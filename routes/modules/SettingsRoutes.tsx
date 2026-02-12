@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { FinancialPanel } from '../../pages/FinancialPanel';
-import ProviderConfig from '../../pages/ProviderConfig';
+import { ProviderConfig } from '../../pages/ProviderConfig';
 import TransactionHistoryPage from '../../pages/TransactionHistoryPage'; // Importa a nova página
 
 export const SettingsRoutes = (
