@@ -1,6 +1,6 @@
 import React from 'react';
-import CashFlowChart from '../../components/financial/CashFlowChart';
-import TransactionHistory from '../../components/financial/TransactionHistory';
+import CashFlowChart from '../components/financial/CashFlowChart';
+import TransactionHistory from '../components/financial/TransactionHistory';
 
 const TransactionHistoryPage: React.FC = () => {
     return (
