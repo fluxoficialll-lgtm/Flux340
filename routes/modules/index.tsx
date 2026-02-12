@@ -7,3 +7,4 @@ export * from './profile';
 export * from './settings';
 export * from './financial';
 export * from './notification';
+export * from './misc';

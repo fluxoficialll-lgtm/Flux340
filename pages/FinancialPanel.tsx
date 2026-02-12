@@ -6,6 +6,8 @@ import { AffiliateStats } from '../types';
 import { BalanceCard, CurrencyCode } from '../components/financial/BalanceCard';
 import { AffiliateCard } from '../components/financial/AffiliateCard';
 import { GatewayCard } from '../components/financial/GatewayCard';
+import CashFlowChart from '../components/financial/CashFlowChart';
+import TransactionHistoryCard from '../components/financial/TransactionHistoryCard';
 
 export const FinancialPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -68,7 +70,6 @@ export const FinancialPanel: React.FC = () => {
               allTransactions.forEach(tx => {
                   const status = (tx.status || '').toLowerCase();
                   if (!['paid', 'completed', 'approved', 'settled'].includes(status)) return;
-                  // Fix: changed 't.date_created' to 'tx.date_created' as the variable name is 'tx'
                   const txDate = new Date(tx.created_at || tx.createdAt || tx.date_created || 0).getTime();
                   const isMatch = selectedFilter === 'Ontem' ? (txDate >= tsFilter && txDate < startOfDay) : (txDate >= tsFilter);
                   if (isMatch) {
@@ -100,7 +101,6 @@ export const FinancialPanel: React.FC = () => {
       setPreferredProvider(pref);
 
       if (user) {
-          // Resolve o nome para exibir no card apenas se estiver conectado
           const isSyncConnected = user.paymentConfigs?.syncpay?.isConnected || user.paymentConfig?.providerId === 'syncpay';
           const isStripeConnected = user.paymentConfigs?.stripe?.isConnected;
           const isPaypalConnected = user.paymentConfigs?.paypal?.isConnected;
@@ -110,7 +110,6 @@ export const FinancialPanel: React.FC = () => {
           else if (pref === 'stripe' && isStripeConnected) resolvedName = 'Stripe';
           else if (pref === 'paypal' && isPaypalConnected) resolvedName = 'PayPal';
           else {
-              // Fallback para qualquer um conectado
               if (isSyncConnected) resolvedName = 'SyncPay';
               else if (isStripeConnected) resolvedName = 'Stripe';
               else if (isPaypalConnected) resolvedName = 'PayPal';
@@ -163,6 +162,11 @@ export const FinancialPanel: React.FC = () => {
             loading={loading}
             showCurrencySwitch={preferredProvider !== 'syncpay'}
         />
+        
+        <CashFlowChart />
+
+        <TransactionHistoryCard />
+
         {activeProviderName && <AffiliateCard affiliateStats={affiliateStats} pixelId={pixelId} setPixelId={setPixelId} pixelToken={pixelToken} setPixelToken={setPixelToken} isSavingMarketing={isSavingMarketing} onSaveMarketing={() => {}} onCopyAffiliateLink={() => {}} isCopyingLink={isCopyingLink} onOpenTracking={() => {}} />}
         <GatewayCard 
             activeProvider={activeProviderName}
