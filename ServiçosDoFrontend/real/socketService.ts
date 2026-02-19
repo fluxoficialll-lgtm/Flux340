@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { authService } from '../ServiçosDeAutenticacao/authService';
 
 let socket: Socket | null = null;

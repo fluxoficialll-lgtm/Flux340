@@ -1,7 +1,7 @@
 
 import { NotificationSettings, PaymentProviderConfig, User, SecuritySettings } from '../../types';
 import { db } from '@/database';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 
 const API_USERS = `${API_BASE}/api/users`;
 

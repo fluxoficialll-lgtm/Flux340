@@ -1,7 +1,7 @@
 
 import { notificationService } from '../../notificationService';
 import { authService } from '../../ServiçosDeAutenticacao/authService';
-import { API_BASE } from '../../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { db } from '../../../database';
 import { hydrationManager } from '../HydrationManager';
 

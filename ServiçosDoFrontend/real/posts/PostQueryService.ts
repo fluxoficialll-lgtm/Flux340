@@ -1,6 +1,6 @@
 
 import { Post, PaginatedResponse } from '../../../types';
-import { API_BASE } from '../../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { db } from '../../../database';
 import { sqlite } from '../../../database/engine';
 import { PostUtils } from './PostUtils';

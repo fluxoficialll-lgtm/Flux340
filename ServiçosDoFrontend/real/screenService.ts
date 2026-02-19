@@ -1,5 +1,5 @@
 
-import { apiClient } from '../apiClient';
+import { apiClient } from '../ServiçosDeApi/apiClient';
 
 export interface BusinessDashboardData {
     stats: {

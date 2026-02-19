@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
 import { trackingService } from '../ServiçosDoFrontend/trackingService';
-import { API_BASE } from '../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { LoginInitialCard } from '../features/auth/Componentes/LoginInitialCard';
 import { LoginEmailCard } from '../features/auth/Componentes/LoginEmailCard';
 

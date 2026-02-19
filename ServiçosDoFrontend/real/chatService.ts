@@ -2,7 +2,7 @@
 import { db } from '@/database';
 import { ChatMessage, ChatData } from '../../types';
 import { authService } from '../ServiçosDeAutenticacao/authService';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { ChatVisibilityManager } from '../chat/ChatVisibilityManager';
 
 const API_URL = `${API_BASE}/api/messages`;

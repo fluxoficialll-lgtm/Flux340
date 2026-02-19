@@ -1,6 +1,6 @@
 
 import { Post } from '../../../types';
-import { API_BASE } from '../../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { db } from '../../../database';
 import { PostUtils } from './PostUtils';
 

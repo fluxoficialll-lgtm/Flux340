@@ -3,7 +3,7 @@ import { IPixelProvider } from './providers/BaseProvider';
 import { MetaProvider } from './providers/MetaProvider';
 import { TikTokProvider } from './providers/TikTokProvider';
 import { GoogleAdsProvider } from './providers/GoogleAdsProvider';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { eventGuard } from './logic/EventGuard';
 import { generateDeterministicEventId } from './logic/DeterministicId';
 import { advancedMatcher } from './logic/AdvancedMatcher';

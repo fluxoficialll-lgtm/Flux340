@@ -1,5 +1,5 @@
 
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { Group } from '../../types';
 
 const PROXY_BASE = `${API_BASE}/api/paypal`;

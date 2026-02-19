@@ -5,7 +5,7 @@ import { chatService } from '../chatService';
 import { adService } from '../adService';
 import { postService } from '../postService';
 import { PostMetricsService } from './PostMetricsService';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { sqlite } from '../../database/engine';
 
 export const reelsService = {

@@ -1,7 +1,7 @@
 import { MarketplaceItem, Comment, User } from '../../types';
 import { db } from '@/database';
 import { DiscoveryHub } from '../discovery/DiscoveryHub';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { authService } from '../ServiçosDeAutenticacao/authService';
 import { sqlite } from '../../database/engine';
 

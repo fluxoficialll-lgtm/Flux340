@@ -1,4 +1,4 @@
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '../ServiçosDeApi/apiConfig';
 import { AppEvent, AppEventType, AppEventSource } from '../../types';
 import { authService } from '../ServiçosDeAutenticacao/authService';
 

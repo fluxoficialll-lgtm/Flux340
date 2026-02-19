@@ -1,7 +1,7 @@
 
 import { UserSession } from '../../types';
 import { db } from '@/database';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { cryptoService } from '../cryptoService';
 
 const API_URL = `${API_BASE}/api/auth`;

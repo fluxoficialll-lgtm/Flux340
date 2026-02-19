@@ -1,6 +1,6 @@
 
 import { User } from '../../types';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { performLoginSync } from './AuthSync';
 import { USE_MOCKS, MOCK_USERS } from '../../mocks';
 

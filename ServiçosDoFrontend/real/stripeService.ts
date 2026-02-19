@@ -1,5 +1,5 @@
 
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { Group } from '../../types';
 import { connectionHub } from '../connections/connectionHub';
 

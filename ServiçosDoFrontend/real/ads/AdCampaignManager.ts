@@ -1,7 +1,7 @@
 import { AdCampaign } from '../../../types';
 import { db } from '@/database';
 import { authService } from '../../ServiçosDeAutenticacao/authService';
-import { API_BASE } from '../../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { ConversionHub } from '../../ServiçoDeAds/attribution/ConversionHub';
 import { FeedbackOptimizer } from '../../ServiçoDeAds/intelligence/FeedbackOptimizer';
 

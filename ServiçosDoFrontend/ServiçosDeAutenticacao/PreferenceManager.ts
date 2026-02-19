@@ -1,5 +1,5 @@
 
-import { apiClient } from '../apiClient';
+import { apiClient } from '../ServiçosDeApi/apiClient';
 import { db } from '../../database';
 import { User, PaymentProviderConfig, NotificationSettings, SecuritySettings } from '../../types';
 

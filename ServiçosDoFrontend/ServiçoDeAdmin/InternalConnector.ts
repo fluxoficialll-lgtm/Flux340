@@ -1,5 +1,5 @@
 
-import { fluxClient, FluxRequestOptions } from '../fluxClient';
+import { fluxClient, FluxRequestOptions } from '../ServiçosDeApi/fluxClient';
 
 /**
  * InternalConnector (Legacy Bridge Wrapper)

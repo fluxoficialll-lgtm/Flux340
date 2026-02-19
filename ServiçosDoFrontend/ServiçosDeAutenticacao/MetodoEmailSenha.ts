@@ -2,7 +2,7 @@
 import { User, AuthError } from '../../types';
 import { emailService } from '../emailService';
 import { cryptoService } from '../cryptoService';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { performLoginSync } from './AuthSync';
 import { USE_MOCKS, MOCK_USERS } from '../../mocks';
 

@@ -2,7 +2,7 @@
 import { Group } from '../../../types';
 import { db } from '@/database';
 import { authService } from '../../ServiçosDeAutenticacao/authService';
-import { API_BASE } from '../../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { ValidationRules } from '../../../constants/ValidationRules';
 import { StructurePolicy } from '../../policy/StructurePolicy';
 import { PaymentProviderConfig } from '../../../types/groups.types';

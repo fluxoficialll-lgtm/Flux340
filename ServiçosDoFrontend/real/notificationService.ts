@@ -3,7 +3,7 @@ import { authService } from '../ServiçosDeAutenticacao/authService';
 import { db } from '@/database';
 import { USE_MOCKS } from '../../mocks';
 import { sqlite } from '../../database/engine';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 
 export const notificationService = {
   getNotifications: (): NotificationItem[] => {

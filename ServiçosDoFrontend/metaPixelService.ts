@@ -1,7 +1,7 @@
 
 import { pixelOrchestrator } from './pixel/PixelOrchestrator';
 import { PixelEventData, PixelUserData } from '../types/pixel.types';
-import { API_BASE } from '../apiConfig';
+import { API_BASE } from './ServiçosDeApi/apiConfig';
 
 /**
  * metaPixelService

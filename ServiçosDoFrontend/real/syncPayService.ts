@@ -1,5 +1,5 @@
 
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { User, Group, AffiliateStats } from '../../types';
 import { authService } from '../ServiçosDeAutenticacao/authService';
 import { getCookie } from '../metaPixelService';

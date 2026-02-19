@@ -1,6 +1,6 @@
 
 import { PixelEventData, PixelUserData } from '../../types/pixel.types';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 
 /**
  * MetaCapiService

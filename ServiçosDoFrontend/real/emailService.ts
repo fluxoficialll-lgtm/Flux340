@@ -3,7 +3,7 @@
  * Redireciona chamadas para o Backend (/api/send-email)
  */
 
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 
 const BACKEND_URL = `${API_BASE}/api/send-email`;
 

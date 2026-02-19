@@ -1,6 +1,6 @@
 import { db } from '../../database';
 import { Post } from '../../types';
-import { API_BASE } from '../../apiConfig';
+import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { authService } from '../ServiçosDeAutenticacao/authService';
 
 const SESSION_VIEW_CACHE_KEY = 'flux_viewed_posts_session';
