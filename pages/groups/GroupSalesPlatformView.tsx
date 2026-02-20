@@ -6,8 +6,8 @@ import { authService } from '../../ServiçosDoFrontend/ServiçosDeAutenticacao/a
 import { Group } from '../../types';
 
 // Subcomponentes
-import { OwnerControls } from '../../Componentes/ComponentesDeGroups/Componentes/platform/OwnerControls';
-import { PlatformGroupCard } from '../../Componentes/ComponentesDeGroups/Componentes/platform/PlatformGroupCard';
+import { OwnerControls } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/OwnerControls';
+import { PlatformGroupCard } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/PlatformGroupCard';
 
 export const GroupSalesPlatformView: React.FC = () => {
     const navigate = useNavigate();

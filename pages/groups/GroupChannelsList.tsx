@@ -9,7 +9,7 @@ import { Group } from '../../types';
 import { ChannelsHero } from '../../Componentes/ComponentesDeGroups/Componentes/channels/ChannelsHero';
 import { ChannelListRenderer } from '../../Componentes/ComponentesDeGroups/Componentes/channels/ChannelListRenderer';
 import { ChannelsFooter } from '../../Componentes/ComponentesDeGroups/Componentes/channels/ChannelsFooter';
-import { OwnerControls } from '../../Componentes/ComponentesDeGroups/Componentes/platform/OwnerControls';
+import { OwnerControls } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/OwnerControls';
 
 export const GroupChannelsList: React.FC = () => {
     const navigate = useNavigate();

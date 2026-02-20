@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Channel, ChannelSection } from '../../../../types';
-import { ChannelListItem } from './channels/ChannelListItem';
+import { ItemDaListaDeCanais } from './ComponentesDeCanalDeGrupo/ItemDaListaDeCanais';
 
 interface ChannelsSectionProps {
     channels: Channel[];
@@ -81,7 +81,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
 
                     <div className="space-y-2">
                         {getChannelsForSection(section).map(c => (
-                            <ChannelListItem 
+                            <ItemDaListaDeCanais 
                                 key={c.id}
                                 channel={c}
                                 onOptions={(channel) => onOptions(channel, 'channel')}
@@ -112,7 +112,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
 
                     <div className="space-y-2">
                         {hasGeneralOrphan && (
-                            <ChannelListItem 
+                            <ItemDaListaDeCanais 
                                 channel={{ id: 'general', name: 'Geral', onlyAdminsPost: false, type: 'text' }}
                                 onOptions={(c) => onOptions(c, 'channel')}
                                 onDelete={() => {}}
@@ -120,7 +120,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
                             />
                         )}
                         {orphans.map(c => (
-                            <ChannelListItem 
+                            <ItemDaListaDeCanais 
                                 key={c.id}
                                 channel={c}
                                 onOptions={(channel) => onOptions(channel, 'channel')}

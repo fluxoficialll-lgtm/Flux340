@@ -2,14 +2,14 @@
 import React from 'react';
 import { Channel } from '../../../../types';
 
-interface ChannelListItemProps {
+interface ItemDaListaDeCanaisProps {
     channel: Channel;
     onDelete: (id: string) => void;
     onOptions: (channel: Channel) => void;
     isDefault?: boolean;
 }
 
-export const ChannelListItem: React.FC<ChannelListItemProps> = ({ 
+export const ItemDaListaDeCanais: React.FC<ItemDaListaDeCanaisProps> = ({ 
     channel, 
     onDelete, 
     onOptions,

@@ -5,9 +5,9 @@ import { Channel, ChannelSection } from '../../../types';
 import { useModal } from '../../../Componentes/ModalSystem';
 import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { ChannelsSection as ChannelsEditor } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/ChannelsSection';
-import { ChannelsHeader } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/channels/ChannelsHeader';
-import { ChannelsNotice } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/channels/ChannelsNotice';
-import { ChannelOptionsModal } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/channels/ChannelOptionsModal';
+import { CabecalhoDosCanais } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/ComponentesDeCanalDeGrupo/CabecalhoDosCanais';
+import { AvisoDosCanais } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/ComponentesDeCanalDeGrupo/AvisoDosCanais';
+import { ModalDeOpcoesDoCanal } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/ComponentesDeCanalDeGrupo/ModalDeOpcoesDoCanal';
 
 export const GroupChannelsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -135,10 +135,10 @@ export const GroupChannelsPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#0a0c10] text-white font-['Inter'] flex flex-col overflow-hidden">
-            <ChannelsHeader onBack={handleBack} title="Estrutura de Canais" />
+            <CabecalhoDosCanais onBack={handleBack} title="Estrutura de Canais" />
 
             <main className="flex-1 overflow-y-auto p-5 max-w-[600px] mx-auto w-full pb-32 no-scrollbar">
-                <ChannelsNotice />
+                <AvisoDosCanais />
 
                 <ChannelsEditor 
                     channels={form.channels}
@@ -156,7 +156,7 @@ export const GroupChannelsPage: React.FC = () => {
             </main>
 
             {optionsModal.isOpen && (
-                <ChannelOptionsModal 
+                <ModalDeOpcoesDoCanal 
                     isOpen={optionsModal.isOpen}
                     onClose={() => setOptionsModal({ ...optionsModal, isOpen: false })}
                     title={(optionsModal.target as any).name || (optionsModal.target as any).title}

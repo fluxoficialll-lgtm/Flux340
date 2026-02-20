@@ -4,7 +4,7 @@ import { Channel, ChannelSection } from '../../../../types';
 import { ModerationOptions } from './options/ModerationOptions';
 import { ContentOptions } from './options/ContentOptions';
 
-interface ChannelOptionsModalProps {
+interface ModalDeOpcoesDoCanalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
@@ -14,7 +14,7 @@ interface ChannelOptionsModalProps {
     onAddChannelInside?: () => void;
 }
 
-export const ChannelOptionsModal: React.FC<ChannelOptionsModalProps> = ({
+export const ModalDeOpcoesDoCanal: React.FC<ModalDeOpcoesDoCanalProps> = ({
     isOpen,
     onClose,
     title,

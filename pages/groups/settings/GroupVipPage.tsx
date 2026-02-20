@@ -6,7 +6,7 @@ import { VipMonetizationSection } from '../../../Componentes/ComponentesDeGroups
 import { PixelSettingsModal } from '../../../Componentes/groups/PixelSettingsModal';
 import { ProviderSelectorModal } from '../../../Componentes/groups/ProviderSelectorModal';
 import { postService } from '../../../ServiçosDoFrontend/postService';
-import { UploadProgressCard } from '../../../Componentes/ComponentesDeGroups/Componentes/platform/UploadProgressCard';
+import { UploadProgressCard } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
 
 export const GroupVipPage: React.FC = () => {
     const navigate = useNavigate();

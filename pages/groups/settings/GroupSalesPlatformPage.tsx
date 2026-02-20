@@ -7,7 +7,7 @@ import { PlatformStatusCard } from '../../../Componentes/ComponentesDeGroups/Com
 import { PlatformStructureEditor } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/sales-platform/PlatformStructureEditor';
 import { PlatformInfoBox } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/sales-platform/PlatformInfoBox';
 import { FolderOptionsModal } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/sales-platform/FolderOptionsModal';
-import { ChannelOptionsModal } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/channels/ChannelOptionsModal';
+import { ModalDeOpcoesDoCanal } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/ComponentesDeCanalDeGrupo/ModalDeOpcoesDoCanal';
 import { SalesFolder, SalesSection, Channel } from '../../../types';
 
 export const GroupSalesPlatformPage: React.FC = () => {
@@ -157,7 +157,7 @@ export const GroupSalesPlatformPage: React.FC = () => {
             </main>
 
             {optionsModal.isOpen && optionsModal.type === 'channel' && (
-                <ChannelOptionsModal 
+                <ModalDeOpcoesDoCanal 
                     isOpen={optionsModal.isOpen}
                     onClose={() => setOptionsModal({ ...optionsModal, isOpen: false })}
                     title={(optionsModal.target as Channel).name}

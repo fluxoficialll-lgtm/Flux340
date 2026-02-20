@@ -8,10 +8,10 @@ import { currencyService } from '../ServiçosDoFrontend/currencyService';
 import { Group } from '../types';
 
 // Subcomponentes Modulares
-import { RevenueHeader } from '../Componentes/ComponentesDeGroups/Componentes/revenue/RevenueHeader';
-import { RevenueSummaryCard } from '../Componentes/ComponentesDeGroups/Componentes/revenue/RevenueSummaryCard';
-import { RevenueMetricsGrid } from '../Componentes/ComponentesDeGroups/Componentes/revenue/RevenueMetricsGrid';
-import { PaymentMixCard } from '../Componentes/ComponentesDeGroups/Componentes/revenue/PaymentMixCard';
+import { RevenueHeader } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/RevenueHeader';
+import { RevenueSummaryCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/RevenueSummaryCard';
+import { RevenueMetricsGrid } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/RevenueMetricsGrid';
+import { PaymentMixCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/PaymentMixCard';
 
 type CurrencyCode = 'BRL' | 'USD' | 'EUR';
 

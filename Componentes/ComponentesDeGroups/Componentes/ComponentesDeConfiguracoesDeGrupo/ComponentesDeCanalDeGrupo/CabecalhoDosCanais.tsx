@@ -1,12 +1,12 @@
 
 import React from 'react';
 
-interface ChannelsHeaderProps {
+interface CabecalhoDosCanaisProps {
     onBack: () => void;
     title: string;
 }
 
-export const ChannelsHeader: React.FC<ChannelsHeaderProps> = ({ onBack, title }) => {
+export const CabecalhoDosCanais: React.FC<CabecalhoDosCanaisProps> = ({ onBack, title }) => {
     return (
         <header className="flex items-center p-4 bg-[#0c0f14] border-b border-white/10 h-[65px] sticky top-0 z-50">
             <button 
