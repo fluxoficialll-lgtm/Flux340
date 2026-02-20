@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
-import { SettingItem } from '../Componentes/settings/SettingItem';
+import { ItemConfiguracao } from '../Componentes/settings/ItemConfiguracao';
 
 export const GroupSettings: React.FC = () => {
     const navigate = useNavigate();
@@ -143,17 +143,17 @@ export const GroupSettings: React.FC = () => {
                 {/* 1. Estrutura e Identidade */}
                 <div className="settings-group">
                     <h2>Estrutura e Identidade</h2>
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-circle-info" 
                         label="Informações Principais" 
                         onClick={() => navigate(`/group-settings/${id}/info`)} 
                     />
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-chart-simple" 
                         label="Estatísticas de Capacidade" 
                         onClick={() => navigate(`/group-settings/${id}/stats`)} 
                     />
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-cubes-stacked" 
                         label="Modo Hub (Conteúdo e Chat)" 
                         onClick={() => navigate(`/group-settings/${id}/sales-platform`)} 
@@ -169,23 +169,23 @@ export const GroupSettings: React.FC = () => {
                 {/* 2. Segurança e Moderação */}
                 <div className="settings-group">
                     <h2>Segurança e Moderação</h2>
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-id-card-clip" 
                         label="Gestão de Cargos" 
                         onClick={() => navigate(`/group-settings/${id}/roles`)} 
                         rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
                     />
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-key" 
                         label="Acesso e Convites" 
                         onClick={() => navigate(`/group-settings/${id}/access`)} 
                     />
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-sliders" 
                         label="Regras de Chat" 
                         onClick={() => navigate(`/group-settings/${id}/moderation`)} 
                     />
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-users" 
                         label="Lista de Membros" 
                         onClick={() => navigate(`/group-settings/${id}/members`)} 
@@ -195,24 +195,24 @@ export const GroupSettings: React.FC = () => {
                 {/* 3. Monetização e Escala */}
                 <div className="settings-group">
                     <h2>Monetização e Escala</h2>
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-cash-register" 
                         label="Configurações de Checkout" 
                         onClick={() => navigate(`/group-settings/${id}/checkout-config`)} 
                         rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
                     />
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-chart-pie" 
                         label="Faturamento Detalhado" 
                         onClick={() => navigate(`/group-revenue/${id}`)} 
                     />
-                    <SettingItem 
+                    <ItemConfiguracao 
                         icon="fa-calendar-check" 
                         label="Mensagens Agendadas" 
                         onClick={() => navigate(`/group-settings/${id}/schedule`)} 
                     />
                     {group.isVip && isOwner && (
-                        <SettingItem 
+                        <ItemConfiguracao 
                             icon="fa-crown" 
                             label="Funil de Vendas VIP" 
                             onClick={() => navigate(`/group-settings/${id}/vip`)} 

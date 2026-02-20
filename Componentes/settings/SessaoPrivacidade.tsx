@@ -1,16 +1,16 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SettingItem } from './SettingItem';
+import { ItemConfiguracao } from './ItemConfiguracao';
 
-interface PrivacyGroupProps {
+interface SessaoPrivacidadeProps {
     isPrivate: boolean;
     onTogglePrivacy: () => void;
     isAdultContent: boolean;
     onToggleAdult: () => void;
 }
 
-export const PrivacyGroup: React.FC<PrivacyGroupProps> = ({ 
+export const SessaoPrivacidade: React.FC<SessaoPrivacidadeProps> = ({ 
     isPrivate, 
     onTogglePrivacy, 
     isAdultContent, 
@@ -29,27 +29,27 @@ export const PrivacyGroup: React.FC<PrivacyGroupProps> = ({
         <div className="settings-group">
             <h2>Privacidade e Segurança</h2>
             
-            <SettingItem 
+            <ItemConfiguracao 
                 icon="fa-lock" 
                 label="Conta Privada" 
                 onClick={onTogglePrivacy}
                 rightElement={renderSwitch(isPrivate, onTogglePrivacy)}
             />
 
-            <SettingItem 
+            <ItemConfiguracao 
                 icon="fa-triangle-exclamation" 
                 label="Habilitar Conteúdo +18" 
                 onClick={onToggleAdult}
                 rightElement={renderSwitch(isAdultContent, onToggleAdult)}
             />
 
-            <SettingItem 
+            <ItemConfiguracao 
                 icon="fa-shield-alt" 
                 label="Segurança e Login" 
                 onClick={() => navigate('/security-login')} 
             />
 
-            <SettingItem 
+            <ItemConfiguracao 
                 icon="fa-user-slash" 
                 label="Gerenciar Bloqueios" 
                 onClick={() => navigate('/blocked-users')} 

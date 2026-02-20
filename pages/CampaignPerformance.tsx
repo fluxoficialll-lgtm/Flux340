@@ -14,7 +14,7 @@ import { FunnelMetrics } from '../Componentes/ads/performance/FunnelMetrics';
 import { SystemMetrics } from '../Componentes/ads/performance/SystemMetrics';
 import { AdPreview } from '../Componentes/ads/AdPreview';
 // Fix: Import CTA_OPTIONS_CONFIG from constants instead of AdPlacementSelector
-import { CTA_OPTIONS_CONFIG } from '../features/ads/constants/AdConstants';
+import { CTA_OPTIONS_CONFIG } from '../Componentes/ComponentesDeAds/constants/AdConstants';
 import { AdCampaign } from '../types';
 import { useModal } from '../Componentes/ModalSystem';
 

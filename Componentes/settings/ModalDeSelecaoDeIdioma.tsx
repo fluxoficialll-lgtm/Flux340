@@ -1,27 +1,27 @@
 
 import React from 'react';
 
-export interface LanguageOption {
+export interface OpcaoDeIdioma {
     id: string;
     label: string;
     flag: string;
     nativeName: string;
 }
 
-interface LanguageSelectorModalProps {
+interface ModalDeSelecaoDeIdiomaProps {
     isOpen: boolean;
     onClose: () => void;
     currentLanguage: string;
     onSelect: (langId: string) => void;
 }
 
-export const LANGUAGES: LanguageOption[] = [
+export const IDIOMAS: OpcaoDeIdioma[] = [
     { id: 'pt', label: 'Português', flag: '🇧🇷', nativeName: 'Brasil' },
     { id: 'en', label: 'English', flag: '🇺🇸', nativeName: 'United States' },
     { id: 'es', label: 'Español', flag: '🇪🇸', nativeName: 'España' }
 ];
 
-export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({ 
+export const ModalDeSelecaoDeIdioma: React.FC<ModalDeSelecaoDeIdiomaProps> = ({ 
     isOpen, 
     onClose, 
     currentLanguage, 
@@ -44,7 +44,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                    {LANGUAGES.map((lang) => (
+                    {IDIOMAS.map((lang) => (
                         <button
                             key={lang.id}
                             onClick={() => {

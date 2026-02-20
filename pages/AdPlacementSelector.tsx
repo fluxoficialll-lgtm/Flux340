@@ -1,16 +1,16 @@
 
 import React from 'react';
-import { useAdCampaignFlow } from '../features/ads/hooks/useAdCampaignFlow';
-import { CTA_OPTIONS_CONFIG } from '../features/ads/constants/AdConstants';
+import { useAdCampaignFlow } from '../Componentes/ComponentesDeAds/hooks/useAdCampaignFlow';
+import { CTA_OPTIONS_CONFIG } from '../Componentes/ComponentesDeAds/constants/AdConstants';
 
 // Layout e Cabeçalho
 import { AdFlowHeader } from '../Componentes/ads/AdFlowHeader';
 import { AdFlowFooter } from '../Componentes/ads/AdFlowFooter';
 
 // Componentes de Etapa
-import { CampaignStep } from '../features/ads/Componentes/steps/CampaignStep';
-import { AudienceStep } from '../features/ads/Componentes/steps/AudienceStep';
-import { CreativeStep } from '../features/ads/Componentes/steps/CreativeStep';
+import { CampaignStep } from '../Componentes/ComponentesDeAds/Componentes/steps/CampaignStep';
+import { AudienceStep } from '../Componentes/ComponentesDeAds/Componentes/steps/AudienceStep';
+import { CreativeStep } from '../Componentes/ComponentesDeAds/Componentes/steps/CreativeStep';
 
 export const AdPlacementSelector: React.FC = () => {
   const {

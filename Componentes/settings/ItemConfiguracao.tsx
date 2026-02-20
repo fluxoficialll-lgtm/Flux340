@@ -1,14 +1,14 @@
 
 import React from 'react';
 
-interface SettingItemProps {
+interface ItemConfiguracaoProps {
     icon: string;
     label: string;
     onClick: () => void;
     rightElement?: React.ReactNode;
 }
 
-export const SettingItem: React.FC<SettingItemProps> = ({ icon, label, onClick, rightElement }) => {
+export const ItemConfiguracao: React.FC<ItemConfiguracaoProps> = ({ icon, label, onClick, rightElement }) => {
     return (
         <div onClick={onClick} className="setting-item">
             <div className="setting-info">

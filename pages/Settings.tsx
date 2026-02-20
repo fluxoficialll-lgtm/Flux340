@@ -6,9 +6,9 @@ import { useModal } from '../Componentes/ModalSystem';
 import { Footer } from '../Componentes/layout/Footer';
 
 // Novos Componentes Modulares
-import { AccountGroup } from '../Componentes/settings/AccountGroup';
-import { PrivacyGroup } from '../Componentes/settings/PrivacyGroup';
-import { GeneralGroup } from '../Componentes/settings/GeneralGroup';
+import { SessaoConta } from '../Componentes/settings/SessaoConta';
+import { SessaoPrivacidade } from '../Componentes/settings/SessaoPrivacidade';
+import { SessaoGeral } from '../Componentes/settings/SessaoGeral';
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -108,16 +108,16 @@ export const Settings: React.FC = () => {
       </header>
 
       <main className="no-scrollbar">
-        <AccountGroup />
+        <SessaoConta />
 
-        <PrivacyGroup 
+        <SessaoPrivacidade 
             isPrivate={isPrivate}
             onTogglePrivacy={handleTogglePrivacy}
             isAdultContent={isAdultContent}
             onToggleAdult={handleToggleAdultContent}
         />
 
-        <GeneralGroup />
+        <SessaoGeral />
 
         <div className="logout-container">
             <button onClick={handleLogout} className="logout-btn">
