@@ -13,7 +13,7 @@ import { Footer } from '../Componentes/layout/Footer';
 import { FilterBar } from '../Componentes/notifications/FilterBar';
 import { NotificationCard } from '../Componentes/notifications/NotificationCard';
 import { MainHeader } from '../Componentes/layout/MainHeader';
-import { ExpiringVipNotificationCard } from '../features/notifications/Componentes/ExpiringVipNotificationCard';
+import { ExpiringVipNotificationCard } from '../Componentes/ComponentesDeNotifications/Componentes/ExpiringVipNotificationCard';
 
 // Lazy loading do modal de pagamento para manter performance
 const PaymentFlowModal = lazy(() => import('../Componentes/ComponentesDeProvedores/PaymentFlowModal').then(m => ({ default: m.PaymentFlowModal })));

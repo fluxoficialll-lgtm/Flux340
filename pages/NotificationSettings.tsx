@@ -6,11 +6,11 @@ import { NotificationSettings as INotificationSettings } from '../types';
 import { useModal } from '../Componentes/ModalSystem';
 
 // Subcomponentes Modulares
-import { GlobalPauseCard } from '../features/notifications/Componentes/settings/GlobalPauseCard';
-import { SocialSection } from '../features/notifications/Componentes/settings/SocialSection';
-import { CommunicationSection } from '../features/notifications/Componentes/settings/CommunicationSection';
-import { BusinessSection } from '../features/notifications/Componentes/settings/BusinessSection';
-import { EmailPreferencesSection } from '../features/notifications/Componentes/settings/EmailPreferencesSection';
+import { GlobalPauseCard } from '../Componentes/ComponentesDeNotifications/Componentes/settings/GlobalPauseCard';
+import { SocialSection } from '../Componentes/ComponentesDeNotifications/Componentes/settings/SocialSection';
+import { CommunicationSection } from '../Componentes/ComponentesDeNotifications/Componentes/settings/CommunicationSection';
+import { BusinessSection } from '../Componentes/ComponentesDeNotifications/Componentes/settings/BusinessSection';
+import { EmailPreferencesSection } from '../Componentes/ComponentesDeNotifications/Componentes/settings/EmailPreferencesSection';
 
 export const NotificationSettings: React.FC = () => {
     const navigate = useNavigate();
