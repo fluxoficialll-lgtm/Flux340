@@ -1,0 +1,64 @@
+
+.provider-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    position: relative;
+    cursor: pointer;
+}
+
+.provider-card.clickable:hover {
+    background-color: #f0f0f0;
+}
+
+.provider-icon {
+    font-size: 2rem;
+    margin-right: 1rem;
+}
+
+.provider-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    flex-grow: 1;
+}
+
+.active-indicator {
+    background-color: #4caf50;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.provider-card-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.connect-button,
+.update-button,
+.disconnect-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.connect-button {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.update-button {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.disconnect-button {
+    background-color: #ef4444;
+    color: white;
+}

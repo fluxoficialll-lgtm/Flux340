@@ -7,6 +7,20 @@ export const SyncPayCard = ({ group, activeProviderId, onCredentialsSubmit, onDi
 
     const isConnected = group?.paymentConfig?.syncpay?.isConnected;
 
+    const handleConnectClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleDisconnectClick = (e) => {
+        e.stopPropagation();
+        onDisconnect('syncpay');
+    };
+
+    const handleUpdateClick = (e) => {
+        e.stopPropagation();
+        setIsModalOpen(true);
+    };
+
     const handleCardClick = () => {
         if (isConnected) {
             onSelectProvider('syncpay');
@@ -19,9 +33,16 @@ export const SyncPayCard = ({ group, activeProviderId, onCredentialsSubmit, onDi
                 <div className="provider-icon"><i className="fa-solid fa-bolt"></i></div>
                 <div className="provider-name">SyncPay</div>
                 {activeProviderId === 'syncpay' && <div className="active-indicator">Ativo</div>}
-                
-                <div className="options-button" onClick={(e) => { e.stopPropagation(); setIsModalOpen(true); }}>
-                    <i className="fa-solid fa-ellipsis-vertical"></i>
+
+                <div className="provider-card-buttons">
+                    {!isConnected ? (
+                        <button onClick={handleConnectClick} className="connect-button">Conectar</button>
+                    ) : (
+                        <>
+                            <button onClick={handleUpdateClick} className="update-button">Atualizar</button>
+                            <button onClick={handleDisconnectClick} className="disconnect-button">Desconectar</button>
+                        </>
+                    )}
                 </div>
             </div>
 

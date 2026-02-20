@@ -7,6 +7,20 @@ export const PayPalCard = ({ group, activeProviderId, onCredentialsSubmit, onDis
 
     const isConnected = group?.paymentConfig?.paypal?.isConnected;
 
+    const handleConnectClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleDisconnectClick = (e) => {
+        e.stopPropagation();
+        onDisconnect('paypal');
+    };
+
+    const handleUpdateClick = (e) => {
+        e.stopPropagation();
+        setIsModalOpen(true);
+    };
+
     const handleCardClick = () => {
         if (isConnected) {
             onSelectProvider('paypal');
@@ -19,9 +33,16 @@ export const PayPalCard = ({ group, activeProviderId, onCredentialsSubmit, onDis
                 <div className="provider-icon"><i className="fa-brands fa-paypal"></i></div>
                 <div className="provider-name">PayPal</div>
                 {activeProviderId === 'paypal' && <div className="active-indicator">Ativo</div>}
-                
-                <div className="options-button" onClick={(e) => { e.stopPropagation(); setIsModalOpen(true); }}>
-                    <i className="fa-solid fa-ellipsis-vertical"></i>
+
+                <div className="provider-card-buttons">
+                    {!isConnected ? (
+                        <button onClick={handleConnectClick} className="connect-button">Conectar</button>
+                    ) : (
+                        <>
+                            <button onClick={handleUpdateClick} className="update-button">Atualizar</button>
+                            <button onClick={handleDisconnectClick} className="disconnect-button">Desconectar</button>
+                        </>
+                    )}
                 </div>
             </div>
 

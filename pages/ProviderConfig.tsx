@@ -9,6 +9,7 @@ import { Group } from '../types';
 import { SyncPayCard } from '../Componentes/financial/provider_cards_connection/SyncPayCard';
 import { StripeCard } from '../Componentes/financial/provider_cards_connection/StripeCard';
 import { PayPalCard } from '../Componentes/financial/provider_cards_connection/PayPalCard';
+import '../Componentes/financial/provider_cards_connection/ProviderCard.css';
 
 export const ProviderConfig: React.FC = () => {
     const navigate = useNavigate();
