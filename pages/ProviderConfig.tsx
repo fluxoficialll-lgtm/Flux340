@@ -6,10 +6,10 @@ import { paypalService } from '../ServiçosDoFrontend/ServiçosDeProvedores/payp
 import { stripeService } from '../ServiçosDoFrontend/ServiçosDeProvedores/stripeService';
 import { syncPayService } from '../ServiçosDoFrontend/ServiçosDeProvedores/syncPayService';
 import { Group } from '../types';
-import { SyncPayCard } from '../Componentes/financial/provider_cards_connection/SyncPayCard';
-import { StripeCard } from '../Componentes/financial/provider_cards_connection/StripeCard';
-import { PayPalCard } from '../Componentes/financial/provider_cards_connection/PayPalCard';
-import '../Componentes/financial/provider_cards_connection/ProviderCard.css';
+import { SyncPayCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/SyncPayCard';
+import { StripeCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/StripeCard';
+import { PayPalCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/PayPalCard';
+import '../Componentes/ComponentesDeProvedores/CardsDeConexao/ProviderCard.css';
 
 export const ProviderConfig: React.FC = () => {
     const navigate = useNavigate();
