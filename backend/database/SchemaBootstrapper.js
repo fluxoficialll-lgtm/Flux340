@@ -14,7 +14,7 @@ import { marketplaceSchema } from './schemas/marketplace.js';
 import { relationshipsSchema } from './schemas/relationships.js';
 import { reportsSchema } from './schemas/reports.js';
 import { interactionsSchema } from './schemas/interactions.js';
-import { auditSchema } from './schemas/audit.js';
+import { auditSchema } from './schemas/ServiçosDeLogsSofisticados.js';
 import { settingsSchema } from './schemas/settings.js'; // <-- Adicionado
 
 export const SchemaBootstrapper = {

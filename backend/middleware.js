@@ -1,5 +1,5 @@
 
-import { bridgeLogger } from './services/audit/bridgeLogger.js';
+import { bridgeLogger } from './ServiçosBackEnd/ServiçosDeLogsSofisticados/bridgeLogger.js';
 
 export const validateAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;

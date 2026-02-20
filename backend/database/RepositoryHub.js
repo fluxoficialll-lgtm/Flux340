@@ -9,7 +9,7 @@ import { MarketplaceRepository } from './repositories/MarketplaceRepository.js';
 import { RelationshipRepository } from './repositories/RelationshipRepository.js';
 import { InteractionRepository } from './repositories/InteractionRepository.js';
 import { ReportRepository } from './repositories/ReportRepository.js';
-import { AuditRepository } from './repositories/AuditRepository.js';
+import { AuditRepository } from './repositories/ServiçosDeLogsSofisticadosRepository.js';
 import { AdRepository } from './repositories/AdRepository.js';
 import { query } from './pool.js';
 
@@ -28,7 +28,7 @@ export const RepositoryHub = {
     reports: ReportRepository,
     financial: FinancialRepository,
     fees: FeeRepository,
-    audit: AuditRepository,
+    ServiçosDeLogsSofisticados: AuditRepository,
     ads: AdRepository,
     query: query,
 
