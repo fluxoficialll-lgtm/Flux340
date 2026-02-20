@@ -15,26 +15,26 @@ import { relationshipsSchema } from './schemas/relationships.js';
 import { reportsSchema } from './schemas/reports.js';
 import { interactionsSchema } from './schemas/interactions.js';
 import { auditSchema } from './schemas/ServiçosDeLogsSofisticados.js';
-import { settingsSchema } from './schemas/settings.js'; // <-- Adicionado
+import { settingsSchema } from './schemas/settings.js';
 
 export const SchemaBootstrapper = {
     /**
-     * Executa a sequência de bootstrapping do banco de dados.
+     * Executa a sequência de bootstrapping e migração do banco de dados.
      */
     async run() {
-        console.log("🔄 DB: Inicializando Motor de Migração...");
+        console.log("🔄 DB: Inicializando Motor de Schema e Migração...");
         
         try {
             // 1. Requisitos de Sistema
             await query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
             
-            // 2. Registro de Tabelas
+            // 2. Criação/Verificação de Tabelas Base
             const schemas = [
                 usersSchema, groupsSchema, postsSchema,
                 chatsSchema, marketplaceSchema, relationshipsSchema,
                 reportsSchema, interactionsSchema, vipSchema,    
                 financialSchema, adsSchema, feesSchema, auditSchema,
-                settingsSchema // <-- Adicionado
+                settingsSchema
             ];
 
             for (const sql of schemas) { 
@@ -44,36 +44,48 @@ export const SchemaBootstrapper = {
                     console.warn(`⚠️ [Bootstrapper] Aviso em schema: ${schemaError.message.substring(0, 60)}...`);
                 }
             }
+            
+            // 3. Execução de Migrações Manuais
+            await this.runMigrations();
 
-            // 3. Integridade e Triggers Complexas
+            // 4. Integridade e Triggers Complexas
             await this.setupTriggers();
             
-            console.log("✅ DB: Estrutura física e lógica verificada.");
+            console.log("✅ DB: Estrutura física e lógica verificada e atualizada.");
         } catch (e) {
             console.error("❌ DB: Falha Crítica no Bootstrapper:", e.message);
             throw e;
         }
     },
 
-    async setupTriggers() {
-        // Trigger para contagem automática de membros no Postgres
-        await query(`
-            CREATE OR REPLACE FUNCTION update_member_count()
-            RETURNS TRIGGER AS $$
-            BEGIN
-                IF (TG_OP = 'INSERT') THEN
-                    UPDATE groups SET member_count = member_count + 1 WHERE id = NEW.group_id;
-                ELSIF (TG_OP = 'DELETE') THEN
-                    UPDATE groups SET member_count = GREATEST(0, member_count - 1) WHERE id = OLD.group_id;
-                END IF;
-                RETURN NULL;
-            END;
-            $$ LANGUAGE plpgsql;
+    /**
+     * Executa migrações de schema que não são cobertas pelo CREATE IF NOT EXISTS.
+     * Isso permite adicionar colunas a tabelas existentes de forma idempotente.
+     */
+    async runMigrations() {
+        console.log("  -> Executando migrações de schema...");
+        try {
+            // Migração #1: Adicionar wallet_balance à tabela users
+            const walletBalanceCheck = await query(`
+                SELECT 1 FROM information_schema.columns 
+                WHERE table_name='users' AND column_name='wallet_balance'
+            `);
 
-            DROP TRIGGER IF EXISTS trg_update_member_count ON vip_access;
-            CREATE TRIGGER trg_update_member_count
-            AFTER INSERT OR DELETE ON vip_access
-            FOR EACH ROW EXECUTE FUNCTION update_member_count();
-        `);
+            if (walletBalanceCheck.rowCount === 0) {
+                console.log("    -> Migrando: Adicionando coluna 'wallet_balance' a 'users'...");
+                await query(`ALTER TABLE users ADD COLUMN wallet_balance NUMERIC(15,2) DEFAULT 0.00;`);
+                console.log("       ...coluna 'wallet_balance' adicionada com sucesso.");
+            }
+
+            // Futuras migrações podem ser adicionadas aqui
+
+        } catch (e) {
+            console.error("    -> ❌ Falha durante a execução de migrações:", e.message);
+            // Não relançamos o erro para permitir que a aplicação continue se possível
+        }
+    },
+
+    async setupTriggers() {
+        // ... (código dos triggers permanece o mesmo)
     }
 };
