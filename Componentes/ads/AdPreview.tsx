@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { AdCampaign, Post, MarketplaceItem } from '../../types';
-import { FeedItem } from '../feed/FeedItem';
+import { FeedItem } from '../ComponentesDeFeed/FeedItem';
 import { ProductCard } from '../marketplace/ProductCard';
 
 interface AdPreviewProps {

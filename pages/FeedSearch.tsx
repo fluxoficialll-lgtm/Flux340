@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { postService } from '../ServiçosDoFrontend/postService';
 import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
 import { Post, User } from '../types';
-import { FeedSearchHeader } from '../Componentes/feed/search/FeedSearchHeader';
-import { FeedSearchFilters } from '../Componentes/feed/search/FeedSearchFilters';
-import { FeedSearchResults } from '../Componentes/feed/search/FeedSearchResults';
+import { FeedSearchHeader } from '../Componentes/ComponentesDeFeed/search/FeedSearchHeader';
+import { FeedSearchFilters } from '../Componentes/ComponentesDeFeed/search/FeedSearchFilters';
+import { FeedSearchResults } from '../Componentes/ComponentesDeFeed/search/FeedSearchResults';
 
 export type FeedSearchFilter = 'relevant' | 'recent';
 export type SearchTab = 'posts' | 'users';

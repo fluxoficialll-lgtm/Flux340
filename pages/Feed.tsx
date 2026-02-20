@@ -6,7 +6,7 @@ import { recommendationService } from '../ServiçosDoFrontend/recommendationServ
 import { Post } from '../types';
 import { db } from '@/database';
 import { useModal } from '../Componentes/ModalSystem';
-import { FeedItem } from '../Componentes/feed/FeedItem';
+import { FeedItem } from '../Componentes/ComponentesDeFeed/FeedItem';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
 

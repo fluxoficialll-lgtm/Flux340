@@ -5,7 +5,7 @@ import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/auth
 import { Post, Comment } from '../types';
 import { db } from '@/database';
 import { useModal } from '../Componentes/ModalSystem';
-import { FeedItem } from '../Componentes/feed/FeedItem';
+import { FeedItem } from '../Componentes/ComponentesDeFeed/FeedItem';
 import { CommentSheet } from '../Componentes/ui/comments/CommentSheet';
 import { CommentItem } from '../Componentes/ui/comments/CommentItem';
 
