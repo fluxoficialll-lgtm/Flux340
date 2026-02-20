@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SyncPayModel } from './SyncPayModel';
-import { PayPalModel } from './PayPalModel';
-import { StripeModel } from './StripeModel';
+import { ModalOpcoesPagamentosSyncPay } from './CardsOpcoesDePagamentos/ModalOpcoesPagamentosSyncPay';
+import { ModalOpcoesPagamentosPayPal } from './CardsOpcoesDePagamentos/ModalOpcoesPagamentosPayPal';
+import { ModalOpcoesPagamentosStripe } from './CardsOpcoesDePagamentos/ModalOpcoesPagamentosStripe';
 import { authService } from '../../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
 import { GeoData } from '../../ServiçosDoFrontend/geoService';
 import { ConversionResult } from '../../ServiçosDoFrontend/currencyService';
@@ -83,7 +83,7 @@ export const PaymentFlowModal: React.FC<PaymentFlowModalProps> = ({ isOpen, onCl
                 {status === 'idle' && (
                     <>
                         {provider === 'syncpay' && (
-                            <SyncPayModel 
+                            <ModalOpcoesPagamentosSyncPay 
                                 group={group} 
                                 onSuccess={handleSuccess} 
                                 onError={handleError} 
@@ -91,7 +91,7 @@ export const PaymentFlowModal: React.FC<PaymentFlowModalProps> = ({ isOpen, onCl
                             />
                         )}
                         {provider === 'paypal' && (
-                            <PayPalModel 
+                            <ModalOpcoesPagamentosPayPal 
                                 group={group} 
                                 convertedPriceInfo={convertedPriceInfo}
                                 onSuccess={handleSuccess} 
@@ -100,7 +100,7 @@ export const PaymentFlowModal: React.FC<PaymentFlowModalProps> = ({ isOpen, onCl
                             />
                         )}
                         {provider === 'stripe' && (
-                            <StripeModel 
+                            <ModalOpcoesPagamentosStripe 
                                 group={group} 
                                 geo={geo} 
                                 convertedPriceInfo={convertedPriceInfo}

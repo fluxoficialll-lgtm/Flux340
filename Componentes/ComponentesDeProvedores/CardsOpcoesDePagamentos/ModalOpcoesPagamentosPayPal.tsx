@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { paypalService } from '../../ServiçosDoFrontend/ServiçosDeProvedores/paypalService';
-import { authService } from '../../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { metaPixelService } from '../../ServiçosDoFrontend/metaPixelService';
-import { Group } from '../../types';
-import { ConversionResult } from '../../ServiçosDoFrontend/currencyService';
+import { paypalService } from '../../../ServiçosDoFrontend/ServiçosDeProvedores/paypalService';
+import { authService } from '../../../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
+import { metaPixelService } from '../../../ServiçosDoFrontend/metaPixelService';
+import { Group } from '../../../types';
+import { ConversionResult } from '../../../ServiçosDoFrontend/currencyService';
 import { RedirectionBridgeCard } from './RedirectionBridgeCard';
 
-interface PayPalModelProps {
+interface ModalOpcoesPagamentosPayPalProps {
     group: Group;
     onSuccess: () => void;
     onError: (msg: string) => void;
@@ -15,7 +15,7 @@ interface PayPalModelProps {
     convertedPriceInfo: ConversionResult | null;
 }
 
-export const PayPalModel: React.FC<PayPalModelProps> = ({ group, onSuccess, onError, onTransactionId, convertedPriceInfo }) => {
+export const ModalOpcoesPagamentosPayPal: React.FC<ModalOpcoesPagamentosPayPalProps> = ({ group, onSuccess, onError, onTransactionId, convertedPriceInfo }) => {
     const [approvalUrl, setApprovalUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const pollingInterval = useRef<any>(null);

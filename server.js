@@ -110,6 +110,31 @@ app.get('*', (req, res) => {
     }
 });
 
+// Tratamento final de erros (Global Catch-All)
+app.use((err, req, res, next) => {
+    const logger = req.logger || LogDeOperacoes; // Usa o logger da requisição se disponível
+    const traceId = req.traceId || 'untraced-error';
+
+    logger.error('GLOBAL_UNHANDLED_ERROR', {
+        error: {
+            message: err.message,
+            stack: err.stack
+        },
+        path: req.path,
+        method: req.method,
+        traceId: traceId
+    });
+
+    if (res.headersSent) {
+        return next(err);
+    }
+
+    res.status(500).json({
+        error: 'Ocorreu um erro inesperado.',
+        traceId: traceId
+    });
+});
+
 httpServer.listen(PORT, '0.0.0.0', () => {
     LogDeOperacoes.log('SERVER_START', { port: PORT, env: process.env.NODE_ENV });
 });

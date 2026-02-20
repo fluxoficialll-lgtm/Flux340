@@ -1,31 +1,31 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { stripeService } from '../../ServiçosDoFrontend/ServiçosDeProvedores/stripeService';
-import { authService } from '../../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { GeoData } from '../../ServiçosDoFrontend/geoService';
-import { ConversionResult } from '../../ServiçosDoFrontend/currencyService';
-import { vipSalesTracker } from '../../ServiçosDoFrontend/pixel/trackers/VipSalesTracker';
-import { Group } from '../../types';
-import { USE_MOCKS } from '../../mocks';
+import { stripeService } from '../../../ServiçosDoFrontend/ServiçosDeProvedores/stripeService';
+import { authService } from '../../../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
+import { GeoData } from '../../../ServiçosDoFrontend/geoService';
+import { ConversionResult } from '../../../ServiçosDoFrontend/currencyService';
+import { vipSalesTracker } from '../../../ServiçosDoFrontend/pixel/trackers/VipSalesTracker';
+import { Group } from '../../../types';
+import { USE_MOCKS } from '../../../mocks';
 
 // Sub-views Internas
-import { StripePixView } from './CardsMétodosDePagamentos/StripePixView';
-import { StripeCardForm } from './CardsMétodosDePagamentos/StripeCardForm';
-import { StripeOxxoView } from './CardsMétodosDePagamentos/StripeOxxoView';
-import { StripeSepaForm } from './CardsMétodosDePagamentos/StripeSepaForm';
-import { StripeBoletoView } from './CardsMétodosDePagamentos/StripeBoletoView';
-import { StripeBacsForm } from './CardsMétodosDePagamentos/StripeBacsForm';
-import { StripeUpiView } from './CardsMétodosDePagamentos/StripeUpiView';
-import { StripeKonbiniView } from './CardsMétodosDePagamentos/StripeKonbiniView';
-import { StripePayNowView } from './CardsMétodosDePagamentos/StripePayNowView';
-import { StripeAchForm } from './CardsMétodosDePagamentos/StripeAchForm';
-import { StripeInteracView } from './CardsMétodosDePagamentos/StripeInteracView';
-import { StripeBecsForm } from './CardsMétodosDePagamentos/StripeBecsForm';
-import { StripePadForm } from './CardsMétodosDePagamentos/StripePadForm';
+import { StripePixView } from '../CardsMétodosDePagamentos/StripePixView';
+import { StripeCardForm } from '../CardsMétodosDePagamentos/StripeCardForm';
+import { StripeOxxoView } from '../CardsMétodosDePagamentos/StripeOxxoView';
+import { StripeSepaForm } from '../CardsMétodosDePagamentos/StripeSepaForm';
+import { StripeBoletoView } from '../CardsMétodosDePagamentos/StripeBoletoView';
+import { StripeBacsForm } from '../CardsMétodosDePagamentos/StripeBacsForm';
+import { StripeUpiView } from '../CardsMétodosDePagamentos/StripeUpiView';
+import { StripeKonbiniView } from '../CardsMétodosDePagamentos/StripeKonbiniView';
+import { StripePayNowView } from '../CardsMétodosDePagamentos/StripePayNowView';
+import { StripeAchForm } from '../CardsMétodosDePagamentos/StripeAchForm';
+import { StripeInteracView } from '../CardsMétodosDePagamentos/StripeInteracView';
+import { StripeBecsForm } from '../CardsMétodosDePagamentos/StripeBecsForm';
+import { StripePadForm } from '../CardsMétodosDePagamentos/StripePadForm';
 
 import { RedirectionBridgeCard, RedirectionProvider } from './RedirectionBridgeCard';
 
-interface StripeModelProps {
+interface ModalOpcoesPagamentosStripeProps {
     group: Group;
     geo: GeoData | null;
     onSuccess: () => void;
@@ -146,7 +146,7 @@ const STRIPE_REGIONAL_MATRIX: Record<string, any> = {
     }
 };
 
-export const StripeModel: React.FC<StripeModelProps> = ({ group, geo, onSuccess, onError, onTransactionId, convertedPriceInfo }) => {
+export const ModalOpcoesPagamentosStripe: React.FC<ModalOpcoesPagamentosStripeProps> = ({ group, geo, onSuccess, onError, onTransactionId, convertedPriceInfo }) => {
     const [currentView, setCurrentView] = useState<StripeView>('selection');
     const [redirectTarget, setRedirectTarget] = useState<RedirectionProvider>('stripe');
     const [paymentData, setPaymentData] = useState<any>(null);
@@ -282,7 +282,7 @@ export const StripeModel: React.FC<StripeModelProps> = ({ group, geo, onSuccess,
             {currentView === 'ach' && <StripeAchForm onBack={() => setCurrentView('selection')} onSuccess={onSuccess} />}
             {currentView === 'bacs' && <StripeBacsForm onBack={() => setCurrentView('selection')} onSuccess={onSuccess} />}
             {currentView === 'becs' && <StripeBecsForm onBack={() => setCurrentView('selection')} onSuccess={onSuccess} />}
-            {currentView === 'pad' && <StripePadForm onBack={() => setCurrentView('selection')} onSuccess={onSuccess} />}
+            {currentVeiw === 'pad' && <StripePadForm onBack={() => setCurrentView('selection')} onSuccess={onSuccess} />}
             
             {currentView === 'redirection' && (
                 <RedirectionBridgeCard 
