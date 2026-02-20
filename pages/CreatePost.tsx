@@ -119,7 +119,7 @@ export const CreatePost: React.FC = () => {
 
   const handlePublishClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (isPublishDisabled) return;
+    if (isPublishDisabled || !user) return;
     setIsProcessing(true);
 
     setTimeout(async () => {
@@ -137,7 +137,7 @@ export const CreatePost: React.FC = () => {
             const newPost: Post = {
               id: Date.now().toString(),
               type: uploadedUrls.length > 0 ? 'photo' : 'text',
-              authorId: user?.id || '',
+              authorId: user.id,
               username: username,
               avatar: avatarUrl,
               text: text,
@@ -162,9 +162,9 @@ export const CreatePost: React.FC = () => {
             if (selectedGroup?.isVip && autoSalesEnabled) {
                 await adService.createCampaign({
                     id: Date.now().toString(),
-                    ownerId: user?.id || '',
+                    ownerId: user.id,
                     name: `Auto-Boost: ${selectedGroup.name}`,
-                    ownerEmail: user?.email || '',
+                    ownerEmail: user.email,
                     scheduleType: 'continuous',
                     budget: 0,
                     pricingModel: 'commission',
@@ -181,7 +181,6 @@ export const CreatePost: React.FC = () => {
                 });
             }
             
-            // Correção: Se postou em um grupo, volta para o grupo. Se não, volta para o Feed.
             if (selectedGroup) {
                 navigate(`/group-chat/${selectedGroup.id}`);
             } else {

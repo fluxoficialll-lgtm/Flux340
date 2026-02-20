@@ -48,11 +48,11 @@ export const ProviderConfig: React.FC = () => {
         try {
             await serviceMap[providerId]();
             const config = { isConnected: true, ...credentials };
-            await groupService.updateGroupPaymentProviderConfig(groupId, providerId, config);
+            await groupService.updateGroupPaymentConfig(groupId, { [providerId]: config });
 
             const currentGroup = groupService.getGroupById(groupId);
             if (!currentGroup?.activePaymentProvider) {
-                await groupService.updateGroup(groupId, { activePaymentProvider: providerId });
+                await groupService.updateGroup({ ...currentGroup, id: groupId, activePaymentProvider: providerId });
             }
 
             updateGroupState();
@@ -66,10 +66,11 @@ export const ProviderConfig: React.FC = () => {
         if (!groupId) return;
 
         try {
-            await groupService.updateGroupPaymentProviderConfig(groupId, providerId, { isConnected: false });
+            await groupService.updateGroupPaymentConfig(groupId, { [providerId]: { isConnected: false } });
 
             if (activeProviderId === providerId) {
-                await groupService.updateGroup(groupId, { activePaymentProvider: null });
+                const currentGroup = groupService.getGroupById(groupId);
+                await groupService.updateGroup({ ...currentGroup, id: groupId, activePaymentProvider: null });
             }
 
             updateGroupState();
@@ -80,8 +81,9 @@ export const ProviderConfig: React.FC = () => {
     };
 
     const handleSelectProvider = async (providerId: string) => {
-        if (!groupId || !group?.paymentConfig?.[providerId]?.isConnected) return;
-        await groupService.updateGroup(groupId, { activePaymentProvider: providerId });
+        const currentGroup = groupService.getGroupById(groupId);
+        if (!groupId || !currentGroup?.paymentConfig?.[providerId]?.isConnected) return;
+        await groupService.updateGroup({ ...currentGroup, id: groupId, activePaymentProvider: providerId });
         updateGroupState();
     };
 

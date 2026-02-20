@@ -93,7 +93,7 @@ export const CreateReel: React.FC = () => {
 
   const handlePublish = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (isPublishDisabled || !videoFile) return;
+    if (isPublishDisabled || !videoFile || !currentUser) return;
     setIsProcessing(true);
 
     setTimeout(async () => {
@@ -105,13 +105,13 @@ export const CreateReel: React.FC = () => {
             let finalAdultStatus = false;
             if (analysis.isAdult) finalAdultStatus = true;
 
-            const username = currentUser?.profile?.name ? `@${currentUser.profile.name}` : '@usuario';
-            const avatar = currentUser?.profile?.photoUrl;
+            const username = currentUser.profile?.name ? `@${currentUser.profile.name}` : '@usuario';
+            const avatar = currentUser.profile?.photoUrl;
 
             const newReel: Post = {
                 id: Date.now().toString(),
                 type: 'video',
-                authorId: currentUser?.id || '',
+                authorId: currentUser.id,
                 username: username,
                 avatar: avatar,
                 title: title, 
@@ -134,9 +134,9 @@ export const CreateReel: React.FC = () => {
             if (selectedGroup?.isVip && autoSalesEnabled && !isAd) {
                 await adService.createCampaign({
                     id: Date.now().toString(),
-                    ownerId: currentUser?.id || '',
+                    ownerId: currentUser.id,
                     name: `Auto-Boost (Reel): ${selectedGroup.name}`,
-                    ownerEmail: currentUser?.email || '',
+                    ownerEmail: currentUser.email,
                     scheduleType: 'continuous',
                     budget: 0,
                     pricingModel: 'commission',

@@ -132,7 +132,7 @@ export const CreateMarketplaceItem: React.FC = () => {
             soldCount: 0 
         };
 
-        await marketplaceService.createItem(newItem);
+        await marketplaceService.createItem({ item: newItem });
         navigate('/marketplace');
     } catch (e) {
         console.error("Marketplace Publish Error:", e);
