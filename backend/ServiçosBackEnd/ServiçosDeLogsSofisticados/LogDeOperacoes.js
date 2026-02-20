@@ -1,20 +1,19 @@
 
 /**
  * @file LogDeOperacoes.js
- * @description Logger Estruturado e Configurável para Produção.
- * @version 3.0.0
+ * @description Logger Estruturado e Configurável para Produção com Trace ID Automático.
+ * @version 4.0.0
  *
- * Inspirado em loggers de produção como Pino e Winston, este módulo fornece:
- * - **Logs em JSON Estruturado:** Saída padronizada para fácil parsing por serviços como Elastic, Datadog, etc.
- * - **Nível de Log Configurável:** Controlado pela variável de ambiente LOG_LEVEL.
- * - **Contexto de Serviço:** Adiciona automaticamente nome do serviço, hostname e PID.
- * - **Suporte a Trace ID:** Permite a correlação de logs através de uma única requisição.
- * - **Serialização de Erros:** Captura automática de stack trace para depuração eficaz.
- * - **Performance:** Evita processamento desnecessário.
- * - **Segurança:** Previne mutação de objetos e sanitiza dados sensíveis.
- * - **Resiliência:** Proteção contra erros de serialização (referências circulares).
+ * Esta versão introduz a integração com `AsyncLocalStorage` para injeção automática de Trace ID,
+ * eliminando a necessidade de passá-lo manualmente em cada chamada de log.
+ *
+ * Destaques:
+ * - **Trace ID Automático:** O `traceId` é obtido do contexto da requisição (`requestContext`).
+ * - **API Simplificada:** As funções de log (`log`, `warn`, etc.) não precisam mais do parâmetro `traceId`.
+ * - **Observabilidade Aprimorada:** Garante que todos os logs dentro de uma requisição sejam correlacionados.
  */
 import os from 'os';
+import { requestContext } from './requestContext.js';
 
 const levels = {
     debug: 10,
@@ -31,7 +30,7 @@ const SERVICE_NAME = process.env.SERVICE_NAME || 'flux-app';
 const SENSITIVE_KEYS = ['password', 'token', 'apiKey', 'clientSecret'];
 
 /**
- * Sanitiza um objeto, removendo ou ofuscando chaves sensíveis.
+ * Sanitiza um objeto recursivamente.
  * @private
  */
 function sanitize(obj) {
@@ -53,31 +52,32 @@ function sanitize(obj) {
     return newObj;
 }
 
-
 /**
  * Função central que escreve o log formatado em JSON.
+ * O traceId é obtido automaticamente do contexto da requisição.
  * @private
  */
-const writeLog = (levelName, contexto, data, traceId) => {
+const writeLog = (levelName, contexto, data) => {
     const level = levels[levelName];
     if (level < configuredLevel) {
         return;
     }
 
-    // 1. Correção de Mutação: Cria uma cópia do objeto de dados.
+    // O traceId é recuperado do AsyncLocalStorage
+    const traceId = requestContext.get('traceId');
+
     const { error, ...rest } = data || {};
     const sanitizedData = sanitize(rest);
-
 
     const logObject = {
         level: levelName,
         service: SERVICE_NAME,
         hostname: os.hostname(),
         pid: process.pid,
-        time: Date.now(), // Timestamp de alta precisão
+        time: Date.now(),
         timestamp: new Date().toISOString(),
         contexto,
-        traceId,
+        traceId, // Injetado automaticamente
         data: sanitizedData,
     };
 
@@ -89,12 +89,10 @@ const writeLog = (levelName, contexto, data, traceId) => {
         };
     }
 
-
     let output;
     try {
         output = JSON.stringify(logObject);
     } catch (e) {
-        // Proteção contra falhas de serialização (referências circulares)
         const simplifiedLog = {
             level: 'error',
             service: SERVICE_NAME,
@@ -102,37 +100,38 @@ const writeLog = (levelName, contexto, data, traceId) => {
             error: {
                 message: 'Failed to serialize log object: ' + e.message,
                 originalContext: contexto,
+                traceId, // Tenta incluir o traceId até no erro de logging
             },
         };
         output = JSON.stringify(simplifiedLog);
     }
 
-
-    // Direciona a saída para o stream correto
     if (level >= levels.error) {
         console.error(output);
-    } else if (level === levels.warn){
+    } else if (level === levels.warn) {
         console.warn(output);
-    }
-    else {
+    } else {
         console.log(output);
     }
 };
 
+/**
+ * Logger com API simplificada. O traceId é gerenciado automaticamente.
+ */
 export const LogDeOperacoes = {
-    debug: (contexto, data = {}, traceId = null) => {
-        writeLog('debug', contexto, data, traceId);
+    debug: (contexto, data = {}) => {
+        writeLog('debug', contexto, data);
     },
-    log: (contexto, data = {}, traceId = null) => {
-        writeLog('info', contexto, data, traceId);
+    log: (contexto, data = {}) => {
+        writeLog('info', contexto, data);
     },
-    warn: (contexto, data = {}, traceId = null) => {
-        writeLog('warn', contexto, data, traceId);
+    warn: (contexto, data = {}) => {
+        writeLog('warn', contexto, data);
     },
-    error: (contexto, data = {}, traceId = null) => {
-        writeLog('error', contexto, data, traceId);
+    error: (contexto, data = {}) => {
+        writeLog('error', contexto, data);
     },
-    fatal: (contexto, data = {}, traceId = null) => {
-        writeLog('fatal', contexto, data, traceI);
+    fatal: (contexto, data = {}) => {
+        writeLog('fatal', contexto, data);
     },
 };
