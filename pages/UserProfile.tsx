@@ -19,9 +19,9 @@ import { VisitorInfoCard } from '../Componentes/ComponentesDeUserProfile/Compone
 import { VisitorBlockedState, VisitorPrivateState } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorStates';
 
 // Componentes reaproveitados do perfil
-import { ProfileTabNav } from '../features/profile/Componentes/ProfileTabNav';
-import { ProfileReelsGrid } from '../features/profile/Componentes/tabs/ProfileReelsGrid';
-import { ProfileProductsGrid } from '../features/profile/Componentes/tabs/ProfileProductsGrid';
+import { ProfileTabNav } from '../Componentes/ComponentesDeProfile/Componentes/ProfileTabNav';
+import { ProfileReelsGrid } from '../Componentes/ComponentesDeProfile/Componentes/tabs/ProfileReelsGrid';
+import { ProfileProductsGrid } from '../Componentes/ComponentesDeProfile/Componentes/tabs/ProfileProductsGrid';
 
 export const UserProfile: React.FC = () => {
   const navigate = useNavigate();

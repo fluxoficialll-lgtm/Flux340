@@ -13,11 +13,11 @@ import { Footer } from '../Componentes/layout/Footer';
 import { AvatarPreviewModal } from '../Componentes/ui/AvatarPreviewModal';
 
 // Novos componentes modulares
-import { ProfileHeader } from '../features/profile/Componentes/ProfileHeader';
-import { ProfileInfoCard } from '../features/profile/Componentes/ProfileInfoCard';
-import { ProfileTabNav } from '../features/profile/Componentes/ProfileTabNav';
-import { ProfileReelsGrid } from '../features/profile/Componentes/tabs/ProfileReelsGrid';
-import { ProfileProductsGrid } from '../features/profile/Componentes/tabs/ProfileProductsGrid';
+import { ProfileHeader } from '../Componentes/ComponentesDeProfile/Componentes/ProfileHeader';
+import { ProfileInfoCard } from '../Componentes/ComponentesDeProfile/Componentes/ProfileInfoCard';
+import { ProfileTabNav } from '../Componentes/ComponentesDeProfile/Componentes/ProfileTabNav';
+import { ProfileReelsGrid } from '../Componentes/ComponentesDeProfile/Componentes/tabs/ProfileReelsGrid';
+import { ProfileProductsGrid } from '../Componentes/ComponentesDeProfile/Componentes/tabs/ProfileProductsGrid';
 
 export const Profile: React.FC = () => {
   const navigate = useNavigate();
