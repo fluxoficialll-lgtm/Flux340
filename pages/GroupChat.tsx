@@ -4,8 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { groupService } from '../ServiçosDoFrontend/groupService';
 import { chatService } from '../ServiçosDoFrontend/chatService'; 
 import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { privacyService } from '../ServiçosDoFrontend/privacyService'; 
-import { postService } from '../ServiçosDoFrontend/postService';
 import { db } from '@/database';
 import { Group, ChatMessage } from '../types';
 import { useModal } from '../Componentes/ModalSystem';
@@ -13,16 +11,14 @@ import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
 import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';
 import { MessageItem } from '../Componentes/ComponentesDeChats/MessageItem';
-import { MediaPreviewOverlay } from '../Componentes/ComponentesDeChats/MediaPreviewOverlay';
 import { GroupMenuModal } from '../Componentes/groups/menu/GroupMenuModal';
 import { useAccessValidationFlow } from '../flows/groups/AccessValidationFlow';
-import { ModalGradeDeAcoes, Acao } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
-import { faPencilAlt, faThumbtack, faCopy, faShare, faReply } from '@fortawesome/free-solid-svg-icons';
+import { ModalGradeDeAcoes } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
 
 export const GroupChat: React.FC = () => {
   const navigate = useNavigate();
   const { id, channelId } = useParams<{ id: string, channelId?: string }>();
-  const { showConfirm, showOptions } = useModal(); 
+  const { showOptions } = useModal(); 
   const { validateGroupAccess } = useAccessValidationFlow();
   
   const [group, setGroup] = useState<Group | null>(null);
@@ -32,7 +28,6 @@ export const GroupChat: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -42,26 +37,13 @@ export const GroupChat: React.FC = () => {
   const [selectedMsgIds, setSelectedMsgIds] = useState<number[]>([]);
 
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
-  const audioTimeoutRef = useRef<any>(null);
-
   const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<{ file: File, url: string, type: 'image' | 'video' | 'file' } | null>(null);
-  const [mediaCaption, setMediaCaption] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   const currentUserEmail = authService.getCurrentUserEmail()?.toLowerCase();
   const currentUserId = authService.getCurrentUserId();
 
   const currentChatId = useMemo(() => `${id}_${activeChannelId}`, [id, activeChannelId]);
-
-  const acoesDeSelecao: Acao[] = [
-    { id: 'editar', label: 'Editar', icon: faPencilAlt, onClick: () => { /* Lógica para editar */ } },
-    { id: 'fixar', label: 'Fixar', icon: faThumbtack, onClick: () => { /* Lógica para fixar */ } },
-    { id: 'copiar', label: 'Copiar', icon: faCopy, onClick: () => { /* Lógica para copiar */ } },
-    { id: 'encaminhar', label: 'Encaminhar', icon: faShare, onClick: () => { /* Lógica para encaminhar */ } },
-    { id: 'responder', label: 'Responder', icon: faReply, onClick: () => { /* Lógica para responder */ } },
-  ];
 
   const loadMessages = useCallback(() => { 
     if (currentChatId) {
@@ -94,7 +76,7 @@ export const GroupChat: React.FC = () => {
               chatService.markChatAsRead(currentChatId);
           }
       }
-  }, [id, activeChannelId, currentChatId, loadMessages]);
+  }, [id, activeChannelId, currentChatId, loadMessages, validateGroupAccess, currentUserId]);
 
   useEffect(() => {
       const unsub = db.subscribe('chats', loadMessages);
@@ -104,14 +86,10 @@ export const GroupChat: React.FC = () => {
   const handleSendMessage = (text: string) => {
       const userInfo = authService.getCurrentUser();
       const newMessage: ChatMessage = {
-          id: Date.now(),
-          senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Você',
-          senderAvatar: userInfo?.profile?.photoUrl,
-          senderEmail: userInfo?.email,
-          text, type: 'sent', contentType: 'text',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'sent',
-          deletedBy: []
+          id: Date.now(), senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Você',
+          senderAvatar: userInfo?.profile?.photoUrl, senderEmail: userInfo?.email, text, type: 'sent',
+          contentType: 'text', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'sent', deletedBy: []
       };
       chatService.sendMessage(currentChatId, newMessage);
   };
@@ -132,12 +110,10 @@ export const GroupChat: React.FC = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedMsgIds.length === 0) return;
-    
     const target = await showOptions("Excluir Mensagem", [
         { label: 'Excluir para mim', value: 'me', icon: 'fa-solid fa-user' },
         { label: 'Excluir para todos', value: 'all', icon: 'fa-solid fa-users', isDestructive: true }
     ]);
-
     if (target) {
         await chatService.deleteMessages(currentChatId, selectedMsgIds, target);
         setIsSelectionMode(false);
@@ -150,6 +126,13 @@ export const GroupChat: React.FC = () => {
       if (activeChannelId === 'general') return 'Geral';
       return group?.channels?.find(c => c.id === activeChannelId)?.name || 'Tópico';
   }, [group, activeChannelId]);
+
+  // TODO: Implementar a lógica de cada ação
+  const handleEdit = () => console.log('Editar', selectedMsgIds);
+  const handlePin = () => console.log('Fixar', selectedMsgIds);
+  const handleCopy = () => console.log('Copiar', selectedMsgIds);
+  const handleForward = () => console.log('Encaminhar', selectedMsgIds);
+  const handleReply = () => console.log('Responder', selectedMsgIds);
 
   return (
     <div className={`h-[100dvh] flex flex-col overflow-hidden ${group?.isVip ? 'secure-content' : ''}`} style={{ background: 'radial-gradient(circle at top left, #0c0f14, #0a0c10)', color: '#fff' }}>
@@ -166,7 +149,14 @@ export const GroupChat: React.FC = () => {
       />
 
       <main style={{ flexGrow: 1, width: '100%', display: 'flex', flexDirection: 'column', paddingTop: '60px' }}>
-          <ModalGradeDeAcoes acoes={acoesDeSelecao} visible={isSelectionMode} />
+          <ModalGradeDeAcoes 
+            visible={isSelectionMode} 
+            onEdit={handleEdit}
+            onPin={handlePin}
+            onCopy={handleCopy}
+            onForward={handleForward}
+            onReply={handleReply}
+          />
           <Virtuoso
               ref={virtuosoRef}
               style={{ height: '100%', paddingBottom: '80px' }}
@@ -211,6 +201,12 @@ export const GroupChat: React.FC = () => {
         onDelete={() => {}}
         onLeave={() => {}}
       />
+
+      {zoomedMedia && (
+          <div className="fixed inset-0 z-[60] bg-black bg-opacity-95 flex items-center justify-center p-2" onClick={() => setZoomedMedia(null)}>
+              <img src={zoomedMedia.url} className="max-w-full max-h-full object-contain" />
+          </div>
+      )}
     </div>
   );
 };

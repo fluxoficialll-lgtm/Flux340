@@ -4,23 +4,20 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { chatService } from '../ServiçosDoFrontend/chatService';
 import { ChatMessage } from '../types';
 import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { postService } from '../ServiçosDoFrontend/postService';
 import { db } from '@/database';
 import { useModal } from '../Componentes/ModalSystem';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
 import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';
 import { MessageItem } from '../Componentes/ComponentesDeChats/MessageItem';
-import { MediaPreviewOverlay } from '../Componentes/ComponentesDeChats/MediaPreviewOverlay';
 import { ChatMenuModal } from '../Componentes/ComponentesDeChats/ChatMenuModal';
 import { socketService } from '../ServiçosDoFrontend/socketService';
-import { ModalGradeDeAcoes, Acao } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
-import { faPencilAlt, faThumbtack, faCopy, faShare, faReply } from '@fortawesome/free-solid-svg-icons';
+import { ModalGradeDeAcoes } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
 
 export const Chat: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { showConfirm, showOptions, showAlert } = useModal();
+  const { showOptions } = useModal();
   const chatId = id || '1';
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -30,7 +27,6 @@ export const Chat: React.FC = () => {
   const [contactStatus, setContactStatus] = useState('Offline');
   const [isBlocked, setIsBlocked] = useState(false);
 
-  const [loadingHistory, setLoadingHistory] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -40,23 +36,11 @@ export const Chat: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
-  const audioTimeoutRef = useRef<any>(null);
-
   const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<{ file: File, url: string, type: 'image' | 'video' | 'file' } | null>(null);
-  const [mediaCaption, setMediaCaption] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const currentUserEmail = authService.getCurrentUserEmail()?.toLowerCase();
-
-  const acoesDeSelecao: Acao[] = [
-    { id: 'editar', label: 'Editar', icon: faPencilAlt, onClick: () => { /* Lógica para editar */ } },
-    { id: 'fixar', label: 'Fixar', icon: faThumbtack, onClick: () => { /* Lógica para fixar */ } },
-    { id: 'copiar', label: 'Copiar', icon: faCopy, onClick: () => { /* Lógica para copiar */ } },
-    { id: 'encaminhar', label: 'Encaminhar', icon: faShare, onClick: () => { /* Lógica para encaminhar */ } },
-    { id: 'responder', label: 'Responder', icon: faReply, onClick: () => { /* Lógica para responder */ } },
-  ];
 
   const loadChatData = useCallback((isSilent = false) => {
       const chatData = chatService.getChat(chatId);
@@ -107,19 +91,12 @@ export const Chat: React.FC = () => {
 
   useEffect(() => {
       loadChatData();
-      
       const unsubDeleteChat = socketService.on('chat_deleted_globally', (data: any) => {
-          if (data.chatId === chatId) {
-              navigate('/messages', { replace: true });
-          }
+          if (data.chatId === chatId) navigate('/messages', { replace: true });
       });
-
       const unsubDeleteMsgs = socketService.on('messages_deleted_globally', (data: any) => {
-          if (data.chatId === chatId) {
-              loadChatData(true);
-          }
+          if (data.chatId === chatId) loadChatData(true);
       });
-
       return () => {
           unsubDeleteChat();
           unsubDeleteMsgs();
@@ -134,16 +111,10 @@ export const Chat: React.FC = () => {
   const handleSendMessage = (text: string) => {
       const userInfo = authService.getCurrentUser();
       const newMessage: ChatMessage = {
-          id: Date.now(),
-          text,
-          type: 'sent',
-          contentType: 'text',
+          id: Date.now(), text, type: 'sent', contentType: 'text',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'sent',
-          senderEmail: userInfo?.email,
-          senderAvatar: userInfo?.profile?.photoUrl,
-          senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Você',
-          deletedBy: []
+          status: 'sent', senderEmail: userInfo?.email, senderAvatar: userInfo?.profile?.photoUrl,
+          senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Você', deletedBy: []
       };
       chatService.sendMessage(chatId, newMessage);
   };
@@ -164,12 +135,10 @@ export const Chat: React.FC = () => {
 
   const handleDeleteSelected = async () => {
       if (selectedIds.length === 0) return;
-      
       const target = await showOptions("Excluir Mensagem", [
           { label: 'Excluir para mim', value: 'me', icon: 'fa-solid fa-user' },
           { label: 'Excluir para todos', value: 'all', icon: 'fa-solid fa-users', isDestructive: true }
       ]);
-
       if (target) {
           await chatService.deleteMessages(chatId, selectedIds, target);
           setIsSelectionMode(false);
@@ -181,6 +150,13 @@ export const Chat: React.FC = () => {
   const filteredMessages = useMemo(() => {
     return messages.filter(m => (m.text || '').toLowerCase().includes(searchTerm.toLowerCase()));
   }, [messages, searchTerm]);
+
+  // TODO: Implementar a lógica de cada ação
+  const handleEdit = () => console.log('Editar', selectedIds);
+  const handlePin = () => console.log('Fixar', selectedIds);
+  const handleCopy = () => console.log('Copiar', selectedIds);
+  const handleForward = () => console.log('Encaminhar', selectedIds);
+  const handleReply = () => console.log('Responder', selectedIds);
 
   return (
     <div className="messages-page h-[100dvh] flex flex-col overflow-hidden" style={{ background: 'radial-gradient(circle at top left, #0c0f14, #0a0c10)', color: '#fff' }}>
@@ -202,7 +178,14 @@ export const Chat: React.FC = () => {
       />
 
       <main style={{ flexGrow: 1, width: '100%', display: 'flex', flexDirection: 'column', paddingTop: '60px' }}>
-          <ModalGradeDeAcoes acoes={acoesDeSelecao} visible={isSelectionMode} />
+          <ModalGradeDeAcoes 
+            visible={isSelectionMode} 
+            onEdit={handleEdit}
+            onPin={handlePin}
+            onCopy={handleCopy}
+            onForward={handleForward}
+            onReply={handleReply}
+          />
           <Virtuoso
               ref={virtuosoRef}
               style={{ height: '100%', paddingBottom: '80px' }}
