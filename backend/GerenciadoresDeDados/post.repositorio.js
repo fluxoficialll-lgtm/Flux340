@@ -1,6 +1,6 @@
 
 import { pool } from '../database/pool.js';
-import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/idService.js';
+import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/FabricaDeIDS.js';
 
 // Mapeia uma linha do banco de dados para um objeto de post mais limpo
 const toPostObject = (row) => {

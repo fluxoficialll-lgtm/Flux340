@@ -1,6 +1,6 @@
 
 import { pool } from '../database/pool.js';
-import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/idService.js';
+import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/FabricaDeIDS.js';
 import { conversationRepositorio } from './conversation.repositorio.js';
 
 const toMessageObject = (row) => {

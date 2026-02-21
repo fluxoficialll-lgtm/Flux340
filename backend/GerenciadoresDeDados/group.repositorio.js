@@ -1,6 +1,6 @@
 
 import { pool } from '../database/pool.js';
-import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/idService.js'; // Corrigido
+import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/FabricaDeIDS.js';
 
 const toGroupObject = (row) => {
     if (!row) return null;

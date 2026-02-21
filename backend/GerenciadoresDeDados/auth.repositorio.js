@@ -1,6 +1,6 @@
 
 import { pool } from '../database/pool.js';
-import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/idService.js'; // Importar o gerador de ID
+import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/FabricaDeIDS.js'; // Importar o gerador de ID
 
 // Mapeia uma linha do banco de dados para um objeto de usuário mais limpo
 const toUserObject = (row) => {
