@@ -1,18 +1,24 @@
 
 import express from 'express';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
+import { userRepositorio } from '../GerenciadoresDeDados/user.repositorio.js';
 
 const router = express.Router();
 
-// Rota para obter o ranking de seguidores
+/**
+ * GET /api/ranking/followers
+ * Retorna um ranking dos usuários com mais seguidores.
+ */
 router.get('/followers', async (req, res) => {
     try {
-        // Lógica para obter o ranking de seguidores do banco de dados
-        const ranking = await CentralizadorDeGerenciadoresDeDados.ranking.getFollowerRanking();
+        const limit = parseInt(req.query.limit, 10) || 10;
+
+        // Lógica refatorada para usar o novo userRepositorio
+        const ranking = await userRepositorio.getFollowerRanking({ limit });
+
         res.json(ranking);
-    } catch (error) {
-        console.error('Erro ao obter ranking de seguidores:', error);
-        res.status(500).json({ error: 'Falha ao obter o ranking.' });
+    } catch (e) {
+        console.error(`[Ranking Route Error]: ${e.message}`);
+        res.status(500).json({ error: 'Failed to fetch ranking' });
     }
 });
 

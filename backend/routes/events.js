@@ -1,34 +1,20 @@
 
 import express from 'express';
-import { z } from 'zod';
 import { eventProcessor } from '../ServiçosBackEnd/eventProcessor.js';
+import { validate, eventSchema } from '../validators.js';
 
 const router = express.Router();
 
 // Cache simples de idempotência (Em prod usaria Redis EX)
 const idempotencyCache = new Set();
 
-const eventSchema = z.object({
-    event_id: z.string().uuid(),
-    source: z.enum(['frontend', 'backend', 'payment_gateway', 'auth_service', 'moderation_service']),
-    type: z.string(),
-    timestamp: z.number(),
-    payload: z.any()
-});
-
 /**
  * POST /api/events/ingest
  * O Coletor "Fan-In" Profissional.
  */
-router.post('/ingest', async (req, res) => {
+router.post('/ingest', validate(eventSchema), async (req, res) => {
     try {
-        // 1. Validação do Schema
-        const validated = eventSchema.safeParse(req.body);
-        if (!validated.success) {
-            return res.status(400).json({ error: "INVALID_EVENT_FORMAT", details: validated.error });
-        }
-
-        const event = validated.data;
+        const event = req.body;
 
         // 2. Checagem de Idempotência (Evita duplicação)
         if (idempotencyCache.has(event.event_id)) {

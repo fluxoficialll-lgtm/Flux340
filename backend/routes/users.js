@@ -1,50 +1,43 @@
 
 import express from 'express';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
+import { userRepositorio } from '../GerenciadoresDeDados/user.repositorio.js';
 import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 
 const router = express.Router();
 
-router.get('/sync', async (req, res) => {
-    // Log de depuração para uma rota potencialmente ruidosa.
-    LogDeOperacoes.debug('TENTATIVA_SYNC_USUARIOS', {}, req.traceId);
-    try {
-        const users = await CentralizadorDeGerenciadoresDeDados.users.getAll();
-        res.json({ users });
-    } catch (e) { 
-        LogDeOperacoes.error('FALHA_SYNC_USUARIOS', { error: e }, req.traceId);
-        res.status(500).json({ error: e.message }); 
-    }
-});
+// Endpoint para buscar todos os usuários (substituído por uma busca mais eficiente)
+// router.get('/sync', ...)
 
+// Endpoint de busca de usuários
 router.get('/search', async (req, res) => {
     const { q } = req.query;
-    if (!q) return res.json([]);
+    if (!q) {
+        return res.json([]);
+    }
     
     LogDeOperacoes.log('TENTATIVA_BUSCA_USUARIO', { query: q }, req.traceId);
 
     try {
-        const users = await CentralizadorDeGerenciadoresDeDados.users.getAll();
-        const filtered = users.filter(u => 
-            u.profile?.name?.toLowerCase().includes(q.toLowerCase()) || 
-            u.profile?.nickname?.toLowerCase().includes(q.toLowerCase())
-        );
-        LogDeOperacoes.log('SUCESSO_BUSCA_USUARIO', { query: q, resultsCount: filtered.length }, req.traceId);
-        res.json(filtered);
+        const users = await userRepositorio.search(q);
+        LogDeOperacoes.log('SUCESSO_BUSCA_USUARIO', { query: q, resultsCount: users.length }, req.traceId);
+        res.json(users);
     } catch (e) { 
         LogDeOperacoes.error('FALHA_BUSCA_USUARIO', { query: q, error: e }, req.traceId);
         res.status(500).json({ error: e.message }); 
     }
 });
 
+// Endpoint para obter um usuário para atualização
 router.get('/update', async (req, res) => {
     const { email } = req.query;
-    if (!email) return res.status(400).json({ error: 'Email é obrigatório' });
+    if (!email) {
+        return res.status(400).json({ error: 'Email é obrigatório' });
+    }
 
     LogDeOperacoes.log('TENTATIVA_GET_USUARIO_PARA_UPDATE', { email }, req.traceId);
 
     try {
-        const user = await CentralizadorDeGerenciadoresDeDados.users.findByEmail(email);
+        const user = await userRepositorio.findByEmail(email);
         if (user) {
             LogDeOperacoes.log('SUCESSO_GET_USUARIO_PARA_UPDATE', { userId: user.id, email }, req.traceId);
             res.json({ user });
@@ -58,17 +51,20 @@ router.get('/update', async (req, res) => {
     }
 });
 
+// Endpoint para atualizar um usuário
 router.put('/update', async (req, res) => {
     const { email, updates } = req.body;
+    if (!email || !updates) {
+        return res.status(400).json({ error: 'Email e updates são obrigatórios' });
+    }
+
     LogDeOperacoes.log('TENTATIVA_ATUALIZACAO_USUARIO', { email, fields: Object.keys(updates) }, req.traceId);
 
     try {
-        const user = await CentralizadorDeGerenciadoresDeDados.users.findByEmail(email);
-        if (user) {
-            const updated = { ...user, ...updates };
-            await CentralizadorDeGerenciadoresDeDados.users.update(updated);
-            LogDeOperacoes.log('SUCESSO_ATUALIZACAO_USUARIO', { userId: user.id, email, fields: Object.keys(updates) }, req.traceId);
-            res.json({ user: updated });
+        const updatedUser = await userRepositorio.update(email, updates);
+        if (updatedUser) {
+            LogDeOperacoes.log('SUCESSO_ATUALIZACAO_USUARIO', { userId: updatedUser.id, email, fields: Object.keys(updates) }, req.traceId);
+            res.json({ user: updatedUser });
         } else { 
             LogDeOperacoes.warn('ATUALIZACAO_USUARIO_NAO_ENCONTRADO', { email }, req.traceId);
             res.status(404).json({ error: 'Usuário não encontrado' });

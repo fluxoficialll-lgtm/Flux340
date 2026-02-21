@@ -15,7 +15,7 @@ import { upload } from './backend/config/storage.js';
 import { LogDeOperacoes } from './backend/ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 
 // Serviços e Rotas
-import { dbManager } from './backend/databaseManager.js';
+import { db } from './backend/database/InicializaçãoDoPostgreSQL.js'; // CORRIGIDO
 import { storageService } from './backend/ServiçosBackEnd/storageService.js';
 import { IntegrityCheck } from './backend/jobs/IntegrityCheck.js';
 import apiRoutes from './backend/routes.js';
@@ -32,7 +32,7 @@ const io = initSocket(httpServer);
 setupMiddlewares(app, io); // Inclui o middleware de logging que injeta req.logger
 
 // 2. Inicialização do Banco de Dados e Manutenção
-dbManager.init()
+db.init() // CORRIGIDO
     .then(() => {
         LogDeOperacoes.log('DB_INIT', { message: 'Database system initialized successfully.' });
         // Executa tarefas de manutenção após a inicialização

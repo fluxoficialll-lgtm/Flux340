@@ -1,7 +1,9 @@
 
 import express from 'express';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
-import { FeeEngine } from '../ServiçosBackEnd/financial/FeeEngine.js';
+import { financialRepositorio } from '../GerenciadoresDeDados/financial.repositorio.js';
+import { userRepositorio } from '../GerenciadoresDeDados/user.repositorio.js';
+import { groupRepositorio } from '../GerenciadoresDeDados/group.repositorio.js';
+// import { FeeEngine } from '../ServiçosBackEnd/financial/FeeEngine.js'; // Temporariamente desativado
 import { NotificationEmitter } from '../ServiçosBackEnd/socket/NotificationEmitter.js';
 import { facebookCapi } from '../ServiçosBackEnd/facebookCapi.js';
 import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
@@ -9,43 +11,54 @@ import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/
 const router = express.Router();
 
 router.post('/process-sale-success', async (req, res) => {
-    const { transactionId, grossAmount, provider, sellerId, groupId, buyerEmail } = req.body;
+    const { transactionId, grossAmount, provider, sellerId, groupId, buyerEmail, currency = 'BRL', method, country, userData } = req.body;
     const logContext = { transactionId, provider, sellerId, groupId };
 
     LogDeOperacoes.log('TENTATIVA_PROCESSAR_VENDA', { ...logContext, grossAmount }, req.traceId);
 
     try {
-        // Etapa 1: Cálculo de Taxas
-        LogDeOperacoes.log('CALCULANDO_TAXAS_TRANSACAO', logContext, req.traceId);
-        const breakdown = await FeeEngine.calculateTransaction(grossAmount, sellerId, {
-            provider,
-            method: req.body.method,
-            country: req.body.country
-        });
-        LogDeOperacoes.log('SUCESSO_CALCULO_TAXAS', { ...logContext, breakdown }, req.traceId);
+        // Etapa 1: Cálculo de Taxas (Temporariamente desativado)
+        LogDeOperacoes.log('CALCULANDO_TAXAS_TRANSACAO (DESATIVADO)', logContext, req.traceId);
+        // const breakdown = await FeeEngine.calculateTransaction(grossAmount, sellerId, { provider, method, country });
+        
+        // Mock do objeto breakdown para permitir que a aplicação continue funcionando
+        const breakdown = {
+            platformFee: 0, // Taxa da plataforma zerada
+            providerFee: 0, // Assumindo que a taxa do provedor não é calculada aqui
+            netAmount: grossAmount,
+            currency: currency
+        };
 
-        // Etapa 2: Registro Financeiro no Banco de Dados
+        LogDeOperacoes.log('SUCESSO_CALCULO_TAXAS (MOCK)', { ...logContext, breakdown }, req.traceId);
+
+        // Etapa 2: Registro Financeiro no Banco de Dados com o novo repositório
         LogDeOperacoes.log('REGISTRANDO_TRANSACAO_FINANCEIRA_DB', { ...logContext, netAmount: breakdown.netAmount }, req.traceId);
-        await CentralizadorDeGerenciadoresDeDados.financial.recordTransaction({
+        await financialRepositorio.recordTransaction({
             userId: sellerId,
+            relatedEntityId: groupId,
+            relatedEntityType: 'group',
+            grossAmount: grossAmount,
+            platformFee: breakdown.platformFee,
+            providerFee: breakdown.providerFee, // Pode ser 0 se não for conhecido
+            netAmount: breakdown.netAmount,
+            currency: currency,
             type: 'sale',
-            amount: breakdown.netAmount,
-            status: 'paid',
-            providerTxId: transactionId,
-            currency: req.body.currency || 'BRL',
-            data: {
-                originalGross: grossAmount,
-                platformProfit: breakdown.platformFee,
-                groupId,
-                provider,
-                method: req.body.method
+            status: 'completed', // Status final, pois o pagamento já foi confirmado
+            provider: provider,
+            providerTransactionId: transactionId,
+            metadata: {
+                buyerEmail,
+                paymentMethod: method,
+                buyerCountry: country,
+                userAgent: req.headers['user-agent'],
+                ipAddress: req.ip,
             }
         });
         LogDeOperacoes.log('SUCESSO_REGISTRO_TRANSACAO_DB', logContext, req.traceId);
 
-        // Etapa 3: Disparo de Evento para Facebook CAPI (se aplicável)
-        const seller = await CentralizadorDeGerenciadoresDeDados.users.findById(sellerId);
-        const group = await CentralizadorDeGerenciadoresDeDados.groups.findById(groupId);
+        // Etapa 3: Disparo de Evento para Facebook CAPI (utilizando os novos repositórios)
+        const seller = await userRepositorio.findById(sellerId);
+        const group = await groupRepositorio.findById(groupId);
 
         if (seller && seller.marketingConfig?.pixelId) {
             LogDeOperacoes.log('TENTATIVA_ENVIO_EVENTO_CAPI', { ...logContext, pixelId: seller.marketingConfig.pixelId }, req.traceId);
@@ -56,19 +69,8 @@ router.post('/process-sale-success', async (req, res) => {
                     eventName: 'Purchase',
                     eventId: `pur_${transactionId}`,
                     url: `${process.env.APP_URL}/vip-group-sales/${groupId}`,
-                    eventData: {
-                        value: grossAmount,
-                        currency: req.body.currency || 'BRL',
-                        content_ids: [groupId],
-                        content_type: 'product_group',
-                        content_name: group?.name || 'Venda VIP'
-                    },
-                    userData: {
-                        email: buyerEmail,
-                        ip: req.ip,
-                        userAgent: req.headers['user-agent'],
-                        ...req.body.userData
-                    }
+                    eventData: { value: grossAmount, currency, content_ids: [groupId], content_type: 'product_group', content_name: group?.name || 'Venda VIP' },
+                    userData: { email: buyerEmail, ip: req.ip, userAgent: req.headers['user-agent'], ...userData }
                 });
                 LogDeOperacoes.log('SUCESSO_ENVIO_EVENTO_CAPI', { ...logContext, pixelId: seller.marketingConfig.pixelId }, req.traceId);
             } catch (capiErr) {

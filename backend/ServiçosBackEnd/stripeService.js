@@ -1,7 +1,6 @@
 
 import axios from 'axios';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
-import { FeeEngine } from './financial/FeeEngine.js';
+import { financialRepositorio } from '../GerenciadoresDeDados/financial.repositorio.js';
 
 // Usamos a chave da FLUX (Plataforma) para criar as sessões e coletar taxas
 const PLATFORM_STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
@@ -30,12 +29,13 @@ export const stripeService = {
     createCheckoutSession: async (group, sellerId, successUrl, cancelUrl) => {
         try {
             const grossAmount = parseFloat(group.price);
-            const feeData = await FeeEngine.calculateTransaction(grossAmount, sellerId, {
-                provider: 'stripe',
-                method: 'card',
-                country: 'BR',
-                currency: group.currency || 'BRL'
-            });
+            
+            // Mock do cálculo de taxas, já que o FeeEngine foi removido
+            const feeData = {
+                platformFee: 0,
+                providerFee: 0, // A taxa do provedor é tratada pela Stripe
+                netAmount: grossAmount
+            };
 
             const isSubscription = group.accessType === 'temporary';
             const params = new URLSearchParams();
@@ -90,22 +90,26 @@ export const stripeService = {
 
     fulfillOrder: async (session) => {
         const { groupId, sellerId } = session.metadata;
-        const amount = session.amount_total / 100;
-        const platformProfit = parseFloat(session.metadata.platformFee || 0);
+        const grossAmount = session.amount_total / 100;
+        const platformFee = parseFloat(session.metadata.platformFee || 0);
+        const netAmount = grossAmount - platformFee;
 
         try {
-            await CentralizadorDeGerenciadoresDeDados.financial.recordTransaction({
+            await financialRepositorio.recordTransaction({
                 userId: sellerId,
-                type: 'sale',
-                amount: amount - platformProfit,
-                status: 'paid',
-                providerTxId: session.id,
+                relatedEntityId: groupId,
+                relatedEntityType: 'group',
+                grossAmount: grossAmount,
+                platformFee: platformFee,
+                providerFee: 0, // A taxa do provedor já é descontada pela Stripe
+                netAmount: netAmount,
                 currency: session.currency.toUpperCase(),
-                data: { 
-                    platformProfit, 
-                    groupId, 
-                    method: 'Stripe Checkout',
-                    fullGross: amount
+                type: 'sale',
+                status: 'completed',
+                provider: 'stripe',
+                providerTransactionId: session.id,
+                metadata: {
+                    payment_intent: session.payment_intent
                 }
             });
         } catch (e) {

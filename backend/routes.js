@@ -5,7 +5,6 @@ import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
 import groupsRoutes from './routes/groups.js';
 import messagesRoutes from './routes/messages.js';
-import adminRoutes from './routes/admin.js';
 import paymentRoutes from './routes/payments.js';
 import socialRoutes from './routes/social.js';
 import eventRoutes from './routes/events.js';
@@ -17,7 +16,8 @@ import moderationRoutes from './routes/moderation.js';
 import trackingRoutes from './routes/tracking.js';
 import rankingRoutes from './routes/ranking.js';
 import profileRoutes from './routes/profile.js';
-import fluxmapRoutes from './routes/fluxmap.js';
+import analyticsRoutes from './routes/analytics.js'; // ADICIONADO
+import auditLogsRoutes from './routes/auditLogs.js'; // ADICIONADO
 
 // Gateway specific routes
 import syncpayRoutes from './routes/gateways/syncpay.js';
@@ -25,8 +25,6 @@ import stripeRoutes from './routes/gateways/stripe.js';
 import paypalRoutes from './routes/gateways/paypal.js';
 
 const router = express.Router();
-
-// O middleware de Trace ID já é aplicado globalmente no server.js
 
 // Handshake Route (Batimento)
 router.get('/ping', (req, res) => {
@@ -41,7 +39,6 @@ router.use('/auth', authRoutes);
 router.use('/users', usersRoutes);
 router.use('/groups', groupsRoutes);
 router.use('/messages', messagesRoutes);
-router.use('/admin', adminRoutes);
 router.use('/events', eventRoutes);
 router.use('/marketplace', marketplaceRoutes);
 router.use('/posts', postsRoutes);
@@ -50,7 +47,8 @@ router.use('/moderation', moderationRoutes);
 router.use('/tracking', trackingRoutes);
 router.use('/ranking', rankingRoutes);
 router.use('/profile', profileRoutes);
-router.use('/fluxmap', fluxmapRoutes);
+router.use('/analytics', analyticsRoutes); // ADICIONADO
+router.use('/auditlogs', auditLogsRoutes); // ADICIONADO
 
 // Mounting Gateways
 router.use('/syncpay', syncpayRoutes);

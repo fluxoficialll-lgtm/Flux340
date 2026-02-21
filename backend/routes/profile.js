@@ -1,31 +1,40 @@
 
 import express from 'express';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
+import { userRepositorio } from '../GerenciadoresDeDados/user.repositorio.js';
+import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 
 const router = express.Router();
 
 // Rota para obter dados do perfil para edição
 router.get('/edit', async (req, res) => {
-    try {
-        const userId = req.userId; // Supondo que o ID do usuário está disponível na requisição
-        if (!userId) {
-            return res.status(401).json({ error: 'Usuário não autenticado.' });
-        }
+    const userId = req.userId; // Middleware de autenticação deve fornecer isso
+    LogDeOperacoes.log('TENTATIVA_GET_PERFIL_PARA_EDICAO', { userId }, req.traceId);
 
-        const user = await CentralizadorDeGerenciadoresDeDados.users.findById(userId);
+    if (!userId) {
+        LogDeOperacoes.warn('GET_PERFIL_FALHA_AUTENTICACAO', {}, req.traceId);
+        return res.status(401).json({ error: 'Usuário não autenticado.' });
+    }
+
+    try {
+        const user = await userRepositorio.findById(userId);
         if (!user) {
+            LogDeOperacoes.warn('GET_PERFIL_USUARIO_NAO_ENCONTRADO', { userId }, req.traceId);
             return res.status(404).json({ error: 'Usuário não encontrado.' });
         }
 
-        // Retornar os dados do perfil que podem ser editados
+        LogDeOperacoes.log('SUCESSO_GET_PERFIL_PARA_EDICAO', { userId }, req.traceId);
+        // Retorna apenas os campos que o usuário pode editar
         res.json({
             name: user.name,
             username: user.username,
             bio: user.bio,
-            // etc.
+            location: user.location,
+            website: user.website,
+            profilePictureUrl: user.profilePictureUrl,
+            coverPhotoUrl: user.coverPhotoUrl
         });
     } catch (error) {
-        console.error('Erro ao obter dados do perfil:', error);
+        LogDeOperacoes.error('FALHA_GET_PERFIL_PARA_EDICAO', { userId, error }, req.traceId);
         res.status(500).json({ error: 'Falha ao obter os dados do perfil.' });
     }
 });

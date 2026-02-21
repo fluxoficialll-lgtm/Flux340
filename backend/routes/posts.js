@@ -1,6 +1,7 @@
 
 import express from 'express';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
+import { postRepositorio } from '../GerenciadoresDeDados/post.repositorio.js';
+import { interactionRepositorio } from '../GerenciadoresDeDados/interaction.repositorio.js';
 import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 
 const router = express.Router();
@@ -11,11 +12,12 @@ router.get('/', async (req, res) => {
     LogDeOperacoes.log('TENTATIVA_LISTAR_POSTS', { limit: Number(limit) || 50, fromCursor: cursor }, req.traceId);
 
     try {
-        const posts = await CentralizadorDeGerenciadoresDeDados.posts.list(Number(limit) || 50, cursor);
+        const posts = await postRepositorio.list(Number(limit) || 50, cursor);
         
         let nextCursor = null;
         if (posts.length > 0) {
-            nextCursor = posts[posts.length - 1].timestamp;
+            // O cursor agora é o timestamp do último post retornado
+            nextCursor = posts[posts.length - 1].createdAt.toISOString();
         }
 
         res.json({ data: posts, nextCursor });
@@ -35,19 +37,19 @@ router.post('/create', async (req, res) => {
             LogDeOperacoes.warn('FALHA_CRIACAO_POST_DADOS_INVALIDOS', { postId: id, authorId }, req.traceId);
             return res.status(400).json({ error: "ID e authorId são obrigatórios" });
         }
-        await CentralizadorDeGerenciadoresDeDados.posts.create(req.body);
+        await postRepositorio.create(req.body);
         LogDeOperacoes.log('SUCESSO_CRIACAO_POST', { postId: id, authorId }, req.traceId);
-        res.json({ success: true });
+        res.status(201).json({ success: true });
     } catch (e) {
         LogDeOperacoes.error('FALHA_CRIACAO_POST', { postId: id, authorId, error: e }, req.traceId);
         res.status(500).json({ error: e.message });
     }
 });
 
-// Interagir (Like / View) com Verificação de Unicidade
+// Interagir (Like / Unlike) com um Post
 router.post('/:id/interact', async (req, res) => {
     const { id } = req.params;
-    const { type, userId, action } = req.body;
+    const { type, userId, action } = req.body; // action pode ser 'remove' para unlike
     LogDeOperacoes.log('TENTATIVA_INTERACAO_POST', { postId: id, userId, type, action }, req.traceId);
 
     try {
@@ -58,9 +60,9 @@ router.post('/:id/interact', async (req, res) => {
         
         let success = false;
         if (action === 'remove' && type === 'like') {
-            success = await CentralizadorDeGerenciadoresDeDados.interactions.removeInteraction(id, userId, type);
-        } else {
-            success = await CentralizadorDeGerenciadoresDeDados.interactions.recordUniqueInteraction(id, userId, type);
+            success = await interactionRepositorio.removeInteraction(id, userId, type);
+        } else if (type === 'like') {
+            success = await interactionRepositorio.recordUniqueInteraction(id, userId, type);
         }
         
         LogDeOperacoes.log('SUCESSO_INTERACAO_POST', { postId: id, userId, type, action, processed: success }, req.traceId);
@@ -83,9 +85,9 @@ router.post('/:id/comment', async (req, res) => {
             return res.status(400).json({ error: "Objeto de comentário com authorId é obrigatório" });
         }
         
-        await CentralizadorDeGerenciadoresDeDados.posts.addComment(id, comment);
-        LogDeOperacoes.log('SUCESSO_ADICIONAR_COMENTARIO', { postId: id, authorId: comment.authorId }, req.traceId);
-        res.json({ success: true });
+        const newComment = await postRepositorio.addComment(id, comment);
+        LogDeOperacoes.log('SUCESSO_ADICIONAR_COMENTARIO', { postId: id, commentId: newComment.id, authorId: newComment.authorId }, req.traceId);
+        res.status(201).json({ success: true, comment: newComment });
     } catch (e) {
         LogDeOperacoes.error('FALHA_ADICIONAR_COMENTARIO', { postId: id, error: e }, req.traceId);
         res.status(500).json({ error: e.message });
@@ -95,12 +97,11 @@ router.post('/:id/comment', async (req, res) => {
 // Deletar Post
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-    // Supondo que o ID do usuário venha de um middleware de autenticação: req.user.id
     const initiatedBy = req.user?.id || 'unknown';
     LogDeOperacoes.log('TENTATIVA_DELETAR_POST', { postId: id, initiatedBy }, req.traceId);
 
     try {
-        await CentralizadorDeGerenciadoresDeDados.posts.delete(id);
+        await postRepositorio.delete(id);
         LogDeOperacoes.log('SUCESSO_DELETAR_POST', { postId: id, initiatedBy }, req.traceId);
         res.json({ success: true });
     } catch (e) {

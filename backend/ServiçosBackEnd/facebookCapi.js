@@ -1,6 +1,5 @@
 
 import crypto from 'crypto';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js'; 
 
 const FB_API_VERSION = 'v19.0';
 

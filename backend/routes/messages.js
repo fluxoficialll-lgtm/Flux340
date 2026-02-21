@@ -1,107 +1,96 @@
 
 import express from 'express';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
+import { conversationRepositorio } from '../GerenciadoresDeDados/conversation.repositorio.js';
+import { messageRepositorio } from '../GerenciadoresDeDados/message.repositorio.js';
+import { groupRepositorio } from '../GerenciadoresDeDados/group.repositorio.js';
+import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 
 const router = express.Router();
 
-router.get('/private', async (req, res) => {
+// Listar todas as conversas de um usuário
+router.get('/', async (req, res) => {
+    const userId = req.userId;
+    LogDeOperacoes.log('TENTATIVA_LISTAR_CONVERSAS', { userId }, req.traceId);
     try {
-        const { email } = req.query;
-        if (!email) return res.status(400).json({ error: "Email é obrigatório." });
-        const chats = await CentralizadorDeGerenciadoresDeDados.chats.findPrivate(email);
-        res.json({ chats });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        const conversations = await conversationRepositorio.listForUser(userId);
+        res.json({ chats: conversations });
+    } catch (e) {
+        LogDeOperacoes.error('FALHA_LISTAR_CONVERSAS', { userId, error: e }, req.traceId);
+        res.status(500).json({ error: e.message });
+    }
 });
 
-router.get('/private/:chatId', async (req, res) => {
+// Buscar mensagens de uma conversa específica
+router.get('/:conversationId', async (req, res) => {
+    const { conversationId } = req.params;
+    const userId = req.userId;
+    const { limit, offset } = req.query;
+    LogDeOperacoes.log('TENTATIVA_BUSCAR_MENSAGENS', { userId, conversationId }, req.traceId);
+
     try {
-        const { chatId } = req.params;
-        const chat = await CentralizadorDeGerenciadoresDeDados.chats.findById(chatId);
-        if (!chat) return res.json({ messages: [] });
-        res.json({ messages: chat.messages || [] });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        const messages = await messageRepositorio.findByConversationId(conversationId, userId, limit, offset);
+        res.json({ messages });
+    } catch (e) {
+        LogDeOperacoes.error('FALHA_BUSCAR_MENSAGENS', { userId, conversationId, error: e }, req.traceId);
+        res.status(500).json({ error: e.message });
+    }
 });
 
-router.get('/groups/:id', async (req, res) => {
-    try {
-        const chat = await CentralizadorDeGerenciadoresDeDados.chats.findById(req.params.id);
-        if (!chat) return res.json({ messages: [] });
-        res.json({ messages: chat.messages || [] });
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
+// Enviar uma mensagem
 router.post('/send', async (req, res) => {
+    const senderId = req.userId;
+    const { conversationId, content, isGroup, recipientId } = req.body;
+    LogDeOperacoes.log('TENTATIVA_ENVIAR_MENSAGEM', { senderId, conversationId, isGroup, recipientId }, req.traceId);
+
     try {
-        const { chatId, message } = req.body;
-        if (!chatId || !message) return res.status(400).json({ error: "chatId e message são obrigatórios." });
-        
-        let chatData = await CentralizadorDeGerenciadoresDeDados.chats.findById(chatId);
-        
-        if (chatData) {
-            chatData.deletedBy = []; 
-            chatData.messages.push(message);
-        } else {
-            chatData = { 
-                id: chatId, 
-                contactName: message.senderName || 'Desconhecido', 
-                isBlocked: false, 
-                deletedBy: [],
-                messages: [message] 
-            };
+        let convId = conversationId;
+
+        // Se for uma DM e não tiver um ID de conversa, encontre ou crie a conversa privada
+        if (!isGroup && !convId) {
+            if (!recipientId) return res.status(400).json({ error: 'recipientId é obrigatório para novas DMs.' });
+            const conversation = await conversationRepositorio.findOrCreatePrivateConversation(senderId, recipientId);
+            convId = conversation.id;
         }
 
-        await CentralizadorDeGerenciadoresDeDados.chats.set(chatData);
-
-        if (!chatId.includes('@')) {
-            await CentralizadorDeGerenciadoresDeDados.groups.updateActivity(chatId);
+        // Se for uma conversa de grupo e não houver ID, encontre-o através do group_id
+        if (isGroup && !convId) {
+            const { groupId } = req.body;
+            if (!groupId) return res.status(400).json({ error: 'groupId é obrigatório para mensagens de grupo.' });
+            const conversation = await conversationRepositorio.findByGroupId(groupId);
+            if (!conversation) return res.status(404).json({ error: 'Conversa de grupo não encontrada.' });
+            convId = conversation.id;
         }
 
+        const newMessage = await messageRepositorio.create(senderId, convId, content);
+
+        // Emitir evento em tempo real
         if (req.io) {
-            req.io.to(chatId).emit('new_message', { chatId, message });
+            req.io.to(convId).emit('new_message', { conversationId: convId, message: newMessage });
         }
 
+        LogDeOperacoes.log('SUCESSO_ENVIAR_MENSAGEM', { senderId, conversationId: convId }, req.traceId);
+        res.status(201).json({ success: true, message: newMessage });
+
+    } catch (e) {
+        LogDeOperacoes.error('FALHA_ENVIAR_MENSAGEM', { senderId, error: e }, req.traceId);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Deletar mensagens
+router.delete('/messages', async (req, res) => {
+    const userId = req.userId;
+    const { messageIds, target } = req.body;
+    const deleteAll = target === 'all';
+    LogDeOperacoes.log('TENTATIVA_DELETAR_MENSAGENS', { userId, count: messageIds.length, target }, req.traceId);
+
+    try {
+        await messageRepositorio.deleteMessages(messageIds, userId, deleteAll);
         res.json({ success: true });
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-router.delete('/private/:chatId', async (req, res) => {
-    try {
-        const { chatId } = req.params;
-        const { userEmail, target, messageIds } = req.body; 
-
-        if (!userEmail) return res.status(400).json({ error: "Identidade do usuário necessária." });
-
-        // Se enviou IDs de mensagens, é exclusão de mensagens, não da conversa toda
-        if (messageIds && messageIds.length > 0) {
-            await CentralizadorDeGerenciadoresDeDados.chats.deleteMessages(chatId, messageIds, userEmail, target);
-            
-            if (target === 'all' && req.io) {
-                req.io.to(chatId).emit('messages_deleted_globally', { chatId, messageIds });
-            }
-            
-            return res.json({ success: true, action: 'messages_deleted' });
-        }
-
-        // Caso contrário, exclusão do CHAT INTEIRO
-        let result;
-        if (target === 'all') {
-            result = await CentralizadorDeGerenciadoresDeDados.chats.hardDelete(chatId);
-            if (req.io) {
-                req.io.to(chatId).emit('chat_deleted_globally', { chatId });
-            }
-            res.json({ success: true, action: 'deleted_for_all' });
-        } else {
-            result = await CentralizadorDeGerenciadoresDeDados.chats.markAsDeleted(chatId, userEmail);
-            res.json({ success: true, action: result });
-        }
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-router.post('/groups/:id/hide', async (req, res) => {
-    try {
-        const { messageId, userEmail } = req.body;
-        res.json({ success: true, hiddenId: messageId });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) {
+        LogDeOperacoes.error('FALHA_DELETAR_MENSAGENS', { userId, error: e }, req.traceId);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 export default router;

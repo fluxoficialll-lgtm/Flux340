@@ -1,13 +1,14 @@
 
 import express from 'express';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
+import { marketplaceRepositorio } from '../GerenciadoresDeDados/marketplace.repositorio.js';
+import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 
 const router = express.Router();
 
-// Listar todos os itens (Orgânicos)
+// Listar itens do marketplace com filtros
 router.get('/', async (req, res) => {
     try {
-        const items = await CentralizadorDeGerenciadoresDeDados.marketplace.list();
+        const items = await marketplaceRepositorio.list(req.query);
         res.json({ data: items });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -17,7 +18,7 @@ router.get('/', async (req, res) => {
 // Buscar item específico
 router.get('/:id', async (req, res) => {
     try {
-        const item = await CentralizadorDeGerenciadoresDeDados.marketplace.findById(req.params.id);
+        const item = await marketplaceRepositorio.findById(req.params.id);
         if (!item) return res.status(404).json({ error: 'Item não encontrado' });
         res.json({ item });
     } catch (e) {
@@ -25,26 +26,45 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Criar/Atualizar item
+// Criar ou atualizar item
 router.post('/create', async (req, res) => {
+    const sellerId = req.userId;
+    LogDeOperacoes.log('TENTATIVA_CRIAR_ITEM_MARKETPLACE', { sellerId, body: req.body }, req.traceId);
     try {
-        const item = req.body;
-        if (!item.id || !item.sellerId) {
-            return res.status(400).json({ error: "Dados incompletos (id e sellerId são obrigatórios)" });
-        }
-        await CentralizadorDeGerenciadoresDeDados.marketplace.create(item);
-        res.json({ success: true });
+        const item = await marketplaceRepositorio.create({ sellerId, ...req.body });
+        res.status(201).json(item);
     } catch (e) {
+        LogDeOperacoes.error('FALHA_CRIAR_ITEM_MARKETPLACE', { sellerId, error: e }, req.traceId);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Endpoint de atualização parcial
+router.patch('/:id', async (req, res) => {
+    LogDeOperacoes.log('TENTATIVA_ATUALIZAR_ITEM_MARKETPLACE', { itemId: req.params.id, updates: req.body }, req.traceId);
+    try {
+        const updatedItem = await marketplaceRepositorio.update(req.params.id, req.body);
+        res.json(updatedItem);
+    } catch (e) {
+        LogDeOperacoes.error('FALHA_ATUALIZAR_ITEM_MARKETPLACE', { itemId: req.params.id, error: e }, req.traceId);
         res.status(500).json({ error: e.message });
     }
 });
 
 // Deletar item
 router.delete('/:id', async (req, res) => {
+    LogDeOperacoes.log('TENTATIVA_DELETAR_ITEM_MARKETPLACE', { itemId: req.params.id }, req.traceId);
     try {
-        await CentralizadorDeGerenciadoresDeDados.marketplace.delete(req.params.id);
-        res.json({ success: true });
+        // Adicionar verificação de permissão (apenas o vendedor ou admin pode deletar)
+        const item = await marketplaceRepositorio.findById(req.params.id);
+        if (item && item.sellerId !== req.userId /* && !req.user.isAdmin */) {
+            return res.status(403).json({ error: 'Permissão negada.' });
+        }
+
+        await marketplaceRepositorio.delete(req.params.id);
+        res.status(204).send();
     } catch (e) {
+        LogDeOperacoes.error('FALHA_DELETAR_ITEM_MARKETPLACE', { itemId: req.params.id, error: e }, req.traceId);
         res.status(500).json({ error: e.message });
     }
 });

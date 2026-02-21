@@ -1,6 +1,6 @@
 
 import { EventEmitter } from 'events';
-import { CentralizadorDeGerenciadoresDeDados } from '../database/CentralizadorDeGerenciadoresDeDados.js';
+import { eventRepositorio } from '../GerenciadoresDeDados/event.repositorio.js';
 
 class EventProcessor extends EventEmitter {
     constructor() {
@@ -10,20 +10,22 @@ class EventProcessor extends EventEmitter {
     }
 
     setupHandlers() {
-        // Handler Genérico de Ingestão
         this.on('ingested_event', async (event) => {
+            // Persiste o evento ANTES de qualquer outra coisa para garantir que não seja perdido.
+            await eventRepositorio.storeEvent(event);
+            // Inicia o processamento real.
             await this.processEvent(event);
         });
     }
 
     async processEvent(event) {
-        const { event_id, type, source, payload, timestamp } = event;
-        
-        // 1. Sanitização e Log de Auditoria Simples
-        // console.log(`[PROCESSOR] Processing ${type} from ${source} (${event_id})`);
+        const { event_id, type, source, payload } = event;
 
         try {
-            // 2. Roteamento de Lógica Baseado no Tipo
+            // 1. Marca o evento como 'em processamento'
+            await eventRepositorio.updateEventStatus(event_id, 'processing');
+
+            // 2. Roteamento da Lógica de Negócios
             switch (type) {
                 case 'payment_success':
                     await this.handlePaymentSuccess(payload);
@@ -32,26 +34,32 @@ class EventProcessor extends EventEmitter {
                     await this.handleUserError(payload);
                     break;
                 case 'content_created':
-                    // Poderia disparar análises de IA aqui sem travar o endpoint
+                    // Futuras implementações...
                     break;
                 default:
-                    // Apenas loga eventos desconhecidos
+                    // Para eventos sem lógica específica, apenas os marcamos como concluídos.
                     break;
             }
-
+            
+            // 3. Marca como concluído se tudo correu bem
+            await eventRepositorio.updateEventStatus(event_id, 'completed');
             this.processedCount++;
+
         } catch (error) {
             console.error(`[PROCESSOR ERR] Failed to process ${event_id}:`, error.message);
+            // 4. Marca como falho em caso de erro
+            await eventRepositorio.updateEventStatus(event_id, 'failed', error.message);
         }
     }
 
     async handlePaymentSuccess(payload) {
-        // Exemplo: Notificar vendedor e liberar acesso se o endpoint principal falhou ou é legado
-        // Este é o lugar para redundância.
+        // A lógica de negócio para um pagamento bem-sucedido iria aqui.
+        // Por exemplo, liberar acesso a um produto digital.
     }
 
     async handleUserError(payload) {
-        // Logar erros críticos para o painel administrativo de infraestrutura
+        // A lógica para lidar com um erro do usuário iria aqui.
+        // Por exemplo, registrar o erro para análise.
     }
 
     getStats() {

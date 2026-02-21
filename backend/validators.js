@@ -5,6 +5,14 @@ import xss from 'xss';
 // Helper to sanitize strings
 const sanitize = (val) => (typeof val === 'string' ? xss(val) : val);
 
+export const eventSchema = z.object({
+    event_id: z.string().uuid(),
+    source: z.enum(['frontend', 'backend', 'payment_gateway', 'auth_service', 'moderation_service']),
+    type: z.string(),
+    timestamp: z.number(),
+    payload: z.any()
+});
+
 export const registerSchema = z.object({
     email: z.string().email().transform(sanitize),
     password: z.string().min(6),

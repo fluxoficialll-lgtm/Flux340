@@ -1,5 +1,5 @@
 
-import { CentralizadorDeGerenciadoresDeDados } from '../../database/CentralizadorDeGerenciadoresDeDados.js';
+import { auditLogRepositorio } from '../../GerenciadoresDeDados/auditLog.repositorio.js';
 
 /**
  * AiPerformanceLog: Monitor de inteligência artificial.
@@ -13,15 +13,24 @@ export const AiPerformanceLog = {
 
         try {
             // Logamos para o sistema de eventos do banco
-            // No futuro, isso alimentará o painel de 'IA Health' no admin
-            console.log(`[AI_AUDIT] Model: ${model} | Success: ${success} | Latency: ${duration}ms | Tokens: ${tokenCount || 'N/A'}`);
-            
-            // Opcional: Se falhar, registra evidência para retreinamento
-            if (!success) {
-                console.error(`[AI_FAILURE] Trace: ${traceId} | Context: ${context}`);
-            }
+            // Isso alimenta o painel de 'IA Health' no admin
+            await auditLogRepositorio.insert({
+                traceId: traceId,
+                level: success ? 'info' : 'error',
+                service: 'AI_PERFORMANCE',
+                contexto: context, // Ex: 'GeradorDePosts', 'AnalisadorDeSentimento'
+                data: {
+                    model,
+                    duration,
+                    tokenCount,
+                    prompt, // Cuidado com PII ao logar prompts
+                },
+                timestamp: new Date()
+            });
+
         } catch (e) {
             // Auditoria nunca deve quebrar o fluxo principal
+            console.error('Falha ao gravar log de auditoria de IA:', e.message);
         }
     }
 };
