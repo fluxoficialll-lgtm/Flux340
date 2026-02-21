@@ -3,7 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { authRepositorio } from '../GerenciadoresDeDados/auth.repositorio.js';
-import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/idService.js'; // Corrigido
+import { gerarId, ID_PREFIX } from '../ServiçosBackEnd/idService.js';
 
 const router = express.Router();
 

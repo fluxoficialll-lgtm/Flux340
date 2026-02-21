@@ -13,6 +13,12 @@ export const ID_PREFIX = {
   PAGAMENTO: 'pay',
   MEDIA: 'med',
   NOTIFICACAO: 'ntf',
+  ITEM_DO_MARKETPLACE: 'itm',
+  CONVERSA: 'cnv',
+  COMENTARIO: 'cmt',
+  TRANSACAO: 'trn',
+  EVENTO: 'evt',
+  CAMPANHA_DE_ANUNCIO: 'adc',
 } as const;
 
 // Extrai os tipos de prefixo do objeto
