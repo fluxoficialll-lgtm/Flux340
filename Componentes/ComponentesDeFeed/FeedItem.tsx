@@ -4,7 +4,7 @@ import { Post } from '../../types';
 import { PostHeader } from '../PostHeader';
 import { PostText } from '../PostText';
 import { ImageCarousel } from '../ImageCarousel';
-import { GroupAttachmentCard } from '../GroupAttachmentCard';
+import { GroupAttachmentCard } from '../groups/GroupAttachmentCard';
 import { PollPost } from './PollPost';
 import { PostActions } from './PostActions';
 import { postService } from '../../ServiçosDoFrontend/postService';

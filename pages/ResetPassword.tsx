@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../Componentes/Layout';
 import { Input } from '../Componentes/Input';
-import { Button } from '../Componentes/Button';
+import { Button } from '../Componentes/ui/Button';
 import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
 import { AuthError } from '../types';
 
@@ -45,9 +45,7 @@ export const ResetPassword: React.FC = () => {
             alert("Senha alterada com sucesso!");
             navigate('/');
         }
-    } catch (err: any) {
-        setError(err.message);
-    } finally {
+    } catch (err: any) {        setError(err.message);    } finally {
         setLoading(false);
     }
   };
