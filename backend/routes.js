@@ -18,6 +18,7 @@ import rankingRoutes from './routes/ranking.js';
 import profileRoutes from './routes/profile.js';
 import analyticsRoutes from './routes/analytics.js'; // ADICIONADO
 import auditLogsRoutes from './routes/auditLogs.js'; // ADICIONADO
+import auditoriaRoutes from './routes/auditoria.js'; // NOVO
 
 // Gateway specific routes
 import syncpayRoutes from './routes/gateways/syncpay.js';
@@ -49,6 +50,7 @@ router.use('/ranking', rankingRoutes);
 router.use('/profile', profileRoutes);
 router.use('/analytics', analyticsRoutes); // ADICIONADO
 router.use('/auditlogs', auditLogsRoutes); // ADICIONADO
+router.use('/auditoria', auditoriaRoutes); // NOVO
 
 // Mounting Gateways
 router.use('/syncpay', syncpayRoutes);
