@@ -1,86 +1,93 @@
 
 import pg from 'pg';
-import dotenv from 'dotenv';
+import { pool } from '../pool.js'; // Importa o pool centralizado
 import { LogDeOperacoes } from '../../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
+import { isLocal } from '../../config/ambiente.js';
 
-dotenv.config();
+const { Client } = pg;
 
-const { Pool } = pg;
+/**
+ * Cria uma nova string de conexão para um banco de dados específico, 
+ * reutilizando a configuração principal do ambiente.
+ * @param {string} dbName - O nome do banco de dados para o qual se conectar.
+ * @returns {string} - A nova string de conexão.
+ */
+const createConnectionString = (dbName) => {
+    const connString = process.env.DATABASE_URL;
+    if (!connString) {
+        throw new Error('DATABASE_URL não está definida no ambiente.');
+    }
+    const url = new URL(connString);
+    url.pathname = `/${dbName}`;
+    return url.toString();
+};
 
-const getBaseConfig = () => ({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    idleTimeoutMillis: 5000,
-    connectionTimeoutMillis: 5000,
-});
-
+/**
+ * Verifica se um banco de dados contém tabelas definidas pelo usuário.
+ * @param {string} dbName - O nome do banco de dados para verificar.
+ * @returns {Promise<string>} - O status do banco de dados.
+ */
 const checkDatabaseStatus = async (dbName) => {
-    const config = { ...getBaseConfig(), database: dbName };
-    const tempPool = new Pool(config);
+    const connectionString = createConnectionString(dbName);
+    const client = new Client({
+        connectionString,
+        ssl: !isLocal ? { rejectUnauthorized: false } : false,
+        connectionTimeoutMillis: 5000,
+    });
+
     try {
-        const client = await tempPool.connect();
-        try {
-            const res = await client.query(`
-                SELECT 1 
-                FROM information_schema.tables 
-                WHERE table_schema NOT IN (\'pg_catalog\', \'information_schema\')
-                LIMIT 1;
-            `);
-            return res.rowCount > 0 ? '📚 PostgreSQL — dados existentes.' : '🆕 PostgreSQL — dados inexistentes.';
-        } finally {
-            client.release();
-        }
+        await client.connect();
+        const res = await client.query(`
+            SELECT 1
+            FROM information_schema.tables
+            WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+            LIMIT 1;
+        `);
+        return res.rowCount > 0 ? '📚 PostgreSQL — dados existentes.' : '🆕 PostgreSQL — dados inexistentes.';
     } catch (error) {
-        LogDeOperacoes.warn('DB_AUDIT_CONNECTION_FAILURE', {
-            message: `Não foi possível conectar ou verificar o banco de dados '${dbName}'.`,
-            error: error.message,
-        });
+        // Se a conexão falhar, o banco é considerado inacessível.
         return '🚫 Inacessível';
     } finally {
-        await tempPool.end();
+        await client.end();
     }
 };
 
-// RENOMEADO: A constante exportada agora tem um nome mais específico.
-export const auditorDoPostgreSQL = {
-    async inspectDatabases() {
-        LogDeOperacoes.log('DB_AUDIT_START', { message: 'Iniciando auditoria de bancos de dados PostgreSQL.' });
-        const config = { ...getBaseConfig(), database: 'postgres' };
-        const masterPool = new Pool(config);
-        const client = await masterPool.connect();
+/**
+ * Realiza uma auditoria em todos os bancos de dados PostgreSQL, verificando a conectividade e a presença de tabelas.
+ */
+const inspectDatabases = async () => {
+    LogDeOperacoes.log('DB_AUDIT_START', { message: 'Iniciando auditoria de bancos de dados PostgreSQL.' });
 
-        try {
-            const res = await client.query(`
-                SELECT datname FROM pg_database 
-                WHERE datistemplate = false AND datname <> \'postgres\';
-            `);
-            
-            const databases = [];
-            LogDeOperacoes.log('DB_AUDIT_DISCOVERY', { count: res.rows.length, message: `Encontrados ${res.rows.length} bancos de dados para análise.` });
+    let databases = [];
+    try {
+        // 1. Obter a lista de bancos de dados usando o pool central
+        const res = await pool.query("SELECT datname FROM pg_database WHERE datistemplate = false AND datname <> 'postgres';");
+        databases = res.rows;
+        LogDeOperacoes.log('DB_AUDIT_DISCOVERY', { count: databases.length, message: `Encontrados ${databases.length} bancos de dados para análise.` });
 
-            for (const row of res.rows) {
-                const dbName = row.datname;
-                const status = await checkDatabaseStatus(dbName);
-                
-                LogDeOperacoes.log('DB_AUDIT_STATUS', { 
-                    database: dbName, 
-                    status: status 
-                });
-
-                databases.push({ name: dbName, status });
+        // 2. Auditar cada banco de dados em paralelo
+        const auditPromises = databases.map(async (db) => {
+            const dbName = db.datname;
+            const status = await checkDatabaseStatus(dbName);
+            if (status === '🚫 Inacessível') {
+                LogDeOperacoes.warn('DB_AUDIT_CONNECTION_FAILURE', { database: dbName, status });
+            } else {
+                LogDeOperacoes.log('DB_AUDIT_STATUS', { database: dbName, status });
             }
+        });
 
-            LogDeOperacoes.log('DB_AUDIT_COMPLETE', { totalFound: databases.length, message: 'Auditoria de bancos de dados concluída.' });
-            return {
-                totalCount: databases.length,
-                databases,
-            };
-        } finally {
-            client.release();
-            await masterPool.end();
-        }
+        await Promise.all(auditPromises);
+
+    } catch (error) {
+        LogDeOperacoes.error('DB_AUDIT_LIST_FAILURE', { 
+            message: 'Erro ao obter a lista de bancos de dados para auditoria.',
+            error: error.message 
+        });
+    } finally {
+        LogDeOperacoes.log('DB_AUDIT_COMPLETE', { message: 'Auditoria de bancos de dados concluída.' });
     }
+};
+
+export const auditorDoPostgreSQL = {
+    inspectDatabases
 };
