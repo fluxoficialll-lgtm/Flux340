@@ -1,42 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { postService } from '../ServiçosDoFrontend/postService';
-import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { Post } from '../types';
-import { USE_MOCKS } from '../mocks';
-
-// Componentes Modulares
+import React from 'react';
+import { useAdContentSelector } from '../hooks/useAdContentSelector';
 import { AdSelectionHeader } from '../Componentes/ads/selection/AdSelectionHeader';
 import { AdContentTabs } from '../Componentes/ads/selection/AdContentTabs';
 import { PostSelectionCard } from '../Componentes/ads/selection/PostSelectionCard';
 import { ReelSelectionCard } from '../Componentes/ads/selection/ReelSelectionCard';
 
 export const AdContentSelector: React.FC = () => {
-    const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'posts' | 'reels'>('posts');
-    const [content, setContent] = useState<Post[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const loadContent = async () => {
-            const user = authService.getCurrentUser();
-            if (user) {
-                // Em modo Mock, postService.getUserPosts já retorna posts do u-creator-002 se o usuário for mock
-                const allPosts = await postService.getUserPosts(user.id);
-                setContent(allPosts);
-            }
-            setLoading(false);
-        };
-        loadContent();
-    }, []);
-
-    const filteredContent = content.filter(p => 
-        activeTab === 'reels' ? p.type === 'video' : (p.type === 'photo' || p.type === 'text')
-    );
-
-    const handleSelect = (post: Post) => {
-        navigate('/ad-placement-selector', { state: { boostedContent: post } });
-    };
+    const {
+        activeTab,
+        setActiveTab,
+        loading,
+        filteredContent,
+        handleSelect,
+        navigate
+    } = useAdContentSelector();
 
     return (
         <div className="min-h-screen bg-[#0a0c10] text-white font-['Inter'] flex flex-col">

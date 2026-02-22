@@ -17,7 +17,6 @@ import trackingRoutes from './routes/tracking.js';
 import rankingRoutes from './routes/ranking.js';
 import profileRoutes from './routes/profile.js';
 import analyticsRoutes from './routes/analytics.js'; // ADICIONADO
-import auditLogsRoutes from './routes/auditLogs.js'; // ADICIONADO
 import auditoriaRoutes from './routes/auditoria.js'; // NOVO
 
 // Gateway specific routes
@@ -49,7 +48,6 @@ router.use('/tracking', trackingRoutes);
 router.use('/ranking', rankingRoutes);
 router.use('/profile', profileRoutes);
 router.use('/analytics', analyticsRoutes); // ADICIONADO
-router.use('/auditlogs', auditLogsRoutes); // ADICIONADO
 router.use('/auditoria', auditoriaRoutes); // NOVO
 
 // Mounting Gateways

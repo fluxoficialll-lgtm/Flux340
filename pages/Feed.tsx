@@ -1,184 +1,25 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { postService } from '../ServiçosDoFrontend/postService';
-import { recommendationService } from '../ServiçosDoFrontend/recommendationService';
-import { Post } from '../types';
-import { db } from '@/database';
+
+import React from 'react';
+import { useFeed } from '../hooks/useFeed';
 import { useModal } from '../Componentes/ModalSystem';
 import { FeedItem } from '../Componentes/ComponentesDeFeed/FeedItem';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
 
 export const Feed: React.FC = () => {
-  const navigate = useNavigate();
+  const {
+    scrollContainerRef, loaderRef, posts, loading, hasMore, currentUserId, uiVisible,
+    activeLocationFilter, isMenuOpen, setIsMenuOpen, handleContainerScroll,
+    handlePostLike, handlePostDelete, handlePostVote, handlePostShare, handleCtaClick,
+    navigate
+  } = useFeed();
   const { showConfirm } = useModal();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [uiVisible, setUiVisible] = useState(true);
-  const [activeLocationFilter, setActiveLocationFilter] = useState<string | null>(null);
-  
-  const [nextCursor, setNextCursor] = useState<number | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const PAGE_SIZE = 15; 
 
-  const lastScrollY = useRef(0);
-  const isFetchingRef = useRef(false);
-  const hasLoadedInitialRef = useRef(false); // Trava para carga inicial
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const viewedPostsRef = useRef<Set<string>>(new Set());
-  const loaderRef = useRef<HTMLDivElement>(null);
-  
-  const currentUser = useMemo(() => authService.getCurrentUser(), []);
-  const currentUserId = currentUser?.id;
-  const isAdultContentAllowed = useMemo(() => localStorage.getItem('settings_18_plus') === 'true', []);
-
-  const mergePosts = useCallback((newPosts: Post[], reset: boolean = false) => {
-    if (!newPosts) return;
-    
-    setPosts(prev => {
-        const combined = reset ? newPosts : [...prev, ...newPosts];
-        const uniqueMap = new Map<string, Post>();
-        
-        combined.forEach(p => { 
-            if (p && p.id && !uniqueMap.has(p.id)) { 
-                uniqueMap.set(p.id, p); 
-            } 
-        });
-
-        const scored = Array.from(uniqueMap.values()).map(p => ({ 
-            p, 
-            score: recommendationService.scorePost(p, currentUser?.email) 
-        }));
-        
-        return scored.sort((a, b) => b.score - a.score).map(item => item.p);
-    });
-  }, [currentUser?.email]);
-
-  const fetchPosts = useCallback(async (cursor?: number, reset = false) => {
-    if (isFetchingRef.current) return;
-    isFetchingRef.current = true;
-    if (!cursor) setLoading(true);
-    
-    try {
-        const storedFilter = localStorage.getItem('feed_location_filter');
-        const filterValue = (storedFilter === 'Global' || !storedFilter) ? null : storedFilter;
-        
-        const response = await postService.getFeedPaginated({ 
-            limit: PAGE_SIZE, 
-            cursor: cursor, 
-            locationFilter: filterValue, 
-            allowAdultContent: isAdultContentAllowed 
-        });
-
-        const fetched = (response.data || []).filter(p => p && (p.type !== 'video' || p.isAd));
-        
-        if (reset) {
-            mergePosts(fetched, true);
-        } else if (fetched.length > 0) {
-            mergePosts(fetched, false);
-        }
-        
-        setNextCursor(response.nextCursor);
-        setHasMore(!!response.nextCursor && fetched.length > 0);
-    } catch (error) {
-        console.error("Feed sync error", error);
-        if (!cursor) setHasMore(false);
-    } finally {
-        setLoading(false);
-        isFetchingRef.current = false;
-    }
-  }, [isAdultContentAllowed, mergePosts]);
-
-  const loadInitialPosts = useCallback(async () => {
-    if (hasLoadedInitialRef.current) return;
-    hasLoadedInitialRef.current = true;
-
-    // Tenta carregar do cache local primeiro para resposta instantânea
-    const local = db.posts.getCursorPaginated(PAGE_SIZE);
-    if (local && local.length > 0) {
-        const validLocal = local.filter(p => p && (p.type !== 'video' || p.isAd));
-        mergePosts(validLocal, true);
-    }
-    
-    // Busca do servidor para garantir dados novos
-    await fetchPosts(undefined, local.length === 0);
-  }, [fetchPosts, mergePosts]);
-
-  useEffect(() => {
-    const userEmail = authService.getCurrentUserEmail();
-    if (!userEmail) { 
-        navigate('/'); 
-        return; 
-    }
-    
-    const filter = localStorage.getItem('feed_location_filter');
-    setActiveLocationFilter(filter);
-    
-    loadInitialPosts();
-
-    // Sincronização em tempo real apenas para métricas, sem re-fetch de lista completa
-    const unsubscribe = db.subscribe('posts', () => {
-        setPosts(currentPosts => {
-            let changed = false;
-            const nextPosts = currentPosts.map(p => {
-                const latest = db.posts.findById(p.id);
-                if (latest && (latest.likes !== p.likes || latest.comments !== p.comments || latest.views !== p.views || latest.liked !== p.liked)) {
-                    changed = true;
-                    return { ...p, ...latest };
-                }
-                return p;
-            });
-            return changed ? nextPosts : currentPosts;
-        });
-    });
-
-    return () => unsubscribe();
-  }, [navigate, loadInitialPosts]);
-
-  // Observer para visualizações
-  useEffect(() => {
-      if (posts.length === 0) return;
-
-      const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                  const postId = entry.target.getAttribute('data-post-id');
-                  if (postId && !viewedPostsRef.current.has(postId)) {
-                      viewedPostsRef.current.add(postId);
-                      postService.incrementView(postId);
-                      recommendationService.trackImpression(postId);
-                  }
-              }
-          });
-      }, { threshold: 0.15 });
-
-      const postElements = document.querySelectorAll('.feed-post-item');
-      postElements.forEach((el) => observer.observe(el));
-      
-      return () => observer.disconnect();
-  }, [posts]);
-
-  // Observer para scroll infinito
-  useEffect(() => {
-      const observer = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && hasMore && !loading && !isFetchingRef.current && nextCursor) {
-              fetchPosts(nextCursor);
-          }
-      }, { root: null, threshold: 0.1 });
-      
-      if (loaderRef.current) observer.observe(loaderRef.current);
-      return () => observer.disconnect();
-  }, [hasMore, nextCursor, fetchPosts, loading]);
-
-  const handleContainerScroll = () => {
-      if (!scrollContainerRef.current) return;
-      const currentScroll = scrollContainerRef.current.scrollTop;
-      setUiVisible(currentScroll <= lastScrollY.current || currentScroll <= 100);
-      lastScrollY.current = currentScroll;
+  const handleDeleteRequest = async (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      if (await showConfirm("Excluir Post", "Deseja excluir permanentemente?", "Excluir", "Cancelar")) {
+          handlePostDelete(id);
+      }
   };
 
   return (
@@ -214,39 +55,13 @@ export const Feed: React.FC = () => {
                         key={post.id} 
                         post={post}
                         currentUserId={currentUserId}
-                        onLike={(id) => {
-                            postService.toggleLike(id);
-                        }}
-                        onDelete={async (e, id) => {
-                            e.stopPropagation();
-                            if (await showConfirm("Excluir Post", "Deseja excluir permanentemente?", "Excluir", "Cancelar")) {
-                                await postService.deletePost(id);
-                                setPosts(prev => prev.filter(p => p.id !== id));
-                            }
-                        }}
+                        onLike={() => handlePostLike(post.id)}
+                        onDelete={(e) => handleDeleteRequest(e, post.id)}
                         onUserClick={(u) => navigate(`/user/${u.replace('@','')}`)}
                         onCommentClick={(id) => navigate(`/post/${id}`)}
-                        onShare={async (p) => {
-                            const url = `${window.location.origin}/#/post/${p.id}`;
-                            if (navigator.share) {
-                                try { await navigator.share({ title: `Post de ${p.username}`, url }); } catch (err) {}
-                            } else {
-                                navigator.clipboard.writeText(url);
-                                alert('Link copiado!');
-                            }
-                            postService.incrementShare(p.id);
-                        }}
-                        onVote={(postId, index) => {
-                            setPosts(prev => prev.map(p => {
-                                if (p.id === postId && p.pollOptions && p.votedOptionIndex == null) {
-                                    const newOptions = [...p.pollOptions];
-                                    newOptions[index].votes += 1;
-                                    return { ...p, pollOptions: newOptions, votedOptionIndex: index };
-                                }
-                                return p;
-                            }));
-                        }}
-                        onCtaClick={(l) => l?.startsWith('http') ? window.open(l,'_blank') : navigate(l||'')}
+                        onShare={() => handlePostShare(post)}
+                        onVote={(postId, index) => handlePostVote(postId, index)}
+                        onCtaClick={() => handleCtaClick(post.ctaLink)}
                     />
                 ))
             ) : !loading && (
@@ -265,7 +80,7 @@ export const Feed: React.FC = () => {
         </div>
       </main>
 
-      {isMenuOpen && <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}></div>}
+      {isMenuOpen && <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={() => setIsMenuMenuOpen(false)}></div>}
       
       <div className={`fixed bottom-[180px] right-[27px] flex flex-col gap-4 z-50 items-end transition-all duration-300 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/feed-search')}>

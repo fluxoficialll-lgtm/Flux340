@@ -1,76 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { marketplaceService } from '../ServiçosDoFrontend/marketplaceService';
-import { adService } from '../ServiçosDoFrontend/adService';
-import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { screenService, BusinessDashboardData } from '../ServiçosDoFrontend/screenService';
-import { MarketplaceItem, AdCampaign } from '../types';
+
+import React from 'react';
+import { useMyStore } from '../hooks/useMyStore';
 import { useModal } from '../Componentes/ModalSystem';
 import { ProductStoreList } from '../Componentes/store/ProductStoreList';
 import { CampaignStoreList } from '../Componentes/store/CampaignStoreList';
 
 export const MyStore: React.FC = () => {
-  const navigate = useNavigate();
+  const {
+    activeTab,
+    setActiveTab,
+    dashboardData,
+    loading,
+    deleteProduct,
+    endCampaign,
+    resumeCampaign,
+    deleteCampaign,
+    handleBack
+  } = useMyStore();
   const { showConfirm } = useModal();
-  const [activeTab, setActiveTab] = useState<'products' | 'campaigns'>('products');
-  const [dashboardData, setDashboardData] = useState<BusinessDashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const loadAggregatedData = async () => {
-      const user = authService.getCurrentUser();
-      if (!user) {
-          navigate('/');
-          return;
-      }
-      setLoading(true);
-      try {
-          const data = await screenService.getMyBusinessData(user.id);
-          setDashboardData(data);
-      } catch (e) {
-          console.error("BFF Error:", e);
-      } finally {
-          setLoading(false);
-      }
-  };
-
-  useEffect(() => {
-      loadAggregatedData();
-  }, []);
 
   const handleDeleteProduct = async (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
       if (await showConfirm("Excluir Produto", "Tem certeza? A ação não pode ser desfeita.", "Excluir", "Cancelar")) {
-          await marketplaceService.deleteItem(id);
-          loadAggregatedData(); 
+          deleteProduct(id);
       }
   };
 
   const handleEndCampaign = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (await showConfirm("Encerrar Campanha", "Deseja parar a veiculação? Você poderá retomá-la a qualquer momento.", "Encerrar", "Manter")) {
-        await adService.updateCampaignStatus(id, 'ended');
-        loadAggregatedData(); 
+        endCampaign(id);
     }
   };
 
   const handleResumeCampaign = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (await showConfirm("Retomar Campanha", "Deseja reativar o anúncio agora?", "Retomar", "Cancelar")) {
-        await adService.updateCampaignStatus(id, 'active');
-        loadAggregatedData(); 
+        resumeCampaign(id);
     }
   };
 
   const handleDeleteCampaign = async (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
       if (await showConfirm("Excluir Campanha", "Deseja remover permanentemente este registro? O orçamento restante não será reembolsado.", "Excluir", "Cancelar")) {
-          await adService.deleteCampaign(id);
-          loadAggregatedData(); 
+          deleteCampaign(id);
       }
-  };
-
-  const handleBack = () => {
-    navigate(-1);
   };
 
   return (

@@ -55,3 +55,20 @@ export interface ModelConfig {
   supportsSearch: boolean;
   supportsImages: boolean;
 }
+
+export interface Contact {
+    id: string;
+    name: string;
+    handle: string;
+    avatar?: string;
+    lastMessage: string;
+    lastMessageTime: number; 
+    time: string; 
+    status: 'online' | string;
+    isOnline: boolean;
+    unreadCount: number;
+  }
+
+export interface EnrichedNotificationItem extends NotificationItem {
+    displayName?: string;
+}

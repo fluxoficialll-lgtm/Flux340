@@ -1,102 +1,21 @@
-
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosDoFrontend/groupService';
-import { Group, GroupLink } from '../types';
+import React from 'react';
+import { useManageGroupLinks } from '../hooks/useManageGroupLinks';
 
 export const ManageGroupLinks: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const [group, setGroup] = useState<Group | undefined>(undefined);
-  
-  // Form States
-  const [newLinkName, setNewLinkName] = useState('');
-  const [maxUses, setMaxUses] = useState('');
-  const [expiresAt, setExpiresAt] = useState('');
-  
-  const [links, setLinks] = useState<GroupLink[]>([]);
-
-  useEffect(() => {
-    if (id) {
-      loadGroupData();
-    }
-  }, [id]);
-
-  const loadGroupData = () => {
-      if (!id) return;
-      const foundGroup = groupService.getGroupById(id);
-      if (foundGroup) {
-          setGroup(foundGroup);
-          setLinks(foundGroup.links || []);
-      } else {
-          // Mock data fallback if not found in storage
-          setGroup({
-              id: id,
-              name: 'Grupo Exemplo',
-              description: '...',
-              isVip: false
-          } as Group);
-      }
-  };
-
-  const handleCreateLink = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!newLinkName.trim() || !id) return;
-
-      const usesLimit = maxUses ? parseInt(maxUses) : undefined;
-      
-      const link = groupService.addGroupLink(id, newLinkName, usesLimit, expiresAt);
-      
-      if (link) {
-          setLinks(prev => [link, ...prev]);
-          // Reset form
-          setNewLinkName('');
-          setMaxUses('');
-          setExpiresAt('');
-      } else {
-          // Mock update for non-persisted group (if needed for demo)
-          const mockLink: GroupLink = {
-              id: Date.now().toString(),
-              name: newLinkName,
-              code: Math.random().toString(36).substring(2, 8).toUpperCase(),
-              joins: 0,
-              createdAt: Date.now(),
-              maxUses: usesLimit,
-              expiresAt: expiresAt
-          };
-          setLinks(prev => [mockLink, ...prev]);
-          setNewLinkName('');
-          setMaxUses('');
-          setExpiresAt('');
-      }
-  };
-
-  const handleDeleteLink = (linkId: string) => {
-      if (window.confirm("Deseja excluir este link? O código deixará de funcionar.")) {
-          if (id) groupService.removeGroupLink(id, linkId);
-          setLinks(prev => prev.filter(l => l.id !== linkId));
-      }
-  };
-
-  const handleCopyLink = (code: string) => {
-      // Use dynamic origin and correct route structure
-      const url = `${window.location.origin}/#/groups?join=${code}`;
-      navigator.clipboard.writeText(url);
-      alert(`Link copiado para a área de transferência!`);
-  };
-
-  const formatDate = (dateString?: string) => {
-      if (!dateString) return 'Nunca expira';
-      return new Date(dateString).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-  };
-
-  const handleBack = () => {
-      if (window.history.state && window.history.state.idx > 0) {
-          navigate(-1);
-      } else {
-          navigate(`/group-chat/${id}`);
-      }
-  };
+  const {
+    links,
+    newLinkName,
+    setNewLinkName,
+    maxUses,
+    setMaxUses,
+    expiresAt,
+    setExpiresAt,
+    handleCreateLink,
+    handleDeleteLink,
+    handleCopyLink,
+    handleBack,
+    formatDate
+  } = useManageGroupLinks();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-x-hidden">

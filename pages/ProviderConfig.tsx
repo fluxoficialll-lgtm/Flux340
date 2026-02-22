@@ -1,11 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosDoFrontend/groupService';
-import { paypalService } from '../ServiçosDoFrontend/ServiçosDeProvedores/paypalService';
-import { stripeService } from '../ServiçosDoFrontend/ServiçosDeProvedores/stripeService';
-import { syncPayService } from '../ServiçosDoFrontend/ServiçosDeProvedores/syncPayService';
-import { Group } from '../types';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useProviderConfig } from '../hooks/useProviderConfig';
 import { SyncPayCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/SyncPayCard';
 import { StripeCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/StripeCard';
 import { PayPalCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/PayPalCard';
@@ -13,79 +9,13 @@ import '../Componentes/ComponentesDeProvedores/CardsDeConexao/ProviderCard.css';
 
 export const ProviderConfig: React.FC = () => {
     const navigate = useNavigate();
-    const { groupId } = useParams<{ groupId: string }>();
-
-    const [group, setGroup] = useState<Group | null>(null);
-    const [activeProviderId, setActiveProviderId] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (groupId) {
-            const currentGroup = groupService.getGroupById(groupId);
-            if (currentGroup) {
-                setGroup(currentGroup);
-                setActiveProviderId(currentGroup.activePaymentProvider || null);
-            }
-        }
-    }, [groupId]);
-
-    const updateGroupState = () => {
-        if (groupId) {
-            const updatedGroup = groupService.getGroupById(groupId);
-            setGroup(updatedGroup ?? null);
-            setActiveProviderId(updatedGroup?.activePaymentProvider || null);
-        }
-    };
-
-    const handleCredentialsSubmit = async (providerId: string, credentials: any) => {
-        if (!groupId) return;
-
-        const serviceMap = {
-            paypal: () => paypalService.authenticate(credentials.credentials, credentials.secretKey),
-            stripe: () => stripeService.authenticate(credentials.secretKey),
-            syncpay: () => syncPayService.authenticate(credentials.publicKey, credentials.privateKey),
-        };
-
-        try {
-            await serviceMap[providerId]();
-            const config = { isConnected: true, ...credentials };
-            await groupService.updateGroupPaymentConfig(groupId, { [providerId]: config });
-
-            const currentGroup = groupService.getGroupById(groupId);
-            if (!currentGroup?.activePaymentProvider) {
-                await groupService.updateGroup({ ...currentGroup, id: groupId, activePaymentProvider: providerId });
-            }
-
-            updateGroupState();
-        } catch (error) {
-            console.error(`Falha ao conectar ${providerId}:`, error);
-            throw error;
-        }
-    };
-
-    const handleDisconnect = async (providerId: string) => {
-        if (!groupId) return;
-
-        try {
-            await groupService.updateGroupPaymentConfig(groupId, { [providerId]: { isConnected: false } });
-
-            if (activeProviderId === providerId) {
-                const currentGroup = groupService.getGroupById(groupId);
-                await groupService.updateGroup({ ...currentGroup, id: groupId, activePaymentProvider: null });
-            }
-
-            updateGroupState();
-        } catch (error) {
-            console.error(`Falha ao desconectar ${providerId}:`, error);
-            throw error;
-        }
-    };
-
-    const handleSelectProvider = async (providerId: string) => {
-        const currentGroup = groupService.getGroupById(groupId);
-        if (!groupId || !currentGroup?.paymentConfig?.[providerId]?.isConnected) return;
-        await groupService.updateGroup({ ...currentGroup, id: groupId, activePaymentProvider: providerId });
-        updateGroupState();
-    };
+    const {
+        group,
+        activeProviderId,
+        handleCredentialsSubmit,
+        handleDisconnect,
+        handleSelectProvider
+    } = useProviderConfig();
 
     const handleBack = () => navigate(-1);
 

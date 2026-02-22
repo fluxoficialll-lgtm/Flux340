@@ -1,165 +1,38 @@
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { chatService } from '../ServiçosDoFrontend/chatService';
-import { ChatMessage } from '../types';
-import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { db } from '@/database';
+import React from 'react';
+import { useChat } from '../hooks/useChat';
 import { useModal } from '../Componentes/ModalSystem';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { Virtuoso } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
 import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';
 import { MessageItem } from '../Componentes/ComponentesDeChats/MessageItem';
 import { ChatMenuModal } from '../Componentes/ComponentesDeChats/ChatMenuModal';
-import { socketService } from '../ServiçosDoFrontend/socketService';
 import { ModalGradeDeAcoes } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
 
 export const Chat: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const {
+    virtuosoRef, messages, contactName, contactHandle, contactAvatar, contactStatus, isBlocked,
+    isSelectionMode, setIsSelectionMode, selectedIds, setSelectedIds, isSearchOpen, setIsSearchOpen,
+    searchTerm, setSearchTerm, zoomedMedia, setZoomedMedia, isMenuModalOpen, setIsMenuModalOpen,
+    isUploading, currentUserEmail, navigate, handleSendMessage, handleToggleSelection, handleStartSelection,
+    deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply
+  } = useChat();
+
   const { showOptions } = useModal();
-  const chatId = id || '1';
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [contactName, setContactName] = useState('');
-  const [contactHandle, setContactHandle] = useState(''); 
-  const [contactAvatar, setContactAvatar] = useState<string | undefined>(undefined);
-  const [contactStatus, setContactStatus] = useState('Offline');
-  const [isBlocked, setIsBlocked] = useState(false);
-
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
-
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
-  const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
-  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-
-  const currentUserEmail = authService.getCurrentUserEmail()?.toLowerCase();
-
-  const loadChatData = useCallback((isSilent = false) => {
-      const chatData = chatService.getChat(chatId);
-      setIsBlocked(chatData.isBlocked);
-
-      let targetUser = undefined;
-      let displayName = chatData.contactName;
-      let displayAvatar = undefined;
-      let handle = '';
-
-      if (chatId.includes('_') && chatId.includes('@') && currentUserEmail) {
-          const otherEmail = chatId.split('_').find(p => p.toLowerCase() !== currentUserEmail);
-          if (otherEmail) {
-              const userRecord = Object.values(db.users.getAll()).find(u => u.email.toLowerCase() === otherEmail.toLowerCase());
-              if (userRecord) {
-                  targetUser = userRecord;
-                  displayName = userRecord.profile?.nickname || userRecord.profile?.name || `@${userRecord.profile?.name}`;
-                  displayAvatar = userRecord.profile?.photoUrl;
-                  handle = userRecord.profile?.name || '';
-              } else {
-                  displayName = otherEmail.split('@')[0];
-              }
-          }
-      }
-
-      setContactName(displayName);
-      setContactAvatar(displayAvatar);
-      setContactHandle(handle);
-
-      if (targetUser?.lastSeen) {
-          const diff = Date.now() - targetUser.lastSeen;
-          if (diff < 2 * 60 * 1000) setContactStatus('Online');
-          else setContactStatus('Offline');
-      } else setContactStatus('Offline');
-
-      const rawMessages = chatData.messages || [];
-      const uniqueMap = new Map();
-      rawMessages.forEach(m => {
-          const deletedBy = m.deletedBy || [];
-          if (!deletedBy.includes(currentUserEmail || '')) {
-              uniqueMap.set(m.id, m);
-          }
-      });
-      const deduplicated = Array.from(uniqueMap.values()).sort((a, b) => a.id - b.id);
-      
-      setMessages(deduplicated);
-  }, [chatId, currentUserEmail]);
-
-  useEffect(() => {
-      loadChatData();
-      const unsubDeleteChat = socketService.on('chat_deleted_globally', (data: any) => {
-          if (data.chatId === chatId) navigate('/messages', { replace: true });
-      });
-      const unsubDeleteMsgs = socketService.on('messages_deleted_globally', (data: any) => {
-          if (data.chatId === chatId) loadChatData(true);
-      });
-      return () => {
-          unsubDeleteChat();
-          unsubDeleteMsgs();
-      };
-  }, [chatId, loadChatData, navigate]);
-
-  useEffect(() => {
-      const unsub = db.subscribe('chats', () => loadChatData(true));
-      return () => unsub();
-  }, [loadChatData]);
-
-  const handleSendMessage = (text: string) => {
-      const userInfo = authService.getCurrentUser();
-      const newMessage: ChatMessage = {
-          id: Date.now(), text, type: 'sent', contentType: 'text',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'sent', senderEmail: userInfo?.email, senderAvatar: userInfo?.profile?.photoUrl,
-          senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Você', deletedBy: []
-      };
-      chatService.sendMessage(chatId, newMessage);
+  const handleDeleteRequest = async () => {
+    if (selectedIds.length === 0) return;
+    const target = await showOptions("Excluir Mensagem", [
+        { label: 'Excluir para mim', value: 'me', icon: 'fa-solid fa-user' },
+        { label: 'Excluir para todos', value: 'all', icon: 'fa-solid fa-users', isDestructive: true }
+    ]);
+    if (target) {
+        deleteSelectedMessages(target);
+    }
   };
-
-  const handleToggleSelection = (msgId: number) => {
-      setSelectedIds(prev => {
-          const next = prev.includes(msgId) ? prev.filter(id => id !== msgId) : [...prev, msgId];
-          if (next.length === 0) setIsSelectionMode(false);
-          return next;
-      });
-  };
-
-  const handleStartSelection = (msgId: number) => {
-      setIsSelectionMode(true);
-      setSelectedIds([msgId]);
-      if (navigator.vibrate) navigator.vibrate(10);
-  };
-
-  const handleDeleteSelected = async () => {
-      if (selectedIds.length === 0) return;
-      const target = await showOptions("Excluir Mensagem", [
-          { label: 'Excluir para mim', value: 'me', icon: 'fa-solid fa-user' },
-          { label: 'Excluir para todos', value: 'all', icon: 'fa-solid fa-users', isDestructive: true }
-      ]);
-      if (target) {
-          await chatService.deleteMessages(chatId, selectedIds, target);
-          setIsSelectionMode(false);
-          setSelectedIds([]);
-          loadChatData(true);
-      }
-  };
-
-  const filteredMessages = useMemo(() => {
-    return messages.filter(m => (m.text || '').toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [messages, searchTerm]);
-
-  // TODO: Implementar a lógica de cada ação
-  const handleEdit = () => console.log('Editar', selectedIds);
-  const handlePin = () => console.log('Fixar', selectedIds);
-  const handleCopy = () => console.log('Copiar', selectedIds);
-  const handleForward = () => console.log('Encaminhar', selectedIds);
-  const handleReply = () => console.log('Responder', selectedIds);
 
   return (
-    <div className="messages-page h-[100dvh] flex flex-col overflow-hidden" style={{ background: 'radial-gradient(circle at top left, #0c0f14, #0a0c10)', color: '#fff' }}>
+    <div className="messages-page h-[100dvh] flex flex-col overflow-hidden bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white">
       <ChatHeader
         title={contactName}
         subtitle={isBlocked ? 'Bloqueado' : contactStatus}
@@ -169,7 +42,7 @@ export const Chat: React.FC = () => {
         isSelectionMode={isSelectionMode}
         selectedCount={selectedIds.length}
         onCancelSelection={() => { setIsSelectionMode(false); setSelectedIds([]); }}
-        onDeleteSelection={handleDeleteSelected}
+        onDeleteSelection={handleDeleteRequest}
         isSearchOpen={isSearchOpen}
         onToggleSearch={() => { setIsSearchOpen(!isSearchOpen); setSearchTerm(''); }}
         searchTerm={searchTerm}
@@ -177,7 +50,7 @@ export const Chat: React.FC = () => {
         onMenuClick={() => setIsMenuModalOpen(true)}
       />
 
-      <main style={{ flexGrow: 1, width: '100%', display: 'flex', flexDirection: 'column', paddingTop: '60px' }}>
+      <main className="flex-grow w-full flex flex-col pt-[60px]">
           <ModalGradeDeAcoes 
             visible={isSelectionMode} 
             onEdit={handleEdit}
@@ -188,9 +61,9 @@ export const Chat: React.FC = () => {
           />
           <Virtuoso
               ref={virtuosoRef}
-              style={{ height: '100%', paddingBottom: '80px' }}
-              data={filteredMessages}
-              initialTopMostItemIndex={filteredMessages.length - 1}
+              className="h-full pb-[80px]"
+              data={messages}
+              initialTopMostItemIndex={messages.length - 1}
               followOutput="smooth"
               itemContent={(index, msg) => (
                   <MessageItem
@@ -203,7 +76,6 @@ export const Chat: React.FC = () => {
                       onStartSelection={handleStartSelection}
                       onMediaClick={(url, type) => setZoomedMedia({ url, type })}
                       onProductClick={(pid) => navigate(`/marketplace/product/${pid}`)}
-                      playingAudioId={playingAudioId}
                       onPlayAudio={() => {}}
                   />
               )}

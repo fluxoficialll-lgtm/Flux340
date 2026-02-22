@@ -1,154 +1,72 @@
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosDoFrontend/groupService';
-import { chatService } from '../ServiçosDoFrontend/chatService'; 
-import { authService } from '../ServiçosDoFrontend/ServiçosDeAutenticacao/authService';
-import { db } from '@/database';
-import { Group, ChatMessage } from '../types';
+import React, { useState } from 'react';
+import { useGroupChat } from '../hooks/useGroupChat';
 import { useModal } from '../Componentes/ModalSystem';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { Virtuoso } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
 import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';
 import { MessageItem } from '../Componentes/ComponentesDeChats/MessageItem';
-import { GroupMenuModal } from '../Componentes/groups/menu/GroupMenuModal';
-import { useAccessValidationFlow } from '../flows/groups/AccessValidationFlow';
+import { ChatMenuModal } from '../Componentes/ComponentesDeChats/ChatMenuModal';
 import { ModalGradeDeAcoes } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
 
 export const GroupChat: React.FC = () => {
-  const navigate = useNavigate();
-  const { id, channelId } = useParams<{ id: string, channelId?: string }>();
-  const { showOptions } = useModal(); 
-  const { validateGroupAccess } = useAccessValidationFlow();
-  
-  const [group, setGroup] = useState<Group | null>(null);
-  const [activeChannelId, setActiveChannelId] = useState<string>(channelId || 'general');
-  
-  const [isCreator, setIsCreator] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const {
+    loading, group, channelName, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
+    handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate
+  } = useGroupChat();
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedMsgIds, setSelectedMsgIds] = useState<number[]>([]);
-
-  const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
-  const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
+  const { showOptions } = useModal();
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
-  const currentUserEmail = authService.getCurrentUserEmail()?.toLowerCase();
-  const currentUserId = authService.getCurrentUserId();
-
-  const currentChatId = useMemo(() => `${id}_${activeChannelId}`, [id, activeChannelId]);
-
-  const loadMessages = useCallback(() => { 
-    if (currentChatId) {
-        const chatData = chatService.getChat(currentChatId);
-        const rawMessages = chatData.messages || [];
-        const uniqueMap = new Map();
-        rawMessages.forEach(m => {
-            const deletedBy = m.deletedBy || [];
-            if (!deletedBy.includes(currentUserEmail || '')) {
-                uniqueMap.set(m.id, m);
-            }
-        });
-        const deduplicated = Array.from(uniqueMap.values()).sort((a, b) => a.id - b.id);
-        setMessages(deduplicated); 
-    }
-  }, [currentChatId, currentUserEmail]);
-
-  useEffect(() => {
-      if (id) {
-          const hasAccess = validateGroupAccess(id);
-          if (!hasAccess) return;
-          const loadedGroup = groupService.getGroupById(id);
-          if (loadedGroup) {
-              setGroup(loadedGroup);
-              const isOwner = loadedGroup.creatorId === currentUserId;
-              const isAdm = isOwner || (currentUserId && loadedGroup.adminIds?.includes(currentUserId));
-              setIsCreator(isOwner);
-              setIsAdmin(!!isAdm);
-              loadMessages();
-              chatService.markChatAsRead(currentChatId);
-          }
-      }
-  }, [id, activeChannelId, currentChatId, loadMessages, validateGroupAccess, currentUserId]);
-
-  useEffect(() => {
-      const unsub = db.subscribe('chats', loadMessages);
-      return () => unsub();
-  }, [loadMessages]);
-
-  const handleSendMessage = (text: string) => {
-      const userInfo = authService.getCurrentUser();
-      const newMessage: ChatMessage = {
-          id: Date.now(), senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Você',
-          senderAvatar: userInfo?.profile?.photoUrl, senderEmail: userInfo?.email, text, type: 'sent',
-          contentType: 'text', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'sent', deletedBy: []
-      };
-      chatService.sendMessage(currentChatId, newMessage);
-  };
-
-  const handleToggleSelection = (msgId: number) => {
-      setSelectedMsgIds(prev => {
-          const next = prev.includes(msgId) ? prev.filter(id => id !== msgId) : [...prev, msgId];
-          if (next.length === 0) setIsSelectionMode(false);
-          return next;
-      });
-  };
-
-  const handleStartSelection = (msgId: number) => {
-      setIsSelectionMode(true);
-      setSelectedMsgIds([msgId]);
-      if (navigator.vibrate) navigator.vibrate(10);
-  };
-
-  const handleDeleteSelected = async () => {
-    if (selectedMsgIds.length === 0) return;
+  const handleDeleteRequest = async () => {
+    if (selectedIds.length === 0) return;
     const target = await showOptions("Excluir Mensagem", [
         { label: 'Excluir para mim', value: 'me', icon: 'fa-solid fa-user' },
-        { label: 'Excluir para todos', value: 'all', icon: 'fa-solid fa-users', isDestructive: true }
+        // No futuro, podemos adicionar lógica para permitir "Excluir para todos" apenas para admins do grupo
+        // { label: 'Excluir para todos', value: 'all', icon: 'fa-solid fa-users', isDestructive: true }
     ]);
     if (target) {
-        await chatService.deleteMessages(currentChatId, selectedMsgIds, target);
-        setIsSelectionMode(false);
-        setSelectedMsgIds([]);
-        loadMessages();
+        deleteSelectedMessages(target as 'me' | 'all');
     }
   };
 
-  const activeChannelName = useMemo(() => {
-      if (activeChannelId === 'general') return 'Geral';
-      return group?.channels?.find(c => c.id === activeChannelId)?.name || 'Tópico';
-  }, [group, activeChannelId]);
+  // TODOs para futuras implementações
+  const handleEdit = () => console.log('Editar', selectedIds);
+  const handlePin = () => console.log('Fixar', selectedIds);
+  const handleCopy = () => console.log('Copiar', selectedIds);
+  const handleForward = () => console.log('Encaminhar', selectedIds);
+  const handleReply = () => console.log('Responder', selectedIds);
+  const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
 
-  // TODO: Implementar a lógica de cada ação
-  const handleEdit = () => console.log('Editar', selectedMsgIds);
-  const handlePin = () => console.log('Fixar', selectedMsgIds);
-  const handleCopy = () => console.log('Copiar', selectedMsgIds);
-  const handleForward = () => console.log('Encaminhar', selectedMsgIds);
-  const handleReply = () => console.log('Responder', selectedMsgIds);
+  if (loading) {
+      return (
+          <div className="flex flex-col items-center justify-center h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white">
+              <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff] mb-2"></i>
+              <p className="text-xs uppercase font-bold tracking-widest">Carregando canal...</p>
+          </div>
+      );
+  }
 
   return (
-    <div className={`h-[100dvh] flex flex-col overflow-hidden ${group?.isVip ? 'secure-content' : ''}`} style={{ background: 'radial-gradient(circle at top left, #0c0f14, #0a0c10)', color: '#fff' }}>
+    <div className="messages-page h-[100dvh] flex flex-col overflow-hidden bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white">
       <ChatHeader
-        title={group?.name || 'Carregando...'}
-        subtitle={`#${activeChannelName}`}
-        avatar={group?.coverImage}
-        onBack={() => navigate('/groups')}
+        title={group?.name || 'Comunidade'}
+        subtitle={`# ${channelName}`}
+        avatar={group?.avatarUrl}
+        onBack={() => navigate(`/groups/${group?.id}`)}
+        onInfoClick={() => navigate(`/groups/info/${group?.id}`)}
         isSelectionMode={isSelectionMode}
-        selectedCount={selectedMsgIds.length}
-        onCancelSelection={() => { setIsSelectionMode(false); setSelectedMsgIds([]); }}
-        onDeleteSelection={handleDeleteSelected}
+        selectedCount={selectedIds.length}
+        onCancelSelection={() => { setIsSelectionMode(false); setSelectedIds([]); }}
+        onDeleteSelection={handleDeleteRequest}
+        isSearchOpen={false} // TODO: Implementar busca
+        onToggleSearch={() => {}}
+        searchTerm={null}
+        onSearchChange={() => {}}
         onMenuClick={() => setIsMenuModalOpen(true)}
       />
 
-      <main style={{ flexGrow: 1, width: '100%', display: 'flex', flexDirection: 'column', paddingTop: '60px' }}>
+      <main className="flex-grow w-full flex flex-col pt-[60px]">
           <ModalGradeDeAcoes 
             visible={isSelectionMode} 
             onEdit={handleEdit}
@@ -159,47 +77,45 @@ export const GroupChat: React.FC = () => {
           />
           <Virtuoso
               ref={virtuosoRef}
-              style={{ height: '100%', paddingBottom: '80px' }}
+              className="h-full pb-[80px] no-scrollbar"
               data={messages}
               initialTopMostItemIndex={messages.length - 1}
               followOutput="smooth"
               itemContent={(index, msg) => (
                   <MessageItem
-                    key={msg.id}
-                    msg={msg}
-                    isMe={msg.senderEmail?.toLowerCase() === currentUserEmail}
-                    isSelectionMode={isSelectionMode}
-                    isSelected={selectedMsgIds.includes(msg.id)}
-                    onSelect={handleToggleSelection}
-                    onStartSelection={handleStartSelection}
-                    onMediaClick={(url, type) => setZoomedMedia({ url, type })}
-                    playingAudioId={playingAudioId}
-                    onPlayAudio={() => {}}
+                      key={msg.id}
+                      msg={msg}
+                      isMe={msg.senderEmail?.toLowerCase() === currentUserEmail}
+                      isGroup={true} // Indica que é um chat de grupo para mostrar nome/avatar do remetente
+                      isSelectionMode={isSelectionMode}
+                      isSelected={selectedIds.includes(msg.id)}
+                      onSelect={handleToggleSelection}
+                      onStartSelection={handleStartSelection}
+                      onMediaClick={(url, type) => setZoomedMedia({ url, type })}
+                      onProductClick={(pid) => navigate(`/marketplace/product/${pid}`)}
                   />
               )}
           />
       </main>
 
       {!isSelectionMode && (
-          <ChatInput
+        <ChatInput
             onSendMessage={handleSendMessage}
-            onSendAudio={() => {}}
-            onFileSelect={() => {}}
-            canPost={true}
-            placeholder={`Conversar em #${activeChannelName}...`}
-          />
+            onSendAudio={() => {}} // TODO: Implementar áudio
+            onFileSelect={() => {}} // TODO: Implementar envio de arquivo
+            isBlocked={isBlocked}
+            isUploading={false} // TODO: Implementar estado de upload
+        />
       )}
 
-      <GroupMenuModal 
+      <ChatMenuModal 
         isOpen={isMenuModalOpen}
         onClose={() => setIsMenuModalOpen(false)}
-        isCreator={isCreator}
-        isAdmin={isAdmin}
-        onSearch={() => {}}
-        onClear={() => setIsSelectionMode(true)}
-        onSettings={() => navigate(`/group-settings/${id}`)}
-        onDelete={() => {}}
-        onLeave={() => {}}
+        isBlocked={isBlocked}
+        onSearch={() => {}} // TODO
+        onSelect={() => setIsSelectionMode(true)}
+        onBlock={() => {}} // TODO: Lógica de bloquear/mutar grupo?
+        onClear={() => {}} // TODO: Lógica de limpar chat
       />
 
       {zoomedMedia && (

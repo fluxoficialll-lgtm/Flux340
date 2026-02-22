@@ -1,6 +1,4 @@
 
-import { auditLogRepositorio } from '../../GerenciadoresDeDados/auditLog.repositorio.js';
-
 const SERVICE_NAME = process.env.SERVICE_NAME || 'Flux-Backend';
 
 // Mapeamento de níveis de log para cores no console
@@ -18,21 +16,12 @@ const colors = {
 const processLog = (level, contexto, data = {}, traceId = null) => {
     const timestamp = new Date().toISOString();
     
-    // 1. Formata a mensagem para o console (ainda útil para dev)
+    // Formata e exibe a mensagem no console
     const color = colors[level] || colors.log;
     const traceInfo = traceId ? `[traceId=${traceId}]` : '';
     console.log(`${color}[${timestamp}] [${level.toUpperCase()}] [${contexto}]${traceInfo}${colors.reset} - ${JSON.stringify(data)}`);
 
-    // 2. Persiste o log no banco de dados usando o novo repositório
-    // A inserção é "fire-and-forget" para não impactar a performance da requisição.
-    auditLogRepositorio.insert({
-        traceId,
-        level,
-        service: SERVICE_NAME,
-        contexto,
-        data,
-        timestamp
-    });
+    // A persistência no banco de dados foi removida.
 };
 
 // Objeto principal do serviço de log
