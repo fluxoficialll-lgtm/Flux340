@@ -1,6 +1,6 @@
 
-import { geoService, GeoData } from '../geoService';
-import { currencyService, ConversionResult } from '../currencyService';
+import { geoService, GeoData } from '../../geoService';
+import { currencyService, ConversionResult } from '../../currencyService';
 import { Group } from '../../../types';
 
 export const VipPriceResolver = {

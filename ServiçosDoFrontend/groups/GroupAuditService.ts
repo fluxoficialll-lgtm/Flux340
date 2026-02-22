@@ -1,6 +1,6 @@
 
 import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
-import { authService } from '../../ServiçosDeAutenticacao/authService';
+import { authService } from '../ServiçosDeAutenticacao/authService';
 
 export const GroupAuditService = {
     async logAction(groupId: string, action: string, targetInfo: string) {

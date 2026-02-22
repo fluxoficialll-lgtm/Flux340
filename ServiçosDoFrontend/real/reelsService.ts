@@ -4,7 +4,7 @@ import { recommendationService } from '../recommendationService';
 import { chatService } from '../chatService';
 import { adService } from '../adService';
 import { postService } from '../postService';
-import { PostMetricsService } from './PostMetricsService';
+import { PostMetricsService } from '../PostMetricsService';
 import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { sqlite } from '../../database/engine';
 

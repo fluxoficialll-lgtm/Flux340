@@ -1,4 +1,4 @@
-import { aiOrchestrator, MarketingPrompts } from '../ServiçoDeAi';
+import { aiOrchestrator, MarketingPrompts } from './ServiçoDeAi';
 import { SupportedLanguage } from './i18nService';
 
 export const aiTranslationService = {

@@ -1,7 +1,7 @@
 
 import { AdCampaign } from '../../types';
-import { AdCampaignManager } from './ads/AdCampaignManager';
-import { AdAuctionEngine } from './ads/AdAuctionEngine';
+import { AdCampaignManager } from './AdCampaignManager';
+import { AdAuctionEngine } from './AdAuctionEngine';
 
 /**
  * RealAdService atua como a Fachada (Facade) para o sistema de anúncios,

@@ -3,7 +3,7 @@ import { Comment } from '../../../types';
 import { API_BASE } from '@/ServiçosDoFrontend/ServiçosDeApi/apiConfig';
 import { db } from '../../../database';
 import { authService } from '../../ServiçosDeAutenticacao/authService';
-import { PostMetricsService } from '../PostMetricsService';
+import { PostMetricsService } from '../../PostMetricsService';
 
 const API_URL = `${API_BASE}/api/posts`;
 

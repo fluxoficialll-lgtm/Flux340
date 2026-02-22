@@ -1,6 +1,6 @@
 
-import { i18nService, SupportedLanguage } from '../i18nService';
-import { aiTranslationService } from '../aiTranslationService';
+import { i18nService, SupportedLanguage } from '../../i18nService';
+import { aiTranslationService } from '../../aiTranslationService';
 import { Group } from '../../../types';
 
 export interface TranslatedVipData {

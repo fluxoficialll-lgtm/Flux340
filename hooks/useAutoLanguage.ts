@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { i18nService, SupportedLanguage } from '../ServiçosDoFrontend/real/i18nService';
+import { i18nService, SupportedLanguage } from '../ServiçosDoFrontend/i18nService';
 import { VipTranslationEngine, TranslatedVipData } from '../ServiçosDoFrontend/real/vip/VipTranslationEngine';
 import { Group } from '../types';
 

@@ -1,5 +1,5 @@
 
-import { PostMetricsService } from '../PostMetricsService';
+import { PostMetricsService } from '../../PostMetricsService';
 import { Post } from '../../../types';
 import { db } from '../../../database';
 
