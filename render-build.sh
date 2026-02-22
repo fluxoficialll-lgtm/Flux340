@@ -20,6 +20,10 @@ fi
 echo "=== [FLUX BUILD] Instalando dependências ==="
 npm install --include=dev
 
+# 2.5. Executar migrações
+echo "=== [FLUX BUILD] Executando migrações do banco de dados ==="
+node scripts/executar-migracoes.js
+
 # 3. Limpar build antigo
 echo "=== [FLUX BUILD] Limpando artefatos antigos ==="
 rm -rf dist
