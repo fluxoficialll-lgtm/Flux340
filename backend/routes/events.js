@@ -1,5 +1,6 @@
 
 import express from 'express';
+import { randomUUID } from 'crypto'; // Importa a função para gerar UUIDs
 import { eventProcessor } from '../ServiçosBackEnd/eventProcessor.js';
 import { validate, eventSchema } from '../validators.js';
 
@@ -14,39 +15,45 @@ const idempotencyCache = new Set();
  */
 router.post('/ingest', validate(eventSchema), async (req, res) => {
     try {
-        const event = req.body;
+        const originalEvent = req.body;
+        const trackingId = originalEvent.event_id; // O ID original, ex: "trc_..."
 
-        // 2. Checagem de Idempotência (Evita duplicação)
-        if (idempotencyCache.has(event.event_id)) {
+        // 1. Checagem de Idempotência com o ID de Rastreamento Original
+        if (idempotencyCache.has(trackingId)) {
             return res.status(202).json({ status: "ACCEPTED", duplicate: true });
         }
-
-        // Adiciona ao cache (limita o tamanho em memória)
-        idempotencyCache.add(event.event_id);
+        idempotencyCache.add(trackingId);
         if (idempotencyCache.size > 5000) {
             const first = idempotencyCache.values().next().value;
             idempotencyCache.delete(first);
         }
 
-        // 3. DESACOPLAMENTO (A mágica acontece aqui)
-        // Dispara o evento internamente e NÃO espera o processamento.
-        // O eventProcessor cuidará da lógica pesada em background.
-        eventProcessor.emit('ingested_event', event);
+        // 2. Criação de um Novo Evento Canônico para o Sistema Interno
+        const internalEvent = {
+            ...originalEvent,
+            event_id: randomUUID(), // ✨ GERA UM UUID VÁLIDO AQUI
+            tracking_id: trackingId, // Guarda o ID de rastreamento original
+        };
+
+        // 3. DESACOPLAMENTO
+        // Dispara o evento com o formato interno correto
+        eventProcessor.emit('ingested_event', internalEvent);
 
         // 4. Resposta Imediata
+        // Responde com o NOVO event_id interno, mas confirma o trackingId recebido
         res.status(202).json({ 
             status: "ACCEPTED", 
-            event_id: event.event_id,
+            event_id: internalEvent.event_id, // O novo ID
+            tracking_id: trackingId, // O ID que o cliente enviou
             timestamp: Date.now()
         });
 
     } catch (e) {
-        // O coletor deve ser o mais resiliente possível
         res.status(500).json({ error: "COLLECTOR_BUSY" });
     }
 });
 
-// Endpoint de status interno (para o Adaptive System ou Dashboard Admin)
+// Endpoint de status interno
 router.get('/health', (req, res) => {
     res.json({
         collector: 'ONLINE',
