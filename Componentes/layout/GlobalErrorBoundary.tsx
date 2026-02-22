@@ -36,7 +36,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   private handleReset = () => {
     // Comment: Fix: Properly using setState inherited from the base Component class to reset the error boundary state.
     this.setState({ hasError: false, error: undefined });
-    window.location.hash = '/feed';
+    window.location.hash = '/';
     window.location.reload();
   };
 
