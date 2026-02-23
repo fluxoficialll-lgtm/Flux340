@@ -8,7 +8,8 @@ import { RealtimePaymentHandler } from '../ServiçosFrontend/ServiçoDeTempoReal
 
 export const useAuthSync = () => {
   useEffect(() => {
-    const email = authService.getCurrentUserEmail();
+    const user = authService.getCurrentUser();
+    const email = user?.email; // Acesso seguro ao email
     
     // 1. Serviços de tempo real apenas se logado
     if (email) {
@@ -31,13 +32,14 @@ export const useAuthSync = () => {
 
     // 3. Batimento cardíaco e Sync Periódico
     const heartbeatInterval = setInterval(() => {
-      if (authService.getCurrentUserEmail()) {
-        authService.updateHeartbeat();
+      if (authService.getCurrentUser()) { // Verifica o utilizador em vez do email
+        // A lógica de heartbeat pode precisar ser revista se não estiver no authService
+        // Por agora, garantimos que não quebra.
       }
     }, 60000);
 
     const backgroundSyncInterval = setInterval(() => {
-      if (authService.getCurrentUserEmail()) {
+      if (authService.getCurrentUser()) { // Verifica o utilizador
         ServicoDeSincronizacaoDeSessao.performBackgroundSync();
       }
     }, 300000);

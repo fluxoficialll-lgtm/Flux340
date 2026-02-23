@@ -16,7 +16,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (location.pathname !== '/' && !location.pathname.includes('login')) {
       sessionStorage.setItem('redirect_after_login', location.pathname + location.search);
     }
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Bloqueio global para usuários banidos

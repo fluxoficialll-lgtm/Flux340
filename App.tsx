@@ -27,14 +27,11 @@ const DemoModeBadge = () => {
 const App: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(hydrationManager.isFullyHydrated());
 
   // Inicializa sincronização de presença e batimento cardíaco
   useAuthSync();
 
   useEffect(() => {
-    const unsub = hydrationManager.subscribe(setIsHydrated);
-    
     const initializeApp = async () => {
       // Timeout de segurança: Se em 5s o boot não responder, força isReady
       const bootTimeout = setTimeout(() => {
@@ -46,7 +43,6 @@ const App: React.FC = () => {
       }, 5000);
 
       try {
-        // No HashRouter, os parâmetros podem estar no hash ou no search global
         const getParam = (key: string) => {
             const searchParams = new URLSearchParams(window.location.search);
             if (searchParams.has(key)) return searchParams.get(key);
@@ -61,10 +57,8 @@ const App: React.FC = () => {
 
         const forceOpen = getParam('ignoreMaintenance') === 'true' || getParam('force') === 'true';
 
-        // Consulta o Plano de Controle
         const config = await ConfigControl.boot();
         
-        // Só ativa manutenção se explicitamente configurado, sem bypass e fora de mock
         const shouldShowMaintenance = config.maintenanceMode === true && !USE_MOCKS && !forceOpen;
         
         setIsMaintenance(shouldShowMaintenance);
@@ -74,17 +68,13 @@ const App: React.FC = () => {
       } finally {
         clearTimeout(bootTimeout);
         setIsReady(true);
-        if (USE_MOCKS || !localStorage.getItem('auth_token')) {
-            setIsHydrated(true);
-        }
       }
     };
     
     initializeApp();
-    return () => unsub();
   }, []);
 
-  if (!isReady || (!isHydrated && !USE_MOCKS)) {
+  if (!isReady) {
     return (
       <div className="h-screen w-full bg-[#0c0f14] flex flex-col items-center justify-center gap-4">
         <i className="fa-solid fa-circle-notch fa-spin text-[#00c2ff] text-2xl"></i>

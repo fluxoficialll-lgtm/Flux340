@@ -3,6 +3,7 @@
 // Este serviço faz a comunicação entre a UI (hooks) e a API do backend.
 
 const API_URL = '/api/auth';
+const IS_BROWSER = typeof window !== 'undefined';
 
 /**
  * Armazena o token e os dados do usuário no localStorage.
@@ -10,16 +11,26 @@ const API_URL = '/api/auth';
  * @param {object} user - Os dados do usuário.
  */
 function storeSession(token, user) {
-    if (token) localStorage.setItem('authToken', token);
-    if (user) localStorage.setItem('currentUser', JSON.stringify(user));
+    if (!IS_BROWSER) return;
+    try {
+        if (token) localStorage.setItem('authToken', token);
+        if (user) localStorage.setItem('currentUser', JSON.stringify(user));
+    } catch (error) {
+        console.error("Falha ao armazenar a sessão no localStorage:", error);
+    }
 }
 
 /**
  * Remove a sessão do localStorage.
  */
 function clearSession() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('currentUser');
+    if (!IS_BROWSER) return;
+    try {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+    } catch (error) {
+        console.error("Falha ao limpar a sessão do localStorage:", error);
+    }
 }
 
 export const authService = {
@@ -78,7 +89,6 @@ export const authService = {
      */
     logout() {
         clearSession();
-        // Opcional: notificar o backend sobre o logout
     },
 
     /**
@@ -86,7 +96,13 @@ export const authService = {
      * @returns {boolean} - Verdadeiro se houver um token.
      */
     isAuthenticated() {
-        return !!localStorage.getItem('authToken');
+        if (!IS_BROWSER) return false;
+        try {
+            return !!localStorage.getItem('authToken');
+        } catch (error) {
+            console.error("Falha ao verificar autenticação no localStorage:", error);
+            return false;
+        }
     },
 
     /**
@@ -94,6 +110,7 @@ export const authService = {
      * @returns {object|null} - O objeto do usuário ou nulo.
      */
     getCurrentUser() {
+        if (!IS_BROWSER) return null;
         try {
             const user = localStorage.getItem('currentUser');
             return user ? JSON.parse(user) : null;

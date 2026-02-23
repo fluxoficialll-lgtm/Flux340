@@ -15,7 +15,11 @@ export const useLogin = () => {
     const [password, setPassword] = useState('');
 
     useEffect(() => {
-        trackingService.captureUrlParams();
+        try {
+            trackingService.captureUrlParams();
+        } catch (error) {
+            console.error("Falha ao capturar parâmetros de URL para rastreamento:", error);
+        }
     }, [location]);
 
     const handleRedirect = useCallback((user: any, isNewUser: boolean = false) => {
