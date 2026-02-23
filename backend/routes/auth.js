@@ -5,12 +5,12 @@ import authControle from '../controles/authControle.js';
 const router = express.Router();
 
 // Rota de Registro
-router.post('/register', authContole.register);
+router.post('/register', authControle.register);
 
 // Rota de Login
-router.post('/login', authContole.login);
+router.post('/login', authControle.login);
 
-// Rota de autenticação com Google (CORRIGIDO)
-router.post('/google', authContole.loginComGoogle);
+// Rota de autenticação com Google
+router.post('/google', authControle.loginComGoogle);
 
 export default router;
