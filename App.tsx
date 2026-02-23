@@ -7,7 +7,6 @@ import { DeepLinkHandler } from './Componentes/layout/DeepLinkHandler';
 import AppRoutes from './routes/AppRoutes';
 import { useAuthSync } from './hooks/useAuthSync';
 import { USE_MOCKS } from './ServiçosFrontend/ServiçoDeSimulação/ControleDeSimulacao.js';
-import { GlobalErrorBoundary } from './Componentes/layout/GlobalErrorBoundary';
 import { ConfigControl } from './ServiçosFrontend/ServiçoDeGovernançaFlux/ConfigControl.js';
 import { Maintenance } from './pages/Maintenance';
 import { hydrationManager } from './ServiçosFrontend/ServiçoDeSincronização/GerenciadorDeSincronizacao.js';
@@ -90,16 +89,14 @@ const App: React.FC = () => {
   }
 
   return (
-    <GlobalErrorBoundary>
-      <ModalProvider>
-        <HashRouter>
-          <GlobalTracker />
-          <DeepLinkHandler />
-          <DemoModeBadge />
-          <AppRoutes />
-        </HashRouter>
-      </ModalProvider>
-    </GlobalErrorBoundary>
+    <ModalProvider>
+      <HashRouter>
+        <GlobalTracker />
+        <DeepLinkHandler />
+        <DemoModeBadge />
+        <AppRoutes />
+      </HashRouter>
+    </ModalProvider>
   );
 };
 
