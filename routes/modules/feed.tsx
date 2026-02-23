@@ -2,14 +2,14 @@
 import React, { lazy } from 'react';
 import { ProtectedRoute } from '../../Componentes/ComponentesDeAuth/ProtectedRoute';
 
-const Feed = lazy(() => import('../../pages/Feed').then(m => ({ default: m.Feed })));
-const PostDetails = lazy(() => import('../../pages/PostDetails').then(m => ({ default: m.PostDetails })));
-const CreatePost = lazy(() => import('../../pages/CreatePost').then(m => ({ default: m.CreatePost })));
-const CreatePoll = lazy(() => import('../../pages/CreatePoll').then(m => ({ default: m.CreatePoll })));
-const Reels = lazy(() => import('../../pages/Reels').then(m => ({ default: m.Reels })));
-const CreateReel = lazy(() => import('../../pages/CreateReel').then(m => ({ default: m.CreateReel })));
-const ReelsSearch = lazy(() => import('../../pages/ReelsSearch').then(m => ({ default: m.ReelsSearch })));
-const FeedSearch = lazy(() => import('../../pages/FeedSearch').then(m => ({ default: m.FeedSearch })));
+const Feed = lazy(() => import('../../pages/Feed'));
+const PostDetails = lazy(() => import('../../pages/PostDetails'));
+const CreatePost = lazy(() => import('../../pages/CreatePost'));
+const CreatePoll = lazy(() => import('../../pages/CreatePoll'));
+const Reels = lazy(() => import('../../pages/Reels'));
+const CreateReel = lazy(() => import('../../pages/CreateReel'));
+const ReelsSearch = lazy(() => import('../../pages/ReelsSearch'));
+const FeedSearch = lazy(() => import('../../pages/FeedSearch'));
 
 export const feedRoutes = [
   { path: '/feed', element: <ProtectedRoute><Feed /></ProtectedRoute> },

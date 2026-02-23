@@ -1,8 +1,73 @@
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath as fileURLToPath_log } from 'url';
+
+// --- Início do Código de Log Personalizado ---
+const __filename_log = fileURLToPath_log(import.meta.url);
+const __dirname_log = path.dirname(__filename_log);
+const logDir = path.join(__dirname_log, 'logs');
+
+// Cria o diretório de log se não existir
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+}
+
+const logFile = fs.createWriteStream(path.join(logDir, 'app.log'), { flags: 'a' });
+
+// Salva as funções originais do console
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+const originalInfo = console.info;
+
+const logTimestamp = () => `[${new Date().toISOString()}]`;
+
+// Sobrescreve as funções do console para escrever em arquivo
+console.log = (...args) => {
+    const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
+    logFile.write(`${logTimestamp()} [LOG] ${message}\n`);
+    originalLog.apply(console, args); // Mantém o log no terminal também
+};
+
+console.error = (...args) => {
+    const message = args.map(arg => arg instanceof Error ? arg.stack : (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg)).join(' ');
+    logFile.write(`${logTimestamp()} [ERROR] ${message}\n`);
+    originalError.apply(console, args);
+};
+
+console.warn = (...args) => {
+    const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
+    logFile.write(`${logTimestamp()} [WARN] ${message}\n`);
+    originalWarn.apply(console, args);
+};
+
+console.info = (...args) => {
+    const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
+    logFile.write(`${logTimestamp()} [INFO] ${message}\n`);
+    originalInfo.apply(console, args);
+};
+
+process.on('uncaughtException', (err, origin) => {
+    console.error(`Exceção Não Capturada: ${err.message}`, { stack: err.stack, origin });
+    // O fs.writeSync garante que o log seja escrito antes de sair
+    fs.writeSync(logFile.fd, `${logTimestamp()} [FATAL] Uncaught Exception: ${err.stack}\n`);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Rejeição de Promise Não Tratada:', reason);
+    fs.writeSync(logFile.fd, `${logTimestamp()} [FATAL] Unhandled Rejection: ${reason}\n`);
+});
+
+console.log('--- Sistema de Log em Arquivo Inicializado. Saída será gravada em logs/app.log ---');
+// --- Fim do Código de Log Personalizado ---
+
+
 import 'dotenv/config';
 import express from 'express';
-import path from 'path';
-import fs from 'fs';
+// import path from 'path'; // Já importado acima
+// import fs from 'fs'; // Já importado acima
 import http from 'http';
 import { fileURLToPath } from 'url';
 
