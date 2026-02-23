@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Flux - Conecte-se</title>
     
+    <!-- Environment Configuration -->
+    <script>
+      window.__ENV__ = {
+        VITE_API_URL: "https://api.seuservidor.com" // Injetado pelo servidor em produção
+      };
+    </script>
+
     <!-- Performance Optimizations -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>

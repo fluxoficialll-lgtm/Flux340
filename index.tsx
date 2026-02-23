@@ -3,13 +3,13 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './ServiçosFrontend/ServiçoDeSegurançaDeConteúdo/i18n.js';
-import { validateEnvironment } from './ServiçosFrontend/ValidaçãoDeAmbiente/environmentValidator.js';
 import { initAuditorDeRequisições } from './ServiçosFrontend/ServiçoDeTelemetria/AuditorDeRequisições.js';
 import { rastreadorDeEventos } from './ServiçosFrontend/ServiçoDeTelemetria/RastreadorDeEventos.js';
 import { FiltroDeTelemetria } from './ServiçosFrontend/ServiçoDeTelemetria/FiltroDeTelemetria.js';
+import { loadEnvironment } from './ServiçosFrontend/ValidaçãoDeAmbiente/config.ts';
 
-// 1. Validação de Infraestrutura antes do boot
-validateEnvironment();
+// 1. Carregar configuração de ambiente de forma segura
+loadEnvironment();
 
 // 2. Inicialização de Telemetria e Observabilidade
 initAuditorDeRequisições();
