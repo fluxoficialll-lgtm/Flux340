@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AdCampaign } from '../../types';
 import { adService } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import { useVipPricing } from '../../hooks/useVipPricing';
-import { useModal } from '../ModalSystem';
+import { useModal } from '../ComponenteDeInterfaceDeUsuario/ModalSystem';
 // import { budgetManager } from '../../ServiçosFrontend/ServiçoDeAds/engine/BudgetManager';
 
 // Lazy load do modal de pagamento para manter performance

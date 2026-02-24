@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { GroupRole } from '../../../types';
-import { useModal } from '../../../Componentes/ModalSystem';
+import { useModal } from '../../../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { RoleListItem } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/roles/RoleListItem';
 import { RoleEditor } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/roles/RoleEditor';
 

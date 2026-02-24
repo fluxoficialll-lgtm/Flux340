@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useGroupChat } from '../hooks/useGroupChat';
-import { useModal } from '../Componentes/ModalSystem';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Virtuoso } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
 import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';

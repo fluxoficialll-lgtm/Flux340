@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { groupService } from '../../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
-import { useModal } from '../../../../Componentes/ModalSystem';
+import { useModal } from '../../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { ConfigControl } from '../../../../ServiçosFrontend/ServiçoDeGovernançaFlux/ConfigControl.js';
 
 export const useRoleAssignment = (groupId: string) => {

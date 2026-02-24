@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useCompleteProfile } from '../hooks/useCompleteProfile';
-import { ImageCropModal } from '../Componentes/ui/ImageCropModal';
+import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
 
 export const CompleteProfile: React.FC = () => {
     const {

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { authService, groupService } from '../../../ServiçosFrontend/ServiçoDeSimulação/serviceFactory';
 import { adService } from '../../../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import { AdCampaign, Group, Post } from '../../../types';
-import { useModal } from '../../../Componentes/ModalSystem';
+import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { AdFlowStep } from '../constants/AdConstants';
 
 export const useAdCampaignFlow = () => {
@@ -152,7 +152,7 @@ export const useAdCampaignFlow = () => {
     const prevStep = () => {
         if (currentStep === 'campaign') navigate('/ad-type-selector');
         else if (currentStep === 'adset') setCurrentStep('campaign');
-        else setCurrentStep('adset');
+        else setCurrentStep('ad');
     };
 
     const submitCampaign = async () => {

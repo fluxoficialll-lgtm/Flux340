@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProductDetails } from '../hooks/useProductDetails';
-import { useModal } from '../Componentes/ModalSystem';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 
 // Modular Components
 import { ProductHeader } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductHeader';
@@ -12,7 +12,7 @@ import { ProductSellerCard } from '../Componentes/ComponentesDeMarketplace/Compo
 import { ProductDescription } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductDescription';
 import { ProductBottomBar } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductBottomBar';
 import { ProductLightbox } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductLightbox';
-import { CommentSheet } from '../Componentes/ui/comments/CommentSheet';
+import { CommentSheet } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/CommentSheet';
 
 export const ProductDetails: React.FC = () => {
   const navigate = useNavigate();

@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AvatarPreviewModal } from './ui/AvatarPreviewModal';
-import { UserBadge } from './ui/user/UserBadge';
-import { useUserProfile } from '../hooks/useUserProfile';
+import { AvatarPreviewModal } from '../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
+import { UserBadge } from '../ComponenteDeInterfaceDeUsuario/user/UserBadge';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 interface PostHeaderProps {
     username: string;

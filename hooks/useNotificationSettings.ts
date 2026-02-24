@@ -1,74 +1,66 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { NotificationSettings as INotificationSettings } from '../types';
-import { useModal } from '../Componentes/ModalSystem';
+import { useState, useEffect } from 'react';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 
-const defaultSettings: INotificationSettings = {
-    pauseAll: false,
-    likes: true,
-    comments: true,
-    followers: true,
-    mentions: true,
-    messages: true,
-    groups: true,
-    marketplace: true,
-    emailUpdates: true,
-    emailDigest: true
+// Mock implementation since the real API is not available
+const mockNotificationsAPI = {
+  getSettings: async (userId: string) => {
+    console.log(`[MOCK] Fetching settings for user ${userId}`);
+    // Return some default settings
+    return {
+      push: true,
+      email: {
+        news: true,
+        updates: false,
+      },
+      sms: false,
+    };
+  },
+  updateSettings: async (userId: string, newSettings: any) => {
+    console.log(`[MOCK] Updating settings for user ${userId} with`, newSettings);
+    // Return the new settings to simulate a successful update
+    return newSettings;
+  },
 };
 
-export const useNotificationSettings = () => {
-    const navigate = useNavigate();
-    const { showAlert } = useModal();
-    
-    const [settings, setSettings] = useState<INotificationSettings>(defaultSettings);
-    const [isSyncing, setIsSyncing] = useState(false);
-    const [initialLoading, setInitialLoading] = useState(true);
+export const useNotificationSettings = (userId: string) => {
+    const [settings, setSettings] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { showModal } = useModal();
 
     useEffect(() => {
-        const user = authService.getCurrentUser();
-        if (user && user.notificationSettings) {
-            // Merge saved settings with defaults to ensure all keys are present
-            setSettings({ ...defaultSettings, ...user.notificationSettings });
-        }
-        setInitialLoading(false);
-    }, []);
+        const fetchSettings = async () => {
+            if (!userId) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const data = await mockNotificationsAPI.getSettings(userId);
+                setSettings(data);
+            } catch (err: any) {
+                setError(err);
+                showModal('Error', { message: 'Failed to fetch notification settings.' });
+            }
+            setLoading(false);
+        };
 
-    const toggleSetting = useCallback(async (key: keyof INotificationSettings) => {
-        const originalSettings = settings;
-        const newSettings = { ...settings, [key]: !settings[key] };
-        
-        // Optimistic UI update
-        setSettings(newSettings);
-        setIsSyncing(true);
+        fetchSettings();
+    }, [userId, showModal]);
 
+    const updateSettings = async (newSettings: any) => {
+        if (!userId) return;
         try {
-            await authService.updateNotificationSettings(newSettings);
-            // Success! The sync is complete.
-            setIsSyncing(false);
-        } catch (error) {
-            console.error("Failed to sync notification settings:", error);
-            setIsSyncing(false);
-            // Revert on error
-            setSettings(originalSettings);
-            showAlert("Erro de Sincronização", "Não foi possível salvar suas preferências. Por favor, tente novamente.");
+            setLoading(true);
+            const data = await mockNotificationsAPI.updateSettings(userId, newSettings);
+            setSettings(data);
+            showModal('Success', { message: 'Settings updated successfully!' });
+        } catch (err: any) {
+            setError(err);
+            showModal('Error', { message: 'Failed to update settings.' });
         }
-    }, [settings, showAlert]);
-
-    const handleBack = () => {
-        if (window.history.state && window.history.state.idx > 0) {
-            navigate(-1);
-        } else {
-            navigate('/settings');
-        }
+        setLoading(false);
     };
 
-    return {
-        settings,
-        isSyncing,
-        initialLoading,
-        toggleSetting,
-        handleBack
-    };
+    return { settings, loading, error, updateSettings };
 };

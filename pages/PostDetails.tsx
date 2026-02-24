@@ -1,9 +1,9 @@
 
 import React, { useRef } from 'react';
-import { useModal } from '../Componentes/ModalSystem';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { usePostDetails } from '../hooks/usePostDetails';
 import { FeedItem } from '../Componentes/ComponentesDeFeed/FeedItem';
-import { CommentItem } from '../Componentes/ui/comments/CommentItem';
+import { CommentItem } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/CommentItem';
 
 export const PostDetails: React.FC = () => {
   const { showConfirm } = useModal();

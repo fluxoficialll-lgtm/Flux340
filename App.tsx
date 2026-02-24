@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter } from 'react-router-dom';
-import { ModalProvider } from './Componentes/ModalSystem';
+import { ModalProvider } from './Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { GlobalTracker } from './Componentes/layout/GlobalTracker';
 import { DeepLinkHandler } from './Componentes/layout/DeepLinkHandler';
 import AppRoutes from './routes/AppRoutes';

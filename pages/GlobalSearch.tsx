@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useGlobalSearch } from '../hooks/useGlobalSearch';
-import { useModal } from '../Componentes/ModalSystem';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { User } from '../types';
 
 // A interface para o usuário enriquecido que vem do hook

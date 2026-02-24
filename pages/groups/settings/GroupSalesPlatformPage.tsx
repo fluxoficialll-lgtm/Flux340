@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useGroupSalesPlatform } from '../../../hooks/useGroupSalesPlatform';
-import { useModal } from '../../../Componentes/ModalSystem';
+import { useModal } from '../../../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { PlatformStatusCard } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/sales-platform/PlatformStatusCard';
 import { PlatformStructureEditor } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/sales-platform/PlatformStructureEditor';
 import { PlatformInfoBox } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/sales-platform/PlatformInfoBox';

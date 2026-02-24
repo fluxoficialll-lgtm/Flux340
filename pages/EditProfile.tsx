@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useEditProfile } from '../hooks/useEditProfile';
-import { ImageCropModal } from '../Componentes/ui/ImageCropModal';
+import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
 
 export const EditProfile: React.FC = () => {
   const {

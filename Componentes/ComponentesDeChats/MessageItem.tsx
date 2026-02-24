@@ -1,7 +1,7 @@
 
 import React, { useRef } from 'react';
 import { ChatMessage } from '../../types';
-import { LazyMedia } from '../LazyMedia';
+import { LazyMedia } from '../ComponenteDeInterfaceDeUsuario/LazyMedia';
 import { AudioPlayer } from './AudioPlayer';
 
 interface MessageItemProps {

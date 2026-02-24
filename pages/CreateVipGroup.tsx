@@ -5,7 +5,7 @@ import { PixelSettingsModal } from '../Componentes/groups/PixelSettingsModal';
 import { AccessTypeModal } from '../Componentes/groups/AccessTypeModal';
 import { CurrencySelectorModal } from '../Componentes/groups/CurrencySelectorModal';
 import { ProviderSelectorModal } from '../Componentes/groups/ProviderSelectorModal';
-import { ImageCropModal } from '../Componentes/ui/ImageCropModal';
+import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
 import { UploadProgressCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
 
 export const CreateVipGroup: React.FC = () => {

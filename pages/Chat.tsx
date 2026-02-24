@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useChat } from '../hooks/useChat';
-import { useModal } from '../Componentes/ModalSystem';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Virtuoso } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
 import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';

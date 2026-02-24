@@ -2,11 +2,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../hooks/useProfile';
-import { useModal } from '../Componentes/ModalSystem';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { FollowListModal } from '../Componentes/ComponentesDeProfile/FollowListModal';
 import { FeedItem } from '../Componentes/ComponentesDeFeed/FeedItem';
 import { Footer } from '../Componentes/layout/Footer';
-import { AvatarPreviewModal } from '../Componentes/ui/AvatarPreviewModal';
+import { AvatarPreviewModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 import { ProfileHeader } from '../Componentes/ComponentesDeProfile/Componentes/ProfileHeader';
 import { ProfileInfoCard } from '../Componentes/ComponentesDeProfile/Componentes/ProfileInfoCard';
 import { ProfileTabNav } from '../Componentes/ComponentesDeProfile/Componentes/ProfileTabNav';

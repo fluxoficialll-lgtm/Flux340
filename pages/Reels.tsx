@@ -3,8 +3,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReels } from '../hooks/useReels';
 import { ReelItem } from '../Componentes/ComponentesDeReels/Componentes/ReelItem';
-import { CommentSheet } from '../Componentes/ui/comments/CommentSheet';
-import { useModal } from '../Componentes/ModalSystem'; // A página agora é responsável pelo modal
+import { CommentSheet } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/CommentSheet';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem'; // A página agora é responsável pelo modal
 
 export const Reels: React.FC = () => {
   const navigate = useNavigate();

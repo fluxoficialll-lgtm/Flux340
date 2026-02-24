@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { FeedItem } from '../Componentes/ComponentesDeFeed/FeedItem';
-import { AvatarPreviewModal } from '../Componentes/ui/AvatarPreviewModal';
+import { AvatarPreviewModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 import { Footer } from '../Componentes/layout/Footer';
 import { VisitorHeader } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorHeader';
 import { VisitorInfoCard } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorInfoCard';

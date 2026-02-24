@@ -3,7 +3,7 @@ import React from 'react';
 import { useGroupSalesPlatformView } from '../../hooks/useGroupSalesPlatformView';
 import { OwnerControls } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/OwnerControls';
 import { PlatformGroupCard } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/PlatformGroupCard';
-import { LoadingScreen } from '../../Componentes/LoadingScreen';
+import { LoadingScreen } from '../../Componentes/ComponenteDeInterfaceDeUsuario/LoadingScreen';
 import { SalesPlatformEmptyState } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/SalesPlatformEmptyState';
 import { SalesPlatformSection } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/SalesPlatformSection';
 

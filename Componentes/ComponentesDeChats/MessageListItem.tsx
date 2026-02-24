@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UserAvatar } from '../ui/user/UserAvatar';
+import { UserAvatar } from '../ComponenteDeInterfaceDeUsuario/user/UserAvatar';
 
 interface Contact {
   id: string;

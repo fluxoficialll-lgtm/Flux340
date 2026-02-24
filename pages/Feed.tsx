@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useFeed } from '../hooks/useFeed';
-import { useModal } from '../Componentes/ModalSystem';
+import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { FeedItem } from '../Componentes/ComponentesDeFeed/FeedItem';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';

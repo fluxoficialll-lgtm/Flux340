@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { AuthLayout } from '../Componentes/Layout';
-import { Input } from '../Componentes/Input';
-import { Button } from '../Componentes/ui/Button';
+import { AuthLayout } from '../Componentes/ComponentesDeAuth/AuthLayout';
+import { Input } from '../Componentes/ComponenteDeInterfaceDeUsuario/Input';
+import { Button } from '../Componentes/ComponenteDeInterfaceDeUsuario/Button';
 import { useResetPassword } from '../hooks/useResetPassword';
 
 export const ResetPassword: React.FC = () => {

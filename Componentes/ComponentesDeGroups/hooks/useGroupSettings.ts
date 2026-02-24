@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { groupService } from '../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { authService } from '../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { servicoDeSimulacao } from '@/ServiçosFrontend/ServiçoDeSimulação';
-import { useModal } from '../../../Componentes/ModalSystem';
+import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Group, ScheduledMessage } from '../../../types';
 // import { GroupLifeCycleService } from '../../../ServiçosFrontend/real/groups/GroupLifeCycleService';
 
