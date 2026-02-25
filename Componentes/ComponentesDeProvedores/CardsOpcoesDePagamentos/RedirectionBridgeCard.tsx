@@ -9,16 +9,11 @@ interface RedirectionBridgeCardProps {
     onConfirm: () => void;
     onBack: () => void;
     isLoading?: boolean;
+    config?: any; // Nova prop opcional para configuração visual
 }
 
+// Dados de fallback para provedores que não passam uma config externa
 const PROVIDER_DATA = {
-    paypal: {
-        name: 'PayPal',
-        icon: 'fa-brands fa-paypal',
-        color: '#003087',
-        accent: '#00cfff',
-        msg: 'Você será levado ao ambiente oficial do PayPal para concluir sua transação com segurança.'
-    },
     stripe: {
         name: 'Stripe',
         icon: 'fa-brands fa-stripe',
@@ -50,9 +45,10 @@ const PROVIDER_DATA = {
 };
 
 export const RedirectionBridgeCard: React.FC<RedirectionBridgeCardProps> = ({ 
-    provider, price, onConfirm, onBack, isLoading 
+    provider, price, onConfirm, onBack, isLoading, config 
 }) => {
-    const data = PROVIDER_DATA[provider] || PROVIDER_DATA.generic;
+    // Usa a config externa se fornecida, senão, busca nos dados internos
+    const data = config || PROVIDER_DATA[provider] || PROVIDER_DATA.generic;
     const isWallet = provider === 'wallet';
 
     return (
