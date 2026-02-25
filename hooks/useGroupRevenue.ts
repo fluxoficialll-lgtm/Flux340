@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { syncPayService } from '../ServiçosFrontend/ServiçosDeProvedores/syncPayService.js';
+// CORREÇÃO: Corrigido o alias da importação para corresponder à exportação (S maiúsculo).
+import { SistemaSyncPay as syncPayService } from '../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaSyncPay.js';
 import { currencyService } from '../ServiçosFrontend/ServiçoDeMoeda/currencyService.js';
 import { Group, CurrencyCode } from '../types';
 

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { syncPayService } from '../../../ServiçosFrontend/ServiçosDeProvedores/syncPayService';
+// CORREÇÃO: Apontando para a localização correta do serviço e usando alias
+import { SistemaSyncPay as syncPayService } from '../../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaSyncPay.js';
 import { authService } from '../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { currencyService } from '../../../ServiçosFrontend/ServiçoDeMoeda/currencyService.js';
 import { Group, User } from '../../../types';

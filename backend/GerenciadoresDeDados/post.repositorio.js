@@ -1,6 +1,6 @@
 
 import { pool } from '../database/pool.js';
-import { gerarId } from '../ServiçosBackEnd/FabricaDeIDS.js';
+import { v4 as uuidv4 } from 'uuid'; // SUBSTITUÍDO: Usando a biblioteca padrão para gerar IDs
 
 // Mapeia uma linha do banco de dados para um objeto de post mais limpo
 const toPostObject = (row) => {
@@ -58,8 +58,8 @@ export const postRepositorio = {
      */
     async create(postData) {
         const { authorId, parentPostId, content, mediaUrl } = postData;
-        // CORREÇÃO: Gerar o ID do post dentro do repositório.
-        const newPostId = gerarId();
+        // CORRIGIDO: Gerando o ID do post com a biblioteca uuid.
+        const newPostId = uuidv4();
 
         const query = 'INSERT INTO posts (id, author_id, parent_post_id, content, media_url) VALUES ($1, $2, $3, $4, $5) RETURNING *';
         const res = await pool.query(query, [newPostId, authorId, parentPostId, content, mediaUrl]);
@@ -82,7 +82,7 @@ export const postRepositorio = {
      */
     async addComment(postId, commentData) {
         const { authorId, content } = commentData;
-        const commentId = gerarId();
+        const commentId = uuidv4(); // CORRIGIDO: Usando uuid para o ID do comentário também
 
         const query = 'INSERT INTO comments (id, post_id, author_id, content) VALUES ($1, $2, $3, $4) RETURNING *';
         const res = await pool.query(query, [commentId, postId, authorId, content]);

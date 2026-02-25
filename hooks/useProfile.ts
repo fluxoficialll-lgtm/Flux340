@@ -7,6 +7,7 @@ import { relationshipService } from '../ServiçosFrontend/ServiçoDeRelacionamen
 import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
 import { Post, User, MarketplaceItem } from '../types';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
+import { handleError } from '../ServiçosFrontend/ServiçosDePrevençãoDeErros/ServicoDeTratamentoDeErro.ts';
 
 export const useProfile = () => {
     const navigate = useNavigate();
@@ -33,8 +34,8 @@ export const useProfile = () => {
         try {
             const currentUser = authService.getCurrentUser();
             if (!currentUser || !currentUser.id) {
-                setError("Usuário não autenticado. Por favor, faça login.");
-                return;
+                // Dispara o erro que será capturado pelo catch
+                throw new Error("Usuário não autenticado. Por favor, faça login.");
             }
             setUser(currentUser);
 
@@ -59,11 +60,12 @@ export const useProfile = () => {
                 setFollowingCount(following.length);
             }
         } catch (e: any) {
-            setError("Falha ao carregar o perfil: " + e.message);
+            // Agora, em vez de apenas definir um erro, usamos o handleError
+            handleError(e, { a: 1 }, navigate);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         if (location.state && (location.state as any).activeTab) {

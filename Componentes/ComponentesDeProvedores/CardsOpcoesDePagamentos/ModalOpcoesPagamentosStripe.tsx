@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { stripeService } from '../../../ServiçosFrontend/ServiçosDeProvedores/stripeService';
+// CORREÇÃO: Apontando para a localização correta do serviço e usando alias
+import { SistemaStripe as stripeService } from '../../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaStripe.js';
 import { authService } from '../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { GeoData } from '../../../ServiçosFrontend/ServiçoDeGeolocalização/geoService.js';
 import { ConversionResult } from '../../../ServiçosFrontend/ServiçoDeMoeda/currencyService.js';

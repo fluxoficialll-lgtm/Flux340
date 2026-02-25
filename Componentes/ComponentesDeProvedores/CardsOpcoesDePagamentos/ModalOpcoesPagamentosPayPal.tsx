@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { paypalService } from '../../../ServiçosFrontend/ServiçosDeProvedores/paypalService';
+// CORREÇÃO: Apontando para a localização correta do serviço e usando alias
+import { SistemaPayPal as paypalService } from '../../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaPayPal.js';
 import { authService } from '../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { metaPixelService } from '../../../ServiçosFrontend/ServiçoDeMetaPixel/MetaPixelService.js';
 import { Group } from '../../../types';
-import { ConversionResult } from '../../../ServiçosFrontend/currencyService';
+import { ConversionResult } from '../../../ServiçosFrontend/ServiçoDeMoeda/currencyService.js'; // Corrigido para currencyService
 import { RedirectionBridgeCard } from './RedirectionBridgeCard';
 
 interface ModalOpcoesPagamentosPayPalProps {

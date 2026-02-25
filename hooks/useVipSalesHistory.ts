@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { syncPayService } from '../ServiçosFrontend/ServiçosDeProvedores/syncPayService.js';
+// CORREÇÃO: Corrigido o alias da importação para corresponder à exportação (S maiúsculo).
+import { SistemaSyncPay as syncPayService } from '../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaSyncPay.js';
 
 export const useVipSalesHistory = () => {
   const navigate = useNavigate();

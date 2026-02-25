@@ -25,6 +25,26 @@ class RelationshipService {
         // A lógica de estado real seria gerenciada no banco de dados ou estado da aplicação.
         return Promise.resolve();
     }
+
+    /**
+     * Simula a busca por seguidores de um usuário.
+     * @param {string} userId - O ID do usuário.
+     * @returns {string[]} - Retorna uma lista de IDs de usuários.
+     */
+    getFollowers(userId) {
+        console.log(`[Relationship Mock] Buscando seguidores de ${userId}`);
+        return []; // Retorna uma lista vazia para simulação
+    }
+
+    /**
+     * Simula a busca por usuários que um usuário segue.
+     * @param {string} userId - O ID do usuário.
+     * @returns {string[]} - Retorna uma lista de IDs de usuários.
+     */
+    getFollowing(userId) {
+        console.log(`[Relationship Mock] Buscando quem ${userId} segue`);
+        return []; // Retorna uma lista vazia para simulação
+    }
 }
 
 export const relationshipService = new RelationshipService();

@@ -1,121 +1,114 @@
 
-// Ponte Frontend: Serviço de Autenticação
-// Este serviço faz a comunicação entre a UI (hooks) e a API do backend.
+// authService.js: Orquestrador de Autenticação (Pronto para Produção)
 
-const API_URL = '/api/auth';
+import { metodoGoogle } from './metodoGoogle.js';
+import { metodoEmail } from './metodoEmail.js';
+
 const IS_BROWSER = typeof window !== 'undefined';
 
-/**
- * Dispara um evento customizado para notificar a aplicação sobre mudanças na autenticação.
- */
+// --- GERENCIAMENTO DE SESSÃO ---
+
+// Dispara um evento para que componentes possam reagir a mudanças de autenticação (ex: atualizar a UI).
 function dispatchAuthChange() {
     if (IS_BROWSER) {
         window.dispatchEvent(new CustomEvent('authChange'));
     }
 }
 
-/**
- * Armazena o token e os dados do usuário no localStorage.
- * @param {string} token - O token JWT.
- * @param {object} user - Os dados do usuário.
- */
+// Armazena o token e os dados do usuário de forma segura no localStorage.
 function storeSession(token, user) {
     if (!IS_BROWSER) return;
     try {
-        if (token) localStorage.setItem('authToken', token);
-        if (user) localStorage.setItem('currentUser', JSON.stringify(user));
-        dispatchAuthChange(); // Notifica a aplicação sobre a mudança
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        dispatchAuthChange(); // Notifica a aplicação que o usuário logou.
     } catch (error) {
         console.error("Falha ao armazenar a sessão no localStorage:", error);
+        // Em um app de produção, você poderia logar este erro em um serviço de monitoramento.
     }
 }
 
-/**
- * Remove a sessão do localStorage.
- */
+// Remove os dados da sessão do localStorage.
 function clearSession() {
     if (!IS_BROWSER) return;
     try {
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
-        dispatchAuthChange(); // Notifica a aplicação sobre a mudança
+        dispatchAuthChange(); // Notifica a aplicação que o usuário deslogou.
     } catch (error) {
         console.error("Falha ao limpar a sessão do localStorage:", error);
     }
 }
 
+// --- SERVIÇO ORQUESTRADOR ---
+
 export const authService = {
+    /**
+     * Orquestra o login com o Google, chamando o método de API e gerenciando a sessão.
+     */
     async loginWithGoogle(googleCredential, referredBy) {
-        const response = await fetch(`${API_URL}/google`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ token: googleCredential, referredBy }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Falha no login com Google');
-        }
-
-        const data = await response.json();
-        storeSession(data.token, data.user);
-        return data;
+        const { token, user } = await metodoGoogle.login(googleCredential, referredBy);
+        storeSession(token, user);
+        return { token, user };
     },
 
+    /**
+     * Orquestra o login com email e senha, chamando o método de API e gerenciando a sessão.
+     */
     async login(email, password) {
-        const response = await fetch(`${API_URL}/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Credenciais inválidas');
-        }
-
-        const data = await response.json();
-        storeSession(data.token, data.user);
-        return data;
+        const { token, user } = await metodoEmail.login(email, password);
+        storeSession(token, user);
+        return { token, user };
     },
 
+    /**
+     * Realiza o logout do usuário, limpando a sessão.
+     */
     logout() {
         clearSession();
     },
 
+    /**
+     * Verifica se há um token de autenticação no localStorage.
+     */
     isAuthenticated() {
         if (!IS_BROWSER) return false;
+        return !!this.getToken();
+    },
+
+    /**
+     * Obtém o token de autenticação do usuário logado.
+     */
+    getToken() {
+        if (!IS_BROWSER) return null;
         try {
-            return !!localStorage.getItem('authToken');
+            return localStorage.getItem('authToken');
         } catch (error) {
-            console.error("Falha ao verificar autenticação no localStorage:", error);
-            return false;
+            console.error("Falha ao obter o token do localStorage:", error);
+            return null;
         }
     },
 
+    /**
+     * Obtém os dados do usuário logado a partir do localStorage.
+     */
     getCurrentUser() {
         if (!IS_BROWSER) return null;
         try {
             const user = localStorage.getItem('currentUser');
             return user ? JSON.parse(user) : null;
         } catch (error) {
-            console.error('Erro ao parsear dados do usuário:', error);
-            clearSession(); // Limpa a sessão corrompida
+            console.error('Erro ao parsear dados do usuário do localStorage:', error);
+            clearSession(); // Limpa a sessão se estiver corrompida.
             return null;
         }
     },
-    
+
+    /**
+     * Um atalho para obter o email do usuário logado.
+     */
     getCurrentUserEmail() {
         const user = this.getCurrentUser();
         return user ? user.email : null;
     },
-
-    async getUnreadCount() {
-        console.log("[Auth Mock] Contando notificações não lidas...");
-        return Promise.resolve(0);
-    }
 };

@@ -2,9 +2,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { paypalService } from '../ServiçosFrontend/ServiçosDeProvedores/paypalService';
-import { stripeService } from '../ServiçosFrontend/ServiçosDeProvedores/stripeService';
-import { syncPayService } from '../ServiçosFrontend/ServiçosDeProvedores/syncPayService';
+// CORREÇÃO: Apontando para os arquivos corretos e usando 'as' para manter a compatibilidade com o resto do código.
+import { SistemaPayPal as paypalService } from '../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaPayPal.js';
+import { SistemaStripe as stripeService } from '../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaStripe.js';
+import { SistemaSyncPay as syncPayService } from '../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaSyncPay.js';
 import { Group } from '../types';
 
 export const useProviderConfig = () => {
