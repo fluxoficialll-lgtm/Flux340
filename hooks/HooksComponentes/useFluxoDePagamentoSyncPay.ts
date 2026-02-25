@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { SistemaSyncPay as syncPayService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaSyncPay.js';
+import { ServicoGestaoCredencialSyncPay as syncPayService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialSyncPay.js';
 import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { currencyService } from '../../ServiçosFrontend/ServiçoDeMoeda/currencyService.js';
 import { Group, User } from '../../types';

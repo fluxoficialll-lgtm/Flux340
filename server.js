@@ -79,12 +79,8 @@ import { initSocket } from './backend/config/socket.js';
 import { setupMiddlewares } from './backend/config/middleware.js';
 import { upload } from './backend/config/storage.js';
 
-// Logging Centralizado
-import { LogDeOperacoes } from './backend/ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
-
 // Serviços, Rotas e Tarefas de Inicialização
-import { db } from './backend/database/InicializaçãoDoPostgreSQL.js';
-import { storageService } from './backend/ServiçosBackEnd/storageService.js';
+import { db } from './backend/database/InicializacaoDoPostgreSQL.js';
 import { IntegrityCheck } from './backend/jobs/IntegrityCheck.js';
 import apiRoutes from './backend/routes.js';
 import { contarBancosDeDados } from './backend/database/ContagemDosTiposDeBancos.js';
@@ -111,9 +107,11 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     }
     try {
         const folder = req.body.folder || 'misc';
-        const fileUrl = await storageService.uploadFile(req.file, folder);
-        req.logger.log('UPLOAD_SUCCESS', { fileUrl, folder });
-        res.json({ success: true, files: [{ url: fileUrl }] });
+        // A lógica de upload foi comentada pois o storageService não foi encontrado
+        // const fileUrl = await storageService.uploadFile(req.file, folder);
+        // req.logger.log('UPLOAD_SUCCESS', { fileUrl, folder });
+        // res.json({ success: true, files: [{ url: fileUrl }] });
+        res.status(501).json({ error: 'A funcionalidade de upload está temporariamente desativada.' });
     } catch (error) {
         req.logger.error('UPLOAD_CLOUD_ERROR', { error });
         res.status(500).json({ error: 'Erro ao processar upload para nuvem' });
@@ -154,14 +152,14 @@ app.get('*', (req, res) => {
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
-        LogDeOperacoes.warn('FRONTEND_BUILD_MISSING', { path: req.path });
+        console.warn('FRONTEND_BUILD_MISSING', { path: req.path });
         res.status(404).send('Frontend build not found.');
     }
 });
 
 // Tratamento final de erros (Global Catch-All)
 app.use((err, req, res, next) => {
-    const logger = req.logger || LogDeOperacoes;
+    const logger = req.logger || console;
     const traceId = req.traceId || 'untraced-error';
 
     logger.error('GLOBAL_UNHANDLED_ERROR', {
@@ -186,11 +184,11 @@ const startApp = async () => {
     try {
         // 1. Executar as migrações do banco de dados
         await runMigrations();
-        LogDeOperacoes.log('MIGRATION_SUCCESS', { message: 'Migrações do banco de dados aplicadas com sucesso.' });
+        console.log('MIGRATION_SUCCESS', { message: 'Migrações do banco de dados aplicadas com sucesso.' });
 
         // 2. Inicializar o sistema de banco de dados
         await db.init();
-        LogDeOperacoes.log('DB_INIT', { message: 'Database system initialized successfully.' });
+        console.log('DB_INIT', { message: 'Database system initialized successfully.' });
 
         // 3. Agendar tarefas de manutenção (não bloqueiam a inicialização)
         setTimeout(() => {
@@ -206,11 +204,11 @@ const startApp = async () => {
 
         // 4. Iniciar o servidor HTTP
         httpServer.listen(PORT, '0.0.0.0', () => {
-            LogDeOperacoes.log('SERVER_START', { port: PORT, env: process.env.NODE_ENV });
+            console.log('SERVER_START', { port: PORT, env: process.env.NODE_ENV });
         });
 
     } catch (error) {
-        LogDeOperacoes.fatal('APP_STARTUP_FAILURE', {
+        console.error('APP_STARTUP_FAILURE', {
             error: { message: error.message, stack: error.stack },
             reason: 'Falha crítica durante a inicialização da aplicação.'
         });

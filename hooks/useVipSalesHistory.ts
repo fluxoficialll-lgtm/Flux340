@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-// CORREÇÃO: Corrigido o alias da importação para corresponder à exportação (S maiúsculo).
-import { SistemaSyncPay as syncPayService } from '../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaSyncPay.js';
+// --- Importando o novo serviço de transações ---
+import { ServicoDeTransacoes } from '../ServiçosFrontend/ServiçoDeTransacoes/ServiçoDeTransacoes.js';
 
 export const useVipSalesHistory = () => {
   const navigate = useNavigate();
@@ -28,10 +28,12 @@ export const useVipSalesHistory = () => {
           if (group) setGroupName(group.name);
 
           try {
-              const transactions = await syncPayService.getTransactions(user.email);
+              // --- Utilizando o novo serviço de transações ---
+              const transactions = await ServicoDeTransacoes.obterTransacoes(id);
               
               const filtered = transactions.filter(t => {
                   const isPaid = ['paid', 'completed', 'approved', 'settled'].includes((t.status || '').toLowerCase());
+                  // O filtro de `groupId` já é feito no backend pela API, mas podemos manter por segurança.
                   return t.groupId === id && isPaid;
               });
 
@@ -55,6 +57,8 @@ export const useVipSalesHistory = () => {
 
       loadData();
   }, [id]);
+
+  // --- As funções auxiliares permanecem as mesmas ---
 
   const formatDate = (dateStr?: string) => {
       if (!dateStr) return '-';

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { SistemaStripe as stripeService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaStripe.js';
+import { ServicoGestaoCredencialStripe as stripeService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialStripe.js';
 import { Group } from '../../types';
 import { ControleDeSimulacao } from '../../ServiçosFrontend/ServiçoDeSimulação/ControleDeSimulacao.js';
 

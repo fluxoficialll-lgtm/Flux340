@@ -2,6 +2,51 @@
 import { paypalGatewayService } from '../../ServiçosBackEnd/Gateways/paypalGatewayService.js';
 
 const paypalControle = {
+
+    // --- Novas Funções de Gerenciamento de Credenciais ---
+
+    /**
+     * Gera um link de conexão do PayPal para o vendedor.
+     */
+    generateAccountLink: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const { returnUrl, refreshUrl } = req.body; // O PayPal pode precisar de URLs de retorno
+            const approvalUrl = await paypalGatewayService.createAccountLink(userId, returnUrl, refreshUrl, req.traceId);
+            res.json({ approvalUrl });
+        } catch (error) {
+            res.status(error.statusCode || 500).json({ error: error.message || 'Falha ao gerar o link de conexão do PayPal.' });
+        }
+    },
+
+    /**
+     * Obtém detalhes da conta PayPal conectada.
+     */
+    getAccountDetails: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const accountDetails = await paypalGatewayService.getAccountDetails(userId, req.traceId);
+            res.json(accountDetails);
+        } catch (error) {
+            res.status(error.statusCode || 500).json({ error: error.message || 'Falha ao buscar detalhes da conta PayPal.' });
+        }
+    },
+
+    /**
+     * Verifica o status da conta PayPal.
+     */
+    getAccountStatus: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const status = await paypalGatewayService.getAccountStatus(userId, req.traceId);
+            res.json(status);
+        } catch (error) {
+            res.status(error.statusCode || 500).json({ error: error.message || 'Falha ao verificar o status da conta PayPal.' });
+        }
+    },
+
+    // --- Funções existentes ---
+
     /**
      * Rota para verificar credenciais do PayPal e obter um token.
      */

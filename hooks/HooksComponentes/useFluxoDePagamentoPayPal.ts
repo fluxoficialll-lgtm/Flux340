@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { SistemaPayPal as paypalService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/SistemaPayPal.js';
+import { ServicoGestaoCredencialPayPal as paypalService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialPayPal.js';
 import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { metaPixelService } from '../../ServiçosFrontend/ServiçoDeMetaPixel/MetaPixelService.js';
 import { Group } from '../../types';
