@@ -10,6 +10,7 @@ const Reels = lazy(() => import('../../pages/Reels').then(module => ({ default: 
 const CreateReel = lazy(() => import('../../pages/CreateReel').then(module => ({ default: module.CreateReel })));
 const ReelsSearch = lazy(() => import('../../pages/ReelsSearch').then(module => ({ default: module.ReelsSearch })));
 const FeedSearch = lazy(() => import('../../pages/FeedSearch').then(module => ({ default: module.FeedSearch })));
+const LocationSelector = lazy(() => import('../../pages/LocationSelector'));
 
 export const feedRoutes = [
   { path: '/feed', element: <ProtectedRoute><Feed /></ProtectedRoute> },
@@ -20,5 +21,6 @@ export const feedRoutes = [
   { path: '/reels/:id', element: <ProtectedRoute><Reels /></ProtectedRoute> },
   { path: '/reels-search', element: <ProtectedRoute><ReelsSearch /></ProtectedRoute> },
   { path: '/feed-search', element: <ProtectedRoute><FeedSearch /></ProtectedRoute> },
-  { path: '/create-reel', element: <ProtectedRoute><CreateReel /></ProtectedRoute> }
+  { path: '/create-reel', element: <ProtectedRoute><CreateReel /></ProtectedRoute> },
+  { path: '/location-selector', element: <ProtectedRoute><LocationSelector /></ProtectedRoute> }
 ];

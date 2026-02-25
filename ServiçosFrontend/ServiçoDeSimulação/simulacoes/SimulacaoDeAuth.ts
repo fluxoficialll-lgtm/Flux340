@@ -1,16 +1,19 @@
 
 import { User, AuthResponse } from '../../../types';
 
-const USER_KEY = 'mock_user';
-const TOKEN_KEY = 'mock_token';
+const USER_KEY = 'currentUser';
+const TOKEN_KEY = 'authToken';
+
+const dispatchAuthChange = () => {
+    window.dispatchEvent(new CustomEvent('authChange'));
+};
 
 export const ServicoAutenticacaoMock = {
   async login(email: string, password?: string): Promise<AuthResponse> {
     console.log(`[MOCK] Realizando login para: ${email}`);
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
 
     const mockUser: User = {
+      id: 'user-mock-123',
       uid: 'user-mock-123',
       email: email,
       isProfileCompleted: true, 
@@ -23,8 +26,9 @@ export const ServicoAutenticacaoMock = {
     };
     const mockToken = 'token-mock-abc-123-xyz';
 
-    sessionStorage.setItem(USER_KEY, JSON.stringify(mockUser));
-    sessionStorage.setItem(TOKEN_KEY, mockToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
+    localStorage.setItem(TOKEN_KEY, mockToken);
+    dispatchAuthChange();
 
     return {
       user: mockUser,
@@ -35,9 +39,9 @@ export const ServicoAutenticacaoMock = {
 
   async loginWithGoogle(credential: any, referredBy?: string): Promise<AuthResponse> {
     console.log('[MOCK] Realizando login com Google.');
-    await new Promise(resolve => setTimeout(resolve, 300));
 
     const mockUser: User = {
+      id: 'user-mock-google-456',
       uid: 'user-mock-google-456',
       email: 'google.mock@example.com',
       isProfileCompleted: true,
@@ -50,8 +54,9 @@ export const ServicoAutenticacaoMock = {
     };
     const mockToken = 'token-mock-google-xyz-456';
 
-    sessionStorage.setItem(USER_KEY, JSON.stringify(mockUser));
-    sessionStorage.setItem(TOKEN_KEY, mockToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
+    localStorage.setItem(TOKEN_KEY, mockToken);
+    dispatchAuthChange();
 
     return {
       user: mockUser,
@@ -61,12 +66,12 @@ export const ServicoAutenticacaoMock = {
   },
 
   isAuthenticated: (): boolean => {
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = localStorage.getItem(TOKEN_KEY);
     return !!token;
   },
 
   getCurrentUser: (): User | null => {
-    const userStr = sessionStorage.getItem(USER_KEY);
+    const userStr = localStorage.getItem(USER_KEY);
     try {
       return userStr ? JSON.parse(userStr) as User : null;
     } catch (e) {
@@ -75,13 +80,14 @@ export const ServicoAutenticacaoMock = {
   },
 
   getToken: (): string | null => {
-    return sessionStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(TOKEN_KEY);
   },
 
   logout: async (): Promise<void> => {
     console.log('[MOCK] Realizando logout e limpando sessão.');
-    sessionStorage.removeItem(USER_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    dispatchAuthChange();
     return Promise.resolve();
   },
 };

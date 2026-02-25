@@ -1,59 +1,28 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { authService } from '../ServiçosFrontend/ServiçoDeSimulação/FabricaDeServicos';
-
-// Este evento customizado notificará o hook sobre mudanças de estado de autenticação.
-const dispatchAuthChange = () => {
-  window.dispatchEvent(new CustomEvent('authChange'));
-};
-
-// Modificando o authService para disparar o evento
-const originalLogin = authService.login;
-authService.login = async (...args) => {
-  const result = await originalLogin.apply(authService, args);
-  dispatchAuthChange();
-  return result;
-};
-
-const originalLoginWithGoogle = authService.loginWithGoogle;
-authService.loginWithGoogle = async (...args) => {
-  const result = await originalLoginWithGoogle.apply(authService, args);
-  dispatchAuthChange();
-  return result;
-};
-
-const originalLogout = authService.logout;
-authService.logout = (...args) => {
-  originalLogout.apply(authService, args);
-  dispatchAuthChange();
-};
+import { authService } from '../ServiçosFrontend/ServiçoDeSimulação/serviceFactory';
+import { User } from '../types';
 
 export const useAuth = () => {
-  const [user, setUser] = useState(authService.getCurrentUser());
+  const [user, setUser] = useState<User | null>(() => authService.getCurrentUser());
   const [loading, setLoading] = useState(true);
 
-  const verifyAuth = useCallback(async () => {
-    setLoading(true);
-    try {
-      const isAuth = await authService.confirmAuthentication();
-      const currentUser = isAuth ? authService.getCurrentUser() : null;
-      setUser(currentUser);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+  const handleAuthChange = useCallback(() => {
+    console.log('[useAuth] Detectada mudança de autenticação. Atualizando o usuário.');
+    setUser(authService.getCurrentUser());
   }, []);
 
   useEffect(() => {
-    verifyAuth(); // Verificação inicial
+    setLoading(false);
 
-    window.addEventListener('authChange', verifyAuth);
+    window.addEventListener('authChange', handleAuthChange);
+    window.addEventListener('storage', handleAuthChange);
 
     return () => {
-      window.removeEventListener('authChange', verifyAuth);
+      window.removeEventListener('authChange', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
     };
-  }, [verifyAuth]);
+  }, [handleAuthChange]);
 
   return { user, loading };
 };

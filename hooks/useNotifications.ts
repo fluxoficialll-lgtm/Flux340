@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { notificationService } from '../ServiçosFrontend/ServiçoDeNotificação/notificationService.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
-import { geoService } from '../ServiçosFrontend/ServiçoDeGeolocalizacao/geoService.js';
-import { NotificationItem, Group, GeoData, PriceInfo } from '../types';
+import { NotificationItem, Group, PriceInfo } from '../types';
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -13,7 +12,6 @@ export const useNotifications = () => {
     const [filter, setFilter] = useState('all');
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-    const [geoData, setGeoData] = useState<GeoData | null>(null);
     const [displayPriceInfo, setDisplayPriceInfo] = useState<PriceInfo | null>(null);
     const navigate = useNavigate();
 
@@ -44,14 +42,6 @@ export const useNotifications = () => {
             }
             
             await fetchNotifications();
-            
-            try {
-                // CORREÇÃO: Passar o token e usar await
-                const geoInfo = await geoService.getGeoInfo(token);
-                setGeoData(geoInfo);
-            } catch (error) {
-                console.error("Erro ao buscar informações de geolocalização:", error);
-            }
         };
 
         loadInitialData();
@@ -109,7 +99,6 @@ export const useNotifications = () => {
         isPaymentModalOpen,
         setIsPaymentModalOpen,
         selectedGroup,
-        geoData,
         displayPriceInfo,
         handleFollowToggle,
         handlePendingAction,

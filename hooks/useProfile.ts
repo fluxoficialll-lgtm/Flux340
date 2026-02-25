@@ -24,39 +24,46 @@ export const useProfile = () => {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // CORREÇÃO: A função agora é 'async' para lidar com a chamada de API.
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
     const loadProfileData = useCallback(async () => {
-        const currentUser = authService.getCurrentUser();
-        if (!currentUser || !currentUser.id) {
-            navigate('/');
-            return;
-        }
-        setUser(currentUser);
+        setLoading(true);
+        setError(null);
+        try {
+            const currentUser = authService.getCurrentUser();
+            if (!currentUser || !currentUser.id) {
+                setError("Usuário não autenticado. Por favor, faça login.");
+                return;
+            }
+            setUser(currentUser);
 
-        const token = authService.getToken();
+            const token = authService.getToken();
 
-        // CORREÇÃO: 'await' para esperar a Promise e passar o token.
-        const storedPosts = await postService.getUserPosts(token, currentUser.id);
-        if (storedPosts && Array.isArray(storedPosts)) {
-            // CORREÇÃO: Ordenar por data, convertendo a string para um objeto Date.
-            setMyPosts(storedPosts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
-        } else {
-            setMyPosts([]);
-        }
+            const storedPosts = await postService.getUserPosts(token, currentUser.id);
+            if (storedPosts && Array.isArray(storedPosts)) {
+                setMyPosts(storedPosts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+            } else {
+                setMyPosts([]);
+            }
 
-        const storedProducts = marketplaceService.getItems().filter(i => i.sellerId === currentUser.email || i.sellerId === currentUser.id) || [];
-        // CORREÇÃO: Ordenar produtos também por data.
-        setMyProducts(storedProducts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+            const storedProducts = marketplaceService.getItems().filter(i => i.sellerId === currentUser.email || i.sellerId === currentUser.id) || [];
+            setMyProducts(storedProducts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
 
-        if (currentUser.profile && currentUser.profile.name) {
-            const followers = relationshipService.getFollowers(currentUser.profile.name);
-            setFollowersCount(followers.length);
+            if (currentUser.profile && currentUser.profile.name) {
+                const followers = relationshipService.getFollowers(currentUser.profile.name);
+                setFollowersCount(followers.length);
+            }
+            if (currentUser.id) {
+                const following = relationshipService.getFollowing(currentUser.id);
+                setFollowingCount(following.length);
+            }
+        } catch (e: any) {
+            setError("Falha ao carregar o perfil: " + e.message);
+        } finally {
+            setLoading(false);
         }
-        if (currentUser.id) {
-            const following = relationshipService.getFollowing(currentUser.id);
-            setFollowingCount(following.length);
-        }
-    }, [navigate]);
+    }, []);
 
     useEffect(() => {
         if (location.state && (location.state as any).activeTab) {
@@ -65,24 +72,21 @@ export const useProfile = () => {
     }, [location.state]);
 
     useEffect(() => {
-        const userEmail = authService.getCurrentUserEmail();
-        if (!userEmail) { navigate('/'); return; }
         loadProfileData();
         const unsubPosts = servicoDeSimulacao.subscribe('posts', loadProfileData);
         const unsubRels = servicoDeSimulacao.subscribe('relationships', loadProfileData);
         const unsubUsers = servicoDeSimulacao.subscribe('users', loadProfileData);
         return () => { unsubPosts(); unsubRels(); unsubUsers(); };
-    }, [navigate, loadProfileData]);
+    }, [loadProfileData]);
 
     const deletePost = useCallback(async (postId: string, confirmAction: () => Promise<boolean>) => {
         if (await confirmAction()) {
-            const token = authService.getToken(); // CORREÇÃO: Obter token.
-            await postService.deletePost(token, postId); // CORREÇÃO: Passar token.
+            const token = authService.getToken();
+            await postService.deletePost(token, postId);
         }
     }, []);
 
     const handleLike = useCallback((id: string) => {
-        // NOTA: Este método também precisará de um token na implementação real.
         postService.toggleLike(id);
     }, []);
 
@@ -126,7 +130,6 @@ export const useProfile = () => {
     }, [navigate]);
 
     const handleVote = useCallback((postId: string, index: number) => {
-        // NOTA: A função real aqui é `voteOnPoll` no mock.
         postService.voteOnPoll(postId, index)
     }, []);
     
@@ -149,6 +152,8 @@ export const useProfile = () => {
         followListData,
         isPreviewOpen,
         setIsPreviewOpen,
+        loading,
+        error,
         deletePost,
         handleLike,
         handleShowFollowList,

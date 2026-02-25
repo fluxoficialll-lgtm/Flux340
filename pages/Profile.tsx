@@ -29,6 +29,8 @@ export const Profile: React.FC = () => {
         followListData,
         isPreviewOpen,
         setIsPreviewOpen,
+        loading,
+        error,
         deletePost,
         handleLike,
         handleShowFollowList,
@@ -46,6 +48,14 @@ export const Profile: React.FC = () => {
             showConfirm("Excluir Post", "Tem certeza que deseja excluir este post permanentemente?", "Excluir", "Cancelar")
         );
     };
+
+    if (loading) {
+        return <div className="loading-screen">Carregando perfil...</div>;
+    }
+
+    if (error) {
+        return <div className="error-screen">{error}</div>;
+    }
 
     const handleNickname = user?.profile?.nickname || user?.profile?.name || "Usuário";
     const handleUsername = user?.profile?.name ? `@${user.profile.name}` : "@usuario";

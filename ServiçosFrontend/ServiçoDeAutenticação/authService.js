@@ -6,6 +6,15 @@ const API_URL = '/api/auth';
 const IS_BROWSER = typeof window !== 'undefined';
 
 /**
+ * Dispara um evento customizado para notificar a aplicação sobre mudanças na autenticação.
+ */
+function dispatchAuthChange() {
+    if (IS_BROWSER) {
+        window.dispatchEvent(new CustomEvent('authChange'));
+    }
+}
+
+/**
  * Armazena o token e os dados do usuário no localStorage.
  * @param {string} token - O token JWT.
  * @param {object} user - Os dados do usuário.
@@ -15,6 +24,7 @@ function storeSession(token, user) {
     try {
         if (token) localStorage.setItem('authToken', token);
         if (user) localStorage.setItem('currentUser', JSON.stringify(user));
+        dispatchAuthChange(); // Notifica a aplicação sobre a mudança
     } catch (error) {
         console.error("Falha ao armazenar a sessão no localStorage:", error);
     }
@@ -28,18 +38,13 @@ function clearSession() {
     try {
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
+        dispatchAuthChange(); // Notifica a aplicação sobre a mudança
     } catch (error) {
         console.error("Falha ao limpar a sessão do localStorage:", error);
     }
 }
 
 export const authService = {
-    /**
-     * Envia as credenciais do Google para o backend para login ou registro.
-     * @param {string} googleCredential - O token de credencial do Google.
-     * @param {string} [referredBy] - ID do afiliado que indicou.
-     * @returns {Promise<object>} - O resultado da autenticação do backend.
-     */
     async loginWithGoogle(googleCredential, referredBy) {
         const response = await fetch(`${API_URL}/google`, {
             method: 'POST',
@@ -59,12 +64,6 @@ export const authService = {
         return data;
     },
 
-    /**
-     * Envia e-mail e senha para o backend para login.
-     * @param {string} email - O e-mail do usuário.
-     * @param {string} password - A senha do usuário.
-     * @returns {Promise<object>} - O resultado da autenticação do backend.
-     */
     async login(email, password) {
         const response = await fetch(`${API_URL}/login`, {
             method: 'POST',
@@ -84,17 +83,10 @@ export const authService = {
         return data;
     },
 
-    /**
-     * Faz o logout do usuário, limpando a sessão.
-     */
     logout() {
         clearSession();
     },
 
-    /**
-     * Verifica se o usuário está autenticado localmente.
-     * @returns {boolean} - Verdadeiro se houver um token.
-     */
     isAuthenticated() {
         if (!IS_BROWSER) return false;
         try {
@@ -105,10 +97,6 @@ export const authService = {
         }
     },
 
-    /**
-     * Obtém os dados do usuário do armazenamento local.
-     * @returns {object|null} - O objeto do usuário ou nulo.
-     */
     getCurrentUser() {
         if (!IS_BROWSER) return null;
         try {
@@ -116,24 +104,16 @@ export const authService = {
             return user ? JSON.parse(user) : null;
         } catch (error) {
             console.error('Erro ao parsear dados do usuário:', error);
-            clearSession();
+            clearSession(); // Limpa a sessão corrompida
             return null;
         }
     },
     
-    /**
-     * Obtém o e-mail do usuário do armazenamento local.
-     * @returns {string|null} - O e-mail do usuário ou nulo.
-     */
     getCurrentUserEmail() {
         const user = this.getCurrentUser();
         return user ? user.email : null;
     },
 
-    /**
-     * Simula a contagem de notificações não lidas relacionadas à autenticação (ex: verificação de e-mail).
-     * @returns {Promise<number>}
-     */
     async getUnreadCount() {
         console.log("[Auth Mock] Contando notificações não lidas...");
         return Promise.resolve(0);

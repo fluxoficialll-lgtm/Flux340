@@ -20,6 +20,10 @@ interface Props {
 export const ProfileInfoCard: React.FC<Props> = ({ 
     user, postCount, isCurrentUser, onEdit, onFollow, onUnfollow, onFollowersClick, onFollowingClick, isFollowing 
 }) => {
+    if (!user) {
+        return null; // Ou um spinner de carregamento
+    }
+
     return (
         <div className="profile-info-card">
             <div className="avatar-container">

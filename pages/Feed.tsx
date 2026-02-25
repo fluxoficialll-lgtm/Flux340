@@ -27,7 +27,7 @@ export const Feed: React.FC = () => {
       
       <MainHeader 
         leftContent={
-            <button onClick={() => navigate('/location-filter')} className="bg-none border-none text-[#00c2ff] text-lg cursor-pointer hover:text-white flex items-center gap-1">
+            <button onClick={() => navigate('/location-selector')} className="bg-none border-none text-[#00c2ff] text-lg cursor-pointer hover:text-white flex items-center gap-1">
                 <i className={`fa-solid ${activeLocationFilter && activeLocationFilter !== 'Global' ? 'fa-location-dot' : 'fa-globe'}`}></i>
                 {activeLocationFilter && activeLocationFilter !== 'Global' && (
                     <span className="text-[10px] font-black uppercase tracking-tight ml-1">{activeLocationFilter.substring(0,8)}..</span>
