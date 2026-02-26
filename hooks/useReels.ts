@@ -5,7 +5,7 @@ import { Reel, Comment } from '../types';
 
 // Serviços de produção corretos
 import { ServiçoPublicacaoReels } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoReels.js';
-import { MetricasPublicacaoReels } from '../ServiçosFrontend/ServiçosDePublicações/Métricas.Publicação.Reels.js';
+import { MetricasPublicacaoReels } from '../ServiçosFrontend/SistemaDeMétricas/Métricas.Publicação.Reels.js';
 import { ServicoPublicacaoComentariosReels } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosReels.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 

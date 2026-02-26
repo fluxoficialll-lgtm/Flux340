@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
-import { MetricasPublicacaoFeed } from '../ServiçosFrontend/ServiçosDePublicações/Metricas.Publicação.Feed.js';
+import { MetricasPublicacaoFeed } from '../ServiçosFrontend/SistemaDeMétricas/Metricas.Publicação.Feed.js';
 import { recommendationService } from '../ServiçosFrontend/ServiçoDeRecomendação/recommendationService.js';
 import { Post } from '../types';
 
