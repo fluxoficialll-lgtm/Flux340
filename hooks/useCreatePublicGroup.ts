@@ -1,15 +1,14 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
+import { ServiçoCriaçãoGrupoPublico } from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Publico.js';
 
 export const useCreatePublicGroup = () => {
   const navigate = useNavigate();
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
   const [rawImage, setRawImage] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isCropOpen, setIsCropOpen] = useState(false);
@@ -29,6 +28,9 @@ export const useCreatePublicGroup = () => {
   const handleCroppedImage = async (image: string) => {
     setIsCropOpen(false);
     setCoverImage(image);
+    const blob = await fetch(image).then(res => res.blob());
+    const file = new File([blob], "cover.png", { type: "image/png" });
+    setSelectedCoverFile(file);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -37,21 +39,11 @@ export const useCreatePublicGroup = () => {
 
     setIsCreating(true);
     try {
-        const creatorId = authService.getCurrentUserId();
-        if (!creatorId) throw new Error('User not authenticated');
-
-        let coverImageUrl = '';
-        if (coverImage) {
-            const blob = await fetch(coverImage).then(res => res.blob());
-            coverImageUrl = await fileService.upload(blob, `group-covers/${Date.now()}.png`);
-        }
-
-        await groupService.createGroup({
-            name: groupName,
+        await ServiçoCriaçãoGrupoPublico.criar({
+            groupName,
             description,
-            creatorId,
-            coverImageUrl,
-            groupType: 'public'
+            coverImage: coverImage || undefined,
+            selectedCoverFile
         });
 
         navigate('/groups');
