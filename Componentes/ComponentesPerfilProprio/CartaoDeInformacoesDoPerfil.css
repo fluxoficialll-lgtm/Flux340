@@ -1,0 +1,98 @@
+/* Card geral */
+.profile-info-card {
+    background: linear-gradient(145deg, #1A202C, #10141A);
+    color: #E2E8F0;
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(0, 194, 255, 0.2);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    margin: 2rem auto; /* Margem ajustada */
+    font-family: sans-serif;
+    position: relative;
+}
+
+/* Container do Avatar */
+.avatar-container {
+    margin-top: 0; /* Remove a margem negativa */
+    margin-bottom: 1.5rem; /* Ajusta o espaçamento abaixo do avatar */
+    display: flex;
+    justify-content: center;
+}
+
+/* Detalhes do Usuário */
+.user-details {
+    margin-bottom: 1.5rem;
+}
+
+.user-details .handle {
+    color: #718096;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.user-details .bio {
+    color: #A0AEC0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Container de Estatísticas */
+.stats-container {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.stat .value {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #FFFFFF;
+}
+
+.stat .label {
+    color: #A0AEC0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Ações do Perfil (Botões) */
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* Estilo unificado para ambos os botões (Ghost) */
+.profile-actions .btn-edit,
+.profile-actions .btn-share {
+    background-color: transparent;
+    color: #00c2ff;
+    border: 2px solid #00c2ff;
+    font-weight: bold;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    flex-grow: 1;
+    max-width: 200px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Efeito de hover unificado */
+.profile-actions .btn-edit:hover,
+.profile-actions .btn-share:hover {
+    background-color: rgba(0, 194, 255, 0.1);
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 194, 255, 0.1);
+}

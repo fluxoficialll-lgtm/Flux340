@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { User, Crown } from 'lucide-react';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -13,11 +14,19 @@ interface UserAvatarProps {
 }
 
 const sizeMap: Record<AvatarSize, string> = {
-    xs: 'w-6 h-6 text-[10px]',
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm',
-    lg: 'w-16 h-16 text-xl',
-    xl: 'w-[100px] h-[100px] text-3xl'
+    xs: 'w-6 h-6',
+    sm: 'w-8 h-8',
+    md: 'w-10 h-10',
+    lg: 'w-16 h-16',
+    xl: 'w-[100px] h-[100px]'
+};
+
+const iconSizeMap: Record<AvatarSize, number> = {
+    xs: 12,
+    sm: 16,
+    md: 20,
+    lg: 32,
+    xl: 50
 };
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({ 
@@ -34,9 +43,12 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
     const borderClass = isVip ? 'border-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.2)]' : 'border-white/10';
     const bgClass = 'bg-[#1e2531]';
 
+    const Icon = isVip ? Crown : User;
+    const iconColor = isVip ? '#FFD700' : '#00c2ff';
+
     if (src && !hasError) {
         return (
-            <div className={`${baseClasses} ${borderClass} ${bgClass} cursor-pointer`} onClick={onClick}>
+            <div className={`${baseClasses} ${borderClass} ${bgClass} ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
                 <img 
                     src={src} 
                     alt={alt} 
@@ -49,8 +61,8 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
     }
 
     return (
-        <div className={`${baseClasses} ${borderClass} ${bgClass} text-[#00c2ff] cursor-pointer`} onClick={onClick}>
-            <i className={`fa-solid ${isVip ? 'fa-crown' : 'fa-user'}`}></i>
+        <div className={`${baseClasses} ${borderClass} ${bgClass} ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
+            <Icon size={iconSizeMap[size]} color={iconColor} />
         </div>
     );
 };
