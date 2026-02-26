@@ -8,12 +8,24 @@ const createComment = (req, res) => {
 };
 
 // @desc    Obter todos os comentários de um item do marketplace
-const getAllComments = (req, res) => {
+const getCommentsForItem = (req, res) => {
     res.status(200).json({ message: `Rota para obter todos os comentários do item do marketplace com ID ${req.params.itemId} funcionando!` });
+};
+
+// @desc    Atualizar um comentário
+const updateComment = (req, res) => {
+    res.status(200).json({ message: `Rota para atualizar o comentário com ID ${req.params.commentId} funcionando!` });
+};
+
+// @desc    Deletar um comentário
+const deleteComment = (req, res) => {
+    res.status(200).json({ message: `Rota para deletar o comentário com ID ${req.params.commentId} funcionando!` });
 };
 
 
 export default {
     createComment,
-    getAllComments
+    getCommentsForItem,
+    updateComment,
+    deleteComment
 };
