@@ -69,7 +69,7 @@ const App: React.FC = () => {
 
         const config = await ConfigControl.boot(); 
         
-        const shouldShowMaintenance = config.maintenanceMode === true && !ControleDeSimulacao.isMockMode() && !forceOpen;
+        const shouldShowMaintenance = false; // Manutenção forçadamente desativada
         
         setIsMaintenance(shouldShowMaintenance);
       } catch (e) {

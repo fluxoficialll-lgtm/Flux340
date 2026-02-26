@@ -7,9 +7,9 @@ import { Footer } from '../Componentes/layout/Footer';
 import { VisitorHeader } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorHeader';
 import { VisitorInfoCard } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorInfoCard';
 import { VisitorBlockedState, VisitorPrivateState } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorStates';
-import { ProfileTabNav } from '../Componentes/ComponentesDeProfile/Componentes/ProfileTabNav';
-import { ProfileReelsGrid } from '../Componentes/ComponentesDeProfile/Componentes/tabs/ProfileReelsGrid';
-import { ProfileProductsGrid } from '../Componentes/ComponentesDeProfile/Componentes/tabs/ProfileProductsGrid';
+import { NavegacaoPorAbasDoPerfil as ProfileTabNav } from '../Componentes/ComponentesPerfilProprio/NavegacaoPorAbasDoPerfil';
+import { GradeDeReelsDoPerfil as ProfileReelsGrid } from '../Componentes/ComponentesPerfilProprio/GradeDeReelsDoPerfil';
+import { GradeDeProdutosDoPerfil as ProfileProductsGrid } from '../Componentes/ComponentesPerfilProprio/GradeDeProdutosDoPerfil';
 
 export const UserProfile: React.FC = () => {
   const {
