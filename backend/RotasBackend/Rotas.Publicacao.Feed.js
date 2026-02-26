@@ -17,7 +17,7 @@ router.get('/', feedControle.getAllPosts);
 // @route   GET /:postId
 // @desc    Obter um post específico do feed
 // @access  Public
-router.get('/:postId', feedContole.getPostById);
+router.get('/:postId', feedControle.getPostById);
 
 // @route   PUT /:postId
 // @desc    Atualizar um post do feed
