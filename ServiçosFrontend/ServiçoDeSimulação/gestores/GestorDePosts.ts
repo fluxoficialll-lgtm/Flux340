@@ -7,7 +7,6 @@ export class GestorDePosts extends GestorBase {
     private table = 'posts';
 
     public getAll(): Post[] {
-        // O timestamp agora é uma string ISO, então a ordenação precisa ser ajustada
         return this.queryAll<Post>(this.table).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     }
 
@@ -20,7 +19,6 @@ export class GestorDePosts extends GestorBase {
             const cursorDate = new Date(cursor).getTime();
             startIndex = organic.findIndex(p => new Date(p.timestamp).getTime() < cursorDate);
             if (startIndex === -1) {
-                // Se nenhum post for mais antigo que o cursor, não há mais nada a paginar.
                 return { posts: [], nextCursor: null };
             }
         }
@@ -33,6 +31,27 @@ export class GestorDePosts extends GestorBase {
             : null;
 
         return { posts: paginatedPosts, nextCursor };
+    }
+
+    /**
+     * Cria uma nova postagem e a salva na simulação.
+     */
+    public createPost(data: { authorId: string; content: string; mediaUrl?: string }): Post {
+        const newPost: Post = {
+            id: `post_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            authorId: data.authorId,
+            content: data.content,
+            mediaUrl: data.mediaUrl || null,
+            timestamp: new Date().toISOString(),
+            likes: 0,
+            comments: 0,
+            isAd: false,
+            cta: null,
+            ctaUrl: null
+        };
+
+        this.add(newPost);
+        return newPost;
     }
 
     public saveAll(data: Post[]): void {
