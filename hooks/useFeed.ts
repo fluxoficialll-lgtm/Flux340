@@ -1,8 +1,9 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeSimulação/serviceFactory';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postServiceFactory';
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { MetricasPublicacaoFeed } from '../ServiçosFrontend/ServiçosDePublicações/Metricas.Publicação.Feed.js';
 import { recommendationService } from '../ServiçosFrontend/ServiçoDeRecomendação/recommendationService.js';
 import { Post } from '../types';
 
@@ -25,7 +26,6 @@ export const useFeed = () => {
     const PAGE_SIZE = 15;
 
     const currentUser = useMemo(() => authService.getCurrentUser(), []);
-    const currentUserId = currentUser?.id;
     const isAdultContentAllowed = useMemo(() => localStorage.getItem('settings_18_plus') === 'true', []);
 
     const mergePosts = useCallback((newPosts: Post[], reset: boolean = false) => {
@@ -49,11 +49,11 @@ export const useFeed = () => {
             const storedFilter = localStorage.getItem('feed_location_filter');
             const filterValue = (storedFilter === 'Global' || !storedFilter) ? null : storedFilter;
             
-            const response = await postService.listPosts(authService.getToken(), { 
+            const response = await ServiçoPublicaçãoFeed.getFeed('home', {
                 limit: PAGE_SIZE, 
                 cursor: cursor, 
                 locationFilter: filterValue, 
-                allowAdultContent: isAdultContentAllowed 
+                allowAdultContent: isAdultContentAllowed
             });
 
             const fetched = (response.data || []).filter(p => p && (p.type !== 'video' || p.isAd));
@@ -69,7 +69,6 @@ export const useFeed = () => {
         }
     }, [isAdultContentAllowed, mergePosts]);
 
-    // Efeito para carregar os posts iniciais e lidar com filtros
     useEffect(() => {
         if (!authService.isAuthenticated()) {
             navigate('/');
@@ -79,12 +78,10 @@ export const useFeed = () => {
         const filter = localStorage.getItem('feed_location_filter');
         setActiveLocationFilter(filter);
         
-        // Sempre busca os posts da rede (que será interceptada pelo mock)
         fetchPosts(undefined, true); 
 
     }, [navigate, fetchPosts]);
 
-    // Efeito para observador de visualização (incrementar views)
     useEffect(() => {
         if (posts.length === 0) return;
         const observer = new IntersectionObserver((entries) => {
@@ -93,7 +90,7 @@ export const useFeed = () => {
                     const postId = entry.target.getAttribute('data-post-id');
                     if (postId && !viewedPostsRef.current.has(postId)) {
                         viewedPostsRef.current.add(postId);
-                        postService.incrementView(postId);
+                        MetricasPublicacaoFeed.incrementView(postId);
                         recommendationService.trackImpression(postId);
                     }
                 }
@@ -104,7 +101,6 @@ export const useFeed = () => {
         return () => observer.disconnect();
     }, [posts]);
 
-    // Efeito para scroll infinito
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting && hasMore && !loading && !isFetchingRef.current && nextCursor) {
@@ -116,7 +112,6 @@ export const useFeed = () => {
         return () => observer.disconnect();
     }, [hasMore, nextCursor, fetchPosts, loading]);
 
-    // Efeito para controlar a visibilidade da UI no scroll
     const handleContainerScroll = () => {
         if (!scrollContainerRef.current) return;
         const currentScroll = scrollContainerRef.current.scrollTop;
@@ -124,22 +119,18 @@ export const useFeed = () => {
         lastScrollY.current = currentScroll;
     };
 
-    // --- Funções de Ação do Post ---
-
     const handlePostDelete = async (id: string) => {
-        await postService.deletePost(id);
+        await MetricasPublicacaoFeed.deletePost(id);
         setPosts(prev => prev.filter(p => p.id !== id));
     };
 
     const handlePostLike = (id: string) => {
-        postService.toggleLike(id);
-        // Opcional: Atualizar a UI imediatamente para melhor UX
+        MetricasPublicacaoFeed.toggleLike(id);
         setPosts(prev => prev.map(p => p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p));
     };
     
     const handlePostVote = (postId: string, index: number) => {
-        // A lógica de votação pode precisar ser ajustada para o mock
-        postService.voteOnPoll(postId, index); 
+        MetricasPublicacaoFeed.voteOnPoll(postId, index); 
         setPosts(prev => prev.map(p => {
             if (p.id === postId && p.pollOptions && p.votedOptionIndex == null) {
                 const newOptions = [...p.pollOptions];
@@ -158,7 +149,7 @@ export const useFeed = () => {
             navigator.clipboard.writeText(url);
             alert('Link copiado!');
         }
-        postService.incrementShare(p.id);
+        MetricasPublicacaoFeed.incrementShare(p.id);
     };
     
     const handleCtaClick = (link: string | undefined) => {
@@ -168,7 +159,7 @@ export const useFeed = () => {
     };
 
     return {
-        scrollContainerRef, loaderRef, posts, loading, hasMore, currentUserId, uiVisible,
+        scrollContainerRef, loaderRef, posts, loading, hasMore, currentUserId: currentUser?.id, uiVisible,
         activeLocationFilter, isMenuOpen, setIsMenuOpen, handleContainerScroll,
         handlePostLike, handlePostDelete, handlePostVote, handlePostShare, handleCtaClick,
         navigate

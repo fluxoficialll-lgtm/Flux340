@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Comment } from '../../../types';
-import { postService } from '../../../ServiçosFrontend/ServiçoDePosts/postService.js';
+import { ServiçoPublicaçãoComentáriosFeed } from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
 
 interface CommentItemProps {
     comment: Comment;
@@ -26,14 +26,13 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
     const avatarSize = depth === 0 ? 'w-8 h-8' : 'w-6 h-6';
     
-    // IMPORTANTE: Só mostramos respostas se estivermos no nível 0.
     const canShowReplies = depth === 0 && comment.replies && comment.replies.length > 0;
     const hasMoreReplies = comment.replies && visibleCount < comment.replies.length;
 
     const handleToggleReplies = () => {
         if (showReplies) {
             setShowReplies(false);
-            setVisibleCount(3); // Reseta ao ocultar
+            setVisibleCount(3); 
         } else {
             setShowReplies(true);
         }
@@ -104,7 +103,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
                     <div className="flex items-center gap-5 mt-2 ml-2">
                         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
-                            {postService.formatRelativeTime(comment.timestamp)}
+                            {ServiçoPublicaçãoComentáriosFeed.formatRelativeTime(comment.timestamp)}
                         </span>
                         <button 
                             className="text-[10px] font-black text-gray-500 hover:text-[#00c2ff] uppercase tracking-widest cursor-pointer bg-transparent border-none p-0 transition-colors"
@@ -125,7 +124,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
             {canShowReplies && (
                 <div className="relative pl-11 mt-2">
-                    {/* Linha da Thread */}
+                    
                     <div className="absolute left-[15px] top-0 bottom-4 w-[1px] bg-white/5 rounded-full"></div>
                     
                     {!showReplies ? (
@@ -135,13 +134,13 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                         >
                             <div className="w-6 h-[1px] bg-white/10 group-hover:bg-[#00c2ff]/30"></div>
                             <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-300 uppercase tracking-widest">
-                                Ver {comment.replies!.length} {comment.replies!.length === 1 ? 'resposta' : 'respostas'}
+                                Ver {comment.replies.length} {comment.replies.length === 1 ? 'resposta' : 'respostas'}
                             </span>
                         </button>
                     ) : (
                         <>
                             <div className="flex flex-col">
-                                {comment.replies!.slice(0, visibleCount).map(reply => (
+                                {comment.replies.slice(0, visibleCount).map(reply => (
                                     <CommentItem 
                                         key={reply.id} 
                                         comment={reply} 
@@ -162,7 +161,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                                         className="text-[10px] font-black text-[#00c2ff] hover:text-white uppercase tracking-widest transition-colors py-2 flex items-center gap-2 bg-transparent border-none cursor-pointer"
                                     >
                                         <i className="fa-solid fa-plus-circle text-[12px]"></i>
-                                        Ver mais respostas ({comment.replies!.length - visibleCount})
+                                        Ver mais respostas ({comment.replies.length - visibleCount})
                                     </button>
                                 ) : <div />}
 

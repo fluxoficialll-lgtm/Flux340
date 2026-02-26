@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { relationshipService } from '../ServiçosFrontend/ServiçoDeRelacionamento/relationshipService.js';
+import { systemaRelacaoUsuarios } from '../ServiçosFrontend/ServiçoDeRelacionamento/Sistema.Relação.Usuários.js';
 import { User } from '../types';
 
 // A interface pode ser movida para um arquivo de tipos se for usada em outro lugar.
@@ -18,8 +18,9 @@ export const useLeaderboard = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            const ranked = await relationshipService.getTopCreators();
-            setRankedUsers(ranked);
+            // Corrigido para usar o novo serviço e a função correta
+            const ranked = await systemaRelacaoUsuarios.getTopCreators();
+            setRankedUsers(ranked as RankedUser[]); // Fazendo um cast para garantir a tipagem
         } catch (error) {
             console.error("Falha ao carregar o leaderboard:", error);
             setRankedUsers([]); // Garante que em caso de erro, a lista fique vazia

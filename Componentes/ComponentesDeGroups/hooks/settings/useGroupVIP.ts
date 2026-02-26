@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Group, VipMediaItem } from '../../../../types';
-import { postService } from '../../../../ServiçosFrontend/ServiçoDePosts/postService.js';
+import { fileService } from '../../../../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 
 export const useGroupVIP = (group: Group | null) => {
   const [vipPrice, setVipPrice] = useState('');
@@ -57,7 +57,7 @@ export const useGroupVIP = (group: Group | null) => {
           setUploadProgress(Math.round((i / toUpload.length) * 100));
 
           try {
-              const url = await postService.uploadMedia(file, 'vips_doors');
+              const url = await fileService.uploadFile(file);
               const type = file.type.startsWith('video') ? 'video' as const : 'image' as const;
               
               newItems.push({ url, type });

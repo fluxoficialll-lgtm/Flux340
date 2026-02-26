@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Post, User } from '../../../types';
 import { ContainerFeed } from '../Container.Feed';
-import { postService } from '../../../ServiçosFrontend/ServiçoDePosts/postService.js';
 import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { SearchTab } from '../../../pages/FeedSearch';
 import { UserBadge } from '../../ComponenteDeInterfaceDeUsuario/user/UserBadge';
+import { ServiçoPublicaçãoFeed } from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
 interface FeedSearchResultsProps {
     activeTab: SearchTab;
@@ -27,6 +28,38 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
     const navigate = useNavigate();
     const { showConfirm } = useModal();
 
+    // Função de Like refatorada para usar o serviço real
+    const handleLike = async (postId: string) => {
+        try {
+            const post = await ServiçoPublicaçãoFeed.getPostById(postId);
+            if (!post) return;
+            
+            const updatedPost = { 
+                ...post, 
+                liked: !post.liked, 
+                likes: post.likes + (!post.liked ? 1 : -1) 
+            };
+            
+            await ServiçoPublicaçãoFeed.updatePost(postId, updatedPost);
+            // Idealmente, o estado local seria atualizado aqui para refletir a mudança instantaneamente
+        } catch (error) {
+            console.error("Falha ao processar o like:", error);
+        }
+    };
+
+    // Função de Delete refatorada para usar o serviço real
+    const handleDelete = async (postId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (await showConfirm("Excluir Post", "Deseja apagar permanentemente?", "Excluir", "Cancelar")) {
+            try {
+                await ServiçoPublicaçãoFeed.deletePost(postId);
+                // Idealmente, o estado local seria atualizado para remover o post da UI
+            } catch (error) {
+                console.error("Falha ao deletar o post:", error);
+            }
+        }
+    };
+
     if (loading && (postResults.length === 0 && userResults.length === 0)) {
         return (
             <div className="flex flex-col items-center justify-center py-32 animate-pulse">
@@ -47,13 +80,8 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
                         key={post.id}
                         post={post}
                         currentUserId={currentUser?.id}
-                        onLike={(id) => postService.toggleLike(id)}
-                        onDelete={async (id, e) => {
-                            e.stopPropagation();
-                            if (await showConfirm("Excluir Post", "Deseja apagar permanentemente?", "Excluir", "Cancelar")) {
-                                await postService.deletePost(id);
-                            }
-                        }}
+                        onLike={handleLike}
+                        onDelete={(id, e) => handleDelete(id, e)}
                         onUserClick={(u) => navigate(`/user/${u.replace('@', '')}`)}
                         onCommentClick={(id) => navigate(`/post/${id}`)}
                         onShare={(p) => {
@@ -68,6 +96,8 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
             </div>
         );
     }
+
+    // O restante do componente permanece o mesmo...
 
     // Render Users
     if (activeTab === 'users' && userResults.length > 0) {

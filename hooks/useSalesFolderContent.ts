@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
+import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Group, SalesFolder, Infoproduct } from '../types';
 
@@ -79,7 +79,7 @@ export const useSalesFolderContent = () => {
             setUploadProgress(Math.round(((i) / fileArray.length) * 100));
 
             try {
-                const fileUrl = await postService.uploadMedia(file, 'infoproducts');
+                const fileUrl = await fileService.uploadFile(file);
                 const sizeStr = formatFileSize(file.size);
                 const extension = file.name.split('.').pop()?.toLowerCase() || 'file';
                 

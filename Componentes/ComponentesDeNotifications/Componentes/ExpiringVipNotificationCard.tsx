@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NotificationItem } from '../../../types';
-import { postService } from '../../../ServiçosFrontend/ServiçoDePosts/postService.js';
+import { groupService } from '../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 
 interface ExpiringVipNotificationCardProps {
     notif: NotificationItem;
@@ -132,7 +132,7 @@ export const ExpiringVipNotificationCard: React.FC<ExpiringVipNotificationCardPr
                 <div className="notification-meta-vip">
                     <span className="notification-time-vip">{notif.time}</span>
                     <span className="text-gray-700 text-[10px]">•</span>
-                    <span className="notification-relative-vip">{postService.formatRelativeTime(notif.timestamp)}</span>
+                    <span className="notification-relative-vip">{groupService.formatRelativeTime(notif.timestamp)}</span>
                 </div>
             </div>
 

@@ -6,7 +6,7 @@ import { Group } from '../types';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
 import { JoinViaLinkBtn } from '../Componentes/groups/list/JoinViaLinkBtn';
-import { GroupListItem } from '../Componentes/groups/list/GroupListItem';
+import { ContêinerListaGrupos } from '../Componentes/groups/list/Contêiner.Lista.Grupos';
 import { CreateGroupFAB } from '../Componentes/groups/list/CreateGroupFAB';
 
 const TrackingModal = lazy(() => import('../Componentes/groups/TrackingModal').then(m => ({ default: m.TrackingModal })));
@@ -73,7 +73,7 @@ export const Groups: React.FC = () => {
 
         <div className="w-full">
           {groups.map(group => (
-            <GroupListItem 
+            <ContêinerListaGrupos 
               key={group.id}
               group={group}
               currentUserEmail={currentUserEmail}

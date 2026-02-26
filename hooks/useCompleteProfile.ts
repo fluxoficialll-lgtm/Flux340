@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
+import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js'; // Corrigido
 import { AuthError, UserProfile } from '../types';
 
 export const useCompleteProfile = () => {
@@ -81,7 +82,7 @@ export const useCompleteProfile = () => {
             if (email) {
                 let photoUrl: string | undefined = undefined;
                 if (selectedFile) {
-                    photoUrl = await postService.uploadMedia(selectedFile, 'avatars');
+                    photoUrl = await fileService.uploadFile(selectedFile);
                 }
 
                 const finalProfile: UserProfile = {

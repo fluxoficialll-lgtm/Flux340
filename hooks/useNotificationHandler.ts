@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { NotificationItem } from '../types';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService.js';
+import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { useNavigate } from 'react-router-dom';
 
 interface NotificationHandlerProps {
@@ -41,7 +41,7 @@ export const useNotificationHandler = ({
         onPendingAction('reject', notif);
     }, [notif, onPendingAction]);
 
-    const formattedTime = postService.formatRelativeTime(notif.timestamp);
+    const formattedTime = groupService.formatRelativeTime(notif.timestamp);
 
     return {
         handleCardClick,

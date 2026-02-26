@@ -1,11 +1,9 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
-import { Group, VipMediaItem, CurrencyType } from '../types';
-// import { GATEWAY_CURRENCIES, DEFAULT_CURRENCY_FOR_GATEWAY } from '../ServiçosFrontend/gatewayConfig';
+import { ServiçoCriaçãoGrupoPago } from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Pago.js';
+import { CurrencyType } from '../types';
 
 export const useCreateVipGroup = () => {
   const navigate = useNavigate();
@@ -161,89 +159,43 @@ export const useCreateVipGroup = () => {
 
     setIsCreating(true);
     setIsUploading(true);
-    
+
+    const onProgress = (progress: number, current: number, total: number) => {
+        setUploadProgress(progress);
+        setUploadCurrent(current);
+        setUploadTotal(total);
+    };
+
     try {
-        const currentUserId = authService.getCurrentUserId();
-        const currentUserEmail = authService.getCurrentUserEmail();
-        
-        const totalToUpload = vipMediaItems.filter(i => i.file).length + (selectedCoverFile ? 1 : 0);
-        setUploadTotal(totalToUpload);
-        setUploadCurrent(0);
-        setUploadProgress(0);
-
-        let finalCoverUrl = coverImage;
-        if (selectedCoverFile) {
-            setUploadCurrent(prev => prev + 1);
-            finalCoverUrl = await postService.uploadMedia(selectedCoverFile, 'avatars');
-            setUploadProgress(Math.round((1 / totalToUpload) * 100));
-        }
-
-        const uploadedVipMedia: VipMediaItem[] = [];
-        const filesToUpload = vipMediaItems.filter(i => i.file);
-        const staticItems = vipMediaItems.filter(i => !i.file);
-
-        let uploadedCount = selectedCoverFile ? 1 : 0;
-
-        for (const item of filesToUpload) {
-            uploadedCount++;
-            setUploadCurrent(uploadedCount);
-            const url = await postService.uploadMedia(item.file!, 'vips_doors');
-            uploadedVipMedia.push({ url, type: item.type });
-            setUploadProgress(Math.round((uploadedCount / totalToUpload) * 100));
-        }
-
-        const finalMediaGallery = [...staticItems.map(i => ({ url: i.url, type: i.type })), ...uploadedVipMedia];
-
-        let expirationValue = undefined;
-        if (accessType === 'temporary') expirationValue = accessConfig?.interval;
-        else if (accessType === 'one_time') expirationValue = `${accessConfig?.days}d${accessConfig?.hours}h`;
-
-        const newGroup: Group = {
-          ...({} as any),
-          id: Date.now().toString(),
-          name: groupName,
-          description: description,
-          coverImage: finalCoverUrl,
-          isVip: true,
-          price: numericPrice.toString(),
-          currency: currency as any,
-          accessType: accessType,
-          selectedProviderId: selectedProviderId,
-          expirationDate: expirationValue,
-          vipDoor: {
-            mediaItems: finalMediaGallery,
-            text: vipDoorText || "Bem-vindo ao VIP!",
-            buttonText: vipButtonText
-          },
-          lastMessage: "Grupo criado. Configure os conteúdos.",
-          time: "Agora",
-          creatorId: currentUserId || '',
-          creatorEmail: currentUserEmail || undefined,
-          memberIds: currentUserId ? [currentUserId] : [],
-          adminIds: currentUserId ? [currentUserId] : [],
-          status: 'active',
-          pixelId: pixelId || undefined,
-          pixelToken: pixelToken || undefined
+        const payload = { 
+            groupName, description, coverImage, selectedCoverFile,
+            vipMediaItems, vipDoorText, vipButtonText, price, currency,
+            accessType, accessConfig, selectedProviderId, pixelId, pixelToken
         };
-        await groupService.createGroup(newGroup);
         
+        await ServiçoCriaçãoGrupoPago.criar(payload, onProgress);
+
         setTimeout(() => {
             setIsUploading(false);
             navigate('/groups', { replace: true });
         }, 800);
         
     } catch (e) {
+        console.error(e);
         alert("Erro ao criar grupo VIP.");
         setIsCreating(false);
         setIsUploading(false);
     }
-  }, [groupName, description, coverImage, selectedCoverFile, vipMediaItems, vipDoorText, vipButtonText, price, currency, accessType, accessConfig, selectedProviderId, pixelId, pixelToken, isCreating, isUploading, navigate]);
+  }, [
+    groupName, description, coverImage, selectedCoverFile, vipMediaItems, 
+    vipDoorText, vipButtonText, price, currency, accessType, accessConfig, 
+    selectedProviderId, pixelId, pixelToken, isCreating, isUploading, navigate
+  ]);
   
   return {
     groupName, setGroupName,
     description, setDescription,
     coverImage,
-    selectedCoverFile,
     vipMediaItems, setVipMediaItems,
     vipDoorText, setVipDoorText,
     vipButtonText, setVipButtonText,
@@ -273,7 +225,7 @@ export const useCreateVipGroup = () => {
     handleVipMediaChange,
     moveVipMediaItem,
     removeMediaItem,
-_handlePriceChange,
+    handlePriceChange,
     handleSavePixel,
     handleBack,
     handleSubmit,

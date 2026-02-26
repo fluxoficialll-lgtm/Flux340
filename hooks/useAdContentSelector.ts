@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
+import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post } from '../types';
 
@@ -14,9 +14,12 @@ export const useAdContentSelector = () => {
         const loadContent = async () => {
             setLoading(true);
             const user = authService.getCurrentUser();
-            if (user) {
-                const allPosts = await postService.getUserPosts(user.id);
-                setContent(allPosts);
+            if (user && user.id) {
+                // Corrigido: Usa o serviço de feed para buscar os posts do perfil do usuário
+                const feedResult = await ServiçoPublicaçãoFeed.getFeed('profile', { userId: user.id });
+                // O resultado pode ter um formato diferente, garantimos que pegamos o array de posts
+                const allPosts = feedResult.data || feedResult;
+                setContent(allPosts as Post[]);
             }
             setLoading(false);
         };

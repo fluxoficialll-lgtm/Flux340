@@ -7,7 +7,7 @@
 
 const API_BASE_URL = '/api/reels'; // A base da API para Reels
 
-export const ServiçoPublicaçãoComentáriosReels = {
+export const ServicoPublicacaoComentariosReels = {
 
     /**
      * Adiciona um novo comentário a um Reel específico.

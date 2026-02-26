@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
+import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, User } from '../types';
 
@@ -30,7 +30,7 @@ export const useFeedSearch = () => {
         setLoading(true);
         try {
             if (tab === 'posts') {
-                const data = await postService.searchPosts(query);
+                const data = await ServiçoPublicaçãoFeed.searchPosts(query);
                 setPostResults(data);
             } else {
                 const data = await authService.searchUsers(query);
@@ -51,8 +51,10 @@ export const useFeedSearch = () => {
     const sortedPosts = useMemo(() => {
         const list = [...postResults];
         if (filter === 'recent') {
-            return list.sort((a, b) => b.timestamp - a.timestamp);
+            // Presume que `timestamp` é um número (epoch time) ou uma string ISO 8601
+            return list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         }
+        // Lógica de relevância
         return list.sort((a, b) => {
             const scoreA = (a.likes || 0) + (a.comments || 0) * 2 + (a.views || 0) / 10;
             const scoreB = (b.likes || 0) + (b.comments || 0) * 2 + (b.views || 0) / 10;

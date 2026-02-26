@@ -1,11 +1,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { relationshipService } from '../ServiçosFrontend/ServiçoDeRelacionamento/relationshipService.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import { systemaRelacaoUsuarios } from '../ServiçosFrontend/ServiçoDeRelacionamento/Sistema.Relação.Usuários.js';
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 import { User } from '../types';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 
 export const useGlobalSearch = () => {
   const navigate = useNavigate();
@@ -13,15 +12,16 @@ export const useGlobalSearch = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [tick, setTick] = useState(0);
 
   const currentUserEmail = authService.getCurrentUserEmail();
 
+  // Efeito para buscar usuários com base no termo de pesquisa
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (searchTerm.trim().length > 0) {
         setLoading(true);
         try {
+          // authService agora é a única fonte para buscar usuários
           const results = await authService.searchUsers(searchTerm);
           setUsers(results);
         } catch (error) {
@@ -38,17 +38,20 @@ export const useGlobalSearch = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
+  // Efeito para se inscrever a mudanças nos relacionamentos
   useEffect(() => {
-    const unsubRel = servicoDeSimulacao.subscribe('relationships', () => {
-      setTick(prev => prev + 1);
+    const unsubscribe = systemaRelacaoUsuarios.subscribe(() => {
+      // Força a re-renderização para atualizar o status de seguir/seguindo
+      setUsers(prevUsers => [...prevUsers]); 
     });
-    return () => unsubRel();
+    return () => unsubscribe();
   }, []);
 
+  // Memoiza os usuários enriquecidos para evitar recálculos desnecessários
   const enrichedUsers = useMemo(() => {
     return users.map(user => {
         const username = user.profile?.name || 'unknown';
-        const status = relationshipService.isFollowing(username);
+        const status = systemaRelacaoUsuarios.isFollowing(username);
         const isPrivate = user.profile?.isPrivate || false;
         const isMe = user.email === currentUserEmail;
         const canMessage = (!isPrivate || status === 'following') && !isMe;
@@ -73,23 +76,25 @@ export const useGlobalSearch = () => {
             btnClass
         };
     });
-  }, [users, tick, currentUserEmail]);
+  }, [users, currentUserEmail]); // A dependência do 'tick' foi removida
 
+  // Ação de seguir/deixar de seguir
   const handleAction = async (user: User) => {
     const username = user.profile?.name;
     if (!username || processingId) return;
 
     setProcessingId(user.id);
     try {
-      const status = relationshipService.isFollowing(username);
+      const status = systemaRelacaoUsuarios.isFollowing(username);
       if (status === 'none') {
-        await relationshipService.followUser(username);
+        await systemaRelacaoUsuarios.followUser(username);
       } else {
-        await relationshipService.unfollowUser(username);
+        await systemaRelacaoUsuarios.unfollowUser(username);
       }
+      // O subscribe já vai cuidar de atualizar a UI
     } catch (error: any) {
       console.error("[Search] Follow error:", error);
-      throw error;
+      // A UI pode mostrar um erro aqui
     } finally {
       setProcessingId(null);
     }

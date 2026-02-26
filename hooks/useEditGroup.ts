@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { metaPixelService } from '../ServiçosFrontend/metaPixelService';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
+import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { Group, VipMediaItem } from '../types';
 
 export const useEditGroup = () => {
@@ -167,7 +166,7 @@ export const useEditGroup = () => {
         if (selectedCoverFile) {
             uploadedCount++;
             setUploadCurrent(uploadedCount);
-            finalCoverUrl = await postService.uploadMedia(selectedCoverFile, 'avatars');
+            finalCoverUrl = await fileService.uploadFile(selectedCoverFile);
             setUploadProgress(Math.round((uploadedCount / totalToUpload) * 100));
         }
 
@@ -175,7 +174,7 @@ export const useEditGroup = () => {
         for (const item of filesToUpload) {
             uploadedCount++;
             setUploadCurrent(uploadedCount);
-            const url = await postService.uploadMedia(item.file!, 'vips_doors');
+            const url = await fileService.uploadFile(item.file!);
             uploadedVipMedia.push({ url, type: item.type });
             setUploadProgress(Math.round((uploadedCount / totalToUpload) * 100));
         }

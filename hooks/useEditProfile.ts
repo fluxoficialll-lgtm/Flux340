@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
+import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { AuthError, UserProfile } from '../types';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 
@@ -112,7 +112,7 @@ export const useEditProfile = () => {
               let finalPhotoUrl = formData.photoUrl;
 
               if (selectedFile) {
-                  finalPhotoUrl = await postService.uploadMedia(selectedFile, 'avatars');
+                  finalPhotoUrl = await fileService.uploadFile(selectedFile);
               }
 
               const updatedProfile = { ...formData, photoUrl: finalPhotoUrl };

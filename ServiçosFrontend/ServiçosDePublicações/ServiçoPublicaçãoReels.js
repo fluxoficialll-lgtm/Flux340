@@ -2,44 +2,51 @@
 // ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoReels.js
 
 /**
- * Este serviço é focado na criação e publicação de Reels.
+ * Este serviço é focado na criação, publicação e busca de Reels.
  */
 
-const API_BASE_URL = '/api/reels'; // Endpoint da API para Reels
+const API_BASE_URL = '/api/reels';
 
-export const ServiçoPublicaçãoReels = {
+async function fetchWithAuth(url, options = {}) {
+    const authToken = localStorage.getItem('authToken');
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        ...options.headers,
+    };
 
-    /**
-     * Cria e publica um novo Reel.
-     * @param {object} reelData - Os dados do Reel (ex: { videoUrl, description, songId }).
-     * @returns {Promise<object>} - O objeto do Reel criado.
-     */
+    const response = await fetch(url, { ...options, headers });
+
+    if (!response.ok) {
+        const errorResult = await response.json().catch(() => ({}));
+        throw new Error(errorResult.message || `Falha na requisição para ${url}`);
+    }
+    return response.json();
+}
+
+export const ServiçoPublicacaoReels = {
     async create(reelData) {
-        const authToken = localStorage.getItem('authToken');
-        if (!authToken) {
-            throw new Error('Autenticação necessária para criar um Reel.');
-        }
-
-        // Para uploads de vídeo, geralmente se usa FormData.
-        // Este é um exemplo simplificado com JSON. Pode precisar de ajuste.
-        const response = await fetch(API_BASE_URL, {
+        return fetchWithAuth(API_BASE_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json', // Mudar para 'multipart/form-data' se estiver enviando arquivos
-                'Authorization': `Bearer ${authToken}`,
-            },
-            body: JSON.stringify(reelData), // Se usar FormData, o body será o objeto FormData
+            body: JSON.stringify(reelData),
         });
-
-        if (!response.ok) {
-            const errorResult = await response.json();
-            throw new Error(errorResult.message || 'Falha ao criar o Reel.');
-        }
-
-        return response.json();
     },
 
-    // Métodos futuros podem incluir:
-    // async update(reelId, updates) { ... }
-    // async delete(reelId) { ... }
+    /**
+     * Busca todos os reels.
+     * @returns {Promise<Array<object>>} - Uma lista de reels.
+     */
+    async getReels() {
+        const response = await fetchWithAuth(API_BASE_URL);
+        return response.data; // A API de reels encapsula em { data: [...] }
+    },
+
+    /**
+     * Busca um reel específico pelo seu ID.
+     * @param {string} reelId - O ID do reel.
+     * @returns {Promise<object>} - O objeto do reel.
+     */
+    async getReelById(reelId) {
+        return fetchWithAuth(`${API_BASE_URL}/${reelId}`);
+    }
 };

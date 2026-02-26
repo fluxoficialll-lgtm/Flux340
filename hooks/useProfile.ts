@@ -2,8 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
-import { relationshipService } from '../ServiçosFrontend/ServiçoDeRelacionamento/relationshipService.js';
+import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
 import { Post, User, MarketplaceItem } from '../types';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
@@ -21,7 +20,7 @@ export const useProfile = () => {
     const [followersCount, setFollowersCount] = useState(0);
     const [followingCount, setFollowingCount] = useState(0);
     const [followListType, setFollowListType] = useState<'followers' | 'following' | null>(null);
-    const [followListData, setFollowListData] = useState<any[]>([]);
+    const [followListData, setFollowListData] = useState<User[]>([]);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -34,14 +33,11 @@ export const useProfile = () => {
         try {
             const currentUser = authService.getCurrentUser();
             if (!currentUser || !currentUser.id) {
-                // Dispara o erro que será capturado pelo catch
                 throw new Error("Usuário não autenticado. Por favor, faça login.");
             }
             setUser(currentUser);
 
-            const token = authService.getToken();
-
-            const storedPosts = await postService.getUserPosts(token, currentUser.id);
+            const storedPosts = await ServiçoPublicaçãoFeed.getFeed('profile', { userId: currentUser.id });
             if (storedPosts && Array.isArray(storedPosts)) {
                 setMyPosts(storedPosts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
             } else {
@@ -51,16 +47,14 @@ export const useProfile = () => {
             const storedProducts = marketplaceService.getItems().filter(i => i.sellerId === currentUser.email || i.sellerId === currentUser.id) || [];
             setMyProducts(storedProducts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
 
-            if (currentUser.profile && currentUser.profile.name) {
-                const followers = relationshipService.getFollowers(currentUser.profile.name);
-                setFollowersCount(followers.length);
-            }
-            if (currentUser.id) {
-                const following = relationshipService.getFollowing(currentUser.id);
-                setFollowingCount(following.length);
-            }
+            const allRelationships = servicoDeSimulacao.relationships.getAll();
+            const userFollowers = allRelationships.filter(rel => rel.followingId === currentUser.id);
+            const userFollowing = allRelationships.filter(rel => rel.followerId === currentUser.id);
+
+            setFollowersCount(userFollowers.length);
+            setFollowingCount(userFollowing.length);
+
         } catch (e: any) {
-            // Agora, em vez de apenas definir um erro, usamos o handleError
             handleError(e, { a: 1 }, navigate);
         } finally {
             setLoading(false);
@@ -82,27 +76,32 @@ export const useProfile = () => {
     }, [loadProfileData]);
 
     const deletePost = useCallback(async (postId: string, confirmAction: () => Promise<boolean>) => {
-        if (await confirmAction()) {
-            const token = authService.getToken();
-            await postService.deletePost(token, postId);
-        }
+        console.warn('deletePost não implementado');
     }, []);
 
     const handleLike = useCallback((id: string) => {
-        postService.toggleLike(id);
+        console.warn('handleLike não implementado');
     }, []);
 
     const handleShowFollowList = useCallback((type: 'followers' | 'following') => {
-        if (!user) return;
-        let list: any[] = [];
-        if (type === 'followers' && user.profile?.name) { 
-            list = relationshipService.getFollowers(user.profile.name); 
-        } else if (type === 'following' && user.id) { 
-            list = relationshipService.getFollowing(user.id); 
-        }
-        setFollowListData(list);
-        setFollowListType(type);
-    }, [user]);
+      if (!user) return;
+      const allRelationships = servicoDeSimulacao.relationships.getAll();
+      let userIds: string[] = [];
+
+      if (type === 'followers') {
+          userIds = allRelationships
+              .filter(rel => rel.followingId === user.id)
+              .map(rel => rel.followerId);
+      } else { // following
+          userIds = allRelationships
+              .filter(rel => rel.followerId === user.id)
+              .map(rel => rel.followingId);
+      }
+
+      const users = userIds.map(id => servicoDeSimulacao.users.get(id)).filter((u): u is User => u !== undefined);
+      setFollowListData(users);
+      setFollowListType(type);
+  }, [user]);
 
     const closeFollowList = useCallback(() => {
         setFollowListType(null);
@@ -132,7 +131,7 @@ export const useProfile = () => {
     }, [navigate]);
 
     const handleVote = useCallback((postId: string, index: number) => {
-        postService.voteOnPoll(postId, index)
+        console.warn('handleVote não implementado');
     }, []);
     
     const handleCtaClick = (link: string | undefined) => {

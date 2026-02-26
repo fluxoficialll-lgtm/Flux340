@@ -1,55 +1,51 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { reelsService } from '../ServiçosFrontend/ServiçoDeReels/reelsService.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { Post } from '../types';
-
-export type CategoryFilter = 'relevant' | 'recent' | 'watched' | 'unwatched' | 'liked';
 
 export const useReelsSearch = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('relevant');
+  const [query, setQuery] = useState('');
   const [results, setResults] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [currentUserEmail, setCurrentUserEmail] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const email = authService.getCurrentUserEmail();
-    if(email) setCurrentUserEmail(email);
-  }, []);
+    const handleSearch = async () => {
+      if (query.trim() === '' || query.length < 3) {
+        setResults([]);
+        return;
+      }
 
-  useEffect(() => {
-    setLoading(true);
-    
-    const timeoutId = setTimeout(() => {
-        const searchResults = reelsService.searchReels(
-            searchTerm, 
-            activeCategory, 
-            currentUserEmail
-        );
-        
+      setIsLoading(true);
+      setError(null);
+      try {
+        const searchResults = await ServiçoPublicaçãoFeed.searchPosts(query);
         setResults(searchResults);
-        setLoading(false);
-    }, 400); // 400ms debounce
+      } catch (err) {
+        setError('Falha ao buscar resultados.');
+        console.error(err);
+      }
+      setIsLoading(false);
+    };
 
-    return () => clearTimeout(timeoutId);
+    const debounceTimeout = setTimeout(() => {
+      handleSearch();
+    }, 500);
 
-  }, [searchTerm, activeCategory, currentUserEmail]);
+    return () => clearTimeout(debounceTimeout);
+  }, [query]);
 
-  const handleNavigate = (path: string) => {
-      navigate(path);
+  const handlePostClick = (postId: string) => {
+    navigate(`/post/${postId}`);
   };
 
   return {
-    searchTerm, 
-    setSearchTerm, 
-    activeCategory, 
-    setActiveCategory, 
-    results, 
-    loading, 
-    currentUserEmail,
-    handleNavigate
+    query,
+    setQuery,
+    results,
+    isLoading,
+    error,
+    handlePostClick
   };
 };

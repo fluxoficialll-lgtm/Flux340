@@ -15,7 +15,7 @@ interface GroupListItemProps {
     onDelete: (e: React.MouseEvent) => void;
 }
 
-export const GroupListItem: React.FC<GroupListItemProps> = ({
+export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     group,
     currentUserEmail,
     unreadCount,

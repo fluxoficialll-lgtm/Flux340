@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
-import { Group } from '../types';
+import { ServiçoCriaçãoGrupoPrivado } from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Privado.js';
 
 export const useCreatePrivateGroup = () => {
   const navigate = useNavigate();
@@ -13,7 +10,7 @@ export const useCreatePrivateGroup = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Crop states
+  // Estado para o cropper de imagem
   const [isCropOpen, setIsCropOpen] = useState(false);
   const [rawImage, setRawImage] = useState<string>('');
 
@@ -31,6 +28,7 @@ export const useCreatePrivateGroup = () => {
 
   const handleCroppedImage = (croppedBase64: string) => {
     setCoverImage(croppedBase64);
+    // Converte o base64 de volta para um arquivo para upload
     fetch(croppedBase64)
       .then(res => res.blob())
       .then(blob => {
@@ -43,45 +41,25 @@ export const useCreatePrivateGroup = () => {
       if (window.history.state && window.history.state.idx > 0) {
           navigate(-1);
       } else {
-          navigate('/create-group');
+          navigate('/create-group'); // Rota de fallback
       }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(isCreating) return;
+    if (isCreating) return;
+
     setIsCreating(true);
     
     try {
-        const currentUserId = authService.getCurrentUserId();
-        const currentUserEmail = authService.getCurrentUserEmail();
-        
-        let finalCoverUrl = coverImage;
-        if (selectedFile) {
-            finalCoverUrl = await postService.uploadMedia(selectedFile, 'group_covers');
-        }
-
-        const newGroup: Group = {
-          id: Date.now().toString(),
-          name: groupName,
-          description: description,
-          coverImage: finalCoverUrl,
-          isVip: false,
-          isPrivate: true,
-          lastMessage: "Grupo privado criado.",
-          time: "Agora",
-          creatorId: currentUserId || '',
-          creatorEmail: currentUserEmail || undefined,
-          memberIds: currentUserId ? [currentUserId] : [],
-          adminIds: currentUserId ? [currentUserId] : []
-        };
-
-        await groupService.createGroup(newGroup);
-        navigate('/groups');
-    } catch (e) {
-        alert("Erro ao criar grupo privado.");
+      const groupData = { name: groupName, description };
+      await ServiçoCriaçãoGrupoPrivado.criar(groupData, selectedFile, coverImage);
+      navigate('/groups');
+    } catch (error) {
+      console.error(error); // Log do erro para depuração
+      alert((error as Error).message || "Erro ao criar grupo privado.");
     } finally {
-        setIsCreating(false);
+      setIsCreating(false);
     }
   };
 

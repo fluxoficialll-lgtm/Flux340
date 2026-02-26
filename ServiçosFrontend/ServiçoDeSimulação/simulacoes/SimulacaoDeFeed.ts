@@ -72,6 +72,19 @@ const handleFeedSimulado = (urlObj: URL): Promise<Response> => {
     return Promise.resolve(new Response(JSON.stringify({ data: postsData, nextCursor }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
 };
 
+const handlePostDetailsSimulado = (url: URL): Promise<Response> => {
+    const postId = url.pathname.split('/').pop();
+    console.log(`[SIMULAÇÃO] ✅ Retornando mock para detalhes do post: ${postId}`);
+    const post = todosOsPostsSimulados.find(p => p.id === postId);
+
+    if (post) {
+        return Promise.resolve(new Response(JSON.stringify({ data: post }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    } else {
+        return Promise.resolve(new Response(JSON.stringify({ message: 'Post não encontrado' }), { status: 404 }));
+    }
+};
+
+
 export const handleUserPostsSimulado = (url: URL): Promise<Response> => {
     const userIdMatch = url.pathname.match(/api\/users\/(.*?)\/posts/);
     if (!userIdMatch) return Promise.resolve(new Response(JSON.stringify({ message: 'ID de usuário não encontrado na URL' }), { status: 400 }));
@@ -89,6 +102,7 @@ export const handleUserPostsSimulado = (url: URL): Promise<Response> => {
 
 export const feedHandlers: Record<string, (url: URL, config?: RequestInit) => Promise<Response>> = {
     '/api/posts': handleFeedSimulado,
+    '/api/posts/:id': handlePostDetailsSimulado,
 };
 
 export const mockPostService = {
@@ -98,6 +112,16 @@ export const mockPostService = {
         const postsData = todosOsPostsSimulados.slice(numericCursor, numericCursor + limit);
         const nextCursor = (numericCursor + limit < todosOsPostsSimulados.length) ? numericCursor + limit : null;
         return Promise.resolve({ data: postsData, nextCursor });
+    },
+
+    async getPostById(token: string, postId: string): Promise<Post> {
+        console.log(`[SIMULAÇÃO] ✅ Retornando mock para detalhes do post: ${postId} via mockPostService`);
+        const post = todosOsPostsSimulados.find(p => p.id === postId);
+        if (post) {
+            return Promise.resolve(post);
+        } else {
+            return Promise.reject(new Error('Post não encontrado'));
+        }
     },
 
     async getUserPosts(userId: string): Promise<Post[]> { // FUNÇÃO ADICIONADA

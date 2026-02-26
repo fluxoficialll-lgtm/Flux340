@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { reelsService } from '../ServiçosFrontend/ServiçoDeReels/reelsService.js';
+import { ServiçoPublicacaoReels } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoReels.js';
+import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js'; // Corrigido
 import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { contentSafetyService } from '../ServiçosFrontend/ServiçoDeSegurançaDeConteúdo/contentSafetyService.js';
 import { Group } from '../types';
@@ -16,9 +17,9 @@ export const useCreateReel = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string>(preselectedGroup || 'none');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -38,7 +39,7 @@ export const useCreateReel = () => {
       };
       reader.readAsDataURL(file);
     } else {
-      alert('Por favor, selecione um arquivo de vídeo.');
+      setError('Por favor, selecione um arquivo de vídeo.');
     }
   };
 
@@ -47,30 +48,29 @@ export const useCreateReel = () => {
     if (!videoFile || isCreating) return;
 
     setIsCreating(true);
+    setError(null);
 
     try {
       const isSafe = await contentSafetyService.isTextSafe(description);
       if (!isSafe) {
-        alert('Sua descrição contém palavras que não são permitidas. Por favor, revise o texto.');
-        setIsCreating(false);
-        return;
+        throw new Error('Sua descrição contém palavras não permitidas.');
       }
 
-      const videoUrl = await reelsService.uploadReel(videoFile, setUploadProgress);
+      const videoUrl = await fileService.uploadFile(videoFile);
 
       const user = authService.getCurrentUser();
       if (!user) {
         throw new Error("Usuário não autenticado.");
       }
-
-      await reelsService.createReel({
+      
+      const reelData = {
         description,
         videoUrl,
-        userId: user.id,
-        userAvatar: user.profile?.photoUrl,
-        username: user.profile?.name || "Usuário",
+        authorId: user.id,
         groupId: selectedGroupId !== 'none' ? selectedGroupId : undefined,
-      });
+      };
+
+      await ServiçoPublicacaoReels.create(reelData);
 
       if (selectedGroupId !== 'none') {
         navigate(`/group/${selectedGroupId}`);
@@ -78,11 +78,10 @@ export const useCreateReel = () => {
         navigate('/feed');
       }
 
-    } catch (error) {
-      console.error("Erro ao criar o Reel:", error);
-      alert('Ocorreu um erro ao criar seu Reel. Tente novamente.');
+    } catch (err: any) {
+      console.error("Erro ao criar o Reel:", err);
+      setError(err.message || 'Ocorreu um erro ao criar seu Reel. Tente novamente.');
       setIsCreating(false);
-      setUploadProgress(0);
     }
   };
 
@@ -90,11 +89,11 @@ export const useCreateReel = () => {
     description, setDescription,
     videoPreview,
     isCreating,
-    uploadProgress,
     userGroups,
     selectedGroupId, setSelectedGroupId,
     handleFileChange,
     handleSubmit,
+    error,
     navigate
   };
 };

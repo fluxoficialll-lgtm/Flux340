@@ -1,98 +1,86 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
+import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, PollOption } from '../types';
 
-export const useCreatePoll = () => {
-  const navigate = useNavigate();
-  const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState<string[]>(['', '']);
-  const [duration, setDuration] = useState('24 Horas');
-  const [isCreateDisabled, setIsCreateDisabled] = useState(true);
+export const useCreatePoll = (editingPost: Post | null) => {
+    const navigate = useNavigate();
+    const [question, setQuestion] = useState('');
+    const [options, setOptions] = useState<PollOption[]>([{ id: '1', text: '' }, { id: '2', text: '' }]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentUser = authService.getCurrentUser();
-  const username = currentUser?.profile?.name ? `@${currentUser.profile.name}` : "@usuario";
-  const avatar = currentUser?.profile?.photoUrl || "https://randomuser.me/api/portraits/men/32.jpg";
+    useEffect(() => {
+        if (editingPost && editingPost.poll) {
+            setQuestion(editingPost.poll.question);
+            setOptions(editingPost.poll.options.map((opt, index) => ({ id: `${index + 1}`, text: opt.text, votes: opt.votes })) || []);
+        }
+    }, [editingPost]);
 
-  useEffect(() => {
-    const questionFilled = question.trim().length > 0;
-    const filledOptionsCount = options.filter(opt => opt.trim().length > 0).length;
-    setIsCreateDisabled(!(questionFilled && filledOptionsCount >= 2));
-  }, [question, options]);
-
-  const handleAddOption = () => {
-    if (options.length < 5) {
-      setOptions([...options, '']);
-    } else {
-      alert('Máximo de 5 opções atingido.');
-    }
-  };
-
-  const handleRemoveOption = (index: number) => {
-    const newOptions = options.filter((_, i) => i !== index);
-    setOptions(newOptions);
-  };
-
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-  };
-
-  const handleDurationClick = () => {
-    const current = duration;
-    let newDuration;
-    if (current === '24 Horas') newDuration = '7 Dias';
-    else if (current === '7 Dias') newDuration = '30 Dias';
-    else newDuration = '24 Horas';
-    setDuration(newDuration);
-    alert(`Duração da enquete alterada para: ${newDuration}.`);
-  };
-
-  const handleCreatePoll = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isCreateDisabled) return;
-
-    const validOptions = options.filter(opt => opt.trim().length > 0);
-    const pollOptionsData: PollOption[] = validOptions.map(opt => ({ text: opt, votes: 0 }));
-
-    const newPost: Post = {
-      id: Date.now().toString(),
-      type: 'poll',
-      authorId: currentUser?.id || '',
-      username: username,
-      avatar: avatar,
-      text: question,
-      time: "Agora",
-      timestamp: Date.now(),
-      isPublic: true,
-      views: 0,
-      likes: 0,
-      comments: 0,
-      liked: false,
-      pollOptions: pollOptionsData,
-      votedOptionIndex: null
+    const handleOptionChange = (id: string, text: string) => {
+        const newOptions = options.map(option => option.id === id ? { ...option, text } : option);
+        setOptions(newOptions);
     };
 
-    postService.addPost(newPost);
-    navigate('/feed');
-  };
+    const addOption = () => {
+        if (options.length < 5) {
+            setOptions([...options, { id: `${Date.now()}` , text: '' }]);
+        }
+    };
 
-  const handleNavigateBack = () => navigate('/create-post');
+    const removeOption = (id: string) => {
+        if (options.length > 2) {
+            setOptions(options.filter(option => option.id !== id));
+        }
+    };
 
-  return {
-    question,
-    setQuestion,
-    options,
-    duration,
-    isCreateDisabled,
-    handleAddOption,
-    handleRemoveOption,
-    handleOptionChange,
-    handleDurationClick,
-    handleCreatePoll,
-    handleNavigateBack
-  };
+    const handleSubmit = async () => {
+        if (question.trim() === '' || options.some(opt => opt.text.trim() === '')) {
+            alert('Por favor, preencha a pergunta e todas as opções da enquete.');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        const postData = {
+            content: question,
+            type: 'poll',
+            poll: {
+                question,
+                options: options.map(opt => ({ text: opt.text.trim(), votes: opt.votes || 0 }))
+            },
+            // Se for edição, precisamos passar o ID do post
+            ...(editingPost && { postId: editingPost.id })
+        };
+
+        try {
+            if (editingPost) {
+                // Lógica de atualização (PUT)
+                await ServiçoPublicaçãoFeed.updatePost(editingPost.id, postData);
+            } else {
+                // Lógica de criação (POST)
+                await ServiçoPublicaçãoFeed.createPost(postData);
+            }
+            navigate('/'); // Redireciona para a home após sucesso
+        } catch (error) {
+            console.error("Erro ao criar/atualizar enquete:", error);
+            alert('Ocorreu um erro. Tente novamente.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return {
+        question,
+        setQuestion,
+        options,
+        handleOptionChange,
+        addOption,
+        removeOption,
+        handleSubmit,
+        isSubmitting,
+        canAddOption: options.length < 5,
+        canRemoveOption: options.length > 2,
+    };
 };

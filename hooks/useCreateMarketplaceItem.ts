@@ -1,10 +1,8 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// Importação do serviço de marketplace validado
 import { ServiçoPublicaçãoMarketplace } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoMarketplace.js';
-// Mantendo outros serviços que o hook possa precisar
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService'; // Usado para upload de mídia
+import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { MarketplaceItem } from '../types';
 
 export const useCreateMarketplaceItem = () => {
@@ -13,14 +11,12 @@ export const useCreateMarketplaceItem = () => {
   const state = location.state as { type?: 'paid' | 'organic' } | null;
   const isPaid = state?.type === 'paid';
 
-  // Estados do formulário (title, price, etc.)
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('Eletrônicos');
   const [locationVal, setLocationVal] = useState('');
   const [description, setDescription] = useState('');
   
-  // Estados de mídia
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
   const [additionalMedia, setAdditionalMedia] = useState<{file: File, url: string, type: 'image' | 'video'}[]>([]);
@@ -28,7 +24,6 @@ export const useCreateMarketplaceItem = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ... (Handlers de mídia como handleCoverChange, handleGalleryChange permanecem os mesmos)
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -56,11 +51,9 @@ export const useCreateMarketplaceItem = () => {
     setError(null);
 
     try {
-      // Passo 1: Preparar os dados para o serviço.
-      // A lógica de upload permanece por enquanto, mas o objetivo é que o serviço lide com isso.
-      const coverImageUrl = selectedCoverFile ? await postService.uploadMedia(selectedCoverFile, 'marketplace') : coverImage || '';
+      const coverImageUrl = selectedCoverFile ? await fileService.uploadFile(selectedCoverFile) : coverImage || '';
       const additionalMediaUrls = await Promise.all(
-        additionalMedia.map(item => postService.uploadMedia(item.file, 'marketplace'))
+        additionalMedia.map(item => fileService.uploadFile(item.file))
       );
 
       const rawPrice = price.replace(/\./g, '').replace(',', '.');
@@ -71,16 +64,12 @@ export const useCreateMarketplaceItem = () => {
         category: category,
         description: description,
         location: locationVal,
-        images: [coverImageUrl, ...additionalMediaUrls].filter(Boolean), // Filtra URLs nulas/vazias
-        // O serviço irá extrair o 'authToken' e associar o vendedor (usuário logado)
+        images: [coverImageUrl, ...additionalMediaUrls].filter(Boolean), 
       };
 
-      // Passo 2: Chamar o serviço de publicação do marketplace.
-      // A chamada é mais limpa e direta.
       const newItem = await ServiçoPublicaçãoMarketplace.create(itemData);
       console.log('Item de marketplace criado com sucesso:', newItem);
 
-      // Passo 3: Redirecionar o usuário.
       navigate('/marketplace');
 
     } catch (err: any) {

@@ -1,12 +1,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { postService } from '../ServiçosFrontend/ServiçoDePosts/postService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, Comment } from '../types';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
-// PASSO 1: Importar o hook de ações que refatoramos
 import { usePostActions } from './usePostActions';
+import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
 export const usePostDetails = () => {
   const navigate = useNavigate();
@@ -20,60 +18,45 @@ export const usePostDetails = () => {
   const currentUser = authService.getCurrentUser();
   const currentUserId = currentUser?.id;
 
-  // A função para carregar os dados permanece a mesma
-  const loadData = useCallback(() => {
+  const loadData = useCallback(async () => {
     if (id) {
-      const foundPost = postService.getPostById(id);
-      if (foundPost) {
-        setPost(foundPost);
-        setComments(foundPost.commentsList || []);
-      } else {
-        navigate('/feed');
+      try {
+        const foundPost = await ServiçoPublicaçãoFeed.getPostById(id);
+        if (foundPost) {
+          setPost(foundPost);
+          // Assumindo que os comentários são parte do objeto do post
+          setComments(foundPost.commentsList || []);
+        } else {
+          navigate('/feed');
+        }
+      } catch (error) {
+        console.error("Falha ao buscar detalhes do post:", error);
+        navigate('/feed'); // Redireciona em caso de erro
       }
     }
   }, [id, navigate]);
 
   useEffect(() => {
     loadData();
-    const unsub = servicoDeSimulacao.subscribe('posts', (updatedPost) => {
-        if (updatedPost.id === id) {
-            loadData();
-        }
-    });
-    return () => unsub();
   }, [id, loadData]);
 
-  // PASSO 2: Instanciar o usePostActions, se o post existir
-  // Usamos um post 'dummy' se o post principal ainda não carregou para evitar erros
+  // O dummy post permanece útil para evitar erros de renderização antes do post carregar
   const dummyPost: Post = { id: '', likes: 0, comments: 0, liked: false, username: '', avatar: '', time: '', text: '' };
-  const { handleCommentSubmit, isCommenting, commentError } = usePostActions(post || dummyPost);
+  const { handleCommentSubmit, isCommenting, commentError, handleLike, handleDelete } = usePostActions(post || dummyPost);
 
-  // A lógica de Like pode ser movida para o usePostActions no futuro, mas mantemos por enquanto
-  const handleLike = () => {
-    if (!post) return;
-    const isLiked = !post.liked;
-    setPost(p => p ? { ...p, liked: isLiked, likes: p.likes + (isLiked ? 1 : -1) } : null);
-    postService.toggleLike(post.id);
-  };
-
-  // PASSO 3: Substituir a lógica de handleSendComment
   const handleSendComment = async () => {
     if (!commentText.trim() || !post || !currentUser) return;
     
-    // Chama a função do nosso hook centralizado
     const success = await handleCommentSubmit(commentText.trim());
     
-    // Se a publicação for bem-sucedida, limpamos a UI e recarregamos os dados
     if (success) {
         setCommentText('');
         setReplyingTo(null);
-        // Recarrega a lista de comentários para exibir o novo comentário
-        loadData(); 
+        loadData(); // Recarrega os dados para mostrar o novo comentário
     }
-    // O estado de erro (commentError) e carregamento (isCommenting) já são gerenciados pelo usePostActions
   };
   
-  // As outras funções (delete, like de comentário, etc) permanecem por enquanto
+  // Estas funções podem ser implementadas no futuro
   const handleDeleteComment = async (commentId: string) => { /* ... */ };
   const handleCommentLike = (commentId: string) => { /* ... */ };
   const handleVote = (optionIndex: number) => { /* ... */ };
@@ -86,14 +69,14 @@ export const usePostDetails = () => {
     replyingTo, 
     setReplyingTo, 
     currentUserId, 
-    handleLike, 
-    handleSendComment, // Agora esta função usa nossa nova lógica
+    handleLike, // Vem do usePostActions
+    handleDelete, // Vem do usePostActions
+    handleSendComment, 
     handleDeleteComment, 
     handleCommentLike, 
     handleVote, 
     navigate,
-    // PASSO 4: Expor os novos estados para a página
-    isCommenting, // Para a UI saber que um comentário está sendo enviado
-    commentError, // Para a UI poder exibir uma mensagem de erro
+    isCommenting, 
+    commentError, 
   };
 };
