@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Stat } from '../../ComponentesPerfilProprio/Stat';
 
 interface VisitorInfoCardProps {
     avatar?: string;
@@ -19,11 +20,14 @@ interface VisitorInfoCardProps {
     onFollowClick: () => void;
     onMessageClick: () => void;
     onAvatarClick: () => void;
+    onFollowersClick?: () => void;
+    onFollowingClick?: () => void;
 }
 
 export const VisitorInfoCard: React.FC<VisitorInfoCardProps> = ({
     avatar, nickname, username, bio, stats, isMe, isBlocked,
-    relationStatus, isFollowLoading, canMessage, onFollowClick, onMessageClick, onAvatarClick
+    relationStatus, isFollowLoading, canMessage, onFollowClick, onMessageClick, onAvatarClick,
+    onFollowersClick, onFollowingClick
 }) => {
     if (isBlocked) return null;
 
@@ -39,18 +43,9 @@ export const VisitorInfoCard: React.FC<VisitorInfoCardProps> = ({
             <span className="profile-handle">{username}</span>
             
             <div className="profile-stats-container">
-                <div className="stat-box">
-                    <span className="stat-value">{stats.posts}</span>
-                    <span className="stat-label">Posts</span>
-                </div>
-                <div className="stat-box">
-                    <span className="stat-value">{stats.followers}</span>
-                    <span className="stat-label">Seguidores</span>
-                </div>
-                <div className="stat-box">
-                    <span className="stat-value">{stats.following}</span>
-                    <span className="stat-label">Seguindo</span>
-                </div>
+                <Stat value={stats.posts} label="Posts" />
+                <Stat value={stats.followers} label="Seguidores" onClick={onFollowersClick} />
+                <Stat value={stats.following} label="Seguindo" onClick={onFollowingClick} />
             </div>
 
             <p className="profile-bio">{bio}</p>

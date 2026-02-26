@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { ContainerFeed } from '../Componentes/ComponentesDeFeed/Container.Feed';
 import { AvatarPreviewModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
@@ -7,29 +7,57 @@ import { Footer } from '../Componentes/layout/Footer';
 import { VisitorHeader } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorHeader';
 import { VisitorInfoCard } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorInfoCard';
 import { VisitorBlockedState, VisitorPrivateState } from '../Componentes/ComponentesDeUserProfile/Componentes/VisitorStates';
-import { NavegacaoPorAbasDoPerfil as ProfileTabNav } from '../Componentes/ComponentesPerfilProprio/NavegacaoPorAbasDoPerfil';
-import { GradeDeReelsDoPerfil as ProfileReelsGrid } from '../Componentes/ComponentesPerfilProprio/GradeDeReelsDoPerfil';
-import { GradeDeProdutosDoPerfil as ProfileProductsGrid } from '../Componentes/ComponentesPerfilProprio/GradeDeProdutosDoPerfil';
+import { ModalListaDeSeguidores } from '../Componentes/ComponentesPerfilProprio/ModalListaDeSeguidores';
+
+// 1. Importações corrigidas e padronizadas
+import { CardCategoriasPerfil } from '../Componentes/ComponentesPerfilProprio/Card.Categorias.Perfil';
+import { GradeDePostagens } from '../Componentes/ComponentesPerfilProprio/Grade.Postagens';
+import { GradeDeProdutos } from '../Componentes/ComponentesPerfilProprio/Grade.Produtos';
+import { GradeDeFotos } from '../Componentes/ComponentesPerfilProprio/Grade.Fotos';
+import { GradeDeReels } from '../Componentes/ComponentesPerfilProprio/Grade.Reels';
 
 export const UserProfile: React.FC = () => {
   const {
     isLoading, isMe, isBlocked, isPrivate, isFollowLoading, userData, userPosts, userProducts,
     activeTab, setActiveTab, relationStatus, canMessage, isContentVisible, targetUserEmail,
-    handleFollowClick, handleToggleBlock, handleLike, handleVote, navigate, handleMessageClick
+    handleFollowClick, handleToggleBlock, handleLike, handleVote, navigate, handleMessageClick,
+    isModalOpen, modalTitle, modalUsers, handleFollowersClick, handleFollowingClick, handleCloseModal, 
+    isPreviewOpen, setIsPreviewOpen
   } = useUserProfile();
 
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   if (isLoading || !userData) {
     return <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white"><i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i></div>;
   }
 
+  // 2. Filtrando o conteúdo uma vez para reutilização
+  const textPosts = userPosts.filter(p => p.type !== 'video' && p.type !== 'photo');
+  const photoPosts = userPosts.filter(p => p.type === 'photo');
+  const videoPosts = userPosts.filter(p => p.type === 'video');
+
+  const renderContent = () => {
+      if (!isContentVisible) return <VisitorPrivateState />;
+
+      // 3. Renderização condicional unificada
+      switch (activeTab) {
+          case 'posts':
+              return <GradeDePostagens posts={textPosts} />;
+          case 'products':
+              return <GradeDeProdutos products={userProducts} onProductClick={(p) => navigate(`/marketplace/product/${p.id}`)} />;
+          case 'fotos':
+              return <GradeDeFotos photos={photoPosts} onPhotoClick={(p) => navigate(`/post/${p.id}`)} />;
+          case 'reels':
+              return <GradeDeReels reels={videoPosts} onReelClick={(p) => navigate(`/reels/${p.id}`, { state: { authorId: targetUserEmail } })} />;
+          default:
+              return <div className="no-content">Nenhum conteúdo.</div>;
+      }
+  };
+
   return (
     <div className="h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
       <style>{`
           main { flex-grow: 1; overflow-y: auto; padding-top: 80px; padding-bottom: 100px; scroll-behavior: smooth; }
-          .post-list { padding: 0 10px; display: flex; flex-direction: column; }
           .no-content { text-align: center; color: #666; padding: 40px 0; font-size: 14px; width: 100%; }
       `}</style>
 
@@ -63,45 +91,32 @@ export const UserProfile: React.FC = () => {
                 onFollowClick={handleFollowClick}
                 onMessageClick={handleMessageClick}
                 onAvatarClick={() => setIsPreviewOpen(true)}
+                onFollowersClick={handleFollowersClick}
+                onFollowingClick={handleFollowingClick}
               />
-
-              {isContentVisible ? (
-                <div className="animate-fade-in">
-                  <ProfileTabNav 
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    hasProducts={userProducts.length > 0}
-                  />
-                  <div className="tab-content px-2 pb-10">
-                    {activeTab === 'posts' && (
-                        <div className="post-list px-3">
-                            {userPosts.filter(p => p.type !== 'video' && p.type !== 'photo').length > 0 ? 
-                                userPosts.filter(p => p.type !== 'video' && p.type !== 'photo').map(post => (
-                                    <ContainerFeed key={post.id} post={post} onLike={handleLike} onDelete={()=>{}} onUserClick={() => {}} onCommentClick={(id)=>navigate(`/post/${id}`)} onShare={() => {}} onVote={handleVote} onCtaClick={(l) => l?.startsWith('http') ? window.open(l,'_blank') : navigate(l||'')} />
-                                )) : <div className="no-content">Nenhum post.</div>}
-                        </div>
-                    )}
-                    {activeTab === 'products' && <ProfileProductsGrid products={userProducts} onProductClick={(id) => navigate(`/marketplace/product/${id}`)} />}
-                    {activeTab === 'fotos' && (
-                        <div className="post-list px-3">
-                            {userPosts.filter(p => p.type === 'photo').length > 0 ? 
-                                userPosts.filter(p => p.type === 'photo').map(post => (
-                                    <ContainerFeed key={post.id} post={post} onLike={handleLike} onDelete={()=>{}} onUserClick={() => {}} onCommentClick={(id)=>navigate(`/post/${id}`)} onShare={() => {}} onVote={handleVote} onCtaClick={(l) => l?.startsWith('http') ? window.open(l,'_blank') : navigate(l||'')} />
-                                )) : <div className="no-content">Nenhuma foto.</div>}
-                        </div>
-                    )}
-                    {activeTab === 'reels' && <ProfileReelsGrid reels={userPosts.filter(p => p.type === 'video')} onReelClick={(post) => navigate(`/reels/${post.id}`, { state: { authorId: targetUserEmail } })} onDelete={() => {}} />}
-                  </div>
-                </div>
-              ) : (
-                <VisitorPrivateState />
-              )}
+              <div className="mt-4">
+                <CardCategoriasPerfil 
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  hasProducts={userProducts.length > 0}
+                />
+              </div>
+              <div className="tab-content mt-4 px-2 pb-10">
+                {renderContent()}
+              </div>
             </>
           )}
         </div>
       </main>
 
       <Footer />
+
+      <ModalListaDeSeguidores 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal} 
+        users={modalUsers} 
+        title={modalTitle} 
+      />
 
       <AvatarPreviewModal 
         isOpen={isPreviewOpen} 

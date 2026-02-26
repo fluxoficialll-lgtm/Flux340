@@ -1,33 +1,77 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 
 import { CabecalhoPerfil } from '../Componentes/ComponentesPerfilProprio/CabecalhoPerfil';
 import { CartaoDeInformacoesDoPerfil } from '../Componentes/ComponentesPerfilProprio/CartaoDeInformacoesDoPerfil';
-import { NavegacaoPorAbasDoPerfil } from '../Componentes/ComponentesPerfilProprio/NavegacaoPorAbasDoPerfil';
-import { GradeDeReelsDoPerfil } from '../Componentes/ComponentesPerfilProprio/GradeDeReelsDoPerfil';
-import { GradeDeProdutosDoPerfil } from '../Componentes/ComponentesPerfilProprio/GradeDeProdutosDoPerfil';
-import { ContainerFeed } from '../Componentes/ComponentesDeFeed/Container.Feed';
+import { CardCategoriasPerfil } from '../Componentes/ComponentesPerfilProprio/Card.Categorias.Perfil';
 import { Footer } from '../Componentes/layout/Footer';
 import { ModalListaDeSeguidores } from '../Componentes/ComponentesPerfilProprio/ModalListaDeSeguidores';
 import { AvatarPreviewModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 
+// Importando as novas grades padronizadas
+import { GradeDePostagens } from '../Componentes/ComponentesPerfilProprio/Grade.Postagens';
+import { GradeDeProdutos } from '../Componentes/ComponentesPerfilProprio/Grade.Produtos';
+import { GradeDeFotos } from '../Componentes/ComponentesPerfilProprio/Grade.Fotos';
+import { GradeDeReels } from '../Componentes/ComponentesPerfilProprio/Grade.Reels';
+
 export const Profile = () => {
-    const activeTab = 'posts';
+    // 1. Estado dinâmico para a aba ativa
+    const [activeTab, setActiveTab] = useState('posts');
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalUsers, setModalUsers] = useState([]);
+
+    // 2. Dados mock mais completos para cada grade
     const mockPosts = [
-        { id: '1', type: 'text' },
-        { id: '2', type: 'photo' },
-        { id: '3', type: 'video' }
+        { id: '1', type: 'photo', src: 'https://source.unsplash.com/random/500x500?sig=1' },
+        { id: '2', type: 'video', thumbnail: 'https://source.unsplash.com/random/500x500?sig=2' },
+        { id: '3', type: 'text', content: 'Este é um exemplo de um post apenas com texto, mostrando como ele pode aparecer na grade.' },
+        { id: '4', type: 'photo', src: 'https://source.unsplash.com/random/500x500?sig=3' },
+        { id: '5', type: 'photo', src: 'https://source.unsplash.com/random/500x500?sig=4' },
+        { id: '6', type: 'video', thumbnail: 'https://source.unsplash.com/random/500x500?sig=5' },
     ];
 
-    const mockProducts = [{ id: '1', name: 'Produto 1', price: 'R$10', image: 'https://via.placeholder.com/150' }, { id: '2', name: 'Produto 2', price: 'R$20', image: 'https://via.placeholder.com/150' }];
-
-    const mockUsers = [
-        { id: '1', nickname: 'Usuário 1', username: '@usuario1', avatar: 'https://via.placeholder.com/150' },
-        { id: '2', nickname: 'Usuário 2', username: '@usuario2', avatar: 'https://via.placeholder.com/150' }
+    const mockProducts = [
+        { id: '1', name: 'Produto Incrível', price: 'R$ 99,90', image: 'https://source.unsplash.com/random/400x400?sig=10' },
+        { id: '2', name: 'Item Fantástico', price: 'R$ 149,00', image: 'https://source.unsplash.com/random/400x400?sig=11' },
+        { id: '3', name: 'Super Gadget', price: 'R$ 299,90', image: 'https://source.unsplash.com/random/400x400?sig=12' },
     ];
+
+    const mockPhotos = [
+        { id: '1', src: 'https://source.unsplash.com/random/500x500?sig=20' },
+        { id: '2', src: 'https://source.unsplash.com/random/500x500?sig=21' },
+        { id: '3', src: 'https://source.unsplash.com/random/500x500?sig=22' },
+        { id: '4', src: 'https://source.unsplash.com/random/500x500?sig=23' },
+        { id: '5', src: 'https://source.unsplash.com/random/500x500?sig=24' },
+    ];
+
+    const mockReels = [
+        { id: '1', thumbnail: 'https://source.unsplash.com/random/270x480?sig=30' },
+        { id: '2', thumbnail: 'https://source.unsplash.com/random/270x480?sig=31' },
+        { id: '3', thumbnail: 'https://source.unsplash.com/random/270x480?sig=32' },
+        { id: '4', thumbnail: 'https://source.unsplash.com/random/270x480?sig=33' },
+    ];
+
+    const mockFollowers = [{ id: '1', nickname: 'Seguidor 1', username: '@seguidor1', avatar: 'https://via.placeholder.com/150' }];
+    const mockFollowing = [{ id: '1', nickname: 'Seguindo 1', username: '@seguindo1', avatar: 'https://via.placeholder.com/150' }];
+
+    const handleFollowersClick = () => {
+        setModalTitle('Seguidores');
+        setModalUsers(mockFollowers);
+        setIsModalOpen(true);
+    };
+
+    const handleFollowingClick = () => {
+        setModalTitle('Seguindo');
+        setModalUsers(mockFollowing);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => setIsModalOpen(false);
 
     return (
-        <div className="profile-page h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
+        <div className="h-[100dvh] bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
 
             <style>{`
                 main { flex-grow: 1; overflow-y: auto; padding-top: 80px; padding-bottom: 100px; }
@@ -37,61 +81,35 @@ export const Profile = () => {
             <CabecalhoPerfil />
 
             <main className="flex-grow w-full overflow-y-auto no-scrollbar">
-                <div style={{width:'100%', maxWidth:'500px', margin:'0 auto', paddingTop:'10px', paddingBottom: '100px'}}>
-
+                <div style={{width:'100%', maxWidth:'500px', margin:'0 auto', paddingTop:'10px'}}>
                     <CartaoDeInformacoesDoPerfil 
-                        avatar="https://via.placeholder.com/150"
-                        nickname="Usuário"
-                        username="@usuario"
-                        bio="Sem biografia definida."
-                        website="https://site.com"
-                        stats={{
-                            posts: 10,
-                            followers: 100,
-                            following: 50
-                        }}
+                        avatar="https://source.unsplash.com/random/150x150"
+                        nickname="Usuário Padrão"
+                        username="@usuario.padrao"
+                        bio="Explorando o mundo, um pixel de cada vez."
+                        website="https://meusite.com"
+                        stats={{ posts: mockPosts.length, followers: 134, following: 89 }}
+                        onFollowersClick={handleFollowersClick}
+                        onFollowingClick={handleFollowingClick}
                     />
+                </div>
 
-                    <div className="profile-tabs-container">
-                        <NavegacaoPorAbasDoPerfil 
-                            activeTab={activeTab}
-                            setActiveTab={() => {}}
-                            hasProducts={true}
-                        />
+                <div className="profile-tabs-container mt-4">
+                    {/* 3. Passando a função para o componente de categorias */}
+                    <CardCategoriasPerfil 
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        hasProducts={mockProducts.length > 0}
+                    />
+                </div>
 
-                        <div className="tab-content">
-
-                            {activeTab === 'posts' && (
-                                <div className="post-list animate-fade-in px-3">
-                                    {mockPosts.length > 0 ? 
-                                        mockPosts.map(post => (
-                                            <ContainerFeed key={post.id} post={post} />
-                                        )) : <div className="no-content">Sem posts.</div>}
-                                </div>
-                            )}
-
-                            {activeTab === 'products' && (
-                                <GradeDeProdutosDoPerfil 
-                                    products={mockProducts}
-                                />
-                            )}
-
-                            {activeTab === 'fotos' && (
-                                <div className="post-list animate-fade-in px-3">
-                                    {mockPosts.length > 0 ? 
-                                        mockPosts.map(post => (
-                                            <ContainerFeed key={post.id} post={post} />
-                                        )) : <div className="no-content">Sem fotos.</div>}
-                                </div>
-                            )}
-
-                            {activeTab === 'reels' && (
-                                <GradeDeReelsDoPerfil 
-                                    reels={mockPosts}
-                                />
-                            )}
-
-                        </div>
+                <div style={{width:'100%', maxWidth:'500px', margin:'0 auto', paddingBottom: '100px'}}>
+                    {/* 4. Renderização condicional da grade correta */}
+                    <div className="tab-content mt-4">
+                        {activeTab === 'posts' && <GradeDePostagens posts={mockPosts} />}
+                        {activeTab === 'products' && <GradeDeProdutos products={mockProducts} />}
+                        {activeTab === 'fotos' && <GradeDeFotos photos={mockPhotos} />}
+                        {activeTab === 'reels' && <GradeDeReels reels={mockReels} />}
                     </div>
                 </div>
             </main>
@@ -99,17 +117,13 @@ export const Profile = () => {
             <Footer />
 
             <ModalListaDeSeguidores 
-                isOpen={false} 
-                onClose={() => {}} 
-                users={mockUsers} 
-                title="Seguidores" 
+                isOpen={isModalOpen} 
+                onClose={handleCloseModal} 
+                users={modalUsers} 
+                title={modalTitle} 
             />
 
-            <AvatarPreviewModal 
-                isOpen={false}
-                imageSrc=""
-                username="Usuário"
-            />
+            <AvatarPreviewModal isOpen={false} imageSrc="" username="Usuário" />
         </div>
     );
 };
