@@ -3,16 +3,15 @@ import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Importa os arrays de rotas dos módulos
-import {
-  authRoutes,
-  feedRoutes,
-  groupRoutes,
-  marketplaceRoutes,
-  profileRoutes,
-  settingsRoutes,
-  financialRoutes,
-  notificationRoutes,
-} from './modules';
+import { authRoutes } from './Rotas.Autenticacao';
+import { feedRoutes } from './Rotas.Feed';
+import { groupRoutes } from './Rotas.Grupos';
+import { marketplaceRoutes } from './Rotas.Marketplace';
+import { profileRoutes } from './Rotas.Perfil';
+import { settingsRoutes } from './Rotas.Configuracoes';
+import { financialRoutes } from './Rotas.Financeiro';
+import { notificationRoutes } from './Rotas.Notificacoes';
+import { miscRoutes } from './Rotas.Diversos';
 
 // Combina todos os módulos em um único array
 const allRoutes = [
@@ -23,7 +22,8 @@ const allRoutes = [
   ...profileRoutes,
   ...settingsRoutes,
   ...financialRoutes,
-  ...notificationRoutes
+  ...notificationRoutes,
+  ...miscRoutes,
 ];
 
 // Componente de Loading
