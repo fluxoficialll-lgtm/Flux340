@@ -9,6 +9,9 @@ import rotasSyncPay from './Rotas.Provedor.SyncPay.js';
 import rotasPayPal from './Rotas.Provedor.PayPal.js';
 import rotasStripe from './Rotas.Provedor.Stripe.js';
 
+// Importando a nova rota de gestão de variáveis
+import rotasGestaoVariaveis from './Rotas.Gestão.Variáveis.js';
+
 // ---- ROTAS COM CONTROLADORES AUSENTES (Desativadas Temporariamente) ----
 // import rotasUsuario from './Rotas.Usuario.js'; 
 // import RotasFeed from './Rotas.Publicacao.Feed.js';
@@ -20,6 +23,9 @@ import rotasStripe from './Rotas.Provedor.Stripe.js';
 const router = express.Router();
 
 // Agrupa as rotas importadas dos módulos sob seus respectivos prefixos
+
+// Rota de Configuração (ex: /api/v1/config/boot)
+router.use('/v1/config', rotasGestaoVariaveis);
 
 // Rotas de Autenticação (ex: /api/auth/register, /api/auth/login)
 router.use('/auth', rotasCriacaoConta);
