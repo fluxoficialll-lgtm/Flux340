@@ -7,7 +7,7 @@ const createCampaign = (req, res) => {
 };
 
 // @desc    Obter todas as campanhas
-const getAllCampaigns = (req, res) => {
+const getCampaigns = (req, res) => {
     res.status(200).json({ message: "Rota para obter todas as campanhas funcionando!" });
 };
 
@@ -16,9 +16,21 @@ const getCampaignById = (req, res) => {
     res.status(200).json({ message: `Rota para obter a campanha com ID ${req.params.campaignId} funcionando!` });
 };
 
+// @desc    Atualizar uma campanha
+const updateCampaign = (req, res) => {
+    res.status(200).json({ message: `Rota para atualizar a campanha com ID ${req.params.campaignId} funcionando!` });
+};
+
+// @desc    Deletar uma campanha
+const deleteCampaign = (req, res) => {
+    res.status(200).json({ message: `Rota para deletar a campanha com ID ${req.params.campaignId} funcionando!` });
+};
+
 
 export default {
     createCampaign,
-    getAllCampaigns,
-    getCampaignById
+    getCampaigns,
+    getCampaignById,
+    updateCampaign,
+    deleteCampaign
 };
