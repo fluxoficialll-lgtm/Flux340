@@ -16,9 +16,21 @@ const getGroupById = (req, res) => {
     res.status(200).json({ message: `Rota para obter o grupo com ID ${req.params.groupId} funcionando!` });
 };
 
+// @desc    Entrar em um grupo
+const joinGroup = (req, res) => {
+    res.status(200).json({ message: `Rota para entrar no grupo com ID ${req.params.groupId} funcionando!` });
+};
+
+// @desc    Listar membros de um grupo
+const getGroupMembers = (req, res) => {
+    res.status(200).json({ message: `Rota para listar membros do grupo com ID ${req.params.groupId} funcionando!` });
+};
+
 
 export default {
     createGroup,
     getAllGroups,
-    getGroupById
+    getGroupById,
+    joinGroup,
+    getGroupMembers
 };
