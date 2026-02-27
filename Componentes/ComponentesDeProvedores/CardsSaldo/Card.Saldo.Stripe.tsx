@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 
 export type CurrencyCode = 'BRL' | 'USD' | 'EUR';
 
-// A interface no hook `useFinancialPanel` está diferente desta.
-// Esta é a que o componente espera.
 interface CurrencyStats {
     total: number;
     own: number;
@@ -12,7 +10,6 @@ interface CurrencyStats {
 }
 
 interface BalanceCardProps {
-    // A prop pode chegar nula/indefinida ou incompleta durante o carregamento.
     stats: Record<CurrencyCode, CurrencyStats> | null | undefined;
     selectedFilter: string;
     filters: string[];
@@ -28,8 +25,7 @@ const CURRENCY_CONFIG = {
     EUR: { symbol: '€', color: '#ffd700', label: 'Euro' }
 };
 
-// Componente tornado resiliente para lidar com `stats` nulo, indefinido ou incompleto.
-export const BalanceCard: React.FC<BalanceCardProps> = ({
+export const CardSaldoStripe: React.FC<BalanceCardProps> = ({
     stats,
     selectedFilter,
     filters,
@@ -40,7 +36,6 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
 }) => {
     const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>('BRL');
     
-    // Lógica de segurança: verifica se `stats` existe e se a moeda selecionada está presente.
     const currentStats = stats ? stats[selectedCurrency] : undefined;
     const config = CURRENCY_CONFIG[selectedCurrency];
 
@@ -49,12 +44,11 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
         return val.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
-    // Se os dados estiverem carregando ou se forem inválidos, exibe um estado de carregamento.
     if (loading || !currentStats) {
         return (
             <div className="flux-card bg-white/5 border border-white/10 rounded-[20px] p-6 mb-5 shadow-2xl relative animate-fade-in overflow-hidden">
                  <div className="flex justify-between items-start mb-6">
-                    <div className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Saldo em Conta</div>
+                    <div className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Saldo Stripe</div>
                     <button className="bg-gray-500/10 text-gray-500 rounded-full w-8 h-8 flex items-center justify-center" disabled>
                         <i className="fa-solid fa-rotate-right fa-spin"></i>
                     </button>
@@ -100,7 +94,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
                         ))}
                     </div>
                 ) : (
-                    <div className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Saldo em Conta</div>
+                    <div className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Saldo Stripe</div>
                 )}
 
                 <button 

@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { useFinancialPanel } from '../hooks/useFinancialPanel';
-import { BalanceCard } from '../Componentes/financial/BalanceCard';
 import { AffiliateCard } from '../Componentes/financial/AffiliateCard';
 import { GatewayCard } from '../Componentes/financial/GatewayCard';
 import { CashFlowCard } from '../Componentes/financial/CashFlowCard';
 import { TransactionsCard } from '../Componentes/financial/TransactionsCard';
+import { CardSaldoStripe, CardSaldoPayPal, CardSaldoSyncPay } from '../Componentes/ComponentesDeProvedores/CardsSaldo';
 
 // Componente de Esqueleto para simular o carregamento dos cards.
 const SkeletonCard = ({ height = 'h-48' }) => (
@@ -26,6 +26,43 @@ export const FinancialPanel: React.FC = () => {
     isCopyingLink, filters, loadData, handleBack, navigate
   } = useFinancialPanel();
 
+  const renderBalanceCard = () => {
+    switch (activeProviderName) {
+      case 'stripe':
+        return <CardSaldoStripe 
+                  stats={currencyStats}
+                  selectedFilter={selectedFilter}
+                  filters={filters || []}
+                  onFilterChange={setSelectedFilter}
+                  onRefresh={loadData}
+                  loading={loading}
+                  showCurrencySwitch={preferredProvider !== 'syncpay'}
+              />;
+      case 'paypal':
+        return <CardSaldoPayPal 
+                  stats={currencyStats}
+                  selectedFilter={selectedFilter}
+                  filters={filters || []}
+                  onFilterChange={setSelectedFilter}
+                  onRefresh={loadData}
+                  loading={loading}
+                  showCurrencySwitch={preferredProvider !== 'syncpay'}
+              />;
+      case 'syncpay':
+        return <CardSaldoSyncPay 
+                  stats={currencyStats}
+                  selectedFilter={selectedFilter}
+                  filters={filters || []}
+                  onFilterChange={setSelectedFilter}
+                  onRefresh={loadData}
+                  loading={loading}
+                  showCurrencySwitch={preferredProvider !== 'syncpay'}
+              />;
+      default:
+        return null;
+    }
+  }
+
   return (
     <div className="h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-y-auto overflow-x-hidden">
       <header className="flex items-center justify-between p-4 bg-[#0c0f14] fixed w-full z-10 border-b border-white/10 top-0 h-[65px]">
@@ -43,15 +80,7 @@ export const FinancialPanel: React.FC = () => {
           </>
         ) : (
           <>
-            <BalanceCard 
-                stats={currencyStats}
-                selectedFilter={selectedFilter}
-                filters={filters || []}
-                onFilterChange={setSelectedFilter}
-                onRefresh={loadData}
-                loading={loading}
-                showCurrencySwitch={preferredProvider !== 'syncpay'}
-            />
+            {renderBalanceCard()}
             
             <CashFlowCard />
 
