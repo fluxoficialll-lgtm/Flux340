@@ -29,7 +29,8 @@ router.use('/auth', rotasAutenticacao);
 router.use('/users', rotasUsuario);
 
 // ---- Novas Rotas de Publicação ----
-router.use('/posts', RotasFeed);
+// CORRIGIDO: Alterado de '/posts' para '/feed' para corresponder ao frontend
+router.use('/feed', RotasFeed);
 router.use('/marketplace', RotasMarketplace);
 router.use('/campaigns', RotasCampanha);
 router.use('/groups', RotasGrupos);

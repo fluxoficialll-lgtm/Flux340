@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Comment } from '../../../types';
-import { ServiçoPublicaçãoComentáriosFeed } from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
+import { ServiçoPublicacaoComentariosFeed } from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
 
-interface CommentItemProps {
+interface CardComentarioMarketplaceProps {
     comment: Comment;
     onReplyClick: (commentId: string, username: string) => void;
     onLike: (id: string) => void;
@@ -12,7 +12,7 @@ interface CommentItemProps {
     depth?: number;
 }
 
-export const CommentItem: React.FC<CommentItemProps> = ({ 
+export const CardComentarioMarketplace: React.FC<CardComentarioMarketplaceProps> = ({ 
     comment, onReplyClick, onLike, onDelete, onUserClick, currentUserId, depth = 0 
 }) => {
     const isOwner = comment.userId === currentUserId;
@@ -103,7 +103,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
                     <div className="flex items-center gap-5 mt-2 ml-2">
                         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
-                            {ServiçoPublicaçãoComentáriosFeed.formatRelativeTime(comment.timestamp)}
+                            {ServiçoPublicacaoComentariosFeed.formatRelativeTime(comment.timestamp)}
                         </span>
                         <button 
                             className="text-[10px] font-black text-gray-500 hover:text-[#00c2ff] uppercase tracking-widest cursor-pointer bg-transparent border-none p-0 transition-colors"
@@ -141,7 +141,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                         <>
                             <div className="flex flex-col">
                                 {comment.replies.slice(0, visibleCount).map(reply => (
-                                    <CommentItem 
+                                    <CardComentarioMarketplace 
                                         key={reply.id} 
                                         comment={reply} 
                                         onReplyClick={onReplyClick} 

@@ -1,8 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { MarketplaceItem } from '../types';
-// CORREÇÃO: Corrigido o erro de digitação de 'Publicacao' para 'Publicação'
-import { ServiçoPublicaçãoComentáriosMarketplace } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosMarketplace.js';
+import { ServiçoPublicacaoComentariosMarketplace } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosMarketplace.js';
 
 // O hook recebe um item do marketplace como argumento
 export const useMarketplaceItemActions = (item: MarketplaceItem) => {
@@ -22,7 +21,7 @@ export const useMarketplaceItemActions = (item: MarketplaceItem) => {
 
         try {
             // Chama o serviço correto para criar um comentário no marketplace
-            const newComment = await ServiçoPublicaçãoComentáriosMarketplace.create(item.id, { content: commentText });
+            const newComment = await ServiçoPublicacaoComentariosMarketplace.create(item.id, { content: commentText });
             
             // Atualiza a contagem de comentários na UI em caso de sucesso
             setCommentsCount(prev => prev + 1);

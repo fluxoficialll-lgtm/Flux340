@@ -7,7 +7,33 @@
 
 const API_BASE_URL = '/api/posts'; // A base da API para posts
 
-export const ServiçoPublicaçãoComentáriosFeed = {
+async function fetchWithAuth(url, options = {}) {
+    const authToken = localStorage.getItem('authToken');
+    const headers = {
+        ...options.headers,
+    };
+
+    if (options.body) {
+        headers['Content-Type'] = 'application/json';
+    }
+    
+    if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    const response = await fetch(url, { ...options, headers });
+
+    if (!response.ok) {
+        const errorResult = await response.json().catch(() => ({}));
+        throw new Error(errorResult.message || `Falha na requisição para ${url}`);
+    }
+
+    if (response.status !== 204) {
+        return response.json();
+    }
+}
+
+export const ServiçoPublicacaoComentariosFeed = {
 
     /**
      * Adiciona um novo comentário a um post específico.
@@ -19,28 +45,48 @@ export const ServiçoPublicaçãoComentáriosFeed = {
         if (!postId) {
             throw new Error('O ID do post é necessário para adicionar um comentário.');
         }
-
-        const authToken = localStorage.getItem('authToken');
-        if (!authToken) {
-            throw new Error('Autenticação necessária para comentar.');
-        }
-
-        const response = await fetch(`${API_BASE_URL}/${postId}/comments`, {
+        return fetchWithAuth(`${API_BASE_URL}/${postId}/comments`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`,
-            },
             body: JSON.stringify(commentData),
         });
-
-        if (!response.ok) {
-            const errorResult = await response.json();
-            throw new Error(errorResult.message || 'Falha ao publicar o comentário.');
-        }
-
-        return response.json();
     },
+
+    /**
+     * Busca todos os comentários de um post específico.
+     * @param {string} postId - O ID do post.
+     * @returns {Promise<Array<object>>} - Uma lista de comentários.
+     */
+    async getAll(postId) {
+        if (!postId) {
+            throw new Error('O ID do post é necessário para buscar os comentários.');
+        }
+        return fetchWithAuth(`${API_BASE_URL}/${postId}/comments`);
+    },
+
+    /**
+     * Atualiza um comentário específico.
+     * @param {string} commentId - O ID do comentário a ser atualizado.
+     * @param {object} updates - Os campos a serem atualizados (ex: { content }).
+     * @returns {Promise<object>} - O comentário atualizado.
+     */
+    async update(commentId, updates) {
+        return fetchWithAuth(`/api/comments/${commentId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    /**
+     * Deleta um comentário.
+     * @param {string} commentId - O ID do comentário a ser deletado.
+     * @returns {Promise<void>}
+     */
+    async delete(commentId) {
+        return fetchWithAuth(`/api/comments/${commentId}`, {
+            method: 'DELETE',
+        });
+    },
+
 
     /**
      * Formata um timestamp para uma string de tempo relativo (ex: "há 5 minutos").

@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { Post } from '../types';
 // Importando o serviço correto para comentários do feed
-import { ServiçoPublicaçãoComentáriosFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
+import { ServiçoPublicacaoComentariosFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
 
 export const usePostActions = (post: Post) => {
     // Estados existentes para Like
@@ -35,7 +35,7 @@ export const usePostActions = (post: Post) => {
         setCommentError(null);
 
         try {
-            const newComment = await ServiçoPublicaçãoComentáriosFeed.create(post.id, { content: commentText });
+            const newComment = await ServiçoPublicacaoComentariosFeed.create(post.id, { content: commentText });
             
             setCommentsCount(prev => prev + 1);
             console.log("Comentário publicado com sucesso:", newComment);

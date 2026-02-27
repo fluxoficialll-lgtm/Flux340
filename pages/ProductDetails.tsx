@@ -12,7 +12,7 @@ import { ProductSellerCard } from '../Componentes/ComponentesDeMarketplace/Compo
 import { ProductDescription } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductDescription';
 import { ProductBottomBar } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductBottomBar';
 import { ProductLightbox } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductLightbox';
-import { CommentSheet } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/CommentSheet';
+import { PainelGestorComentarios, GestorTiposComentarios } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/Painel.Gestor.Comentarios';
 
 export const ProductDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ export const ProductDetails: React.FC = () => {
         onClose={() => setZoomedMedia(null)}
       />
 
-      <CommentSheet 
+      <PainelGestorComentarios 
         isOpen={isCommentModalOpen}
         onClose={() => setIsCommentModalOpen(false)}
         title={`Perguntas (${questions.length})`}
@@ -108,6 +108,7 @@ export const ProductDetails: React.FC = () => {
         onCancelReply={() => setReplyingTo(null)}
         onReplyClick={(cid, user) => setReplyingTo({ id: cid, username: user })}
         placeholder={isSeller ? "Responda a dúvida do cliente..." : "Escreva sua dúvida para o vendedor..."}
+        channelType={GestorTiposComentarios.MARKETPLACE}
       />
     </div>
   );

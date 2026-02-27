@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { usePostDetails } from '../hooks/usePostDetails';
 import { ContainerFeed } from '../Componentes/ComponentesDeFeed/Container.Feed';
-import { CommentItem } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/CommentItem';
+import { CardComentarioFeed } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/Card.Comentario.Feed';
 
 export const PostDetails: React.FC = () => {
   const { showConfirm } = useModal();
@@ -71,7 +71,7 @@ export const PostDetails: React.FC = () => {
 
           <div className="space-y-1">
             {comments.length > 0 ? comments.map(c => (
-              <CommentItem
+              <CardComentarioFeed
                 key={c.id}
                 comment={c}
                 onReplyClick={handleReplyClick}

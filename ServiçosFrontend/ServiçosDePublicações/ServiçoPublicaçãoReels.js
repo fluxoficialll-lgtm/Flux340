@@ -10,10 +10,17 @@ const API_BASE_URL = '/api/reels';
 async function fetchWithAuth(url, options = {}) {
     const authToken = localStorage.getItem('authToken');
     const headers = {
-        'Content-Type': 'application/json',
-        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
         ...options.headers,
     };
+
+    // Adiciona Content-Type se o corpo existir e não for FormData
+    if (options.body && !(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
+    
+    if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+    }
 
     const response = await fetch(url, { ...options, headers });
 
@@ -21,10 +28,20 @@ async function fetchWithAuth(url, options = {}) {
         const errorResult = await response.json().catch(() => ({}));
         throw new Error(errorResult.message || `Falha na requisição para ${url}`);
     }
-    return response.json();
+
+    // Retorna o corpo da resposta apenas se ele existir
+    if (response.status !== 204) { // 204 No Content
+        return response.json();
+    }
 }
 
+
 export const ServiçoPublicacaoReels = {
+    /**
+     * Cria um novo reel.
+     * @param {object} reelData - Dados do reel (ex: { description, videoUrl, musicId }).
+     * @returns {Promise<object>} - O objeto do reel criado.
+     */
     async create(reelData) {
         return fetchWithAuth(API_BASE_URL, {
             method: 'POST',
@@ -36,9 +53,8 @@ export const ServiçoPublicacaoReels = {
      * Busca todos os reels.
      * @returns {Promise<Array<object>>} - Uma lista de reels.
      */
-    async getReels() {
-        const response = await fetchWithAuth(API_BASE_URL);
-        return response.data; // A API de reels encapsula em { data: [...] }
+    async getAll() {
+        return fetchWithAuth(API_BASE_URL);
     },
 
     /**
@@ -46,7 +62,31 @@ export const ServiçoPublicacaoReels = {
      * @param {string} reelId - O ID do reel.
      * @returns {Promise<object>} - O objeto do reel.
      */
-    async getReelById(reelId) {
+    async getById(reelId) {
         return fetchWithAuth(`${API_BASE_URL}/${reelId}`);
+    },
+
+    /**
+     * Atualiza um reel existente.
+     * @param {string} reelId - O ID do reel a ser atualizado.
+     * @param {object} updates - Os campos a serem atualizados.
+     * @returns {Promise<object>} - O reel atualizado.
+     */
+    async update(reelId, updates) {
+        return fetchWithAuth(`${API_BASE_URL}/${reelId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    /**
+     * Deleta um reel.
+     * @param {string} reelId - O ID do reel a ser deletado.
+     * @returns {Promise<void>}
+     */
+    async delete(reelId) {
+        return fetchWithAuth(`${API_BASE_URL}/${reelId}`, {
+            method: 'DELETE',
+        });
     }
 };

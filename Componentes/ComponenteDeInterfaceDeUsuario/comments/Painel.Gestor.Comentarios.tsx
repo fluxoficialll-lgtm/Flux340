@@ -1,9 +1,17 @@
 
 import React, { useRef, useEffect } from 'react';
 import { Comment } from '../../../types';
-import { CommentItem } from './CommentItem';
+import { CardComentarioFeed } from './Card.Comentario.Feed';
+import { CardComentarioReels } from './Card.Comentario.Reels';
+import { CardComentarioMarketplace } from './Card.Comentario.Marketplace';
 
-interface CommentSheetProps {
+export enum GestorTiposComentarios {
+    FEED,
+    REELS,
+    MARKETPLACE
+}
+
+interface PainelGestorComentariosProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
@@ -19,12 +27,13 @@ interface CommentSheetProps {
     onCancelReply: () => void;
     onReplyClick: (id: string, username: string) => void;
     placeholder?: string;
+    channelType: GestorTiposComentarios;
 }
 
-export const CommentSheet: React.FC<CommentSheetProps> = ({
+export const PainelGestorComentarios: React.FC<PainelGestorComentariosProps> = ({
     isOpen, onClose, title, comments, commentText, onCommentTextChange, onSend,
     onLike, onDelete, onUserClick, currentUserId, replyingTo, onCancelReply,
-    onReplyClick, placeholder = "Adicione um comentário..."
+    onReplyClick, placeholder = "Adicione um comentário...", channelType
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +42,21 @@ export const CommentSheet: React.FC<CommentSheetProps> = ({
             inputRef.current.focus();
         }
     }, [replyingTo]);
+
+    const getCommentComponent = () => {
+        switch (channelType) {
+            case GestorTiposComentarios.FEED:
+                return CardComentarioFeed;
+            case GestorTiposComentarios.REELS:
+                return CardComentarioReels;
+            case GestorTiposComentarios.MARKETPLACE:
+                return CardComentarioMarketplace;
+            default:
+                return CardComentarioFeed; // Fallback default
+        }
+    };
+
+    const CommentComponent = getCommentComponent();
 
     return (
         <>
@@ -99,7 +123,7 @@ export const CommentSheet: React.FC<CommentSheetProps> = ({
                 <div className="drawer-content no-scrollbar">
                     {comments.length > 0 ? (
                         comments.map(c => (
-                            <CommentItem 
+                            <CommentComponent 
                                 key={c.id} 
                                 comment={c} 
                                 onReplyClick={onReplyClick} 

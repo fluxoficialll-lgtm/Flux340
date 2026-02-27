@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReels } from '../hooks/useReels';
 import { ReelItem } from '../Componentes/ComponentesDeReels/Componentes/ReelItem';
-import { CommentSheet } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/CommentSheet';
+import { PainelGestorComentarios, GestorTiposComentarios } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/Painel.Gestor.Comentarios';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem'; // A página agora é responsável pelo modal
 
 export const Reels: React.FC = () => {
@@ -119,7 +119,7 @@ export const Reels: React.FC = () => {
         )}
       </div>
 
-      <CommentSheet 
+      <PainelGestorComentarios 
           isOpen={isCommentModalOpen}
           onClose={() => setIsCommentModalOpen(false)}
           title={`Comentários (${currentComments.length})`}
@@ -134,6 +134,7 @@ export const Reels: React.FC = () => {
           replyingTo={replyingTo}
           onCancelReply={() => setReplyingTo(null)}
           onReplyClick={(cid, user) => setReplyingTo({ id: cid, username: user })}
+          channelType={GestorTiposComentarios.REELS}
       />
     </div>
   );
