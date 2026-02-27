@@ -1,15 +1,15 @@
 
-// Funções de controle para Comentários de Reels
+// Funções de controle para Comentários de Posts
 
-// @desc    Criar um novo comentário em um Reel
+// @desc    Criar um novo comentário em um post
 const createComment = (req, res) => {
-    // O ID do Reel estará em req.params.reelId
-    res.status(201).json({ message: `Rota para criar comentário no Reel com ID ${req.params.reelId} funcionando!` });
+    // O ID do Post estará em req.params.postId
+    res.status(201).json({ message: `Rota para criar comentário no Post com ID ${req.params.postId} funcionando!` });
 };
 
-// @desc    Obter todos os comentários de um Reel
-const getCommentsForReel = (req, res) => {
-    res.status(200).json({ message: `Rota para obter todos os comentários do Reel com ID ${req.params.reelId} funcionando!` });
+// @desc    Obter todos os comentários de um post
+const getCommentsForPost = (req, res) => {
+    res.status(200).json({ message: `Rota para obter todos os comentários do Post com ID ${req.params.postId} funcionando!` });
 };
 
 // @desc    Atualizar um comentário
@@ -25,7 +25,7 @@ const deleteComment = (req, res) => {
 
 export default {
     createComment,
-    getCommentsForReel,
+    getCommentsForPost,
     updateComment,
     deleteComment
 };
