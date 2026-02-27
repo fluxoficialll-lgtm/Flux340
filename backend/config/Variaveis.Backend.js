@@ -1,38 +1,65 @@
 // Arquivo: backend/config/Variaveis.Backend.js
 
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Configuração de caminho robusta para encontrar o .env na raiz do projeto
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '..', '..');
+dotenv.config({ path: path.join(projectRoot, '.env') });
+
 /**
- * Centraliza a definição e a validação das variáveis de ambiente do Backend.
- * Garante que a aplicação tenha a configuração necessária para iniciar.
+ * Centraliza a definição, validação e acesso às variáveis de ambiente do Backend.
+ * Este módulo garante que a aplicação só inicie se todas as variáveis críticas estiverem presentes.
  */
 
-import dotenv from 'dotenv';
+// --- Definição das Variáveis Esperadas ---
 
-dotenv.config(); // Carrega as variáveis do arquivo .env para process.env
+// Variáveis que são OBRIGATÓRIAS para a aplicação funcionar.
+const VARIAVEIS_OBRIGATORIAS = [
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'GOOGLE_CLIENT_ID',       // Desacoplado do VITE_ prefix
+    'GOOGLE_CLIENT_SECRET',
+    'CORS_ORIGIN'             // Adicionado à validação
+];
 
-// 1. Defina um objeto com todas as variáveis esperadas, lendo de process.env
-const config = {
-    // Obrigatórias para o funcionamento do servidor
-    databaseUrl: process.env.DATABASE_URL,
-    jwtSecret: process.env.JWT_SECRET,
-    googleClientId: process.env.VITE_GOOGLE_CLIENT_ID, // Mantido para a rota /boot
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    
-    // Opcional com valor padrão
-    port: process.env.PORT || 3001,
-    corsOrigin: process.env.CORS_ORIGIN, // Será validado separadamente
+// Variáveis OPCIONAIS, que possuem um valor padrão caso não sejam definidas.
+const VARIAVEIS_OPCIONAIS = {
+    PORT: 3001
 };
 
-// 2. Validação: Verifique se as variáveis essenciais foram carregadas
-if (!config.databaseUrl) {
-    throw new Error('[Configuração do Backend] A variável de ambiente obrigatória "DATABASE_URL" não foi definida.');
-}
-if (!config.jwtSecret) {
-    throw new Error('[Configuração do Backend] A variável de ambiente obrigatória "JWT_SECRET" não foi definida.');
-}
-if (!config.googleClientId) {
-    throw new Error('[Configuração do Backend] A variável de ambiente obrigatória "VITE_GOOGLE_CLIENT_ID" não foi definida.');
-}
+// --- Processamento e Validação ---
 
-// 3. Exporte o objeto de configuração validado
-const VariaveisBackend = config;
-export default VariaveisBackend;
+const VariaveisBackend = {};
+
+// 1. Processa e valida as variáveis obrigatórias
+VARIAVEIS_OBRIGATORIAS.forEach(nome => {
+    const valor = process.env[nome];
+    if (!valor) {
+        throw new Error(`[Configuração do Backend] A variável de ambiente obrigatória "${nome}" não foi definida.`);
+    }
+    VariaveisBackend[nome] = valor;
+});
+
+// 2. Processa as variáveis opcionais com seus valores padrão
+Object.entries(VARIAVEIS_OPCIONAIS).forEach(([nome, valorPadrao]) => {
+    VariaveisBackend[nome] = process.env[nome] || valorPadrao;
+});
+
+// Renomeia as chaves para camelCase para um padrão de código mais limpo, se desejar.
+// Isso é opcional, mas recomendado para consistência no código JavaScript.
+const configFinal = {
+    databaseUrl: VariaveisBackend.DATABASE_URL,
+    jwtSecret: VariaveisBackend.JWT_SECRET,
+    googleClientId: VariaveisBackend.GOOGLE_CLIENT_ID,
+    googleClientSecret: VariaveisBackend.GOOGLE_CLIENT_SECRET,
+    corsOrigin: VariaveisBackend.CORS_ORIGIN,
+    port: VariaveisBackend.PORT
+};
+
+
+// 3. Exporte o objeto de configuração final, validado e pronto para uso.
+export default configFinal;
