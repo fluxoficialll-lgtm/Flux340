@@ -3,7 +3,10 @@ import Stripe from 'stripe';
 import config from '../config/Variaveis.Backend.js';
 import SistemaTaxasStripe from '../ServicosBackend/Sistema.Taxas.Stripe.js';
 
-const stripe = new Stripe(config.stripeSecretKey);
+let stripe = null;
+if (config.stripeSecretKey) {
+    stripe = new Stripe(config.stripeSecretKey);
+}
 
 const getSellerStripeAccountId = async (sellerEmail) => {
     console.log(`Buscando ID da conta Stripe para: ${sellerEmail}`);
@@ -11,6 +14,10 @@ const getSellerStripeAccountId = async (sellerEmail) => {
 };
 
 const createPaymentIntent = async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+    }
+
     const { amount, currency, creatorEmail } = req.body;
 
     if (!creatorEmail) {
@@ -44,6 +51,10 @@ const createPaymentIntent = async (req, res) => {
 };
 
 const checkSessionStatus = async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+    }
+
     const { sessionId } = req.params;
 
     try {
