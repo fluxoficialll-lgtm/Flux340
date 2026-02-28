@@ -8,14 +8,12 @@ const __filename_log = fileURLToPath_log(import.meta.url);
 const __dirname_log = path.dirname(__filename_log);
 const logDir = path.join(__dirname_log, 'logs');
 
-// Cria o diretório de log se não existir
 if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
 }
 
 const logFile = fs.createWriteStream(path.join(logDir, 'app.log'), { flags: 'a' });
 
-// Salva as funções originais do console
 const originalLog = console.log;
 const originalError = console.error;
 const originalWarn = console.warn;
@@ -23,11 +21,10 @@ const originalInfo = console.info;
 
 const logTimestamp = () => `[${new Date().toISOString()}]`;
 
-// Sobrescreve as funções do console para escrever em arquivo
 console.log = (...args) => {
     const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
     logFile.write(`${logTimestamp()} [LOG] ${message}\n`);
-    originalLog.apply(console, args); // Mantém o log no terminal também
+    originalLog.apply(console, args);
 };
 
 console.error = (...args) => {
@@ -50,7 +47,6 @@ console.info = (...args) => {
 
 process.on('uncaughtException', (err, origin) => {
     console.error(`Exceção Não Capturada: ${err.message}`, { stack: err.stack, origin });
-    // O fs.writeSync garante que o log seja escrito antes de sair
     fs.writeSync(logFile.fd, `${logTimestamp()} [FATAL] Uncaught Exception: ${err.stack}\n`);
     process.exit(1);
 });
@@ -61,27 +57,16 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 console.log('--- Sistema de Log em Arquivo Inicializado. Saída será gravada em logs/app.log ---');
-// --- Fim do Código de Log Personalizado ---
-
 
 import 'dotenv/config';
 import express from 'express';
-// import path from 'path'; // Já importado acima
-// import fs from 'fs'; // Já importado acima
 import http from 'http';
 import { fileURLToPath } from 'url';
-
-// Importe a função de migração
 import { run as runMigrations } from './scripts/executar-migracoes.js';
-
-// Configurações Modulares
 import { initSocket } from './backend/config/socket.js';
 import { setupMiddlewares } from './backend/config/middleware.js';
 import { upload } from './backend/config/storage.js';
-
-// Serviços, Rotas e Tarefas de Inicialização
 import { db } from './backend/database/InicializacaoDoPostgreSQL.js';
-// import { IntegrityCheck } from './backend/jobs/IntegrityCheck.js'; // Desativado temporariamente
 import apiRoutes from './backend/RotasBackend/Rotas.js';
 import { contarBancosDeDados } from './backend/database/ContagemDosTiposDeBancos.js';
 import { auditorDoPostgreSQL } from './backend/database/AuditoresDeBancos/index.js';
@@ -93,11 +78,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const httpServer = http.createServer(app);
 
-// Inicialização da Infraestrutura e Middlewares
 const io = initSocket(httpServer);
 setupMiddlewares(app, io);
 
-// --- ROTAS DE API ---
 app.use('/api', apiRoutes);
 
 app.post('/api/upload', upload.single('file'), async (req, res) => {
@@ -105,48 +88,57 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         req.logger.warn('UPLOAD_FAILURE', { reason: 'No file uploaded' });
         return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
-    try {
-        const folder = req.body.folder || 'misc';
-        // A lógica de upload foi comentada pois o storageService não foi encontrado
-        // const fileUrl = await storageService.uploadFile(req.file, folder);
-        // req.logger.log('UPLOAD_SUCCESS', { fileUrl, folder });
-        // res.json({ success: true, files: [{ url: fileUrl }] });
-        res.status(501).json({ error: 'A funcionalidade de upload está temporariamente desativada.' });
-    } catch (error) {
-        req.logger.error('UPLOAD_CLOUD_ERROR', { error });
-        res.status(500).json({ error: 'Erro ao processar upload para nuvem' });
-    }
+    res.status(501).json({ error: 'A funcionalidade de upload está temporariamente desativada.' });
 });
 
-// --- SERVIÇO DE ARQUIVOS ESTÁTICOS (SPA) ---
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
-// Tratamento de erro 404 para API (Sempre JSON)
 app.use('/api', (req, res) => {
     req.logger.warn('NOT_FOUND', { path: req.path, method: req.method });
-    res.status(404).json({
-        error: 'Endpoint não encontrado.',
-        traceId: req.traceId
-    });
+    res.status(404).json({ error: 'Endpoint não encontrado.', traceId: req.traceId });
 });
 
-// Tratamento global de erros da API
+// --- TRATAMENTO DE ERRO GLOBAL (REVISADO) ---
 app.use((err, req, res, next) => {
+    const logger = req.logger || console;
+    const traceId = req.traceId || 'untraced-error';
+
+    // Garante que o log seja informativo, mesmo que 'err' não seja um objeto Error padrão.
+    let errorInfo = {};
+    if (err instanceof Error) {
+        errorInfo = { message: err.message, stack: err.stack };
+    } else if (typeof err === 'object' && err !== null) {
+        errorInfo = { message: 'Ocorreu um erro com um objeto não-Error.', details: err };
+    } else {
+        errorInfo = { message: 'Ocorreu um erro com um tipo primitivo.', details: err };
+    }
+
+    logger.error('GLOBAL_UNHANDLED_ERROR', {
+        error: errorInfo,
+        path: req.path,
+        method: req.method,
+        traceId: traceId
+    });
+
+    if (res.headersSent) {
+        return next(err); // Se a resposta já foi enviada, passa o erro para o próximo manipulador do Express.
+    }
+
+    // Responde apenas para rotas de API. Outras rotas (como de arquivos estáticos)
+    // podem ter seu próprio tratamento ou deixar o Express lidar com elas.
     if (req.path.startsWith('/api')) {
-        req.logger.error('GLOBAL_API_ERROR', {
-            error: { message: err.message, stack: err.stack },
-            path: req.path
-        });
         return res.status(500).json({
-            error: 'Erro interno no servidor.',
-            traceId: req.traceId
+            error: 'Ocorreu um erro inesperado no servidor.',
+            message: errorInfo.message, // Fornece uma mensagem mais específica em desenvolvimento
+            traceId: traceId
         });
     }
+
+    // Para erros fora da API, podemos ter uma página de erro genérica ou apenas passar adiante
     next(err);
 });
 
-// Catch-all para SPA (Apenas se NÃO for API)
 app.get('*', (req, res) => {
     const indexPath = path.join(distPath, 'index.html');
     if (fs.existsSync(indexPath)) {
@@ -157,52 +149,20 @@ app.get('*', (req, res) => {
     }
 });
 
-// Tratamento final de erros (Global Catch-All)
-app.use((err, req, res, next) => {
-    const logger = req.logger || console;
-    const traceId = req.traceId || 'untraced-error';
 
-    logger.error('GLOBAL_UNHANDLED_ERROR', {
-        error: { message: err.message, stack: err.stack },
-        path: req.path,
-        method: req.method,
-        traceId: traceId
-    });
-
-    if (res.headersSent) {
-        return next(err);
-    }
-
-    res.status(500).json({
-        error: 'Ocorreu um erro inesperado.',
-        traceId: traceId
-    });
-});
-
-// Função de inicialização da aplicação
 const startApp = async () => {
     try {
-        // 1. Executar as migrações do banco de dados
         await runMigrations();
         console.log('MIGRATION_SUCCESS', { message: 'Migrações do banco de dados aplicadas com sucesso.' });
 
-        // 2. Inicializar o sistema de banco de dados
         await db.init();
         console.log('DB_INIT', { message: 'Database system initialized successfully.' });
 
-        // 3. Agendar tarefas de manutenção (não bloqueiam a inicialização)
         setTimeout(() => {
             contarBancosDeDados();
             auditorDoPostgreSQL.inspectDatabases();
-            // IntegrityCheck.fixGroupMemberCounts(); // Desativado temporariamente
-            // IntegrityCheck.cleanupExpiredVip(); // Desativado temporariamente
         }, 5000);
 
-        setInterval(() => {
-            // IntegrityCheck.fixGroupMemberCounts(); // Desativado temporariamente
-        }, 1000 * 60 * 60);
-
-        // 4. Iniciar o servidor HTTP
         httpServer.listen(PORT, '0.0.0.0', () => {
             console.log('SERVER_START', { port: PORT, env: process.env.NODE_ENV });
         });
@@ -216,5 +176,4 @@ const startApp = async () => {
     }
 };
 
-// Iniciar a aplicação
 startApp();
