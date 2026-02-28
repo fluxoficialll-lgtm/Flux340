@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { AuthError, UserProfile } from '../types';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 
 export const useEditProfile = () => {
   const navigate = useNavigate();
@@ -104,42 +103,20 @@ export const useEditProfile = () => {
       }
 
       setLoading(true);
-      const currentUser = authService.getCurrentUser();
-      const email = currentUser?.email;
 
       try {
-          if (email && currentUser) {
-              let finalPhotoUrl = formData.photoUrl;
+          let finalPhotoUrl = formData.photoUrl;
 
-              if (selectedFile) {
-                  finalPhotoUrl = await fileService.uploadFile(selectedFile);
-              }
-
-              const updatedProfile = { ...formData, photoUrl: finalPhotoUrl };
-
-              await authService.completeProfile(email, updatedProfile);
-              
-              const newHandle = `@${formData.name}`;
-              const allPosts = servicoDeSimulacao.posts.getAll();
-              
-              allPosts.forEach(post => {
-                  let postChanged = false;
-                  if (post.authorId === currentUser.id) {
-                      if (post.username !== newHandle) {
-                          post.username = newHandle;
-                          postChanged = true;
-                      }
-                      if (finalPhotoUrl && post.avatar !== finalPhotoUrl) {
-                          post.avatar = finalPhotoUrl;
-                          postChanged = true;
-                      }
-                  }
-                  if (postChanged) servicoDeSimulacao.posts.update(post);
-              });
-
-              alert('Perfil atualizado com sucesso!');
-              navigate('/profile', { replace: true });
+          if (selectedFile) {
+              finalPhotoUrl = await fileService.uploadFile(selectedFile);
           }
+
+          const updatedProfile = { ...formData, photoUrl: finalPhotoUrl };
+
+          await authService.completeProfile(updatedProfile);
+          
+          alert('Perfil atualizado com sucesso!');
+          navigate('/profile', { replace: true });
       } catch (err: any) {
           if (err.message === AuthError.NAME_TAKEN) {
               setUsernameError('Este nome de usuário já está em uso.');
