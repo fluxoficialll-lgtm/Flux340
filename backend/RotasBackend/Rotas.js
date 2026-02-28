@@ -5,6 +5,9 @@ import express from 'express';
 import rotasCriacaoConta from './Rotas.Criação.Conta.Flux.js';
 import rotasGestaoPerfil from './Rotas.Gestao.Perfil.js'; // Importando a nova rota
 
+// Importando as rotas de publicação
+import rotasPublicacaoFeed from './Rotas.Publicacao.Feed.js';
+
 // Importando as rotas dos provedores de pagamento
 import rotasSyncPay from './Rotas.Provedor.SyncPay.js';
 import rotasPayPal from './Rotas.Provedor.PayPal.js';
@@ -21,6 +24,9 @@ router.use('/v1/config', rotasGestaoVariaveis);
 
 // Rotas de Autenticação (ex: /api/auth/register, /api/auth/login)
 router.use('/auth', rotasCriacaoConta);
+
+// Rotas de Publicação
+router.use('/feed', rotasPublicacaoFeed);
 
 // Rotas de Gestão de Perfil (ex: /api/users/:id)
 router.use('/', rotasGestaoPerfil); // Adicionando a nova rota

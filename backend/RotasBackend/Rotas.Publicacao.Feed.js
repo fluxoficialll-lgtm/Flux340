@@ -1,6 +1,6 @@
 
 import express from 'express';
-import feedControle from '../controles/Controles.Feed.js';
+import feedControle from '../controles/Controles.Publicacao.Feed.js';
 
 const router = express.Router();
 

@@ -1,28 +1,31 @@
 
+// backend/RotasBackend/Rotas.Publicacao.Comentarios.Feed.js
 import express from 'express';
-import comentariosControle from '../controles/Controles.Comentarios.js';
+// Importa o novo controlador que segue a arquitetura correta
+import comentariosController from '../controles/Controles.Publicacao.Comentarios.Feed.js';
+// Middleware para proteger rotas (exemplo)
+import { protect } from '../middleware/authMiddleware.js';
 
-// Este router será montado sob /api/posts/:postId/comments
 const router = express.Router({ mergeParams: true });
 
-// @route   POST /
-// @desc    Criar um novo comentário em um post
+// @route   POST /api/posts/:postId/comments
+// @desc    Criar um novo comentário em um post do feed
 // @access  Private
-router.post('/', comentariosControle.createComment);
+router.post('/', protect, comentariosController.createComment);
 
-// @route   GET /
-// @desc    Obter todos os comentários de um post
+// @route   GET /api/posts/:postId/comments
+// @desc    Obter todos os comentários de um post do feed
 // @access  Public
-router.get('/', comentariosControle.getCommentsForPost);
+router.get('/', comentariosController.getCommentsForPost);
 
-// @route   PUT /:commentId
-// @desc    Atualizar um comentário
+// @route   PUT /api/posts/:postId/comments/:commentId
+// @desc    Atualizar um comentário específico
 // @access  Private
-router.put('/:commentId', comentariosControle.updateComment);
+router.put('/:commentId', protect, comentariosController.updateComment);
 
-// @route   DELETE /:commentId
-// @desc    Deletar um comentário
+// @route   DELETE /api/posts/:postId/comments/:commentId
+// @desc    Deletar um comentário específico
 // @access  Private
-router.delete('/:commentId', comentariosControle.deleteComment);
+router.delete('/:commentId', protect, comentariosController.deleteComment);
 
 export default router;
