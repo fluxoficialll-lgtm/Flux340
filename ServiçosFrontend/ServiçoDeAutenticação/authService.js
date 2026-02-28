@@ -3,7 +3,7 @@
 
 import { metodoGoogle } from './metodoGoogle.js';
 import { metodoEmail } from './metodoEmail.js';
-import { SistemaCriaçãoContas } from './SistemaCriaçãoContas.js';
+import profileService from './Criação.Perfil.Flux.js'; // Importa o serviço de perfil
 
 const IS_BROWSER = typeof window !== 'undefined';
 
@@ -64,19 +64,16 @@ export const authService = {
     /**
      * Completa o perfil de um usuário recém-registrado, atualizando seus dados.
      * O hook `useCompleteProfile` chama esta função.
-     * @param {string} email - O email do usuário (para consistência, mas o ID da sessão é usado).
      * @param {object} profileData - Os dados do perfil a serem atualizados (nome, bio, etc.).
      */
-    async completeProfile(email, profileData) {
-        const currentUser = this.getCurrentUser();
+    async completeProfile(profileData) {
         const token = this.getToken();
-
-        if (!currentUser || !currentUser.id || !token) {
+        if (!token) {
             throw new Error("Usuário não autenticado ou sessão inválida para completar o perfil.");
         }
 
-        // Chama o serviço de conta para ATUALIZAR o usuário no backend
-        const updatedUserFromBackend = await SistemaCriaçãoContas.atualizarConta(currentUser.id, profileData);
+        // Chama o serviço de PERFIL para ATUALIZAR os dados no backend
+        const updatedUserFromBackend = await profileService.atualizarPerfil(profileData);
 
         // Atualiza a sessão local com os novos dados do usuário retornados pelo backend
         storeSession(token, updatedUserFromBackend);
