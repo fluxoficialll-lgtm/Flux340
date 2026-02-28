@@ -48,9 +48,17 @@ const loginUser = async (req, res) => {
     }
 };
 
+const googleAuth = async (req, res) => {
+    // Esta função é um placeholder e retornará um erro 501 (Not Implemented).
+    // A lógica de autenticação do Google será implementada aqui no futuro.
+    res.status(501).json({ message: 'A autenticação com o Google ainda não foi implementada.' });
+};
+
+
 const controleCriacaoConta = {
     registerUser,
     loginUser,
+    googleAuth, // Adicionando a nova função ao controlador
 };
 
 export default controleCriacaoConta;
