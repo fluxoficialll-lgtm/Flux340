@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Group } from '../../../types';
-import { createStripeAccountLink } from '../../../ServicosFrontend/servico provedores de pagamentos/ServicosDaStripe';
+import { createStripeAccountLink } from '../../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialStripe.js';
 
 interface StripeCardProps {
     group: Group | null;

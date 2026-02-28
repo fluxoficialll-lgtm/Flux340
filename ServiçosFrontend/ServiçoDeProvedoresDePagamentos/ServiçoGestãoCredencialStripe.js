@@ -8,6 +8,11 @@ import gestorDeRequisicoes from './GestorDeRequisicoesDosProvedores.js';
  * obtenção de detalhes, desconexão da conta via Stripe Connect,
  * e também com a criação e verificação de pagamentos.
  */
+
+export async function createStripeAccountLink(data) {
+    return gestorDeRequisicoes.post('/gateways/stripe/account-link', data);
+}
+
 export const ServicoGestaoCredencialStripe = {
 
     // --- MÉTODOS DE GESTÃO DE CONTA ---

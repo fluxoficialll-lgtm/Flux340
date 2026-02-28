@@ -15,7 +15,7 @@ dotenv.config({ path: path.join(projectRoot, '.env') });
  * Este módulo garante que a aplicação só inicie se todas as variáveis críticas estiverem presentes.
  */
 
-// --- Definição das Variáveis Esperadas ---
+// --- Definição das Variáveis Esperadas --
 
 // Variáveis que são OBRIGATÓRIAS para a aplicação funcionar.
 const VARIAVEIS_OBRIGATORIAS = [
@@ -24,12 +24,12 @@ const VARIAVEIS_OBRIGATORIAS = [
     'GOOGLE_CLIENT_ID',       // Desacoplado do VITE_ prefix
     'GOOGLE_CLIENT_SECRET',
     'CORS_ORIGIN',             // Adicionado à validação
-    'STRIPE_SECRET_KEY'
 ];
 
 // Variáveis OPCIONAIS, que possuem um valor padrão caso não sejam definidas.
 const VARIAVEIS_OPCIONAIS = {
-    PORT: 3001
+    PORT: 3001,
+    STRIPE_SECRET_KEY: ''
 };
 
 // --- Processamento e Validação ---
