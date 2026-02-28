@@ -2,37 +2,36 @@
 // backend/controles/Controles.Criação.Conta.Flux.js
 
 import servicoCriacaoConta from '../ServicosBackend/Servicos.Criação.Conta.Flux.js';
+import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken';
+import config from '../config/Variaveis.Backend.js';
+
+// Inicializa o cliente do Google com o ID do cliente das variáveis de ambiente
+const client = new OAuth2Client(config.googleClientId);
 
 const registerUser = async (req, res) => {
     try {
-        // Extrai todos os campos possíveis do corpo da requisição
         const { name, email, password, google_id } = req.body;
 
-        // Validação: nome e email são sempre obrigatórios.
         if (!name || !email) {
             return res.status(400).json({ message: 'Nome e email são obrigatórios.' });
         }
 
-        // Validação: É necessário ter uma senha OU um google_id para se registrar.
         if (!password && !google_id) {
             return res.status(400).json({ message: 'É necessário fornecer uma senha ou um ID do Google.' });
         }
 
-        // Passa todos os dados recebidos para o serviço.
-        // O serviço saberá como lidar com a presença de `password` ou `google_id`.
         const result = await servicoCriacaoConta.registerUser({ name, email, password, google_id });
         
         res.status(201).json(result);
     } catch (error) {
         console.error('Erro no controlador ao registrar usuário:', error);
-        // Retorna o erro específico do serviço (ex: email duplicado)
         res.status(400).json({ message: error.message || 'Ocorreu um erro no servidor.' });
     }
 };
 
 const loginUser = async (req, res) => {
     try {
-        // TODO: Adicionar lógica de login para o Google aqui, que provavelmente receberá um `token` do Google em vez de email/senha
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
@@ -49,16 +48,44 @@ const loginUser = async (req, res) => {
 };
 
 const googleAuth = async (req, res) => {
-    // Esta função é um placeholder e retornará um erro 501 (Not Implemented).
-    // A lógica de autenticação do Google será implementada aqui no futuro.
-    res.status(501).json({ message: 'A autenticação com o Google ainda não foi implementada.' });
-};
+    try {
+        const { token } = req.body; // Recebe o idToken do Google
+        if (!token) {
+            return res.status(400).json({ message: 'Token do Google não fornecido.' });
+        }
 
+        // Verifica o token do Google
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: config.googleClientId,
+        });
+
+        const payload = ticket.getPayload();
+        const { name, email, sub: google_id } = payload; // 'sub' é o ID exclusivo do usuário no Google
+
+        // Encontra ou cria um usuário no banco de dados
+        const { user, isNewUser } = await servicoCriacaoConta.findOrCreateUser({
+            name,
+            email,
+            google_id,
+        });
+
+        // Gera um token JWT para a sessão do usuário
+        const jwtToken = jwt.sign({ id: user.id, email: user.email }, config.jwtSecret, { expiresIn: '7d' });
+
+        // Retorna o token JWT, os dados do usuário e se é um novo usuário
+        res.status(200).json({ token: jwtToken, user, isNewUser });
+
+    } catch (error) {
+        console.error('Erro na autenticação com Google:', error);
+        res.status(401).json({ message: 'Falha na autenticação com o Google.' });
+    }
+};
 
 const controleCriacaoConta = {
     registerUser,
     loginUser,
-    googleAuth, // Adicionando a nova função ao controlador
+    googleAuth,
 };
 
 export default controleCriacaoConta;
