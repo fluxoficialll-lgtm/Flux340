@@ -1,7 +1,7 @@
 
 import express from 'express';
 import ControleCriacaoGrupoPrivado from '../controles/Controles.Criação.Grupo.Privado.js';
-import authMiddleware from '../meu-software-de-servidor/autenticar.js';
+import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
 

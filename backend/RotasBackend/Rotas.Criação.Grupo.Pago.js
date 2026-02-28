@@ -1,7 +1,7 @@
 
 import express from 'express';
 import ControleCriacaoGrupoPago from '../controles/Controles.Criação.Grupo.Pago.js';
-import authMiddleware from '../meu-software-de-servidor/autenticar.js';
+import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
 
