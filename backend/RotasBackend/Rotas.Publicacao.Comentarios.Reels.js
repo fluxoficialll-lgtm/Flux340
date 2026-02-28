@@ -1,6 +1,6 @@
 
 import express from 'express';
-import comentariosReelsControle from '../controles/Controles.Comentarios.Reels.js';
+import comentariosReelsControle from '../controles/Controles.Publicacao.Comentarios.Reels.js';
 
 // Este router será montado sob /api/reels/:reelId/comments
 const router = express.Router({ mergeParams: true });

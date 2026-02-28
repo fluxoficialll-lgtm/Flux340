@@ -1,52 +1,25 @@
 
 // backend/database/GestãoDeDados/PostgreSQL/Consultas.Gestao.Perfil.js
 
-import { pool } from '../../pool.js';
-
-const updateUser = async (id, userData) => {
-    const { name, bio, profile_image } = userData;
-
-    // Verifica quais campos foram fornecidos e constrói a consulta dinamicamente
-    const fields = [];
-    const values = [];
-    let queryIndex = 1;
-
-    if (name) {
-        fields.push(`name = $${queryIndex++}`);
-        values.push(name);
-    }
-    if (bio) {
-        fields.push(`bio = $${queryIndex++}`);
-        values.push(bio);
-    }
-    if (profile_image) {
-        fields.push(`profile_image = $${queryIndex++}`);
-        values.push(profile_image);
-    }
-
-    // Se nenhum campo foi fornecido para atualização, retorna um erro
-    if (fields.length === 0) {
-        throw new Error('Nenhum campo para atualizar foi fornecido.');
-    }
-
-    values.push(id);
-    const query = `UPDATE users SET ${fields.join(', ')} WHERE id = $${queryIndex} RETURNING *`;
-
-    try {
-        const { rows } = await pool.query(query, values);
-        if (rows.length === 0) {
-            throw new Error('Usuário não encontrado.');
-        }
-        console.log('GestãoDeDados: Usuário atualizado com sucesso.');
-        return rows[0];
-    } catch (error) {
-        console.error('GestãoDeDados: Erro ao atualizar usuário:', error);
-        throw new Error('Erro ao atualizar usuário no banco de dados.');
-    }
+export const queries = {
+    updateUser: `
+        UPDATE users 
+        SET name = $1, bio = $2, profile_image = $3, website = $4
+        WHERE id = $5
+        RETURNING *;
+    `,
+    findUserById: `
+        SELECT 
+            u.id, 
+            u.username, 
+            u.name as nickname, 
+            u.bio, 
+            u.profile_pic as avatar, 
+            u.website,
+            (SELECT COUNT(*) FROM posts WHERE user_id = u.id) as posts_count,
+            (SELECT COUNT(*) FROM user_relationships WHERE followed_id = u.id) as followers_count,
+            (SELECT COUNT(*) FROM user_relationships WHERE follower_id = u.id) as following_count
+        FROM users u
+        WHERE u.id = $1;
+    `,
 };
-
-const consultasGestaoPerfil = {
-    updateUser,
-};
-
-export default consultasGestaoPerfil;

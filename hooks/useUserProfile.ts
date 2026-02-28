@@ -1,52 +1,101 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import { profileService } from '../ServiçosFrontend/ServiçoDePerfil/Serviço.Gestão.Perfil.js';
 import { MetricasListaSeguidores } from '../ServiçosFrontend/SistemaDeMétricas/Métricas.Lista.Seguidores.js';
-import { UserProfile } from '../types';
 
-interface UserProfileData {
-    profile: UserProfile | null;
-    isLoading: boolean;
-    handleFollow: (userId: string) => Promise<void>;
+// A interface que o nosso backend realmente retorna
+export interface UserProfileWithStats {
+    id: string;
+    username: string;
+    nickname: string;
+    bio: string;
+    avatar: string;
+    website: string;
+    stats: {
+        posts: number;
+        followers: number;
+        following: number;
+    };
+    isFollowing?: boolean; // Adicionado para controlar o estado de "seguir"
 }
 
-export const useUserProfile = (username?: string, email?: string): UserProfileData => {
-    const [profile, setProfile] = useState<UserProfile | null>(null);
+interface UseUserProfileData {
+    profile: UserProfileWithStats | null;
+    isLoading: boolean;
+    error: string | null;
+    handleFollow: () => Promise<void>;
+}
+
+export const useUserProfile = (userId: string | undefined): UseUserProfileData => {
+    const [profile, setProfile] = useState<UserProfileWithStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchUserData = useCallback(async () => {
-        if (!username) {
+        if (!userId) {
             setIsLoading(false);
             return;
         }
 
         setIsLoading(true);
+        setError(null);
+
         try {
-            const user = await authService.fetchUserByHandle(username, email);
-            if (user) {
-                setProfile(user);
-            }
-        } catch (error) {
-            console.error("Erro ao buscar perfil do usuário:", error);
+            // Usar o serviço correto que criamos
+            const userProfileData = await profileService.getUserProfile(userId);
+            
+            // Simular o "isFollowing" por enquanto, idealmente isso viria do backend
+            const profileWithMockedFollow = {
+                ...userProfileData,
+                isFollowing: Math.random() > 0.5, // Mock
+            };
+
+            setProfile(profileWithMockedFollow);
+
+        } catch (err: any) {
+            console.error("Erro ao buscar perfil do usuário:", err);
+            setError(err.message || 'Falha ao carregar o perfil.');
             setProfile(null);
         } finally {
             setIsLoading(false);
         }
-    }, [username, email]);
+    }, [userId]);
 
     useEffect(() => {
         fetchUserData();
     }, [fetchUserData]);
 
-    const handleFollow = useCallback(async (userId: string) => {
+    const handleFollow = useCallback(async () => {
+        if (!profile) return;
+
         try {
-            await MetricasListaSeguidores.toggleFollow(userId);
-            // Re-fetch user data to update the follower count and isFollowing status
-            await fetchUserData();
+            // Otimisticamente atualiza a UI
+            setProfile(prevProfile => {
+                if (!prevProfile) return null;
+                const isNowFollowing = !prevProfile.isFollowing;
+                const newFollowersCount = isNowFollowing 
+                    ? prevProfile.stats.followers + 1 
+                    : prevProfile.stats.followers - 1;
+
+                return {
+                    ...prevProfile,
+                    isFollowing: isNowFollowing,
+                    stats: { ...prevProfile.stats, followers: newFollowersCount }
+                };
+            });
+
+            // Chama a API para persistir a mudança
+            await MetricasListaSeguidores.toggleFollow(profile.id);
+            
+            // Opcional: Re-fetch para garantir consistência, embora a UI já esteja atualizada.
+            // await fetchUserData(); 
+
         } catch (error) {
             console.error("Erro ao seguir/deixar de seguir usuário:", error);
+            // Reverte a UI em caso de erro
+            fetchUserData(); 
         }
-    }, [fetchUserData]);
+    }, [profile, fetchUserData]);
 
-    return { profile, isLoading, handleFollow };
+    return { profile, isLoading, error, handleFollow };
 };
