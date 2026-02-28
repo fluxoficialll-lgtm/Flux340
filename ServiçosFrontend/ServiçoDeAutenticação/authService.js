@@ -61,15 +61,23 @@ export const authService = {
         return { token, user };
     },
     
-    async completeProfile(profileData) {
+    async completeProfile(emailOrData, profileDataOrNothing) {
         const token = this.getToken();
         if (!token) {
             throw new Error("Usuário não autenticado ou sessão inválida para completar o perfil.");
         }
 
+        let profileData = profileDataOrNothing;
+        if (!profileData && typeof emailOrData === 'object') {
+            profileData = emailOrData;
+        }
+
         const updatedUserFromBackend = await profileService.atualizarPerfil(profileData);
 
-        storeSession(token, updatedUserFromBackend);
+        const currentUser = this.getCurrentUser();
+        const updatedSessionUser = { ...currentUser, ...updatedUserFromBackend };
+
+        storeSession(token, updatedSessionUser);
 
         return updatedUserFromBackend;
     },
