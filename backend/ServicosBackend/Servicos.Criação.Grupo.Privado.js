@@ -1,5 +1,5 @@
-const { v4: uuidv4 } = require('uuid');
-const RepositorioGruposPrivados = require('../Repositorios/Repositorio.Criação.Grupo.Privado.js');
+import { v4 as uuidv4 } from 'uuid';
+import RepositorioGruposPrivados from '../Repositorios/Repositorio.Criação.Grupo.Privado.js';
 
 class ServicoCriacaoGrupoPrivado {
     async criar(dadosGrupo, creatorId) {
@@ -32,4 +32,4 @@ class ServicoCriacaoGrupoPrivado {
     }
 }
 
-module.exports = new ServicoCriacaoGrupoPrivado();
+export default new ServicoCriacaoGrupoPrivado();

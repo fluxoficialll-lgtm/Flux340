@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL) {
     console.error("❌ ERRO CRÍTICO: DATABASE_URL não definida no ambiente.");
 }
 
-export const pool = new Pool({
+const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: backendConfig.isProducao ? { rejectUnauthorized: false } : false,
     connectionTimeoutMillis: 30000,
@@ -19,4 +19,4 @@ export const pool = new Pool({
     max: 25
 });
 
-export const query = (text, params) => pool.query(text, params);
+export default pool;

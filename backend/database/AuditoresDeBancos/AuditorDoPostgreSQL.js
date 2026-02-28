@@ -1,6 +1,6 @@
 
 import pg from 'pg';
-import { pool } from '../pool.js'; // Importa o pool centralizado
+import pool from '../pool.js'; // Importa o pool centralizado
 // import { LogDeOperacoes } from '../../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 import { backendConfig } from '../../config/ambiente.js';
 

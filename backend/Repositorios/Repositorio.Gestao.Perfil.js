@@ -1,7 +1,7 @@
 
 // backend/Repositorios/Repositorio.Gestao.Perfil.js
 
-import { pool } from '../database/pool.js';
+import pool from '../database/pool.js';
 import { queries } from '../database/GestãoDeDados/PostgreSQL/Consultas.Gestao.Perfil.js';
 
 const findUserById = async (id) => {

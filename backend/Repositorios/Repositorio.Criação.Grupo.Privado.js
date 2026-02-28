@@ -1,5 +1,5 @@
-const pool = require('../database/pool');
-const { criarGrupoPrivado } = require('../database/GestãoDeDados/PostgreSQL/Consultas.Criação.Grupo.Privado.js');
+import pool from '../database/pool.js';
+import { criarGrupoPrivado } from '../database/GestãoDeDados/PostgreSQL/Consultas.Criação.Grupo.Privado.js';
 
 class RepositorioCriacaoGrupoPrivado {
     async criar(grupo) {
@@ -17,4 +17,4 @@ class RepositorioCriacaoGrupoPrivado {
     }
 }
 
-module.exports = new RepositorioCriacaoGrupoPrivado();
+export default new RepositorioCriacaoGrupoPrivado();

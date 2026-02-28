@@ -1,6 +1,6 @@
 
-const express = require('express');
-const credencialStripeController = require('../controles/Controles.Gestao.Credencial.Stripe.js');
+import express from 'express';
+import credencialStripeController from '../controles/Controles.Gestao.Credencial.Stripe.js';
 
 const router = express.Router();
 
@@ -16,4 +16,4 @@ router.get('/account-details', credencialStripeController.getAccountDetails);
 // @desc    Desconecta a conta Stripe
 router.delete('/disconnect', credencialStripeController.disconnectAccount);
 
-module.exports = router;
+export default router;

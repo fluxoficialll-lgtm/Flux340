@@ -1,7 +1,7 @@
 
 // backend/database/GestãoDeDados/PostgreSQL/Consultas.Criação.Conta.Flux.js
 
-import { pool } from '../../pool.js';
+import pool from '../../pool.js';
 
 const registerUser = async (userData) => {
     const { id, name, email, password_hash, google_id } = userData;

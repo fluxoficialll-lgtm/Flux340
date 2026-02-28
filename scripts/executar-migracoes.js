@@ -4,7 +4,7 @@ dotenv.config();
 
 import fs from 'fs/promises';
 import path from 'path';
-import { pool } from '../backend/database/pool.js';
+import pool from '../backend/database/pool.js';
 import { backendConfig } from '../backend/config/ambiente.js';
 const { ambiente: ambienteAtual } = backendConfig;
 

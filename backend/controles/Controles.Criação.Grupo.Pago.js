@@ -1,5 +1,5 @@
 
-const ServicoCriacaoGrupoPago = require('../ServicosBackend/Servicos.Criação.Grupo.Pago.js');
+import ServicoCriacaoGrupoPago from '../ServicosBackend/Servicos.Criação.Grupo.Pago.js';
 
 class ControleCriacaoGrupoPago {
     async handle(req, res) {
@@ -22,4 +22,4 @@ class ControleCriacaoGrupoPago {
     }
 }
 
-module.exports = new ControleCriacaoGrupoPago();
+export default new ControleCriacaoGrupoPago();

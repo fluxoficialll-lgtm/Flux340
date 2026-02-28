@@ -1,5 +1,5 @@
 
-import { pool } from './pool.js';
+import pool from './pool.js';
 // import { LogDeOperacoes } from '../ServiçosBackEnd/ServiçosDeLogsSofisticados/LogDeOperacoes.js';
 
 const db = {

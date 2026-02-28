@@ -1,5 +1,5 @@
 
-const ServicoCriacaoGrupoPrivado = require('../ServicosBackend/Servicos.Criação.Grupo.Privado.js');
+import ServicoCriacaoGrupoPrivado from '../ServicosBackend/Servicos.Criação.Grupo.Privado.js';
 
 class ControleCriacaoGrupoPrivado {
     async handle(req, res) {
@@ -21,4 +21,4 @@ class ControleCriacaoGrupoPrivado {
     }
 }
 
-module.exports = new ControleCriacaoGrupoPrivado();
+export default new ControleCriacaoGrupoPrivado();

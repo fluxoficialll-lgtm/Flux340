@@ -1,6 +1,6 @@
 
 // backend/Repositorios/Repositorio.Publicacao.Feed.js
-import { pool } from '../database/pool.js';
+import pool from '../database/pool.js';
 
 const create = async (postData) => {
     const { content, userId, mediaUrl, parentPostId, type, pollOptions, ctaLink, ctaText } = postData;

@@ -1,7 +1,7 @@
 
-const express = require('express');
-const ControleCriacaoGrupoPago = require('../controles/Controles.Criação.Grupo.Pago.js');
-const authMiddleware = require('../config/Middleware.Autenticacao.JWT.js');
+import express from 'express';
+import ControleCriacaoGrupoPago from '../controles/Controles.Criação.Grupo.Pago.js';
+import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
 
@@ -10,4 +10,4 @@ const router = express.Router();
 // @access  Private
 router.post('/', authMiddleware, ControleCriacaoGrupoPago.handle);
 
-module.exports = router;
+export default router;

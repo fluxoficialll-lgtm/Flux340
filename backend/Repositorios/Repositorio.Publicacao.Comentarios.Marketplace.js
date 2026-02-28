@@ -1,7 +1,7 @@
 
 // backend/Repositorios/Repositorio.Publicacao.Comentarios.Marketplace.js
 
-import { pool } from '../database/postgreSQL.js';
+import pool from '../database/pool.js';
 import { queries } from '../database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Marketplace.js';
 
 async function createComment(itemId, userId, content) {
