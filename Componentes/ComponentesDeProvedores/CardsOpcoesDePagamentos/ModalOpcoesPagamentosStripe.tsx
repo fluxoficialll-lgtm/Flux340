@@ -4,19 +4,19 @@ import { useFluxoDePagamentoStripe, StripeView, GeoData, ConversionResult } from
 import { Group } from '../../../types';
 
 // Importando os componentes de UI para cada método de pagamento
-import { StripePixView } from '../CardsMétodosDePagamentos/StripePixView';
-import { StripeCardForm } from '../CardsMétodosDePagamentos/StripeCardForm';
-import { StripeOxxoView } from '../CardsMétodosDePagamentos/StripeOxxoView';
+import { GestorCheckoutStripePix } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.Pix'; 
+import { GestorCheckoutStripeBoleto } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.Boleto'; 
+import { GestorCheckoutStripeOxxo } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.Oxxo';
+import { GestorCheckoutStripeUpi } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.Upi';
+import { GestorCheckoutStripeKonbini } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.Konbini';
+import { GestorCheckoutStripePayNow } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.PayNow';
+import { GestorCheckoutStripeInterac } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.Interac'; // NOVO FLUXO INTERAC
+import { GestorCheckoutStripeCard } from '../CardsMétodosDePagamentos/Gestor.Checkout.Stripe.Card';
 import { StripeSepaForm } from '../CardsMétodosDePagamentos/StripeSepaForm';
-import { StripeBoletoView } from '../CardsMétodosDePagamentos/StripeBoletoView';
 import { StripeBacsForm } from '../CardsMétodosDePagamentos/StripeBacsForm';
-import { StripeUpiView } from '../CardsMétodosDePagamentos/StripeUpiView';
-import { StripeKonbiniView } from '../CardsMétodosDePagamentos/StripeKonbiniView';
-import { StripePayNowView } from '../CardsMétodosDePagamentos/StripePayNowView';
 import { StripeAchForm } from '../CardsMétodosDePagamentos/StripeAchForm';
-import { StripeInteracView } from '../CardsMétodosDePagamentos/StripeInteracView';
 import { StripeBecsForm } from '../CardsMétodosDePagamentos/StripeBecsForm';
-import { RedirectionBridgeCard, RedirectionProvider } from './RedirectionBridgeCard';
+import { CardRedirecionamentoStripe, RedirectionProvider } from './Card.Redirecionamento.Stripe';
 
 // A matriz de configuração visual agora é importada de um arquivo separado.
 import { STRIPE_REGIONAL_MATRIX } from './PaísesMapeadosStripe';
@@ -48,7 +48,9 @@ export const ModalOpcoesPagamentosStripe: React.FC<ModalOpcoesPagamentosStripePr
     }, [region.methods, props.group.checkoutConfig]);
 
     const handleMethodSelection = (method: StripeView) => {
-        const methodsWithOwnForm = ['card', 'sepa', 'bacs', 'ach', 'becs', 'pad'];
+        // Adicionamos 'interac' aqui. Agora o clique no card do Interac apenas muda a view,
+        // delegando toda a lógica para o componente Gestor.
+        const methodsWithOwnForm = ['card', 'sepa', 'bacs', 'ach', 'becs', 'pad', 'pix', 'boleto', 'oxxo', 'upi', 'konbini', 'paynow', 'interac'];
         const methodsWithRedirect = ['sofort', 'klarna', 'wallet', 'grabpay', 'afterpay', 'link', 'debit_card'];
 
         if (methodsWithOwnForm.includes(method)) {
@@ -99,17 +101,24 @@ export const ModalOpcoesPagamentosStripe: React.FC<ModalOpcoesPagamentosStripePr
                     </div>
                 );
 
-            // Views que precisam de dados da API
-            case 'pix': return <StripePixView data={paymentData} onBack={() => setCurrentView('selection')} />;
-            case 'boleto': return <StripeBoletoView data={paymentData} onBack={() => setCurrentView('selection')} />;
-            case 'oxxo': return <StripeOxxoView data={paymentData} onBack={() => setCurrentView('selection')} />;
-            case 'upi': return <StripeUpiView data={paymentData} onBack={() => setCurrentView('selection')} />;
-            case 'konbini': return <StripeKonbiniView data={paymentData} onBack={() => setCurrentView('selection')} />;
-            case 'paynow': return <StripePayNowView data={paymentData} onBack={() => setCurrentView('selection')} />;
-            case 'interac': return <StripeInteracView data={paymentData} onBack={() => setCurrentView('selection')} />;
-            
-            // Views de formulário (não precisam de dados iniciais da API)
-            case 'card': return <StripeCardForm group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+            // FLUXOS NOVOS E AUTO-CONTIDOS
+            case 'pix': 
+                return <GestorCheckoutStripePix group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+            case 'boleto': 
+                return <GestorCheckoutStripeBoleto group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+            case 'oxxo': 
+                return <GestorCheckoutStripeOxxo group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+            case 'upi': 
+                return <GestorCheckoutStripeUpi group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+            case 'konbini': 
+                return <GestorCheckoutStripeKonbini group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+            case 'paynow': 
+                return <GestorCheckoutStripePayNow group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+            case 'interac': 
+                return <GestorCheckoutStripeInterac group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
+
+            // Views de formulário
+            case 'card': return <GestorCheckoutStripeCard group={props.group} geo={props.geo} onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
             case 'sepa': return <StripeSepaForm onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
             case 'bacs': return <StripeBacsForm onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
             case 'ach': return <StripeAchForm onBack={() => setCurrentView('selection')} onSuccess={props.onSuccess} />;
@@ -117,7 +126,7 @@ export const ModalOpcoesPagamentosStripe: React.FC<ModalOpcoesPagamentosStripePr
 
             case 'redirection':
                 return (
-                    <RedirectionBridgeCard 
+                    <CardRedirecionamentoStripe 
                         provider={redirectTarget}
                         price={props.convertedPriceInfo?.formatted || '...'}
                         onConfirm={props.onSuccess}

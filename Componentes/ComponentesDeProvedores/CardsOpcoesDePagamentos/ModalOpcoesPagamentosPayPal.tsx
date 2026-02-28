@@ -2,7 +2,7 @@
 import React from 'react';
 import { useFluxoDePagamentoPayPal, ConversionResult } from '../../../hooks/HooksComponentes/useFluxoDePagamentoPayPal';
 import { Group } from '../../../types';
-import { RedirectionBridgeCard } from './RedirectionBridgeCard';
+import { CardRedirecionamentoPaypal } from './Card.Redirecionamento.Paypal';
 import { PAYPAL_REGIONAL_MATRIX } from './PaísesMapeadosPayPal'; // Importando a configuração visual
 
 interface ModalOpcoesPagamentosPayPalProps {
@@ -27,8 +27,7 @@ export const ModalOpcoesPagamentosPayPal: React.FC<ModalOpcoesPagamentosPayPalPr
     };
 
     return (
-        <RedirectionBridgeCard 
-            provider="paypal"
+        <CardRedirecionamentoPaypal 
             price={props.convertedPriceInfo?.formatted || '...'}
             isLoading={isLoading}
             onConfirm={handleConfirm}

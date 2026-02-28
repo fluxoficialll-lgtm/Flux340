@@ -11,7 +11,8 @@
 // Nomes das variáveis que são OBRIGATÓRIAS para o frontend funcionar.
 const VARIAVEIS_OBRIGATORIAS = [
     'VITE_API_BASE_URL',
-    'VITE_GOOGLE_CLIENT_ID'
+    'VITE_GOOGLE_CLIENT_ID',
+    'VITE_STRIPE_PUBLIC_KEY'
 ];
 
 // --- Processamento e Validação ---

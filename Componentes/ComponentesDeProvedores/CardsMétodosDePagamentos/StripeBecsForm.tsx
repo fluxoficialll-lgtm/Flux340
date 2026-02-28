@@ -1,62 +1,102 @@
+
 import React, { useState } from 'react';
+import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { GeoData } from '../../../ServiçosFrontend/geoService';
+import { Group } from '../../../types';
 
 interface StripeBecsFormProps {
+    geo: GeoData | null;
+    group: Group;
+    creatorEmail: string;
     onBack: () => void;
-    onSuccess: () => void;
+    onSuccess: (paymentIntentId: string) => void;
 }
 
-export const StripeBecsForm: React.FC<StripeBecsFormProps> = ({ onBack, onSuccess }) => {
+/**
+ * Formulário para Débito Direto BECS (Contas da Austrália) usando o PaymentElement.
+ * A Stripe renderiza o formulário apropriado, incluindo o mandato de débito (DDR),
+ * e lida com a coleta segura dos dados bancários (BSB e número da conta).
+ */
+export const StripeBecsForm: React.FC<StripeBecsFormProps> = ({ geo, group, creatorEmail, onBack, onSuccess }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!stripe || !elements) {
+            setErrorMessage("Stripe não foi inicializado corretamente.");
+            return;
+        }
+
         setLoading(true);
-        setTimeout(() => {
+        setErrorMessage(null);
+
+        // Confirma o pagamento. A Stripe cuidará de coletar os dados,
+        // exibir o mandato e confirmar a intenção de pagamento.
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                // Essencial: A URL para onde o cliente retornará após a tentativa de pagamento.
+                // O status do pagamento BECS ficará pendente por alguns dias.
+                return_url: `${window.location.origin}/payment-status`,
+                payment_method_data: {
+                    billing_details: {
+                        // Nome e e-mail são necessários para pagamentos BECS.
+                        name: group.creatorName, 
+                        email: creatorEmail
+                    }
+                }
+            },
+        });
+
+        // Este código só é alcançado se houver um erro *imediato* na validação,
+        // como um e-mail ausente, antes de qualquer redirecionamento.
+        if (error) {
+            if (error.type === "card_error" || error.type === "validation_error") {
+                setErrorMessage(error.message || "Ocorreu um erro com os dados da sua conta.");
+            } else {
+                setErrorMessage("Ocorreu um erro inesperado. Por favor, tente novamente.");
+            }
             setLoading(false);
-            onSuccess();
-        }, 2000);
+        } else {
+            // O pagamento foi iniciado. O status será 'processing'.
+            // O sucesso final é determinado por webhooks do servidor.
+            if (paymentIntent) {
+                console.log("Pagamento BECS iniciado com sucesso: ", paymentIntent);
+                onSuccess(paymentIntent.id);
+            } else {
+                // Se por algum motivo o paymentIntent não for retornado, redirecione para a página de status geral
+                window.location.href = `${window.location.origin}/payment-status`;
+            }
+        }
     };
 
     return (
         <form onSubmit={handleSubmit} className="animate-fade-in text-left">
             <button type="button" onClick={onBack} className="text-gray-500 text-[10px] font-black uppercase mb-6 hover:text-white">
-                <i className="fa-solid fa-arrow-left mr-2"></i> AU Direct Debit
+                <i className="fa-solid fa-arrow-left mr-2"></i> Voltar
             </button>
 
-            <div className="space-y-5">
-                <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-2xl mb-4">
-                    <p className="text-[10px] text-orange-300 font-bold leading-relaxed">
-                        BECS Direct Debit: By providing your details, you authorize Stripe to debit your AU bank account.
-                    </p>
-                </div>
+            <div className="space-y-4">
+                {/* O PaymentElement renderizará automaticamente o formulário BECS */}
+                <PaymentElement id="payment-element" />
 
-                <div className="input-group mb-0">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Account Name</label>
-                    <input className="input-field" placeholder="Legal Name" required />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="input-group mb-0">
-                        <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">BSB Number</label>
-                        <input className="input-field" placeholder="000-000" required maxLength={7} />
+                {errorMessage && (
+                    <div className="text-red-500 text-xs text-center py-3 font-bold">
+                        {errorMessage}
                     </div>
-                    <div className="input-group mb-0">
-                        <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Account Number</label>
-                        <input className="input-field" placeholder="9 digits" required />
-                    </div>
-                </div>
-
-                <div className="input-group mb-0">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Email</label>
-                    <input className="input-field" type="email" placeholder="receipt@domain.au" required />
-                </div>
+                )}
 
                 <button 
                     type="submit" 
-                    disabled={loading}
-                    className="w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl shadow-lg mt-6 active:scale-95 transition-all"
+                    disabled={!stripe || loading}
+                    className="w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl shadow-lg mt-6 active:scale-95 transition-all disabled:bg-gray-700 disabled:cursor-not-allowed"
                 >
-                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'CONFIRM BECS DEBIT'}
+                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'CONFIRMAR DÉBITO BECS'}
                 </button>
             </div>
         </form>

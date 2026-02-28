@@ -1,59 +1,102 @@
+
 import React, { useState } from 'react';
+import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { GeoData } from '../../../ServiçosFrontend/geoService';
+import { Group } from '../../../types';
 
 interface StripeAchFormProps {
+    geo: GeoData | null;
+    group: Group;
+    creatorEmail: string;
     onBack: () => void;
-    onSuccess: () => void;
+    onSuccess: (paymentIntentId: string) => void;
 }
 
-export const StripeAchForm: React.FC<StripeAchFormProps> = ({ onBack, onSuccess }) => {
+/**
+ * Formulário para Débito Direto ACH (Contas dos EUA) usando o PaymentElement.
+ * Esta abordagem moderna permite que a Stripe renderize a UI apropriada
+ * para coletar e verificar os detalhes da conta bancária de forma segura.
+ */
+export const StripeAchForm: React.FC<StripeAchFormProps> = ({ geo, group, creatorEmail, onBack, onSuccess }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!stripe || !elements) {
+            setErrorMessage("Stripe não foi inicializado corretamente.");
+            return;
+        }
+
         setLoading(true);
-        setTimeout(() => {
+        setErrorMessage(null);
+
+        // Confirma o pagamento. A Stripe cuidará de coletar os dados, 
+        // obter um mandato e redirecionar para verificação, se necessário.
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                // Essencial: A URL para onde o cliente retornará após a tentativa de pagamento.
+                // O status do pagamento ACH ficará pendente por alguns dias.
+                return_url: `${window.location.origin}/payment-status`,
+                payment_method_data: {
+                    billing_details: {
+                        // O nome e o e-mail são necessários para pagamentos ACH.
+                        name: group.creatorName, // Usando o nome do criador do grupo como exemplo
+                        email: creatorEmail
+                    }
+                }
+            },
+        });
+
+        // Este código só é alcançado se houver um erro *imediato* na validação,
+        // como um e-mail ausente, antes de qualquer redirecionamento.
+        if (error) {
+            if (error.type === "card_error" || error.type === "validation_error") {
+                setErrorMessage(error.message || "Ocorreu um erro com os dados da sua conta.");
+            } else {
+                setErrorMessage("Ocorreu um erro inesperado. Por favor, tente novamente.");
+            }
             setLoading(false);
-            onSuccess();
-        }, 2000);
+        } else {
+            // O pagamento foi iniciado. O status será 'processing'.
+            // O sucesso final é determinado por webhooks do servidor.
+            if (paymentIntent) {
+                console.log("Pagamento ACH iniciado com sucesso: ", paymentIntent);
+                onSuccess(paymentIntent.id);
+            } else {
+                 // Se por algum motivo o paymentIntent não for retornado, redirecione para a página de status geral
+                 window.location.href = `${window.location.origin}/payment-status`;
+            }
+        }
     };
 
     return (
         <form onSubmit={handleSubmit} className="animate-fade-in text-left">
             <button type="button" onClick={onBack} className="text-gray-500 text-[10px] font-black uppercase mb-6 hover:text-white">
-                <i className="fa-solid fa-arrow-left mr-2"></i> US Bank Account
+                <i className="fa-solid fa-arrow-left mr-2"></i> Voltar
             </button>
 
-            <div className="space-y-5">
-                <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl mb-4">
-                    <p className="text-[10px] text-blue-300 font-bold leading-relaxed">
-                        Securely connect your bank account via ACH Direct Debit. Payments are verified through Stripe's secure channel.
-                    </p>
-                </div>
+            <div className="space-y-4">
+                {/* O PaymentElement renderizará automaticamente o formulário ACH */}
+                <PaymentElement id="payment-element" />
 
-                <div className="input-group mb-0">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Account Holder Type</label>
-                    <div className="flex gap-2">
-                        <button type="button" className="flex-1 py-3 bg-[#0c0f14] border border-[#00c2ff] text-[#00c2ff] text-xs font-bold rounded-xl">Individual</button>
-                        <button type="button" className="flex-1 py-3 bg-[#0c0f14] border border-white/5 text-gray-500 text-xs font-bold rounded-xl">Company</button>
+                {errorMessage && (
+                    <div className="text-red-500 text-xs text-center py-3 font-bold">
+                        {errorMessage}
                     </div>
-                </div>
-
-                <div className="input-group mb-0">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Routing Number</label>
-                    <input className="input-field" placeholder="9 digits" required maxLength={9} />
-                </div>
-
-                <div className="input-group mb-0">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Account Number</label>
-                    <input className="input-field" placeholder="Your checking account number" required />
-                </div>
+                )}
 
                 <button 
                     type="submit" 
-                    disabled={loading}
-                    className="w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl shadow-lg mt-6 active:scale-95 transition-all"
+                    disabled={!stripe || loading}
+                    className="w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl shadow-lg mt-6 active:scale-95 transition-all disabled:bg-gray-700 disabled:cursor-not-allowed"
                 >
-                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'CONFIRM ACH DEBIT'}
+                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'AUTORIZAR DÉBITO ACH'}
                 </button>
             </div>
         </form>

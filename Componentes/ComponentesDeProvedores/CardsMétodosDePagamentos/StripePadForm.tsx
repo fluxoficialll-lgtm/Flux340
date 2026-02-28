@@ -1,61 +1,102 @@
+
 import React, { useState } from 'react';
+import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { GeoData } from '../../../ServiçosFrontend/geoService';
+import { Group } from '../../../types';
 
 interface StripePadFormProps {
+    geo: GeoData | null;
+    group: Group;
+    creatorEmail: string;
     onBack: () => void;
-    onSuccess: () => void;
+    onSuccess: (paymentIntentId: string) => void;
 }
 
-export const StripePadForm: React.FC<StripePadFormProps> = ({ onBack, onSuccess }) => {
+/**
+ * Formulário para Débito Pré-Autorizado (PAD) do Canadá usando o PaymentElement.
+ * A Stripe renderiza o formulário apropriado, incluindo o acordo de mandato (PAD Agreement),
+ * e lida com a coleta segura dos dados bancários.
+ */
+export const StripePadForm: React.FC<StripePadFormProps> = ({ geo, group, creatorEmail, onBack, onSuccess }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!stripe || !elements) {
+            setErrorMessage("Stripe não foi inicializado corretamente.");
+            return;
+        }
+
         setLoading(true);
-        setTimeout(() => {
+        setErrorMessage(null);
+
+        // Confirma o pagamento. A Stripe cuidará de coletar os dados,
+        // exibir o mandato e redirecionar para verificação, se necessário.
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                // Essencial: A URL para onde o cliente retornará após a tentativa de pagamento.
+                // O status do pagamento PAD (ACSS) ficará pendente.
+                return_url: `${window.location.origin}/payment-status`,
+                payment_method_data: {
+                    billing_details: {
+                        // Nome e e-mail são necessários para pagamentos PAD.
+                        name: group.creatorName, // Usando o nome do criador do grupo como exemplo
+                        email: creatorEmail
+                    }
+                }
+            },
+        });
+
+        // Este código só é alcançado se houver um erro *imediato* na validação,
+        // como um e-mail ausente, antes de qualquer redirecionamento.
+        if (error) {
+            if (error.type === "card_error" || error.type === "validation_error") {
+                setErrorMessage(error.message || "Ocorreu um erro com os dados da sua conta.");
+            } else {
+                setErrorMessage("Ocorreu um erro inesperado. Por favor, tente novamente.");
+            }
             setLoading(false);
-            onSuccess();
-        }, 2000);
+        } else {
+            // O pagamento foi iniciado. O status será 'processing'.
+            // O sucesso final é determinado por webhooks do servidor.
+            if (paymentIntent) {
+                console.log("Pagamento PAD (ACSS) iniciado com sucesso: ", paymentIntent);
+                onSuccess(paymentIntent.id);
+            } else {
+                 // Se por algum motivo o paymentIntent não for retornado, redirecione para a página de status geral
+                 window.location.href = `${window.location.origin}/payment-status`;
+            }
+        }
     };
 
     return (
         <form onSubmit={handleSubmit} className="animate-fade-in text-left">
             <button type="button" onClick={onBack} className="text-gray-500 text-[10px] font-black uppercase mb-6 hover:text-white">
-                <i className="fa-solid fa-arrow-left mr-2"></i> Canada Direct Debit (PAD)
+                <i className="fa-solid fa-arrow-left mr-2"></i> Voltar
             </button>
 
-            <div className="space-y-5">
-                <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl mb-4">
-                    <p className="text-[10px] text-red-400 font-bold leading-relaxed">
-                        Pre-Authorized Debit (PAD) agreement. You agree to a one-time debit from your account.
-                    </p>
-                </div>
+            <div className="space-y-4">
+                {/* O PaymentElement renderizará automaticamente o formulário PAD */}
+                <PaymentElement id="payment-element" />
 
-                <div className="input-group mb-0">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Account Name</label>
-                    <input className="input-field" placeholder="Full Name on Account" required />
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                    <div className="input-group mb-0">
-                        <label className="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Transit</label>
-                        <input className="input-field" placeholder="5 digits" required maxLength={5} />
+                {errorMessage && (
+                    <div className="text-red-500 text-xs text-center py-3 font-bold">
+                        {errorMessage}
                     </div>
-                    <div className="input-group mb-0">
-                        <label className="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Inst.</label>
-                        <input className="input-field" placeholder="3 digits" required maxLength={3} />
-                    </div>
-                    <div className="input-group mb-0 col-span-1">
-                        <label className="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1 block">Account</label>
-                        <input className="input-field" placeholder="No." required />
-                    </div>
-                </div>
+                )}
 
                 <button 
                     type="submit" 
-                    disabled={loading}
-                    className="w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl shadow-lg mt-6 active:scale-95 transition-all"
+                    disabled={!stripe || loading}
+                    className="w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl shadow-lg mt-6 active:scale-95 transition-all disabled:bg-gray-700 disabled:cursor-not-allowed"
                 >
-                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'CONFIRM PAD DEBIT'}
+                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'AUTORIZAR DÉBITO (PAD)'}
                 </button>
             </div>
         </form>

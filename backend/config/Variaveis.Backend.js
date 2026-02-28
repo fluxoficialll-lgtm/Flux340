@@ -23,7 +23,8 @@ const VARIAVEIS_OBRIGATORIAS = [
     'JWT_SECRET',
     'GOOGLE_CLIENT_ID',       // Desacoplado do VITE_ prefix
     'GOOGLE_CLIENT_SECRET',
-    'CORS_ORIGIN'             // Adicionado à validação
+    'CORS_ORIGIN',             // Adicionado à validação
+    'STRIPE_SECRET_KEY'
 ];
 
 // Variáveis OPCIONAIS, que possuem um valor padrão caso não sejam definidas.
@@ -57,7 +58,8 @@ const configFinal = {
     googleClientId: VariaveisBackend.GOOGLE_CLIENT_ID,
     googleClientSecret: VariaveisBackend.GOOGLE_CLIENT_SECRET,
     corsOrigin: VariaveisBackend.CORS_ORIGIN,
-    port: VariaveisBackend.PORT
+    port: VariaveisBackend.PORT,
+    stripeSecretKey: VariaveisBackend.STRIPE_SECRET_KEY
 };
 
 

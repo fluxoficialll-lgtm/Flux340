@@ -1,55 +1,18 @@
 
 import React from 'react';
 
-export type RedirectionProvider = 'paypal' | 'stripe' | 'stripe_link' | 'wallet' | 'generic';
-
-interface RedirectionBridgeCardProps {
-    provider: RedirectionProvider;
+interface CardRedirecionamentoPaypalProps {
     price: string;
     onConfirm: () => void;
     onBack: () => void;
     isLoading?: boolean;
-    config?: any; // Nova prop opcional para configuração visual
+    config: any; 
 }
 
-// Dados de fallback para provedores que não passam uma config externa
-const PROVIDER_DATA = {
-    stripe: {
-        name: 'Stripe',
-        icon: 'fa-brands fa-stripe',
-        color: '#635bff',
-        accent: '#80e9ff',
-        msg: 'Conclua seu pagamento via Checkout Seguro Stripe. Seus dados estão protegidos por criptografia de ponta a ponta.'
-    },
-    stripe_link: {
-        name: 'Stripe Link',
-        icon: 'fa-solid fa-link',
-        color: '#00d66f',
-        accent: '#ffffff',
-        msg: 'Finalize sua compra em 1-clique. O sistema enviará um código SMS para confirmar sua identidade na Stripe.'
-    },
-    wallet: {
-        name: 'Apple / Google Pay',
-        icon: 'fa-solid fa-wallet',
-        color: '#ffffff',
-        accent: '#000000',
-        msg: 'Ativando carteira digital. Você usará a biometria ou senha do seu dispositivo para autorizar o pagamento.'
-    },
-    generic: {
-        name: 'Gateway Seguro',
-        icon: 'fa-solid fa-shield-halved',
-        color: '#00c2ff',
-        accent: '#00ff82',
-        msg: 'Estamos preparando sua conexão segura com o provedor de pagamentos.'
-    }
-};
-
-export const RedirectionBridgeCard: React.FC<RedirectionBridgeCardProps> = ({ 
-    provider, price, onConfirm, onBack, isLoading, config 
+export const CardRedirecionamentoPaypal: React.FC<CardRedirecionamentoPaypalProps> = ({ 
+    price, onConfirm, onBack, isLoading, config 
 }) => {
-    // Usa a config externa se fornecida, senão, busca nos dados internos
-    const data = config || PROVIDER_DATA[provider] || PROVIDER_DATA.generic;
-    const isWallet = provider === 'wallet';
+    const data = config; 
 
     return (
         <div className="redirection-bridge animate-fade-in flex flex-col items-center">
@@ -61,16 +24,16 @@ export const RedirectionBridgeCard: React.FC<RedirectionBridgeCardProps> = ({
                 .provider-shield {
                     width: 70px;
                     height: 70px;
-                    background: ${isWallet ? 'rgba(255,255,255,0.1)' : data.color + '1a'};
-                    border: 2px solid ${isWallet ? 'rgba(255,255,255,0.2)' : data.color + '44'};
+                    background: ${data.color + '1a'};
+                    border: 2px solid ${data.color + '44'};
                     border-radius: 22px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 32px;
-                    color: ${isWallet ? '#fff' : data.color};
+                    color: ${data.color};
                     margin: 0 auto 20px;
-                    box-shadow: 0 10px 25px ${isWallet ? 'rgba(0,0,0,0.2)' : data.color + '22'};
+                    box-shadow: 0 10px 25px ${data.color + '22'};
                     position: relative;
                 }
                 .secure-badge {
@@ -102,8 +65,8 @@ export const RedirectionBridgeCard: React.FC<RedirectionBridgeCardProps> = ({
                 .confirm-redirect-btn {
                     width: 100%;
                     padding: 18px;
-                    background: ${isWallet ? '#fff' : data.color};
-                    color: ${isWallet ? '#000' : '#fff'};
+                    background: ${data.color};
+                    color: #fff;
                     border: none;
                     border-radius: 16px;
                     font-weight: 800;
@@ -112,7 +75,7 @@ export const RedirectionBridgeCard: React.FC<RedirectionBridgeCardProps> = ({
                     letter-spacing: 1px;
                     cursor: pointer;
                     transition: 0.3s;
-                    box-shadow: 0 10px 30px ${isWallet ? 'rgba(255,255,255,0.1)' : data.color + '44'};
+                    box-shadow: 0 10px 30px ${data.color + '44'};
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -162,7 +125,7 @@ export const RedirectionBridgeCard: React.FC<RedirectionBridgeCardProps> = ({
                         <i className="fa-solid fa-circle-notch fa-spin"></i>
                     ) : (
                         <>
-                            <span>{isWallet ? 'Pagar agora' : 'Confirmar e Ir'}</span>
+                            <span>Confirmar e Ir</span>
                             <i className="fa-solid fa-arrow-up-right-from-square"></i>
                         </>
                     )}
