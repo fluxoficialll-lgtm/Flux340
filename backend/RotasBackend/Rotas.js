@@ -1,24 +1,26 @@
 
 import express from 'express';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Importando as novas rotas de autenticação e usuário
-import rotasCriacaoConta from './Rotas.Criação.Conta.Flux.js';
-import rotasGestaoPerfil from './Rotas.Gestao.Perfil.js'; // Importando a nova rota
+const rotasCriacaoConta = require('./Rotas.Criação.Conta.Flux.js');
+const rotasGestaoPerfil = require('./Rotas.Gestao.Perfil.js'); // Importando a nova rota
 
 // Importando as rotas de publicação
-import rotasPublicacaoFeed from './Rotas.Publicacao.Feed.js';
-import rotasCriacaoGrupoPublico from './Rotas.Criação.Grupo.Publico.js';
-import rotasCriacaoGrupoPrivado from './Rotas.Criação.Grupo.Privado.js';
-import rotasCriacaoGrupoPago from './Rotas.Criação.Grupo.Pago.js';
+const rotasPublicacaoFeed = require('./Rotas.Publicacao.Feed.js');
+const rotasCriacaoGrupoPublico = require('./Rotas.Criação.Grupo.Publico.js');
+const rotasCriacaoGrupoPrivado = require('./Rotas.Criação.Grupo.Privado.js');
+const rotasCriacaoGrupoPago = require('./Rotas.Criação.Grupo.Pago.js');
 
 // Importando as rotas dos provedores de pagamento
-import rotasSyncPay from './Rotas.Provedor.SyncPay.js';
-import rotasPayPal from './Rotas.Provedor.PayPal.js';
-import rotasStripe from './Rotas.Provedor.Stripe.js';
-import rotasCredencialStripe from './Rotas.Gestao.Credencial.Stripe.js';
+const rotasSyncPay = require('./Rotas.Provedor.SyncPay.js');
+const rotasPayPal = require('./Rotas.Provedor.PayPal.js');
+const rotasStripe = require('./Rotas.Provedor.Stripe.js');
+const rotasCredencialStripe = require('./Rotas.Gestao.Credencial.Stripe.js');
 
 // Importando a nova rota de gestão de variáveis
-import rotasGestaoVariaveis from './Rotas.Gestão.Variáveis.js';
+const rotasGestaoVariaveis = require('./Rotas.Gestão.Variáveis.js');
 
 const router = express.Router();
 
