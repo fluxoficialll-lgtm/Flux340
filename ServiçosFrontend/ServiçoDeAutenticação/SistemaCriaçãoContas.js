@@ -24,7 +24,7 @@ export const SistemaCriaçãoContas = {
      */
     async obterConta(usuarioId) {
         // Busca os dados de um usuário pelo seu ID.
-        return gestorDeRequisicoes.get(`/api/users/${usuarioId}`);
+        return gestorDeRequisicoes.get(`/api/profiles/${usuarioId}`);
     },
 
     /**
@@ -35,7 +35,7 @@ export const SistemaCriaçãoContas = {
      */
     async atualizarConta(usuarioId, dadosAtualizados) {
         // Envia os dados atualizados para o backend.
-        return gestorDeRequisicoes.put(`/api/users/${usuarioId}`, dadosAtualizados);
+        return gestorDeRequisicoes.put(`/api/profiles/${usuarioId}`, dadosAtualizados);
     },
 
     /**
@@ -45,6 +45,6 @@ export const SistemaCriaçãoContas = {
      */
     async deletarConta(usuarioId) {
         // Solicita ao backend a exclusão da conta do usuário.
-        return gestorDeRequisicoes.delete(`/api/users/${usuarioId}`);
+        return gestorDeRequisicoes.delete(`/api/profiles/${usuarioId}`);
     }
 };

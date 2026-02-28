@@ -3,7 +3,7 @@ import express from 'express';
 
 // Importando as novas rotas de autenticação e o novo serviço de perfil
 import rotasCriacaoConta from './Rotas.Criação.Conta.Flux.js';
-import rotasCriacaoPerfilFlux from './Rotas.Criação.Perfil.Flux.js'; // Substituído
+import rotasCriacaoPerfilFlux from './Rotas.Criação.Perfil.Flux.js';
 
 // Importando as rotas de publicação
 import rotasPublicacaoFeed from './Rotas.Publicacao.Feed.js';
@@ -29,7 +29,7 @@ router.use('/v1/config', rotasGestaoVariaveis);
 router.use('/auth', rotasCriacaoConta);
 
 // Rotas de Gestão de Perfil (ex: /api/profiles/:userId)
-router.use('/profiles', rotasCriacaoPerfilFlux); // Novo endpoint para perfis
+router.use('/profiles', rotasCriacaoPerfilFlux);
 
 // Rotas de Publicação
 router.use('/feed', rotasPublicacaoFeed);
