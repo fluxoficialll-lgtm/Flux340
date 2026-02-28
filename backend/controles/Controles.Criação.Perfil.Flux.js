@@ -12,7 +12,6 @@ const ControlesCriacaoPerfilFlux = {
             res.status(200).json(perfil);
         } catch (error) {
             console.error(`[Controle Perfil] Erro ao buscar perfil ${userId}:`, error);
-            // Adapta a resposta ao tipo de erro
             if (error.message === 'Perfil não encontrado.') {
                 return res.status(404).json({ message: error.message });
             }
@@ -21,12 +20,9 @@ const ControlesCriacaoPerfilFlux = {
     },
 
     async atualizarPerfil(req, res) {
-        const { userId } = req.params;
+        const userId = req.user.id; // Correção: Obter ID do usuário autenticado
         const profileData = req.body;
-
-        // O objeto 'req.user' é adicionado pelo middleware de autenticação (JWT)
-        // e contém os dados do usuário logado (ex: id, email)
-        const requestingUser = req.user; 
+        const requestingUser = req.user;
 
         try {
             const perfilAtualizado = await servicoCriacaoPerfil.updateProfile(userId, profileData, requestingUser);
@@ -44,7 +40,7 @@ const ControlesCriacaoPerfilFlux = {
     },
 
     async deletarPerfil(req, res) {
-        const { userId } = req.params;
+        const userId = req.user.id; // Correção: Obter ID do usuário autenticado
         const requestingUser = req.user;
 
         try {

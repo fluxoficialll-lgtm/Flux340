@@ -12,14 +12,14 @@ const router = express.Router();
 // @access  Public
 router.get('/:userId', ControlesCriacaoPerfilFlux.buscarPerfil);
 
-// @route   PUT /:userId
-// @desc    Atualizar o perfil de um usuário
-// @access  Private (somente o próprio usuário pode atualizar)
-router.put('/:userId', authMiddleware, ControlesCriacaoPerfilFlux.atualizarPerfil);
+// @route   PUT /me
+// @desc    Atualizar o perfil do usuário autenticado
+// @access  Private
+router.put('/me', authMiddleware, ControlesCriacaoPerfilFlux.atualizarPerfil);
 
-// @route   DELETE /:userId
-// @desc    Deletar o perfil de um usuário
-// @access  Private (somente o próprio usuário pode deletar)
-router.delete('/:userId', authMiddleware, ControlesCriacaoPerfilFlux.deletarPerfil);
+// @route   DELETE /me
+// @desc    Deletar o perfil do usuário autenticado
+// @access  Private
+router.delete('/me', authMiddleware, ControlesCriacaoPerfilFlux.deletarPerfil);
 
 export default router;
