@@ -1,7 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeAutenticação/GestorRequisicoesContas.js
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+// A URL base da API. Em produção, geralmente é a raiz, pois o backend e o frontend estão no mesmo domínio.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''; // Corrigido: Removido /api
 
 /**
  * Gestor de Requisições centralizado para a comunicação com o backend.
@@ -11,7 +12,7 @@ const gestorDeRequisicoes = {
 
     /**
      * Realiza uma requisição genérica para a API.
-     * @param {string} endpoint - O caminho do endpoint (ex: '/users').
+     * @param {string} endpoint - O caminho do endpoint (ex: '/api/users').
      * @param {object} options - As opções da requisição (method, headers, body, etc.).
      * @returns {Promise<any>} A resposta da API em formato JSON.
      */

@@ -14,7 +14,7 @@ export const SistemaCriaçãoContas = {
      */
     async criarConta(dadosDoUsuario) {
         // Envia os dados do novo usuário para o endpoint de registro no backend.
-        return gestorDeRequisicoes.post('/auth/register', dadosDoUsuario);
+        return gestorDeRequisicoes.post('/api/auth/register', dadosDoUsuario);
     },
 
     /**
@@ -24,7 +24,7 @@ export const SistemaCriaçãoContas = {
      */
     async obterConta(usuarioId) {
         // Busca os dados de um usuário pelo seu ID.
-        return gestorDeRequisicoes.get(`/users/${usuarioId}`);
+        return gestorDeRequisicoes.get(`/api/users/${usuarioId}`);
     },
 
     /**
@@ -35,7 +35,7 @@ export const SistemaCriaçãoContas = {
      */
     async atualizarConta(usuarioId, dadosAtualizados) {
         // Envia os dados atualizados para o backend.
-        return gestorDeRequisicoes.put(`/users/${usuarioId}`, dadosAtualizados);
+        return gestorDeRequisicoes.put(`/api/users/${usuarioId}`, dadosAtualizados);
     },
 
     /**
@@ -45,6 +45,6 @@ export const SistemaCriaçãoContas = {
      */
     async deletarConta(usuarioId) {
         // Solicita ao backend a exclusão da conta do usuário.
-        return gestorDeRequisicoes.delete(`/users/${usuarioId}`);
+        return gestorDeRequisicoes.delete(`/api/users/${usuarioId}`);
     }
 };
