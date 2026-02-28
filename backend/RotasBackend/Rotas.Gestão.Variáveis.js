@@ -31,7 +31,7 @@ router.get('/boot', (req, res) => {
             });
         }
 
-        req.logger.info('CONFIG_BOOT_SUCCESS', { path: req.path });
+        req.logger.log('CONFIG_BOOT_SUCCESS', { path: req.path });
         res.json(publicConfig);
 
     } catch (error) {
