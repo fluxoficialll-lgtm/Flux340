@@ -1,9 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
+import ServiçoCriaçãoGrupoPublico from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Publico.js';
 
 export const useCreatePublicGroup = () => {
   const navigate = useNavigate();
@@ -37,26 +35,21 @@ export const useCreatePublicGroup = () => {
 
     setIsCreating(true);
     try {
-        const creatorId = authService.getCurrentUserId();
-        if (!creatorId) throw new Error('User not authenticated');
-
-        let coverImageUrl = '';
+        let coverImageBlob: Blob | null = null;
         if (coverImage) {
-            const blob = await fetch(coverImage).then(res => res.blob());
-            coverImageUrl = await fileService.upload(blob, `group-covers/${Date.now()}.png`);
+            coverImageBlob = await fetch(coverImage).then(res => res.blob());
         }
 
-        await groupService.createGroup({
+        await ServiçoCriaçãoGrupoPublico.criar({
             name: groupName,
-            description,
-            creatorId,
-            coverImageUrl,
-            groupType: 'public'
+            description: description,
+            coverImageBlob: coverImageBlob,
         });
 
         navigate('/groups');
     } catch (error) {
         console.error("Failed to create group:", error);
+        alert((error as Error).message);
     } finally {
         setIsCreating(false);
     }

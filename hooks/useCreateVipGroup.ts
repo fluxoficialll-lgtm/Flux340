@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { ServiçoCriaçãoGrupoPago } from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Pago.js';
+import ServiçoCriaçãoGrupoPago from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Pago.js';
 import { CurrencyType } from '../types';
 
 export const useCreateVipGroup = () => {
@@ -168,26 +168,27 @@ export const useCreateVipGroup = () => {
 
     try {
         const payload = { 
-            groupName, description, coverImage, selectedCoverFile,
-            vipMediaItems, vipDoorText, vipButtonText, price, currency,
+            groupName, description, selectedCoverFile,
+            vipMediaItems, vipDoorText, vipButtonText, numericPrice, currency,
             accessType, accessConfig, selectedProviderId, pixelId, pixelToken
         };
         
         await ServiçoCriaçãoGrupoPago.criar(payload, onProgress);
 
+        // Using a small delay to let the user see the upload is complete.
         setTimeout(() => {
             setIsUploading(false);
             navigate('/groups', { replace: true });
         }, 800);
         
     } catch (e) {
-        console.error(e);
-        alert("Erro ao criar grupo VIP.");
+        console.error("Erro ao criar grupo VIP:", e);
+        alert((e as Error).message || "Erro ao criar grupo VIP.");
         setIsCreating(false);
         setIsUploading(false);
     }
   }, [
-    groupName, description, coverImage, selectedCoverFile, vipMediaItems, 
+    groupName, description, selectedCoverFile, vipMediaItems, 
     vipDoorText, vipButtonText, price, currency, accessType, accessConfig, 
     selectedProviderId, pixelId, pixelToken, isCreating, isUploading, navigate
   ]);

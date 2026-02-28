@@ -7,6 +7,9 @@ import rotasGestaoPerfil from './Rotas.Gestao.Perfil.js'; // Importando a nova r
 
 // Importando as rotas de publicação
 import rotasPublicacaoFeed from './Rotas.Publicacao.Feed.js';
+import rotasCriacaoGrupoPublico from './Rotas.Criação.Grupo.Publico.js';
+import rotasCriacaoGrupoPrivado from './Rotas.Criação.Grupo.Privado.js';
+import rotasCriacaoGrupoPago from './Rotas.Criação.Grupo.Pago.js';
 
 // Importando as rotas dos provedores de pagamento
 import rotasSyncPay from './Rotas.Provedor.SyncPay.js';
@@ -27,6 +30,9 @@ router.use('/auth', rotasCriacaoConta);
 
 // Rotas de Publicação
 router.use('/feed', rotasPublicacaoFeed);
+router.use('/groups/public', rotasCriacaoGrupoPublico);
+router.use('/groups/private', rotasCriacaoGrupoPrivado);
+router.use('/groups/paid', rotasCriacaoGrupoPago);
 
 // Rotas de Gestão de Perfil (ex: /api/users/:id)
 router.use('/', rotasGestaoPerfil); // Adicionando a nova rota

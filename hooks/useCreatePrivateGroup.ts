@@ -1,18 +1,16 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ServiçoCriaçãoGrupoPrivado } from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Privado.js';
+import ServiçoCriaçãoGrupoPrivado from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Privado.js';
 
 export const useCreatePrivateGroup = () => {
   const navigate = useNavigate();
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState<string | undefined>(undefined);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-
-  // Estado para o cropper de imagem
-  const [isCropOpen, setIsCropOpen] = useState(false);
   const [rawImage, setRawImage] = useState<string>('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [isCropOpen, setIsCropOpen] = useState(false);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -28,13 +26,6 @@ export const useCreatePrivateGroup = () => {
 
   const handleCroppedImage = (croppedBase64: string) => {
     setCoverImage(croppedBase64);
-    // Converte o base64 de volta para um arquivo para upload
-    fetch(croppedBase64)
-      .then(res => res.blob())
-      .then(blob => {
-          const file = new File([blob], "group_cover.jpg", { type: "image/jpeg" });
-          setSelectedFile(file);
-      });
   };
 
   const handleBack = () => {
@@ -52,8 +43,17 @@ export const useCreatePrivateGroup = () => {
     setIsCreating(true);
     
     try {
-      const groupData = { name: groupName, description };
-      await ServiçoCriaçãoGrupoPrivado.criar(groupData, selectedFile, coverImage);
+        let coverImageBlob: Blob | null = null;
+        if (coverImage) {
+            coverImageBlob = await fetch(coverImage).then(res => res.blob());
+        }
+
+        await ServiçoCriaçãoGrupoPrivado.criar({
+            name: groupName,
+            description: description,
+            coverImageBlob: coverImageBlob,
+        });
+
       navigate('/groups');
     } catch (error) {
       console.error(error); // Log do erro para depuração
