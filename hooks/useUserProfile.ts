@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { profileService } from '../ServiçosFrontend/ServiçoDePerfil/Serviço.Gestão.Perfil.js';
+// Caminho corrigido e importação ajustada para o serviço unificado
+import profileService from '../ServiçosFrontend/ServiçoDeAutenticação/Criação.Perfil.Flux.js';
 import { MetricasListaSeguidores } from '../ServiçosFrontend/SistemaDeMétricas/Métricas.Lista.Seguidores.js';
 
 // A interface que o nosso backend realmente retorna
@@ -41,7 +42,7 @@ export const useUserProfile = (userId: string | undefined): UseUserProfileData =
         setError(null);
 
         try {
-            // Usar o serviço correto que criamos
+            // Agora usando o serviço unificado e real
             const userProfileData = await profileService.getUserProfile(userId);
             
             // Simular o "isFollowing" por enquanto, idealmente isso viria do backend
@@ -87,9 +88,6 @@ export const useUserProfile = (userId: string | undefined): UseUserProfileData =
             // Chama a API para persistir a mudança
             await MetricasListaSeguidores.toggleFollow(profile.id);
             
-            // Opcional: Re-fetch para garantir consistência, embora a UI já esteja atualizada.
-            // await fetchUserData(); 
-
         } catch (error) {
             console.error("Erro ao seguir/deixar de seguir usuário:", error);
             // Reverte a UI em caso de erro

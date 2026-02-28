@@ -1,9 +1,9 @@
 
 import express from 'express';
 
-// Importando as novas rotas de autenticação e usuário
+// Importando as novas rotas de autenticação e o novo serviço de perfil
 import rotasCriacaoConta from './Rotas.Criação.Conta.Flux.js';
-import rotasGestaoPerfil from './Rotas.Gestao.Perfil.js';
+import rotasCriacaoPerfilFlux from './Rotas.Criação.Perfil.Flux.js'; // Substituído
 
 // Importando as rotas de publicação
 import rotasPublicacaoFeed from './Rotas.Publicacao.Feed.js';
@@ -28,14 +28,14 @@ router.use('/v1/config', rotasGestaoVariaveis);
 // Rotas de Autenticação (ex: /api/auth/register, /api/auth/login)
 router.use('/auth', rotasCriacaoConta);
 
+// Rotas de Gestão de Perfil (ex: /api/profiles/:userId)
+router.use('/profiles', rotasCriacaoPerfilFlux); // Novo endpoint para perfis
+
 // Rotas de Publicação
 router.use('/feed', rotasPublicacaoFeed);
 router.use('/groups/public', rotasCriacaoGrupoPublico);
 router.use('/groups/private', rotasCriacaoGrupoPrivado);
 router.use('/groups/paid', rotasCriacaoGrupoPago);
-
-// Rotas de Gestão de Perfil (ex: /api/users/:id)
-router.use('/', rotasGestaoPerfil);
 
 // ---- Rotas dos Provedores de Pagamento ----
 router.use('/syncpay', rotasSyncPay);
