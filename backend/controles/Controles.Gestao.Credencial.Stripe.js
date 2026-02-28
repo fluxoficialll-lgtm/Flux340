@@ -2,9 +2,16 @@
 import Stripe from 'stripe';
 import config from '../config/Variaveis.Backend.js';
 
-const stripe = new Stripe(config.stripeSecretKey);
+let stripe = null;
+if (config.stripeSecretKey) {
+    stripe = new Stripe(config.stripeSecretKey);
+}
 
 const createAccountLink = async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+    }
+
     const { accountId, refresh_url, return_url } = req.body;
 
     try {
@@ -22,6 +29,10 @@ const createAccountLink = async (req, res) => {
 };
 
 const getAccountDetails = async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+    }
+
     const { accountId } = req.params;
 
     try {
@@ -33,6 +44,10 @@ const getAccountDetails = async (req, res) => {
 };
 
 const disconnectAccount = (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+    }
+    
     res.status(200).json({ message: "Funcionalidade de desconexão a ser implementada no lado do seu aplicativo." });
 };
 
