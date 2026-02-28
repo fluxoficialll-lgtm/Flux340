@@ -1,10 +1,9 @@
 
 /**
  * @file Serviço para gestão de perfis de usuário no Flux.
- * Unifica a lógica de criação e busca de perfis, exportando um `profileService`.
+ * Unifica a lógica de criação, busca e atualização de perfis, usando endpoints seguros (/me).
  */
 
-// A importação do Auditor foi removida, pois ele opera globalmente no `fetch`.
 import { authService } from './authService.js';
 
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profiles`;
@@ -29,8 +28,6 @@ const GestorRequisicoesPerfil = {
         }
 
         try {
-            // Correção: A chamada agora é um `fetch` padrão. O auditor, se inicializado,
-            // irá interceptá-la automaticamente.
             const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
             if (!response.ok) {
@@ -38,7 +35,7 @@ const GestorRequisicoesPerfil = {
                 throw new Error(errorData.message || `Erro ${response.status} na API de perfis.`);
             }
 
-            if (response.status === 204) {
+            if (response.status === 204) { // No Content
                 return {};
             }
 
@@ -55,24 +52,37 @@ const GestorRequisicoesPerfil = {
 };
 
 const profileService = {
+    /**
+     * Busca o perfil público de qualquer usuário pelo ID.
+     */
     async getUserProfile(userId) {
         if (!userId) throw new Error('O ID do usuário é obrigatório para buscar o perfil.');
         return GestorRequisicoesPerfil.get(`/${userId}`);
     },
-    async atualizarPerfil(profileData) {
-        const currentUser = authService.getCurrentUser();
-        if (!currentUser || !currentUser.id) {
-            throw new Error('Nenhum usuário logado para atualizar o perfil.');
-        }
-        return GestorRequisicoesPerfil.put(`/${currentUser.id}`, profileData);
+
+    /**
+     * Busca o perfil do usuário autenticado usando o endpoint /me.
+     */
+    async getMyProfile() {
+        return GestorRequisicoesPerfil.get('/me');
     },
+
+    /**
+     * Atualiza o perfil do usuário autenticado. O backend identifica o usuário pelo token.
+     * @param {object} profileData - Os dados do perfil a serem atualizados.
+     */
+    async atualizarPerfil(profileData) {
+        // A chamada para /me garante que o usuário só pode atualizar seu próprio perfil.
+        return GestorRequisicoesPerfil.put('/me', profileData);
+    },
+
+    /**
+     * Deleta o perfil do usuário autenticado. O backend identifica o usuário pelo token.
+     */
     async deletarPerfil() {
-        const currentUser = authService.getCurrentUser();
-        if (!currentUser || !currentUser.id) {
-            throw new Error('Nenhum usuário logado para deletar o perfil.');
-        }
-        console.warn(`[profileService] Deletando perfil do usuário ${currentUser.id}.`);
-        return GestorRequisicoesPerfil.delete(`/${currentUser.id}`);
+        console.warn(`[profileService] Iniciando exclusão do perfil do usuário logado.`);
+        // A chamada para /me garante que o usuário só pode deletar seu próprio perfil.
+        return GestorRequisicoesPerfil.delete('/me');
     },
 };
 

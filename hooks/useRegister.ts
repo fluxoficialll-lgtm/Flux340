@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { SistemaCriaçãoContas } from '../ServiçosFrontend/ServiçoDeAutenticação/SistemaCriaçãoContas';
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { AuthError } from '../types';
 
 export const useRegister = () => {
@@ -22,16 +22,13 @@ export const useRegister = () => {
     // Referral State
     const [referredBy, setReferredBy] = useState<string | null>(null);
 
-    // Effect for validation and extracting referral code
     useEffect(() => {
-        // Extract referral from URL
         const params = new URLSearchParams(location.search);
         const ref = params.get('ref');
         if (ref) {
             setReferredBy(ref);
         }
 
-        // --- Validation Logic ---
         const newErrors: any = {};
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
         if (email && !emailRegex.test(email)) {
@@ -51,19 +48,18 @@ export const useRegister = () => {
 
     }, [email, password, confirmPassword, termsAccepted, location]);
 
-    // Submission handler
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isValid) return;
 
         setLoading(true);
-        setErrors({}); // Clear previous form-level errors
+        setErrors({});
 
         try {
-            // CORREÇÃO: Chamar SistemaCriaçãoContas.criarConta com um objeto de dados do usuário
-            await SistemaCriaçãoContas.criarConta({ email, password, referredBy: referredBy || undefined });
+            // Chama o serviço de autenticação centralizado para registrar o usuário
+            await authService.register({ email, password, referredBy: referredBy || undefined });
             
-            // Após o sucesso, o usuário geralmente é redirecionado para verificar o e-mail ou fazer login
+            // Redireciona para a página de verificação de e-mail após o sucesso
             navigate('/verify-email');
 
         } catch (err: any) {
