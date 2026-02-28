@@ -20,6 +20,11 @@ import rotasCredencialStripe from './Rotas.Gestao.Credencial.Stripe.js';
 // Importando a nova rota de gestão de variáveis
 import rotasGestaoVariaveis from './Rotas.Gestão.Variáveis.js';
 
+// Importando as rotas de métricas
+import rotasMetricasComentarioFeed from './Rotas.Métricas.Comentário.Feed.js';
+import rotasMetricasComentarioMarketplace from './Rotas.Métricas.Comentário.Marketplace.js';
+import rotasMetricasComentarioReels from './Rotas.Métricas.Comentário.Reels.js';
+
 const router = express.Router();
 
 // Rota de Configuração (ex: /api/v1/config/boot)
@@ -42,5 +47,10 @@ router.use('/syncpay', rotasSyncPay);
 router.use('/paypal', rotasPayPal);
 router.use('/stripe', rotasStripe);
 router.use('/credenciais-stripe', rotasCredencialStripe);
+
+// ---- Rotas de Métricas ----
+router.use('/metrics/feed', rotasMetricasComentarioFeed);
+router.use('/metrics/marketplace', rotasMetricasComentarioMarketplace);
+router.use('/metrics/reels', rotasMetricasComentarioReels);
 
 export default router;

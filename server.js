@@ -68,7 +68,6 @@ import { setupMiddlewares } from './backend/config/middleware.js';
 import { upload } from './backend/config/storage.js';
 import { db } from './backend/database/InicializacaoDoPostgreSQL.js';
 import apiRoutes from './backend/RotasBackend/Rotas.js';
-import { contarBancosDeDados } from './backend/database/ContagemDosTiposDeBancos.js';
 import { auditorDoPostgreSQL } from './backend/database/AuditoresDeBancos/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -159,7 +158,6 @@ const startApp = async () => {
         console.log('DB_INIT', { message: 'Database system initialized successfully.' });
 
         setTimeout(() => {
-            contarBancosDeDados();
             auditorDoPostgreSQL.inspectDatabases();
         }, 5000);
 

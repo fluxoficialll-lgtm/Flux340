@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Comment } from '../../../types';
-import { ServiçoPublicacaoComentariosFeed } from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
+import { formatRelativeTime, trackMarketplaceCommentLike, trackMarketplaceCommentReply } from '../../../ServiçosFrontend/SistemaDeMétricas/Métricas.Comentários.Marketplace.js';
 
 interface CardComentarioMarketplaceProps {
     comment: Comment;
@@ -40,6 +40,16 @@ export const CardComentarioMarketplace: React.FC<CardComentarioMarketplaceProps>
 
     const loadMoreReplies = () => {
         setVisibleCount(prev => prev + 3);
+    };
+
+    const handleLike = () => {
+        onLike(comment.id);
+        trackMarketplaceCommentLike(comment.id);
+    };
+
+    const handleReply = () => {
+        onReplyClick(comment.id, comment.username);
+        trackMarketplaceCommentReply(comment.id, { repliedTo: comment.username });
     };
 
     return (
@@ -103,17 +113,17 @@ export const CardComentarioMarketplace: React.FC<CardComentarioMarketplaceProps>
 
                     <div className="flex items-center gap-5 mt-2 ml-2">
                         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
-                            {ServiçoPublicacaoComentariosFeed.formatRelativeTime(comment.timestamp)}
+                            {formatRelativeTime(comment.timestamp)}
                         </span>
                         <button 
                             className="text-[10px] font-black text-gray-500 hover:text-[#00c2ff] uppercase tracking-widest cursor-pointer bg-transparent border-none p-0 transition-colors"
-                            onClick={() => onReplyClick(comment.id, comment.username)}
+                            onClick={handleReply}
                         >
                             Responder
                         </button>
                         <button 
                             className={`text-[10px] font-bold flex items-center gap-1.5 ml-auto transition-colors ${comment.likedByMe ? 'text-red-500' : 'text-gray-500 hover:text-white'}`}
-                            onClick={() => onLike(comment.id)}
+                            onClick={handleLike}
                         >
                             <i className={`${comment.likedByMe ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
                             {comment.likes && comment.likes > 0 && <span>{comment.likes}</span>}
