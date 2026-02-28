@@ -8,6 +8,7 @@ import rotasCriacaoConta from './Rotas.Criação.Conta.Flux.js';
 import rotasSyncPay from './Rotas.Provedor.SyncPay.js';
 import rotasPayPal from './Rotas.Provedor.PayPal.js';
 import rotasStripe from './Rotas.Provedor.Stripe.js';
+import rotasCredencialStripe from './Rotas.Gestao.Credencial.Stripe.js'; // NOVO
 
 // Importando a nova rota de gestão de variáveis
 import rotasGestaoVariaveis from './Rotas.Gestão.Variáveis.js';
@@ -34,6 +35,7 @@ router.use('/auth', rotasCriacaoConta);
 router.use('/syncpay', rotasSyncPay);
 router.use('/paypal', rotasPayPal);
 router.use('/stripe', rotasStripe);
+router.use('/credenciais-stripe', rotasCredencialStripe); // NOVO
 
 // ---- ROTAS COM CONTROLADORES AUSENTES (Desativadas Temporariamente) ----
 // router.use('/users', rotasUsuario);
