@@ -1,4 +1,4 @@
-
+'''
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
@@ -26,7 +26,7 @@ export const useCompleteProfile = () => {
         const user = authService.getCurrentUser();
         if (!user) {
             navigate('/');
-        } else if (user.profile?.name) {
+        } else if (user.profile?.nickname) { // VERIFICA O @, QUE É OBRIGATÓRIO
             navigate('/feed');
         }
     }, [navigate]);
@@ -99,6 +99,7 @@ export const useCompleteProfile = () => {
                 navigate('/feed');
             }
         } catch (err: any) {
+            console.error("Falha ao completar o perfil:", err); // ADICIONADO LOG DE ERRO
             if (err.message === AuthError.NAME_TAKEN) {
                 setUsernameError('Este nome de usuário já está em uso.');
             } else {
@@ -129,3 +130,4 @@ export const useCompleteProfile = () => {
         handleLogout
     };
 };
+'''
