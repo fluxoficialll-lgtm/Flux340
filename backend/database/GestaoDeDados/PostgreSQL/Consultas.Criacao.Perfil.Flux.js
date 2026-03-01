@@ -40,7 +40,7 @@ const findProfileByUserId = async (userId) => {
 };
 
 const updateProfileByUserId = async (userId, profileData) => {
-    const { username, nickname, bio, avatar, website } = profileData;
+    const { name: username, nickname, bio, avatar, website } = profileData;
     console.log(`GestãoDeDados: Atualizando perfil para o usuário ID: ${userId}`);
     
     // Constrói a query dinamicamente para atualizar apenas os campos fornecidos

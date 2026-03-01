@@ -86,8 +86,8 @@ export const useCompleteProfile = () => {
                 }
 
                 const finalProfile: UserProfile = {
-                    name: formData.name || '',
-                    nickname: formData.nickname || '',
+                    name: formData.nickname || '',
+                    nickname: formData.name || '',
                     bio: formData.bio || '',
                     website: '',
                     isPrivate: false,
