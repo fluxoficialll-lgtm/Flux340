@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js'; // Corrigido
+import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { AuthError, UserProfile } from '../types';
 
 export const useCompleteProfile = () => {
@@ -27,14 +27,13 @@ export const useCompleteProfile = () => {
         if (!user) {
             navigate('/');
         } else if (user.profile?.name) {
-            // If profile is already complete, redirect to feed
             navigate('/feed');
         }
     }, [navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        if (name === 'name') {
+        if (name === 'nickname') {
             const cleanValue = value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
             setFormData(prev => ({ ...prev, [name]: cleanValue }));
             setUsernameError('');
@@ -69,7 +68,7 @@ export const useCompleteProfile = () => {
         e.preventDefault();
         setUsernameError('');
 
-        if (!formData.name?.trim()) {
+        if (!formData.nickname?.trim()) {
             setUsernameError('Nome de usuário é obrigatório.');
             return;
         }
@@ -86,8 +85,8 @@ export const useCompleteProfile = () => {
                 }
 
                 const finalProfile: UserProfile = {
-                    name: formData.nickname || '',
-                    nickname: formData.name || '',
+                    name: formData.name || '',
+                    nickname: formData.nickname || '',
                     bio: formData.bio || '',
                     website: '',
                     isPrivate: false,

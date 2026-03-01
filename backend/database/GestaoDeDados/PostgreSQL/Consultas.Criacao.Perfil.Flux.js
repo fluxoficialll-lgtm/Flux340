@@ -3,10 +3,6 @@
 
 import pool from '../../pool.js';
 
-// NOTA: Este arquivo assume que um perfil é criado automaticamente quando um usuário é criado.
-// Portanto, não há uma função 'createProfile' separada aqui.
-// A criação pode ser gerenciada por um gatilho no banco de dados ou no serviço de criação de usuário.
-
 const findProfileByUserId = async (userId) => {
     console.log(`GestãoDeDados: Buscando perfil para o usuário ID: ${userId}`);
     const query = `
@@ -40,21 +36,20 @@ const findProfileByUserId = async (userId) => {
 };
 
 const updateProfileByUserId = async (userId, profileData) => {
-    const { name: username, nickname, bio, avatar, website } = profileData;
+    const { name, nickname, bio, avatar, website } = profileData;
     console.log(`GestãoDeDados: Atualizando perfil para o usuário ID: ${userId}`);
     
-    // Constrói a query dinamicamente para atualizar apenas os campos fornecidos
     const fields = [];
     const values = [];
     let paramIndex = 1;
 
-    if (username !== undefined) {
-        fields.push(`username = $${paramIndex++}`);
-        values.push(username);
-    }
     if (nickname !== undefined) {
-        fields.push(`nickname = $${paramIndex++}`);
+        fields.push(`username = $${paramIndex++}`);
         values.push(nickname);
+    }
+    if (name !== undefined) {
+        fields.push(`nickname = $${paramIndex++}`);
+        values.push(name);
     }
     if (bio !== undefined) {
         fields.push(`bio = $${paramIndex++}`);
@@ -71,10 +66,10 @@ const updateProfileByUserId = async (userId, profileData) => {
 
     if (fields.length === 0) {
         console.log("GestãoDeDados: Nenhum campo fornecido para atualização.");
-        return findProfileByUserId(userId); // Retorna o perfil atual sem alterações
+        return findProfileByUserId(userId);
     }
 
-    values.push(userId); // Adiciona o userId como último parâmetro para a cláusula WHERE
+    values.push(userId);
     const query = `
         UPDATE user_profiles
         SET ${fields.join(', ')}
@@ -88,7 +83,7 @@ const updateProfileByUserId = async (userId, profileData) => {
         return rows[0];
     } catch (error) {
         console.error('GestãoDeDados: Erro ao atualizar o perfil:', error);
-        if (error.code === '23505') { // Conflito de unicidade (ex: username já em uso)
+        if (error.code === '23505') {
             throw new Error('O nome de usuário já está em uso.');
         }
         throw new Error('Erro ao atualizar o perfil no banco de dados.');
@@ -97,8 +92,6 @@ const updateProfileByUserId = async (userId, profileData) => {
 
 const deleteProfileByUserId = async (userId) => {
     console.log(`GestãoDeDados: Deletando perfil para o usuário ID: ${userId}`);
-    // CUIDADO: Isso deleta o perfil, mas não o usuário. A política de negócio
-    // deve garantir que isso seja o comportamento desejado.
     const query = 'DELETE FROM user_profiles WHERE user_id = $1;';
     try {
         await pool.query(query, [userId]);
