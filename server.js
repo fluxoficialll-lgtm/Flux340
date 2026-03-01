@@ -59,6 +59,14 @@ process.on('unhandledRejection', (reason, promise) => {
 console.log('--- Sistema de Log em Arquivo Inicializado. Saída será gravada em logs/app.log ---');
 
 import 'dotenv/config';
+
+// VERIFICAÇÃO DE VARIÁVEIS DE AMBIENTE CRÍTICAS
+if (!process.env.JWT_SECRET) {
+    console.error('ERRO FATAL: A variável de ambiente JWT_SECRET não está definida.');
+    console.error('O servidor não pode iniciar sem esta chave de segurança.');
+    process.exit(1); // Encerra o processo com um código de erro.
+}
+
 import express from 'express';
 import http from 'http';
 import { fileURLToPath } from 'url';
