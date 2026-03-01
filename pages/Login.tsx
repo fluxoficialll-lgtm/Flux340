@@ -42,7 +42,7 @@ export const Login: React.FC = () => {
                 <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={() => console.error('Login com Google falhou')}
-                    shape="pill"
+                    shape="rectangular"
                     size="large"
                     width="400px"
                     theme="filled_black"

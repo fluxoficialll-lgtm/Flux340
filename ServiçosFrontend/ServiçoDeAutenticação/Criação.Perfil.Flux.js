@@ -29,17 +29,37 @@ const GestorRequisicoesPerfil = {
 
         try {
             const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+            
+            const responseText = await response.text();
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'A resposta da API não pôde ser lida.' }));
-                throw new Error(errorData.message || `Erro ${response.status} na API de perfis.`);
+                let errorMessage = `Erro ${response.status} na API de perfis.`;
+                if (responseText) {
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        // Se não for JSON, pode ser uma mensagem de erro em texto puro.
+                        // Evita retornar HTML de páginas de erro.
+                        errorMessage = responseText.trim().startsWith('<') ? 'Ocorreu um erro no servidor.' : responseText;
+                    }
+                }
+                throw new Error(errorMessage);
             }
 
-            if (response.status === 204) { // No Content
+            if (response.status === 204 || !responseText) {
+                // Retorna objeto vazio para 'No Content' ou respostas com corpo vazio.
                 return {};
             }
 
-            return await response.json();
+            try {
+                // Tenta parsear a resposta como JSON.
+                return JSON.parse(responseText);
+            } catch (error) {
+                console.error('Falha ao parsear a resposta JSON do servidor:', responseText);
+                throw new Error('A resposta do servidor não é um JSON válido.');
+            }
+
         } catch (error) {
             console.error(`[GestorRequisicoesPerfil] Falha na requisição ${method} para ${API_BASE_URL}${endpoint}:`, error);
             throw error;
