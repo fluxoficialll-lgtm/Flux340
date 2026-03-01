@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
-import { AuthError, UserProfile } from '../types';
+import { UserProfile } from '../types';
 
 export const useCompleteProfile = () => {
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ export const useCompleteProfile = () => {
         const user = authService.getCurrentUser();
         if (!user) {
             navigate('/');
-        } else if (user.profile?.nickname) { // VERIFICA O @, QUE É OBRIGATÓRIO
+        } else if (user.profile?.nickname) {
             navigate('/feed');
         }
     }, [navigate]);
@@ -73,36 +73,35 @@ export const useCompleteProfile = () => {
         }
 
         setLoading(true);
-        const currentUser = authService.getCurrentUser();
-        const email = currentUser?.email;
 
         try {
-            if (email) {
-                let photoUrl: string | undefined = undefined;
-                if (selectedFile) {
-                    photoUrl = await fileService.uploadFile(selectedFile);
-                }
-
-                const finalProfile: UserProfile = {
-                    name: formData.name || '',
-                    nickname: formData.nickname || '',
-                    bio: formData.bio || '',
-                    website: '',
-                    isPrivate: false,
-                    photoUrl: photoUrl,
-                    cpf: '',
-                    phone: ''
-                };
-
-                await authService.completeProfile(email, finalProfile);
-                navigate('/feed');
+            let photoUrl: string | undefined = undefined;
+            if (selectedFile) {
+                photoUrl = await fileService.uploadFile(selectedFile);
             }
+
+            const profileData = {
+                name: formData.name || '',
+                nickname: formData.nickname || '',
+                bio: formData.bio || '',
+                photoUrl: photoUrl,
+                website: '',
+                isPrivate: false,
+                cpf: '',
+                phone: ''
+            };
+
+            await authService.completeProfile(profileData);
+            
+            navigate('/feed');
+
         } catch (err: any) {
-            console.error("Falha ao completar o perfil:", err); // ADICIONADO LOG DE ERRO
-            if (err.message === AuthError.NAME_TAKEN) {
+            console.error("Falha ao completar o perfil no hook 'useCompleteProfile':", err);
+            
+            if (err.message && err.message.includes('NAME_TAKEN')) {
                 setUsernameError('Este nome de usuário já está em uso.');
             } else {
-                alert('Ocorreu um erro ao finalizar o perfil. Tente novamente.');
+                alert(err.message || 'Ocorreu um erro ao finalizar o perfil. Tente novamente.');
             }
         } finally {
             setLoading(false);

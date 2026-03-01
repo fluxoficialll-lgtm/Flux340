@@ -61,25 +61,31 @@ export const authService = {
         return { token, user };
     },
     
-    async completeProfile(emailOrData, profileDataOrNothing) {
+    async completeProfile(profileData) {
         const token = this.getToken();
         if (!token) {
             throw new Error("Usuário não autenticado ou sessão inválida para completar o perfil.");
         }
 
-        let profileData = profileDataOrNothing;
-        if (!profileData && typeof emailOrData === 'object') {
-            profileData = emailOrData;
+        try {
+            const updatedProfile = await profileService.atualizarPerfil(profileData);
+
+            const currentUser = this.getCurrentUser();
+            // Combina o usuário atual com o perfil atualizado, garantindo que todos os campos estejam presentes.
+            const updatedUser = { 
+                ...currentUser, 
+                profile: { ...currentUser.profile, ...updatedProfile }
+            };
+
+            // Re-armazena a sessão com os dados do usuário atualizado.
+            storeSession(token, updatedUser);
+
+            return updatedUser;
+        } catch (error) {
+            console.error("Falha detalhada ao completar o perfil no authService:", error);
+            // Propaga um erro mais descritivo para a UI.
+            throw new Error(`Falha ao atualizar o perfil: ${error.message}`);
         }
-
-        const updatedUserFromBackend = await profileService.atualizarPerfil(profileData);
-
-        const currentUser = this.getCurrentUser();
-        const updatedSessionUser = { ...currentUser, ...updatedUserFromBackend };
-
-        storeSession(token, updatedSessionUser);
-
-        return updatedUserFromBackend;
     },
 
     logout() {
