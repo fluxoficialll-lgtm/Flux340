@@ -24,6 +24,19 @@ CREATE TABLE IF NOT EXISTS groups (
 CREATE INDEX IF NOT EXISTS idx_groups_creator_id ON groups(creator_id);
 CREATE INDEX IF NOT EXISTS idx_groups_group_type ON groups(group_type);
 
+-- Cria a tabela de membros do grupo
+CREATE TABLE IF NOT EXISTS group_members (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role TEXT DEFAULT 'member',
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Índices para a tabela de membros de grupos
+CREATE INDEX IF NOT EXISTS idx_group_members_group_id ON group_members(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_user_id ON group_members(user_id);
+
 -- Aplica o gatilho de updated_at na tabela groups
 DROP TRIGGER IF EXISTS update_groups_updated_at ON groups;
 CREATE TRIGGER update_groups_updated_at
