@@ -3,13 +3,13 @@
 import pool from '../database/pool.js';
 
 const create = async (postData) => {
-    const { content, userId, mediaUrl, parentPostId, type, pollOptions, ctaLink, ctaText } = postData;
+    const { content, author_id, mediaUrl, parentPostId, type, pollOptions, ctaLink, ctaText } = postData;
     const query = `
         INSERT INTO posts (author_id, content, media_url, parent_post_id, type, poll_options, cta_link, cta_text)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *;
     `;
-    const values = [userId, content, mediaUrl, parentPostId, type || 'text', JSON.stringify(pollOptions || null), ctaLink, ctaText];
+    const values = [author_id, content, mediaUrl, parentPostId, type || 'text', JSON.stringify(pollOptions || null), ctaLink, ctaText];
     const { rows } = await pool.query(query, values);
     return rows[0];
 };
