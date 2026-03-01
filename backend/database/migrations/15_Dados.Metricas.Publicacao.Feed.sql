@@ -3,20 +3,20 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Remove a tabela de métricas de publicações do feed se ela já existir
-DROP TABLE IF EXISTS feed_publication_metrics CASCADE;
+DROP TABLE IF EXISTS post_metrics CASCADE;
 
 -- Cria a tabela de métricas para as publicações do feed
-CREATE TABLE feed_publication_metrics (
+CREATE TABLE post_metrics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    publication_id UUID NOT NULL UNIQUE,
+    post_id UUID NOT NULL UNIQUE,
     views_count INT DEFAULT 0,
     likes_count INT DEFAULT 0,
     shares_count INT DEFAULT 0,
     comments_count INT DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    FOREIGN KEY (publication_id) REFERENCES feed_publications(id) ON DELETE CASCADE
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
--- Cria um índice na coluna publication_id para otimizar as buscas
-CREATE INDEX IF NOT EXISTS idx_feed_publication_metrics_publication_id ON feed_publication_metrics(publication_id);
+-- Cria um índice na coluna post_id para otimizar as buscas
+CREATE INDEX IF NOT EXISTS idx_post_metrics_post_id ON post_metrics(post_id);
