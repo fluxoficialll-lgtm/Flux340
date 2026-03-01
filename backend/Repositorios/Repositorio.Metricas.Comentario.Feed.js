@@ -1,25 +1,28 @@
-// backend/Repositorios/Repositorio.Métricas.Comentário.Feed.js
+// backend/Repositorios/Repositorio.Metricas.Comentario.Feed.js
+import pool from '../database/pool.js';
 
-const queries = require('../database/GestãoDeDados/PostgreSQL/Consultas.Métricas.Comentário.Feed.js');
-
-async function trackComment(commentData) {
-    // Em um cenário real, aqui você chamaria a consulta para inserir no banco de dados
-    console.log('Repositório: Rastreando comentário do feed:', commentData);
-    return queries.insertCommentMetric(commentData);
+export async function trackComment(commentData) {
+    const { userId, postId, content } = commentData;
+    // Lógica para registrar o comentário no banco de dados
+    const query = 'INSERT INTO feed_comments (user_id, post_id, content) VALUES ($1, $2, $3) RETURNING *';
+    const values = [userId, postId, content];
+    const result = await pool.query(query, values);
+    return result.rows[0];
 }
 
-async function trackCommentLike(commentId) {
-    console.log('Repositório: Rastreando like em comentário do feed:', commentId);
-    return queries.insertCommentLikeMetric(commentId);
+export async function trackCommentLike(commentId) {
+    // Lógica para registrar um like em um comentário
+    const query = 'UPDATE feed_comments SET likes = likes + 1 WHERE id = $1 RETURNING *';
+    const values = [commentId];
+    const result = await pool.query(query, values);
+    return result.rows[0];
 }
 
-async function trackCommentReply(commentId, replyData) {
-    console.log('Repositório: Rastreando resposta em comentário do feed:', commentId, replyData);
-    return queries.insertCommentReplyMetric(commentId, replyData);
+export async function trackCommentReply(commentId, replyData) {
+    const { userId, content } = replyData;
+    // Lógica para registrar uma resposta a um comentário
+    const query = 'INSERT INTO feed_comment_replies (comment_id, user_id, content) VALUES ($1, $2, $3) RETURNING *';
+    const values = [commentId, userId, content];
+    const result = await pool.query(query, values);
+    return result.rows[0];
 }
-
-module.exports = {
-    trackComment,
-    trackCommentLike,
-    trackCommentReply,
-};
