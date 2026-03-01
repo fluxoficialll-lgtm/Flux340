@@ -1,5 +1,5 @@
 
-import { pool } from '../../pool.js';
+import pool from '../../pool.js';
 
 const create = async (commentData) => {
     const { reel_id, user_id, content } = commentData;

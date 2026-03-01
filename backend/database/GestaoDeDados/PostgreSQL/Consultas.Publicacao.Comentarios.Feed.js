@@ -1,6 +1,6 @@
 
 // backend/database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Feed.js
-import { pool } from '../../pool.js';
+import pool from '../../pool.js';
 
 const create = async (commentData) => {
     const { post_id, user_id, content } = commentData;

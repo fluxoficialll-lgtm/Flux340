@@ -1,13 +1,6 @@
-const { countLikes, countViews, countShares, countComments } = require('../../database/GestãoDeDados/PostgreSQL/Consultas.Metricas.Publicacao.Reels');
+import { countLikes, countViews, countShares, countComments } from '../database/GestaoDeDados/PostgreSQL/Consultas.Metricas.Publicacao.Reels.js';
 
-const getReelLikes = (reelId) => countLikes(reelId);
-const getReelViews = (reelId) => countViews(reelId);
-const getReelShares = (reelId) => countShares(reelId);
-const getReelComments = (reelId) => countComments(reelId);
-
-module.exports = {
-    getReelLikes,
-    getReelViews,
-    getReelShares,
-    getReelComments,
-};
+export const getReelLikes = (reelId) => countLikes(reelId);
+export const getReelViews = (reelId) => countViews(reelId);
+export const getReelShares = (reelId) => countShares(reelId);
+export const getReelComments = (reelId) => countComments(reelId);

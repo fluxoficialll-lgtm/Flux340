@@ -1,6 +1,6 @@
 
 // backend/database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Marketplace.js
-import { pool } from '../../pool.js';
+import pool from '../../pool.js';
 
 const create = async (itemData) => {
     const {

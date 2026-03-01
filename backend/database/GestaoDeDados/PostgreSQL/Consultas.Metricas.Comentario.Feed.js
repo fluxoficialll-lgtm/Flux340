@@ -1,6 +1,6 @@
 // backend/database/GestãoDeDados/PostgreSQL/Consultas.Métricas.Comentário.Feed.js
 
-const pool = require('../../pool');
+import pool from '../../pool.js';
 
 async function insertCommentMetric(commentData) {
     // Exemplo: INSERT INTO feed_comment_metrics (comment_id, author_id, post_id, created_at) VALUES ($1, $2, $3, NOW());
@@ -21,7 +21,7 @@ async function insertCommentReplyMetric(commentId, replyData) {
     return Promise.resolve();
 }
 
-module.exports = {
+export {
     insertCommentMetric,
     insertCommentLikeMetric,
     insertCommentReplyMetric,
