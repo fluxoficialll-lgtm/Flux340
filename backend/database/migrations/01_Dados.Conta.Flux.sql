@@ -11,8 +11,11 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Garante que a tabela 'users' seja removida antes de ser criada para evitar inconsistências
+DROP TABLE IF EXISTS users CASCADE;
+
 -- Cria a tabela de usuários com todos os campos necessários
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT,
     username TEXT UNIQUE,
@@ -33,9 +36,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Cria índices para otimizar as buscas
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_google_id ON users(google_id);
 
 -- Aplica o gatilho de updated_at na tabela users
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;
@@ -43,4 +46,3 @@ CREATE TRIGGER update_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
-
