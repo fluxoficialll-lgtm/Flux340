@@ -21,7 +21,7 @@ const findProfileByUserId = async (userId) => {
             p.followers_count,
             p.following_count,
             p.user_id
-        FROM profiles p
+        FROM user_profiles p
         WHERE p.user_id = $1
     `;
     try {
@@ -76,7 +76,7 @@ const updateProfileByUserId = async (userId, profileData) => {
 
     values.push(userId); // Adiciona o userId como último parâmetro para a cláusula WHERE
     const query = `
-        UPDATE profiles
+        UPDATE user_profiles
         SET ${fields.join(', ')}
         WHERE user_id = $${paramIndex}
         RETURNING *;
@@ -99,7 +99,7 @@ const deleteProfileByUserId = async (userId) => {
     console.log(`GestãoDeDados: Deletando perfil para o usuário ID: ${userId}`);
     // CUIDADO: Isso deleta o perfil, mas não o usuário. A política de negócio
     // deve garantir que isso seja o comportamento desejado.
-    const query = 'DELETE FROM profiles WHERE user_id = $1;';
+    const query = 'DELETE FROM user_profiles WHERE user_id = $1;';
     try {
         await pool.query(query, [userId]);
         console.log(`GestãoDeDados: Perfil do usuário ${userId} deletado com sucesso.`);
