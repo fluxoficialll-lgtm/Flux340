@@ -56,7 +56,7 @@ export const useFeed = () => {
                 allowAdultContent: isAdultContentAllowed
             });
 
-            const fetched = (response.data || []).filter(p => p && (p.type !== 'video' || p.isAd));
+            const fetched = response.data || [];
             mergePosts(fetched, reset || cursor === undefined);
             setNextCursor(response.nextCursor);
             setHasMore(!!response.nextCursor && fetched.length > 0);

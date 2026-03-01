@@ -15,17 +15,31 @@ const create = async (postData) => {
 };
 
 const findAll = async ({ limit = 10, cursor }) => {
-    // Lógica de cursor a ser implementada posteriormente
+    const params = [parseInt(limit, 10) || 10];
+    let cursorClause = '';
+
+    if (cursor) {
+        cursorClause = 'AND p.id < $2';
+        params.push(parseInt(cursor, 10));
+    }
+
     const query = `
         SELECT p.*, u.username, u.avatar_url 
         FROM posts p
-        JOIN users u ON p.author_id = u.id
-        WHERE p.parent_post_id IS NULL
-        ORDER BY p.created_at DESC
+        LEFT JOIN users u ON p.author_id = u.id
+        WHERE p.parent_post_id IS NULL ${cursorClause}
+        ORDER BY p.id DESC
         LIMIT $1;
     `;
-    const { rows } = await pool.query(query, [limit]);
-    return rows;
+    
+    const { rows } = await pool.query(query, params);
+
+    let nextCursor = null;
+    if (rows.length === (parseInt(limit, 10) || 10)) {
+        nextCursor = rows[rows.length - 1].id;
+    }
+
+    return { data: rows, nextCursor };
 };
 
 const findById = async (postId) => {
