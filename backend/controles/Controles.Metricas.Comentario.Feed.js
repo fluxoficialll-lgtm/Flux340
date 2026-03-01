@@ -1,6 +1,6 @@
 // backend/controles/Controles.Metricas.Comentario.Feed.js
 
-const feedCommentMetricsService = require('../ServicosBackend/Servicos.Metricas.Comentario.Feed.js');
+import * as feedCommentMetricsService from '../ServicosBackend/Servicos.Metricas.Comentario.Feed.js';
 
 async function trackComment(req, res) {
     try {
@@ -35,7 +35,7 @@ async function trackCommentReply(req, res) {
     }
 }
 
-module.exports = {
+export {
     trackComment,
     trackCommentLike,
     trackCommentReply,
