@@ -13,7 +13,7 @@ CREATE TABLE reels_comment_metrics (
     reports_count INT DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    FOREIGN KEY (comment_id) REFERENCES reels_comments(id) ON DELETE CASCADE
+    FOREIGN KEY (comment_id) REFERENCES reel_comments(id) ON DELETE CASCADE
 );
 
 -- Cria um índice na coluna comment_id para otimizar as buscas
