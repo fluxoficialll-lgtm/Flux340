@@ -1,4 +1,3 @@
-'''
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
@@ -130,4 +129,3 @@ export const useCompleteProfile = () => {
         handleLogout
     };
 };
-'''
