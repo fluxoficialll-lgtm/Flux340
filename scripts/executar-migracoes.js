@@ -9,6 +9,22 @@ import { backendConfig } from '../backend/config/ambiente.js';
 const { ambiente: ambienteAtual } = backendConfig;
 
 const MIGRATIONS_DIR = path.join(process.cwd(), 'backend', 'database', 'migrations');
+const MIGRATIONS_TABLE = 'migrations';
+
+const ensureMigrationsTable = async (client) => {
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS ${MIGRATIONS_TABLE} (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL UNIQUE,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        );
+    `);
+};
+
+const getAppliedMigrations = async (client) => {
+    const result = await client.query(`SELECT name FROM ${MIGRATIONS_TABLE}`);
+    return new Set(result.rows.map(row => row.name));
+};
 
 const applyMigration = async (client, fileName) => {
     console.log(`  -> Aplicando: ${fileName}...`);
@@ -16,6 +32,7 @@ const applyMigration = async (client, fileName) => {
     try {
         const sql = await fs.readFile(filePath, 'utf-8');
         await client.query(sql);
+        await client.query(`INSERT INTO ${MIGRATIONS_TABLE} (name) VALUES ($1)`, [fileName]);
         console.log(`     ✔️ Sucesso.`);
     } catch (error) {
         console.error(`     ❌ Erro ao aplicar ${fileName}:`, error.message);
@@ -31,20 +48,24 @@ export const run = async () => {
     const client = await pool.connect();
 
     try {
+        await client.query('BEGIN');
+        await ensureMigrationsTable(client);
+
         const allFiles = await fs.readdir(MIGRATIONS_DIR);
         const migrationFiles = allFiles.filter(file => file.endsWith('.sql')).sort();
+        const appliedMigrations = await getAppliedMigrations(client);
 
-        if (migrationFiles.length === 0) {
+        const pendingMigrations = migrationFiles.filter(file => !appliedMigrations.has(file));
+
+        if (pendingMigrations.length === 0) {
             console.log('✅ Banco de dados já está atualizado. Nenhuma migração necessária.');
+            await client.query('COMMIT');
             return;
         }
 
-        console.log(`🔍 Migrações encontradas. Preparando para aplicar ${migrationFiles.length} atualizações...`);
+        console.log(`🔍 Migrações pendentes encontradas. Preparando para aplicar ${pendingMigrations.length} atualizações...`);
 
-        await client.query('BEGIN');
-        console.log('🛡️  Iniciando transação segura...');
-
-        for (const fileName of migrationFiles) {
+        for (const fileName of pendingMigrations) {
             await applyMigration(client, fileName);
         }
 
