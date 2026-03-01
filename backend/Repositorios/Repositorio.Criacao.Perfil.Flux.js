@@ -8,9 +8,11 @@ const findProfileByUserId = async (userId) => {
     return await consultasCriacaoPerfil.findProfileByUserId(userId);
 };
 
+// CORRIGIDO: Captura e retorna o perfil atualizado da camada de dados.
 const updateProfileByUserId = async (userId, profileData) => {
     console.log('Repositório: Encaminhando para a camada de gestão de dados para atualizar perfil.');
-    return await consultasCriacaoPerfil.updateProfileByUserId(userId, profileData);
+    const perfilAtualizado = await consultasCriacaoPerfil.updateProfileByUserId(userId, profileData);
+    return perfilAtualizado;
 };
 
 const deleteProfileByUserId = async (userId) => {
