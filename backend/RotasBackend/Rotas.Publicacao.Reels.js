@@ -1,7 +1,7 @@
 
 import express from 'express';
 import reelsControle from '../controles/Controles.Publicacao.Reels.js'; // Corrigido
-import rotasComentariosReels from './Rotas.Publicacao.Comentarios.Reels.js';
+import rotasComentariosReels from './Rotas.Comentarios.Reels.js';
 
 const router = express.Router();
 

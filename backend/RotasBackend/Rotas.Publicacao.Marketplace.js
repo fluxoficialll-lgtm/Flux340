@@ -1,7 +1,7 @@
 
 import express from 'express';
-import marketplaceControle from '../controles/Controles.Marketplace.js';
-import rotasComentariosMarketplace from './Rotas.Publicacao.Comentarios.Marketplace.js';
+import marketplaceControle from '../controles/Controles.Publicacao.Marketplace.js';
+import rotasComentariosMarketplace from './Rotas.Comentarios.Marketplace.js';
 
 const router = express.Router();
 

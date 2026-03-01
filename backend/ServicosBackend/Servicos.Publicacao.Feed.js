@@ -1,7 +1,7 @@
 
 // backend/ServicosBackend/Servicos.Publicacao.Feed.js
 
-import feedManager from '../database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Feed.js';
+import feedManager from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Feed.js';
 
 class AppError extends Error {
     constructor(message, statusCode) {
