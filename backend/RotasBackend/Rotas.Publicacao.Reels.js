@@ -2,13 +2,14 @@
 import express from 'express';
 import reelsControle from '../controles/Controles.Publicacao.Reels.js'; // Corrigido
 import rotasComentariosReels from './Rotas.Comentarios.Reels.js';
+import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
 
 // @route   POST /
 // @desc    Criar um novo Reel
 // @access  Private
-router.post('/', reelsControle.createReel);
+router.post('/', authMiddleware, reelsControle.createReel);
 
 // @route   GET /
 // @desc    Obter todos os Reels
@@ -23,12 +24,12 @@ router.get('/:reelId', reelsControle.getReelById);
 // @route   PUT /:reelId
 // @desc    Atualizar um Reel
 // @access  Private
-router.put('/:reelId', reelsControle.updateReel);
+router.put('/:reelId', authMiddleware, reelsControle.updateReel);
 
 // @route   DELETE /:reelId
 // @desc    Deletar um Reel
 // @access  Private
-router.delete('/:reelId', reelsControle.deleteReel);
+router.delete('/:reelId', authMiddleware, reelsControle.deleteReel);
 
 // Aninhando as rotas de comentários
 // /api/reels/:reelId/comments

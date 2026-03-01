@@ -1,13 +1,14 @@
 
 import express from 'express';
 import feedControle from '../controles/Controles.Publicacao.Feed.js';
+import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
 
 // @route   POST /
 // @desc    Criar um novo post no feed
 // @access  Private
-router.post('/', feedControle.createPost);
+router.post('/', authMiddleware, feedControle.createPost);
 
 // @route   GET /
 // @desc    Obter todos os posts do feed
@@ -22,11 +23,11 @@ router.get('/:postId', feedControle.getPostById);
 // @route   PUT /:postId
 // @desc    Atualizar um post do feed
 // @access  Private
-router.put('/:postId', feedControle.updatePost);
+router.put('/:postId', authMiddleware, feedControle.updatePost);
 
 // @route   DELETE /:postId
 // @desc    Deletar um post do feed
 // @access  Private
-router.delete('/:postId', feedControle.deletePost);
+router.delete('/:postId', authMiddleware, feedControle.deletePost);
 
 export default router;
