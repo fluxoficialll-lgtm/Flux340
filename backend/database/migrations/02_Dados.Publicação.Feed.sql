@@ -1,7 +1,7 @@
 -- Cria a tabela de posts para o feed
 CREATE TABLE IF NOT EXISTS posts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
     media_url TEXT,
     parent_post_id UUID REFERENCES posts(id) ON DELETE CASCADE, -- Para comentários/respostas
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 
 -- Índices para a tabela de posts
-CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
+CREATE INDEX IF NOT EXISTS idx_posts_author_id ON posts(author_id);
 CREATE INDEX IF NOT EXISTS idx_posts_parent_post_id ON posts(parent_post_id);
 
 -- Aplica o gatilho de updated_at na tabela posts
