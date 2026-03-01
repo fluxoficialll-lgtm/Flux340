@@ -36,18 +36,22 @@ const findProfileByUserId = async (userId) => {
 };
 
 const updateProfileByUserId = async (userId, profileData) => {
-    const { name, nickname, bio, avatar, website } = profileData;
+    // CORREÇÃO: O frontend envia 'photoUrl', o backend esperava 'avatar'.
+    const { name, nickname, bio, photoUrl, website } = profileData;
     console.log(`GestãoDeDados: Atualizando perfil para o usuário ID: ${userId}`);
     
     const fields = [];
     const values = [];
     let paramIndex = 1;
 
+    // CORREÇÃO: A lógica de mapeamento de 'name' e 'nickname' estava invertida.
     if (nickname !== undefined) {
+        // O nickname do formulário (que é o @usuario) atualiza o campo 'username'
         fields.push(`username = $${paramIndex++}`);
         values.push(nickname);
     }
     if (name !== undefined) {
+        // O name do formulário (nome de exibição) atualiza o campo 'nickname'
         fields.push(`nickname = $${paramIndex++}`);
         values.push(name);
     }
@@ -55,9 +59,10 @@ const updateProfileByUserId = async (userId, profileData) => {
         fields.push(`bio = $${paramIndex++}`);
         values.push(bio);
     }
-    if (avatar !== undefined) {
+    // CORREÇÃO: Usar 'photoUrl' para atualizar o campo 'avatar'
+    if (photoUrl !== undefined) {
         fields.push(`avatar = $${paramIndex++}`);
-        values.push(avatar);
+        values.push(photoUrl);
     }
     if (website !== undefined) {
         fields.push(`website = $${paramIndex++}`);
@@ -66,6 +71,7 @@ const updateProfileByUserId = async (userId, profileData) => {
 
     if (fields.length === 0) {
         console.log("GestãoDeDados: Nenhum campo fornecido para atualização.");
+        // Se nenhum campo foi alterado, retorna o perfil existente para evitar erros.
         return findProfileByUserId(userId);
     }
 
@@ -80,10 +86,12 @@ const updateProfileByUserId = async (userId, profileData) => {
     try {
         const { rows } = await pool.query(query, values);
         console.log(`GestãoDeDados: Perfil do usuário ${userId} atualizado com sucesso.`);
+        // Garante que o perfil atualizado seja retornado.
         return rows[0];
     } catch (error) {
         console.error('GestãoDeDados: Erro ao atualizar o perfil:', error);
-        if (error.code === '23505') {
+        // Tratamento de erro para nome de usuário duplicado
+        if (error.code === '23505' && error.constraint === 'user_profiles_username_key') {
             throw new Error('O nome de usuário já está em uso.');
         }
         throw new Error('Erro ao atualizar o perfil no banco de dados.');
