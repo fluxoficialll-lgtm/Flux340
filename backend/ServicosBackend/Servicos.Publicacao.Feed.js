@@ -18,7 +18,7 @@ const createPost = async (postData, user) => {
     }
 
     // Passa para a camada de gestão de dados para validação e criação
-    return await feedManager.createPost({ ...postData, userId: user.id });
+    return await feedManager.createPost({ ...postData, author_id: user.id });
 };
 
 const getAllPosts = async (options) => {
@@ -45,7 +45,7 @@ const updatePost = async (postId, postData, user) => {
     }
 
     // Regra de negócio de permissão
-    if (post.user_id !== user.id) {
+    if (post.author_id !== user.id) {
         throw new AppError('Usuário não autorizado a editar este post.', 403);
     }
 
@@ -63,7 +63,7 @@ const deletePost = async (postId, user) => {
     }
 
     // Regra de negócio de permissão
-    if (post.user_id !== user.id) {
+    if (post.author_id !== user.id) {
         throw new AppError('Usuário não autorizado a deletar este post.', 403);
     }
 

@@ -5,7 +5,7 @@ import pool from '../database/pool.js';
 const create = async (postData) => {
     const { content, userId, mediaUrl, parentPostId, type, pollOptions, ctaLink, ctaText } = postData;
     const query = `
-        INSERT INTO posts (user_id, content, media_url, parent_post_id, type, poll_options, cta_link, cta_text)
+        INSERT INTO posts (author_id, content, media_url, parent_post_id, type, poll_options, cta_link, cta_text)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *;
     `;
@@ -19,7 +19,7 @@ const findAll = async ({ limit = 10, cursor }) => {
     const query = `
         SELECT p.*, u.username, u.avatar_url 
         FROM posts p
-        JOIN users u ON p.user_id = u.id
+        JOIN users u ON p.author_id = u.id
         WHERE p.parent_post_id IS NULL
         ORDER BY p.created_at DESC
         LIMIT $1;
@@ -32,7 +32,7 @@ const findById = async (postId) => {
     const query = `
         SELECT p.*, u.username, u.avatar_url 
         FROM posts p
-        JOIN users u ON p.user_id = u.id
+        JOIN users u ON p.author_id = u.id
         WHERE p.id = $1;
     `;
     const { rows } = await pool.query(query, [postId]);

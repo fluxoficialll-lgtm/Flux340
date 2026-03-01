@@ -8,7 +8,7 @@ const validatePostData = (data) => {
     if (!data.content || typeof data.content !== 'string' || data.content.trim().length === 0) {
         throw new Error('O conteúdo do post é obrigatório.');
     }
-    if (!data.userId) {
+    if (!data.author_id) {
         throw new Error('A identidade do usuário é inválida.');
     }
     return true;

@@ -6,7 +6,7 @@ import servicoPublicacaoFeed from '../ServicosBackend/Servicos.Publicacao.Feed.j
 const createPost = async (req, res) => {
     try {
         // O serviço agora é o ponto de entrada para a lógica de negócio
-        const postData = { ...req.body }; // userId será extraído nas camadas inferiores
+        const postData = { ...req.body }; // author_id será extraído nas camadas inferiores
         const post = await servicoPublicacaoFeed.createPost(postData, req.user); // Passando req.user para permissões
         res.status(201).json(post);
     } catch (error) {
