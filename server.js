@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 
 import fs from 'fs';
 import path from 'path';
@@ -57,8 +59,6 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 console.log('--- Sistema de Log em Arquivo Inicializado. Saída será gravada em logs/app.log ---');
-
-import 'dotenv/config';
 
 // VERIFICAÇÃO DE VARIÁVEIS DE AMBIENTE CRÍTICAS
 if (!process.env.JWT_SECRET) {
