@@ -71,10 +71,6 @@ export const authService = {
             // Atualiza o perfil no backend
             await profileService.atualizarPerfil(profileData);
             
-            // Busca o estado mais recente do usuário do backend e atualiza a sessão local
-            const updatedUser = await this.refreshUser();
-            
-            return updatedUser;
         } catch (error) {
             console.error("Falha detalhada ao completar o perfil no authService:", error);
             throw new Error(`Falha ao atualizar o perfil: ${error.message}`);
