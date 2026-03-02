@@ -13,7 +13,7 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: backendConfig.isProducao ? { rejectUnauthorized: false } : false,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
     connectionTimeoutMillis: 30000,
     idleTimeoutMillis: 30000,
     max: 25
