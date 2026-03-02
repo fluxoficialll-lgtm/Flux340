@@ -20,6 +20,7 @@ CREATE TABLE user_profiles (
     theme TEXT,
     notifications_enabled BOOLEAN DEFAULT TRUE,
     last_login_at TIMESTAMPTZ,
+    location TEXT, -- Adicionando a coluna de localização
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -28,4 +29,3 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 
 -- Cria um índice na coluna username para garantir unicidade e otimizar buscas
 CREATE UNIQUE INDEX IF NOT EXISTS idx_user_profiles_username ON user_profiles(username);
-

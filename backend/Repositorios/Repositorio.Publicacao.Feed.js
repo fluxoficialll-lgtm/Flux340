@@ -14,22 +14,35 @@ const create = async (postData) => {
     return rows[0];
 };
 
-const findAll = async ({ limit = 10, cursor }) => {
-    const params = [parseInt(limit, 10) || 10];
-    let cursorClause = '';
+const findAll = async ({ limit = 10, cursor, locationFilter, allowAdultContent = false }) => {
+    const params = [];
+    const whereClauses = ['p.parent_post_id IS NULL'];
 
-    if (cursor) {
-        cursorClause = 'AND p.id < $2';
-        params.push(parseInt(cursor, 10));
+    if (locationFilter && locationFilter !== 'Global') {
+        params.push(locationFilter);
+        whereClauses.push(`up.location = $${params.length}`);
     }
 
+    if (allowAdultContent === 'false' || allowAdultContent === false) {
+        whereClauses.push('p.is_adult_content = false');
+    }
+
+    if (cursor) {
+        params.push(parseInt(cursor, 10));
+        whereClauses.push(`p.id < $${params.length}`);
+    }
+
+    params.push(parseInt(limit, 10) || 10);
+    const limitParamIndex = params.length;
+
     const query = `
-        SELECT p.*, u.username, u.avatar_url 
+        SELECT p.*, u.username, u.avatar_url, up.location
         FROM posts p
-        LEFT JOIN users u ON p.author_id = u.id
-        WHERE p.parent_post_id IS NULL ${cursorClause}
+        JOIN users u ON p.author_id = u.id
+        LEFT JOIN user_profiles up ON u.id = up.user_id
+        WHERE ${whereClauses.join(' AND ')}
         ORDER BY p.id DESC
-        LIMIT $1;
+        LIMIT $${limitParamIndex};
     `;
     
     const { rows } = await pool.query(query, params);
@@ -44,9 +57,10 @@ const findAll = async ({ limit = 10, cursor }) => {
 
 const findById = async (postId) => {
     const query = `
-        SELECT p.*, u.username, u.avatar_url 
+        SELECT p.*, u.username, u.avatar_url, up.location 
         FROM posts p
         JOIN users u ON p.author_id = u.id
+        LEFT JOIN user_profiles up ON u.id = up.user_id
         WHERE p.id = $1;
     `;
     const { rows } = await pool.query(query, [postId]);
