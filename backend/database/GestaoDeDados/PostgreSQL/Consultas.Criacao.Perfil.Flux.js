@@ -9,21 +9,19 @@ const findProfileByUserId = async (userId) => {
 const updateProfileByUserId = async (userId, profileData) => {
     const { name, nickname, bio, photoUrl, website, isPrivate, cpf, phone } = profileData;
 
-    const isProfileComplete = !!(name && nickname && cpf && phone);
-
     const query = `
         UPDATE user_profiles
         SET
             name = $1, nickname = $2, bio = $3, photo_url = $4,
             website = $5, is_private = $6, cpf = $7, phone = $8,
-            profile_completed = $9, updated_at = NOW()
-        WHERE user_id = $10
+            updated_at = NOW()
+        WHERE user_id = $9
         RETURNING *;
     `;
 
     const values = [
         name, nickname, bio, photoUrl, website, isPrivate, cpf, phone,
-        isProfileComplete, userId
+        userId
     ];
 
     try {
@@ -50,9 +48,8 @@ const deleteProfileByUserId = async (userId) => {
 
 const findUserById = async (userId) => {
     const query = `
-        SELECT u.id, u.email, up.profile_completed
+        SELECT u.id, u.email
         FROM users u
-        LEFT JOIN user_profiles up ON u.id = up.user_id
         WHERE u.id = $1;
     `;
     try {
