@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { useAuth } from '../hooks/useAuth';
 
 interface ProtectedRouteProps {
@@ -24,6 +23,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
 
   if (!user) {
     return <Navigate to="/" replace />;
+  }
+
+  // Adiciona a lógica de redirecionamento baseada no perfil completo
+  if (user && !user.profile_completed) {
+    // Se o usuário está logado mas o perfil não está completo, redireciona
+    return <Navigate to="/complete-profile" replace />;
   }
 
   return element;

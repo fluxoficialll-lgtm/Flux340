@@ -8,4 +8,5 @@ export interface PerfilDoUsuario {
     website: string;
     isPrivado: boolean;
     urlDaFoto?: string;
+    profile_completed: boolean;
 }

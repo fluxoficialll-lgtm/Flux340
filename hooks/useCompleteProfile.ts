@@ -33,7 +33,7 @@ export const useCompleteProfile = () => {
         auditoria.decisaoRedirecionamento(user);
         if (!user) {
             navigate('/');
-        } else if (user.isProfileCompleted) {
+        } else if (user.profile_completed) { // CORRIGIDO
             navigate('/feed');
         }
     }, [navigate]);
@@ -113,7 +113,7 @@ export const useCompleteProfile = () => {
             auditoria.estadoAposSalvar(usuarioAtualizado);
             auditoria.decisaoRedirecionamento(usuarioAtualizado);
 
-            if (usuarioAtualizado?.isProfileCompleted) {
+            if (usuarioAtualizado?.profile_completed) { // CORRIGIDO
                 navigate('/feed');
             } else {
                 alert("Não foi possível confirmar a conclusão do seu perfil. Verifique os logs.");
