@@ -28,22 +28,10 @@ export const useFeed = () => {
     const currentUser = useMemo(() => authService.getCurrentUser(), []);
     const isAdultContentAllowed = useMemo(() => localStorage.getItem('settings_18_plus') === 'true', []);
 
-    const mergePosts = useCallback((newPosts: Post[], reset: boolean = false) => {
-        if (!newPosts) return;
-        setPosts(prev => {
-            const combined = reset ? newPosts : [...prev, ...newPosts];
-            const uniqueMap = new Map<string, Post>();
-            combined.forEach(p => { if (p && p.id && !uniqueMap.has(p.id)) { uniqueMap.set(p.id, p); } });
-
-            const scored = Array.from(uniqueMap.values()).map(p => ({ p, score: recommendationService.scorePost(p, currentUser?.email) }));
-            return scored.sort((a, b) => b.score - a.score).map(item => item.p);
-        });
-    }, [currentUser?.email]);
-
     const fetchPosts = useCallback(async (cursor?: number, reset = false) => {
         if (isFetchingRef.current && !reset) return;
         isFetchingRef.current = true;
-        if (!cursor || reset) setLoading(true);
+        setLoading(true);
         
         try {
             const storedFilter = localStorage.getItem('feed_location_filter');
@@ -57,7 +45,17 @@ export const useFeed = () => {
             });
 
             const fetched = response.data || [];
-            mergePosts(fetched, reset || cursor === undefined);
+            
+            if (reset) {
+                setPosts(fetched);
+            } else {
+                setPosts(prev => {
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const newPosts = fetched.filter(p => !existingIds.has(p.id));
+                    return [...prev, ...newPosts];
+                });
+            }
+
             setNextCursor(response.nextCursor);
             setHasMore(!!response.nextCursor && fetched.length > 0);
         } catch (error) {
@@ -67,20 +65,39 @@ export const useFeed = () => {
             setLoading(false);
             isFetchingRef.current = false;
         }
-    }, [isAdultContentAllowed, mergePosts]);
+    }, [isAdultContentAllowed]);
+
+    const refreshFeed = useCallback(() => {
+        setNextCursor(undefined);
+        setHasMore(true);
+        viewedPostsRef.current.clear();
+        if(scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0;
+        fetchPosts(undefined, true);
+    }, [fetchPosts]);
 
     useEffect(() => {
         if (!authService.isAuthenticated()) {
             navigate('/');
             return;
         }
-        
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                refreshFeed();
+            }
+        };
+
         const filter = localStorage.getItem('feed_location_filter');
         setActiveLocationFilter(filter);
         
-        fetchPosts(undefined, true); 
+        refreshFeed();
 
-    }, [navigate, fetchPosts]);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [navigate, refreshFeed]);
 
     useEffect(() => {
         if (posts.length === 0) return;
@@ -96,8 +113,8 @@ export const useFeed = () => {
                 }
             });
         }, { threshold: 0.15 });
-        const postElements = document.querySelectorAll('.feed-post-item');
-        postElements.forEach((el) => observer.observe(el));
+        const postElements = scrollContainerRef.current?.querySelectorAll('[data-post-id]');
+        if(postElements) postElements.forEach((el) => observer.observe(el));
         return () => observer.disconnect();
     }, [posts]);
 
@@ -108,8 +125,12 @@ export const useFeed = () => {
             }
         }, { root: null, threshold: 0.1 });
         
-        if (loaderRef.current) observer.observe(loaderRef.current);
-        return () => observer.disconnect();
+        const loader = loaderRef.current;
+        if (loader) observer.observe(loader);
+        
+        return () => {
+            if(loader) observer.unobserve(loader);
+        };
     }, [hasMore, nextCursor, fetchPosts, loading]);
 
     const handleContainerScroll = () => {
