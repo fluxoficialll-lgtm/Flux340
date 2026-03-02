@@ -9,18 +9,19 @@ export const CreatePost: React.FC = () => {
     isGroupModalOpen, setIsGroupModalOpen, myGroups, selectedGroup, setSelectedGroup,
     avatarUrl, username, handleMediaChange, handleRemoveMedia, handleBack, handlePublishClick,
     targetCountry, targetState, targetCity, setTargetCity,
-    handleCountryChange, handleStateChange, saveLocation, countries, states, cities, navigate
+    handleCountryChange, handleStateChange, saveLocation, countries, states, cities, navigate, error
   } = useCreatePost();
 
   return (
     <div className="h-screen flex flex-col bg-[#0c0f14] text-white font-['Inter'] overflow-hidden">
       <style>{`
+        .error-banner { background: #ff4d4f; color: white; padding: 10px; text-align: center; font-size: 14px; position: absolute; top: 60px; left: 0; right: 0; z-index: 100; }
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); height: 60px; z-index: 50; background: #0c0f14; }
         header button { background: none; border: none; font-size: 16px; color: #fff; cursor: pointer; }
         header .publish-btn { background: #00c2ff; color: #000; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 14px; opacity: 1; transition: opacity 0.3s; }
         header .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #333; color: #777; }
         
-        main { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        main { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; margin-top: ${error ? '40px' : '0'}; transition: margin-top 0.3s; }
         
         .input-area { display: flex; gap: 12px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #333; flex-shrink: 0; }
@@ -42,7 +43,7 @@ export const CreatePost: React.FC = () => {
         .setting-icon { color: #888; width: 20px; text-align: center; }
         .setting-value { color: #00c2ff; font-size: 14px; margin-right: 10px; font-weight: 600; }
         .chevron { color: #555; font-size: 12px; }
-
+        
         .ad-box { background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 10px; padding: 15px; margin-bottom: 10px; }
         .ad-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; outline: none; }
         
@@ -71,6 +72,8 @@ export const CreatePost: React.FC = () => {
             {isProcessing ? '...' : (isAd ? 'Confirmar' : 'Publicar')}
         </button>
       </header>
+
+      {error && <div className="error-banner">{error}</div>}
 
       <main>
         {isAd && (
