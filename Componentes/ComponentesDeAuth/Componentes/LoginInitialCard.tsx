@@ -1,19 +1,11 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import type { LoginDadosIniciaisProps } from '@/pages/tipos/Login.types';
 
-interface LoginInitialCardProps {
-    onSelectEmail: () => void;
-    googleButtonSlot: React.ReactNode; // Alterado de googleButtonId para googleButtonSlot
-    loading: boolean;
-    googleProcessing: boolean;
-}
-
-export const LoginInitialCard: React.FC<LoginInitialCardProps> = ({ 
-    onSelectEmail, 
-    googleButtonSlot, // Usando a nova prop
-    loading, 
-    googleProcessing 
+export const LoginInitialCard: React.FC<LoginDadosIniciaisProps> = ({ 
+    onSelecionarEmail, 
+    slotBotaoGoogle, 
 }) => {
     return (
         <div className="w-full flex flex-col items-center animate-fade-in">
@@ -28,11 +20,10 @@ export const LoginInitialCard: React.FC<LoginInitialCardProps> = ({
             </p>
 
             <div className="w-full space-y-4">
-                {/* O novo Google Button é renderizado diretamente aqui */}
-                {googleButtonSlot}
+                {slotBotaoGoogle}
 
                 <button 
-                    onClick={onSelectEmail}
+                    onClick={onSelecionarEmail}
                     className="w-full py-3.5 bg-white/5 border border-white/10 text-white font-bold rounded-lg hover:bg-white/10 transition-all flex items-center justify-center gap-3"
                 >
                     <i className="fa-solid fa-envelope"></i>

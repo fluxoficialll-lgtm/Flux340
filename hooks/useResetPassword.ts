@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { AuthError } from '../types';
+import { ErroSenha } from '@/tipos';
 
 export const useResetPassword = () => {
   const navigate = useNavigate();
@@ -19,9 +19,9 @@ export const useResetPassword = () => {
 
   const validate = () => {
       if (!password) return "Nova senha obrigatória";
-      if (password.length < 6) return AuthError.PASSWORD_TOO_SHORT;
+      if (password.length < 6) return ErroSenha.SENHA_MUITO_CURTA;
       if (!confirm) return "Confirme sua senha";
-      if (password !== confirm) return AuthError.PASSWORDS_DONT_MATCH;
+      if (password !== confirm) return ErroSenha.SENHAS_NAO_CONFEREM;
       return null;
   };
 

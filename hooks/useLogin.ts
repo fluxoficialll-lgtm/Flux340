@@ -8,13 +8,13 @@ import { trackingService } from '../ServiçosFrontend/ServiçoDeRastreamento/Ser
 export const useLogin = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [loading, setLoading] = useState(true); // Começa como true
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState('');
-    const [showEmailForm, setShowEmailForm] = useState(false);
+    const [carregando, setCarregando] = useState(true); // Começa como true
+    const [processando, setProcessando] = useState(false);
+    const [erro, setErro] = useState('');
+    const [mostrarFormEmail, setMostrarFormEmail] = useState(false);
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, definirEmail] = useState('');
+    const [senha, definirSenha] = useState('');
 
     useEffect(() => {
         try {
@@ -25,7 +25,7 @@ export const useLogin = () => {
     }, [location]);
 
     const handleRedirect = useCallback((user: any, isNewUser: boolean = false) => {
-        setProcessing(false);
+        setProcessando(false);
         if (isNewUser || (user && !user.isProfileCompleted)) {
             navigate('/complete-profile', { replace: true });
             return;
@@ -47,14 +47,14 @@ export const useLogin = () => {
             if (user && authService.isAuthenticated()) {
                 handleRedirect(user);
             } else {
-                setLoading(false); // Para de carregar se não estiver autenticado
+                setCarregando(false); // Para de carregar se não estiver autenticado
             }
         }
     }, [handleRedirect]); // handleRedirect é estável
 
-    const handleGoogleSuccess = useCallback(async (credentialResponse: any) => {
-        setProcessing(true);
-        setError('');
+    const submeterLoginGoogle = useCallback(async (credentialResponse: any) => {
+        setProcessando(true);
+        setErro('');
         try {
             if (!credentialResponse || !credentialResponse.credential) {
                 throw new Error("Login com Google falhou.");
@@ -66,39 +66,39 @@ export const useLogin = () => {
                 handleRedirect(result.user, isNew);
             }
         } catch (err: any) {
-            setError(err.message || 'Falha ao autenticar com Google.');
-            setProcessing(false);
+            setErro(err.message || 'Falha ao autenticar com Google.');
+            setProcessando(false);
         }
     }, [handleRedirect]);
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
+    const submeterLoginEmail = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email || !password || processing) return;
-        setProcessing(true);
-        setError('');
+        if (!email || !senha || processando) return;
+        setProcessando(true);
+        setErro('');
         try {
-            const result = await authService.login(email, password);
+            const result = await authService.login(email, senha);
             if (result && result.user) {
                 const isNew = result.nextStep === '/complete-profile' || !result.user.isProfileCompleted;
                 handleRedirect(result.user, isNew);
             }
         } catch (err: any) {
-            setError(err.message || 'Credenciais inválidas.');
-            setProcessing(false);
+            setErro(err.message || 'Credenciais inválidas.');
+            setProcessando(false);
         }
     };
 
     return {
-        loading,
-        processing,
-        error,
-        showEmailForm,
-        setShowEmailForm,
+        carregando,
+        processando,
+        erro,
+        mostrarFormEmail,
+        setMostrarFormEmail,
         email,
-        setEmail,
-        password,
-        setPassword,
-        handleEmailLogin,
-        handleGoogleSuccess,
+        definirEmail,
+        senha,
+        definirSenha,
+        submeterLoginEmail,
+        submeterLoginGoogle,
     };
 };

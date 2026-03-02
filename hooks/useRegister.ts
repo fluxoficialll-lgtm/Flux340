@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { AuthError } from '../types';
+import { ErroSenha } from '@/tipos';
 
 export const useRegister = () => {
     const navigate = useNavigate();
@@ -32,13 +32,13 @@ export const useRegister = () => {
         const newErrors: any = {};
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
         if (email && !emailRegex.test(email)) {
-            newErrors.email = AuthError.INVALID_FORMAT;
+            newErrors.email = ErroSenha.FORMATO_INVALIDO;
         }
         if (password && password.length < 6) {
-            newErrors.password = AuthError.PASSWORD_TOO_SHORT;
+            newErrors.password = ErroSenha.SENHA_MUITO_CURTA;
         }
         if (confirmPassword && password !== confirmPassword) {
-            newErrors.confirm = AuthError.PASSWORDS_DONT_MATCH;
+            newErrors.confirm = ErroSenha.SENHAS_NAO_CONFEREM;
         }
 
         setErrors(newErrors);

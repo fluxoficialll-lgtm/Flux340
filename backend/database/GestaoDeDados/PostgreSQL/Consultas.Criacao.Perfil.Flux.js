@@ -7,20 +7,20 @@ const findProfileByUserId = async (userId) => {
 };
 
 const updateProfileByUserId = async (userId, profileData) => {
-    const { name, nickname, bio, photoUrl, website, isPrivate, cpf, phone } = profileData;
+    const { name, nickname, bio, photoUrl, website, isPrivate } = profileData;
 
     const query = `
         UPDATE user_profiles
         SET
             name = $1, nickname = $2, bio = $3, photo_url = $4,
-            website = $5, is_private = $6, cpf = $7, phone = $8,
+            website = $5, is_private = $6,
             updated_at = NOW()
-        WHERE user_id = $9
+        WHERE user_id = $7
         RETURNING *;
     `;
 
     const values = [
-        name, nickname, bio, photoUrl, website, isPrivate, cpf, phone,
+        name, nickname, bio, photoUrl, website, isPrivate,
         userId
     ];
 
@@ -32,9 +32,6 @@ const updateProfileByUserId = async (userId, profileData) => {
         console.error("[Consulta SQL] Erro ao atualizar perfil para o usuário:", userId, error);
         if (error.code === '23505' && error.constraint === 'user_profiles_nickname_key') {
             throw new Error(`O nickname '${nickname}' já está em uso.`);
-        }
-        if (error.code === '23505' && error.constraint === 'user_profiles_cpf_key') {
-            throw new Error(`O CPF '${cpf}' já está em uso.`);
         }
         throw new Error('Erro no banco de dados ao atualizar o perfil.');
     }

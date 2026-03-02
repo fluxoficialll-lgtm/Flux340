@@ -5,25 +5,26 @@ import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authS
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { UserProfile } from '../types';
 import ServicoAuditoriaCriarPerfil from '../ServiçosFrontend/ServicoLogs/Servico.Auditoria.Criar.Perfil.js';
+import type { DadosFormularioPerfil } from '@/tipos/CompleteProfile.types';
 
 export const useCompleteProfile = () => {
     const navigate = useNavigate();
     const auditoria = ServicoAuditoriaCriarPerfil;
 
-    const [formData, setFormData] = useState<Partial<UserProfile>>({
+    const [dadosFormulario, setDadosFormulario] = useState<DadosFormularioPerfil>({
         name: '',
         nickname: '',
         bio: '',
     });
-    const [isPrivate, setIsPrivate] = useState(false);
+    const [perfilPrivado, setPerfilPrivado] = useState(false);
 
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [usernameError, setUsernameError] = useState('');
+    const [previaImagem, setPreviaImagem] = useState<string | null>(null);
+    const [arquivoSelecionado, setArquivoSelecionado] = useState<File | null>(null);
+    const [carregando, setCarregando] = useState(false);
+    const [erroNomeUsuario, setErroNomeUsuario] = useState('');
 
-    const [isCropOpen, setIsCropOpen] = useState(false);
-    const [rawImage, setRawImage] = useState<string>('');
+    const [cortarAberto, setCortarAberto] = useState(false);
+    const [imagemOriginal, setImagemOriginal] = useState<string>('');
 
     useEffect(() => {
         auditoria.iniciarProcesso();
@@ -37,123 +38,121 @@ export const useCompleteProfile = () => {
         }
     }, [navigate]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const aoMudarInput = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        let finalValue = value;
+        let valorFinal = value;
 
         if (name === 'nickname') {
-            const cleanValue = value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
-            finalValue = cleanValue;
-            setUsernameError('');
+            const valorLimpo = value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+            valorFinal = valorLimpo;
+            setErroNomeUsuario('');
         }
         
-        setFormData(prev => ({ ...prev, [name]: finalValue }));
-        auditoria.alteracaoFormulario(name, finalValue);
+        setDadosFormulario(prev => ({ ...prev, [name]: valorFinal }));
+        auditoria.alteracaoFormulario(name, valorFinal);
     };
     
-    const handlePrivacyChange = (isPrivate: boolean) => {
-        setIsPrivate(isPrivate);
+    const aoMudarPrivacidade = (privado: boolean) => {
+        setPerfilPrivado(privado);
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const aoMudarImagem = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             auditoria.selecaoDeImagem(file.name);
             const reader = new FileReader();
             reader.onload = (ev) => {
-                setRawImage(ev.target?.result as string);
-                setIsCropOpen(true);
+                setImagemOriginal(ev.target?.result as string);
+                setCortarAberto(true);
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const handleCroppedImage = (croppedBase64: string) => {
+    const aoSalvarImagemCortada = (base64Cortada: string) => {
         auditoria.imagemCortada();
-        setImagePreview(croppedBase64);
-        fetch(croppedBase64)
+        setPreviaImagem(base64Cortada);
+        fetch(base64Cortada)
           .then(res => res.blob())
           .then(blob => {
               const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
-              setSelectedFile(file);
+              setArquivoSelecionado(file);
           });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const aoSubmeter = async (e: React.FormEvent) => {
         e.preventDefault();
-        setUsernameError('');
+        setErroNomeUsuario('');
 
-        if (!formData.nickname?.trim()) {
-            setUsernameError('Nome de usuário é obrigatório.');
+        if (!dadosFormulario.nickname?.trim()) {
+            setErroNomeUsuario('Nome de usuário é obrigatório.');
             return;
         }
 
-        setLoading(true);
+        setCarregando(true);
 
-        const profileData: UserProfile = {
-            name: formData.name || '',
-            nickname: formData.nickname || '',
-            bio: formData.bio || '',
+        const dadosPerfil: UserProfile = {
+            name: dadosFormulario.name || '',
+            nickname: dadosFormulario.nickname || '',
+            bio: dadosFormulario.bio || '',
             photoUrl: '',
             website: '',
-            isPrivate,
-            cpf: '',
-            phone: ''
+            isPrivate: perfilPrivado,
         };
 
-        auditoria.tentativaDeSubmissao(profileData);
+        auditoria.tentativaDeSubmissao(dadosPerfil);
 
         try {
-            if (selectedFile) {
-                profileData.photoUrl = await fileService.uploadFile(selectedFile);
+            if (arquivoSelecionado) {
+                dadosPerfil.photoUrl = await fileService.uploadFile(arquivoSelecionado);
             }
 
-            const userAtualizado = await authService.completeProfile(profileData);
+            const usuarioAtualizado = await authService.completeProfile(dadosPerfil);
             
             auditoria.sucessoNaConclusao({ success: true });
-            auditoria.estadoAposSalvar(userAtualizado);
-            auditoria.decisaoRedirecionamento(userAtualizado);
+            auditoria.estadoAposSalvar(usuarioAtualizado);
+            auditoria.decisaoRedirecionamento(usuarioAtualizado);
 
-            if (userAtualizado?.isProfileCompleted) {
+            if (usuarioAtualizado?.isProfileCompleted) {
                 navigate('/feed');
             } else {
                 alert("Não foi possível confirmar a conclusão do seu perfil. Verifique os logs.");
             }
 
         } catch (err: any) {
-            auditoria.falhaNaConclusao(err, profileData);
+            auditoria.falhaNaConclusao(err, dadosPerfil);
             console.error("Falha ao completar o perfil no hook 'useCompleteProfile':", err);
             
             if (err.message && err.message.includes('NAME_TAKEN')) {
-                setUsernameError('Este nome de usuário já está em uso.');
+                setErroNomeUsuario('Este nome de usuário já está em uso.');
             } else {
                 alert(err.message || 'Ocorreu um erro ao finalizar o perfil. Tente novamente.');
             }
         } finally {
-            setLoading(false);
+            setCarregando(false);
         }
     };
     
-    const handleLogout = () => {
+    const aoSair = () => {
         auditoria.logout();
         authService.logout();
         navigate('/');
     };
 
     return {
-        formData, 
-        isPrivate, 
-        imagePreview, 
-        loading, 
-        usernameError, 
-        isCropOpen, 
-        setIsCropOpen, 
-        rawImage, 
-        handleChange, 
-        handleImageChange, 
-        handleCroppedImage, 
-        handlePrivacyChange, 
-        handleSubmit,
-        handleLogout
+        dadosFormulario, 
+        perfilPrivado, 
+        previaImagem, 
+        carregando, 
+        erroNomeUsuario, 
+        cortarAberto, 
+        setCortarAberto, 
+        imagemOriginal, 
+        aoMudarInput, 
+        aoMudarImagem, 
+        aoSalvarImagemCortada, 
+        aoMudarPrivacidade, 
+        aoSubmeter,
+        aoSair
     };
 };

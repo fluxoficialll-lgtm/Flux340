@@ -6,20 +6,20 @@ import { Switch } from '../Componentes/ComponenteDeInterfaceDeUsuario/Switch';
 
 export const CompleteProfile: React.FC = () => {
     const {
-        formData,
-        isPrivate,
-        imagePreview,
-        loading,
-        usernameError,
-        isCropOpen,
-        setIsCropOpen,
-        rawImage,
-        handleChange,
-        handleImageChange,
-        handleCroppedImage,
-        handlePrivacyChange,
-        handleSubmit,
-        handleLogout
+        dadosFormulario,
+        perfilPrivado,
+        previaImagem,
+        carregando,
+        erroNomeUsuario,
+        cortarAberto,
+        setCortarAberto,
+        imagemOriginal,
+        aoMudarInput,
+        aoMudarImagem,
+        aoSalvarImagemCortada,
+        aoMudarPrivacidade,
+        aoSubmeter,
+        aoSair
     } = useCompleteProfile();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,42 +45,42 @@ export const CompleteProfile: React.FC = () => {
 
                 <div className="avatar-section">
                     <div className="avatar-wrapper" onClick={() => fileInputRef.current?.click()}>
-                        {imagePreview ? <img src={imagePreview} className="avatar-img" /> : <div className="avatar-img bg-gray-700 flex items-center justify-center"><i className="fa-solid fa-user text-3xl"></i></div>}
+                        {previaImagem ? <img src={previaImagem} className="avatar-img" /> : <div className="avatar-img bg-gray-700 flex items-center justify-center"><i className="fa-solid fa-user text-3xl"></i></div>}
                         <div className="edit-icon"><i className="fa-solid fa-camera"></i></div>
                     </div>
-                    <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" hidden />
+                    <input type="file" ref={fileInputRef} onChange={aoMudarImagem} accept="image/*" hidden />
                 </div>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={aoSubmeter}>
                     <div className="input-group">
                         <label>Seu apelido</label>
-                        <input type="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="Ex: Seu Nome" />
+                        <input type="text" name="nickname" value={dadosFormulario.nickname || ''} onChange={aoMudarInput} placeholder="Ex: Seu Nome" />
                     </div>
                     <div className="input-group">
                         <label>Seu nome de usuário</label>
-                        <input type="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="Ex: @seunome" />
-                        {usernameError && <p className="text-red-500 text-xs mt-1">{usernameError}</p>}
+                        <input type="text" name="name" value={dadosFormulario.name || ''} onChange={aoMudarInput} placeholder="Ex: @seunome" />
+                        {erroNomeUsuario && <p className="text-red-500 text-xs mt-1">{erroNomeUsuario}</p>}
                     </div>
                     <div className="input-group">
                         <label>Sua bio</label>
-                        <textarea name="bio" value={formData.bio || ''} onChange={handleChange} placeholder="Fale um pouco sobre você" rows={2}></textarea>
+                        <textarea name="bio" value={dadosFormulario.bio || ''} onChange={aoMudarInput} placeholder="Fale um pouco sobre você" rows={2}></textarea>
                     </div>
 
                     <div className="input-group">
                         <Switch 
                             label="Conta Privada" 
-                            isChecked={isPrivate} 
-                            onChange={handlePrivacyChange} 
+                            marcado={perfilPrivado} 
+                            aoMudar={aoMudarPrivacidade} 
                         />
                     </div>
 
-                    <button type="submit" className="submit-btn" disabled={loading}>{loading ? 'Finalizando...' : 'Concluir Cadastro'}</button>
+                    <button type="submit" className="submit-btn" disabled={carregando}>{carregando ? 'Finalizando...' : 'Concluir Cadastro'}</button>
                 </form>
 
-                <button onClick={handleLogout} className="logout-btn">Sair da conta</button>
+                <button onClick={aoSair} className="logout-btn">Sair da conta</button>
             </div>
 
-            <ImageCropModal isOpen={isCropOpen} imageSrc={rawImage} onClose={() => setIsCropOpen(false)} onSave={handleCroppedImage} />
+            <ImageCropModal aberto={cortarAberto} imagemSrc={imagemOriginal} aoFechar={() => setCortarAberto(false)} aoSalvar={aoSalvarImagemCortada} />
         </div>
     );
 };

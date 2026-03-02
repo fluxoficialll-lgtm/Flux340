@@ -2,20 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
-import { AuthError, UserProfile } from '../types';
+import { ErroSenha, PerfilDoUsuario } from '@/tipos';
 
 export const useEditProfile = () => {
   const navigate = useNavigate();
   
-  const [formData, setFormData] = useState<UserProfile>({
-      name: '',
-      nickname: '',
+  const [formData, setFormData] = useState<PerfilDoUsuario>({
+      nome: '',
+      apelido: '',
       bio: '',
       website: '', 
-      isPrivate: false,
-      photoUrl: undefined,
-      cpf: '',
-      phone: ''
+      isPrivado: false,
+      urlDaFoto: undefined,
   });
   
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -38,14 +36,12 @@ export const useEditProfile = () => {
 
       if (user.profile) {
           setFormData({
-              name: user.profile.name || '',
-              nickname: user.profile.nickname || '',
+              nome: user.profile.name || '',
+              apelido: user.profile.nickname || '',
               bio: user.profile.bio || '',
               website: user.profile.website || '',
-              isPrivate: user.profile.isPrivate || false,
-              photoUrl: user.profile.photoUrl,
-              cpf: user.profile.cpf || '',
-              phone: user.profile.phone || ''
+              isPrivado: user.profile.isPrivate || false,
+              urlDaFoto: user.profile.photoUrl,
           });
           if (user.profile.photoUrl) {
               setImagePreview(user.profile.photoUrl);
@@ -57,7 +53,7 @@ export const useEditProfile = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
       
-      if (name === 'name') {
+      if (name === 'nome') {
           const cleanValue = value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
           setFormData(prev => ({ ...prev, [name]: cleanValue }));
           setUsernameError('');
@@ -67,7 +63,7 @@ export const useEditProfile = () => {
   };
 
   const handleTogglePrivacy = () => {
-      setFormData(prev => ({ ...prev, isPrivate: !prev.isPrivate }));
+      setFormData(prev => ({ ...prev, isPrivado: !prev.isPrivado }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +93,7 @@ export const useEditProfile = () => {
       setError('');
       setUsernameError('');
 
-      if (!formData.name.trim()) {
+      if (!formData.nome.trim()) {
           setUsernameError('Nome de usuário é obrigatório');
           return;
       }
@@ -105,20 +101,27 @@ export const useEditProfile = () => {
       setLoading(true);
 
       try {
-          let finalPhotoUrl = formData.photoUrl;
+          let finalPhotoUrl = formData.urlDaFoto;
 
           if (selectedFile) {
               finalPhotoUrl = await fileService.uploadFile(selectedFile);
           }
 
-          const updatedProfile = { ...formData, photoUrl: finalPhotoUrl };
+          const updatedProfile = { 
+            name: formData.nome,
+            nickname: formData.apelido,
+            bio: formData.bio,
+            website: formData.website,
+            isPrivate: formData.isPrivado,
+            photoUrl: finalPhotoUrl 
+          };
 
           await authService.completeProfile(updatedProfile);
           
           alert('Perfil atualizado com sucesso!');
           navigate('/profile', { replace: true });
       } catch (err: any) {
-          if (err.message === AuthError.NAME_TAKEN) {
+          if (err.message === ErroSenha.NOME_DE_USUARIO_JA_EM_USO) {
               setUsernameError('Este nome de usuário já está em uso.');
           } else {
               setError(err.message || 'Erro ao atualizar perfil.');

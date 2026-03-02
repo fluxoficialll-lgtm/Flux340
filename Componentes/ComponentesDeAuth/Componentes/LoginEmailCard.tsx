@@ -1,20 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import type { LoginDadosEmailProps } from '@/pages/tipos/Login.types';
 
-interface LoginEmailCardProps {
-    email: string;
-    setEmail: (val: string) => void;
-    password: string;
-    setPassword: (val: string) => void;
-    onSubmit: (e: React.FormEvent) => void;
-    onBackToGoogle: () => void;
-    loading: boolean;
-    error: string;
-}
-
-export const LoginEmailCard: React.FC<LoginEmailCardProps> = ({
-    email, setEmail, password, setPassword, onSubmit, onBackToGoogle, loading, error
+export const LoginEmailCard: React.FC<LoginDadosEmailProps> = ({
+    email, definirEmail, senha, definirSenha, aoSubmeter, aoVoltar, carregando, erro
 }) => {
     return (
         <div className="w-full animate-fade-in">
@@ -27,21 +17,21 @@ export const LoginEmailCard: React.FC<LoginEmailCardProps> = ({
                 <p className="text-gray-500 text-xs mt-1">Insira suas credenciais abaixo</p>
             </div>
 
-            {error && (
+            {erro && (
                 <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs text-center animate-shake">
                     <i className="fa-solid fa-circle-exclamation mr-2"></i>
-                    {error}
+                    {erro}
                 </div>
             )}
 
-            <form onSubmit={onSubmit} className="w-full space-y-4">
+            <form onSubmit={aoSubmeter} className="w-full space-y-4">
                 <div className="relative">
                     <i className="fa-solid fa-at absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
                     <input 
                         type="email" 
                         placeholder="E-mail" 
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => definirEmail(e.target.value)}
                         className="w-full p-3.5 pl-11 bg-black/20 border border-white/10 rounded-xl text-white outline-none focus:border-[#00c2ff] transition-all placeholder-gray-600"
                         required
                     />
@@ -51,24 +41,24 @@ export const LoginEmailCard: React.FC<LoginEmailCardProps> = ({
                     <input 
                         type="password" 
                         placeholder="Senha" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={senha}
+                        onChange={(e) => definirSenha(e.target.value)}
                         className="w-full p-3.5 pl-11 bg-black/20 border border-white/10 rounded-xl text-white outline-none focus:border-[#00c2ff] transition-all placeholder-gray-600"
                         required
                     />
                 </div>
                 <button 
                     type="submit" 
-                    disabled={loading}
+                    disabled={carregando}
                     className="w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl hover:bg-[#00aaff] transition-all shadow-lg shadow-[#00c2ff]/20 disabled:opacity-50 active:scale-[0.98]"
                 >
-                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'ENTRAR'}
+                    {carregando ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'ENTRAR'}
                 </button>
             </form>
 
             <div className="mt-6 flex flex-col items-center gap-4">
                 <button 
-                    onClick={onBackToGoogle}
+                    onClick={aoVoltar}
                     className="text-sm font-bold text-[#00c2ff] hover:text-white transition-colors flex items-center gap-2"
                 >
                     <i className="fa-brands fa-google"></i>

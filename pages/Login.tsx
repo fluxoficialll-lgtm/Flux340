@@ -9,26 +9,26 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export const Login: React.FC = () => {
     const {
-        loading,
-        processing,
-        error,
-        showEmailForm,
-        setShowEmailForm,
+        carregando,
+        processando,
+        erro,
+        mostrarFormEmail,
+        setMostrarFormEmail,
         email,
-        setEmail,
-        password,
-        setPassword,
-        handleEmailLogin,
-        handleGoogleSuccess,
+        definirEmail,
+        senha,
+        definirSenha,
+        submeterLoginEmail,
+        submeterLoginGoogle,
     } = useLogin();
 
-    const ProcessingOverlay = () => (
+    const CamadaDeProcessamento = () => (
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-[32px] flex items-center justify-center z-50">
             <i className="fa-solid fa-circle-notch fa-spin text-[#00c2ff] text-2xl"></i>
         </div>
     );
 
-    const GoogleButton = () => {
+    const BotaoGoogle = () => {
         if (!GOOGLE_CLIENT_ID) {
             return (
                 <div className="w-full flex flex-col items-center justify-center text-center p-4 bg-red-900/50 border border-red-500/50 rounded-lg">
@@ -40,7 +40,7 @@ export const Login: React.FC = () => {
         return (
             <div className="w-full flex justify-center">
                 <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
+                    onSuccess={submeterLoginGoogle}
                     onError={() => console.error('Login com Google falhou')}
                     shape="rectangular"
                     size="large"
@@ -51,7 +51,7 @@ export const Login: React.FC = () => {
         );
     };
 
-    if (loading) {
+    if (carregando) {
         return (
             <div className="h-screen w-full bg-[#0c0f14] flex items-center justify-center">
                 <i className="fa-solid fa-circle-notch fa-spin text-[#00c2ff] text-3xl"></i>
@@ -67,27 +67,27 @@ export const Login: React.FC = () => {
             </div>
 
             <div className="w-full max-w-[400px] mx-4 bg-white/5 backdrop-blur-2xl rounded-[32px] p-10 border border-white/10 shadow-2xl relative z-10 flex flex-col items-center">
-                {showEmailForm ? (
+                {mostrarFormEmail ? (
                     <LoginEmailCard 
                         email={email}
-                        setEmail={setEmail}
-                        password={password}
-                        setPassword={setPassword}
-                        onSubmit={handleEmailLogin}
-                        onBackToGoogle={() => setShowEmailForm(false)}
-                        loading={processing}
-                        error={error}
+                        definirEmail={definirEmail}
+                        senha={senha}
+                        definirSenha={definirSenha}
+                        aoSubmeter={submeterLoginEmail}
+                        aoVoltar={() => setMostrarFormEmail(false)}
+                        carregando={processando}
+                        erro={erro}
                     />
                 ) : (
                     <LoginInitialCard 
-                        onSelectEmail={() => setShowEmailForm(true)}
-                        googleButtonSlot={<GoogleButton />} // Passamos o botão como um slot!
-                        loading={loading}
-                        googleProcessing={processing}
+                        onSelecionarEmail={() => setMostrarFormEmail(true)}
+                        slotBotaoGoogle={<BotaoGoogle />}
+                        carregando={carregando}
+                        processandoGoogle={processando}
                     />
                 )}
                 
-                {processing && <ProcessingOverlay />}
+                {processando && <CamadaDeProcessamento />}
             </div>
         </div>
     );

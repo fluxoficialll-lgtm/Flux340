@@ -1,53 +1,47 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import type { PropsModalCortarImagem } from '@/tipos/CompleteProfile.types';
 
-interface ImageCropModalProps {
-    isOpen: boolean;
-    imageSrc: string;
-    onClose: () => void;
-    onSave: (croppedImage: string) => void;
-}
-
-export const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, imageSrc, onClose, onSave }) => {
-    const [scale, setScale] = useState(1);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+export const ImageCropModal: React.FC<PropsModalCortarImagem> = ({ aberto, imagemSrc, aoFechar, aoSalvar }) => {
+    const [escala, setEscala] = useState(1);
+    const [posicao, setPosicao] = useState({ x: 0, y: 0 });
+    const [arrastando, setArrastando] = useState(false);
+    const [inicioArrasto, setInicioArrasto] = useState({ x: 0, y: 0 });
     
     const containerRef = useRef<HTMLDivElement>(null);
-    const imageRef = useRef<HTMLImageElement>(null);
+    const imagemRef = useRef<HTMLImageElement>(null);
 
     // Resetar estado ao abrir nova imagem
     useEffect(() => {
-        if (isOpen) {
-            setScale(1);
-            setPosition({ x: 0, y: 0 });
+        if (aberto) {
+            setEscala(1);
+            setPosicao({ x: 0, y: 0 });
         }
-    }, [isOpen, imageSrc]);
+    }, [aberto, imagemSrc]);
 
-    if (!isOpen) return null;
+    if (!aberto) return null;
 
-    const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-        setIsDragging(true);
+    const aoPressionarMouse = (e: React.MouseEvent | React.TouchEvent) => {
+        setArrastando(true);
         const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-        setDragStart({ x: clientX - position.x, y: clientY - position.y });
+        setInicioArrasto({ x: clientX - posicao.x, y: clientY - posicao.y });
     };
 
-    const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isDragging) return;
+    const aoMoverMouse = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!arrastando) return;
         const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-        setPosition({
-            x: clientX - dragStart.x,
-            y: clientY - dragStart.y
+        setPosicao({
+            x: clientX - inicioArrasto.x,
+            y: clientY - inicioArrasto.y
         });
     };
 
-    const handleMouseUp = () => setIsDragging(false);
+    const aoSoltarMouse = () => setArrastando(false);
 
-    const handleApply = () => {
-        if (!imageRef.current) return;
+    const aoAplicar = () => {
+        if (!imagemRef.current) return;
 
         const canvas = document.createElement('canvas');
         const size = 400; // Tamanho padrão para avatar
@@ -56,21 +50,17 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, imageSrc
         const ctx = canvas.getContext('2d');
 
         if (ctx) {
-            const img = imageRef.current;
-            const displayWidth = img.width * scale;
-            const displayHeight = img.height * scale;
+            const img = imagemRef.current;
+            const displayWidth = img.width * escala;
+            const displayHeight = img.height * escala;
             
-            // Calculando a posição no canvas baseada no enquadramento visual
-            // O círculo no CSS tem 280px. O canvas tem 400px.
-            // Precisamos mapear o que está dentro do círculo de 280px para o canvas de 400px.
             const ratio = size / 280;
             
             ctx.fillStyle = "#000";
             ctx.fillRect(0, 0, size, size);
 
-            // Ajuste de centro
-            const offsetX = (position.x * ratio) + (size / 2) - (displayWidth * ratio / 2);
-            const offsetY = (position.y * ratio) + (size / 2) - (displayHeight * ratio / 2);
+            const offsetX = (posicao.x * ratio) + (size / 2) - (displayWidth * ratio / 2);
+            const offsetY = (posicao.y * ratio) + (size / 2) - (displayHeight * ratio / 2);
 
             ctx.drawImage(
                 img, 
@@ -80,8 +70,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, imageSrc
                 displayHeight * ratio
             );
 
-            onSave(canvas.toDataURL('image/jpeg', 0.9));
-            onClose();
+            aoSalvar(canvas.toDataURL('image/jpeg', 0.9));
+            aoFechar();
         }
     };
 
@@ -140,32 +130,32 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, imageSrc
             `}</style>
 
             <header className="flex justify-between items-center p-5 bg-[#0c0f14] border-b border-white/10">
-                <button onClick={onClose} className="text-white text-sm font-bold uppercase tracking-widest opacity-70">Cancelar</button>
+                <button onClick={aoFechar} className="text-white text-sm font-bold uppercase tracking-widest opacity-70">Cancelar</button>
                 <h2 className="text-white font-bold">Ajustar Foto</h2>
-                <button onClick={handleApply} className="text-[#00c2ff] text-sm font-bold uppercase tracking-widest">Concluir</button>
+                <button onClick={aoAplicar} className="text-[#00c2ff] text-sm font-bold uppercase tracking-widest">Concluir</button>
             </header>
 
             <div 
                 className="image-container"
                 ref={containerRef}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onTouchStart={handleMouseDown}
-                onTouchMove={handleMouseMove}
-                onTouchEnd={handleMouseUp}
+                onMouseDown={aoPressionarMouse}
+                onMouseMove={aoMoverMouse}
+                onMouseUp={aoSoltarMouse}
+                onMouseLeave={aoSoltarMouse}
+                onTouchStart={aoPressionarMouse}
+                onTouchMove={aoMoverMouse}
+                onTouchEnd={aoSoltarMouse}
             >
                 <img 
-                    ref={imageRef}
-                    src={imageSrc} 
+                    ref={imagemRef}
+                    src={imagemSrc!} 
                     className="draggable-img"
                     draggable={false}
                     style={{
-                        transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                        transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+                        transform: `translate(${posicao.x}px, ${posicao.y}px) scale(${escala})`,
+                        transition: arrastando ? 'none' : 'transform 0.1s ease-out'
                     }}
-                    alt="To crop"
+                    alt="Para cortar"
                 />
                 <div className="crop-mask"></div>
                 <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/40 text-[10px] uppercase font-bold tracking-widest pointer-events-none">
@@ -181,17 +171,17 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, imageSrc
                         min="1" 
                         max="3" 
                         step="0.01" 
-                        value={scale} 
-                        onChange={(e) => setScale(parseFloat(e.target.value))} 
+                        value={escala} 
+                        onChange={(e) => setEscala(parseFloat(e.target.value))} 
                         className="zoom-slider"
                     />
                     <i className="fa-solid fa-plus text-gray-500 text-xs"></i>
                 </div>
                 <div className="flex justify-center gap-8">
-                    <button onClick={() => setPosition({x: 0, y: 0})} className="text-gray-400 text-xs flex flex-col items-center gap-1">
+                    <button onClick={() => setPosicao({x: 0, y: 0})} className="text-gray-400 text-xs flex flex-col items-center gap-1">
                         <i className="fa-solid fa-arrows-to-dot"></i> Centralizar
                     </button>
-                    <button onClick={() => setScale(1)} className="text-gray-400 text-xs flex flex-col items-center gap-1">
+                    <button onClick={() => setEscala(1)} className="text-gray-400 text-xs flex flex-col items-center gap-1">
                         <i className="fa-solid fa-maximize"></i> Resetar Zoom
                     </button>
                 </div>
