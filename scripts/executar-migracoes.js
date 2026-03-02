@@ -82,3 +82,8 @@ export const run = async () => {
         console.log('🔌 Conexão com o banco de dados liberada.');
     }
 };
+
+run().catch(error => {
+    console.error("Falha ao executar o script de migração:", error);
+    process.exit(1);
+});

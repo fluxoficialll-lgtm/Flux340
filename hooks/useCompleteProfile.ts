@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
@@ -14,6 +15,7 @@ export const useCompleteProfile = () => {
         nickname: '',
         bio: '',
     });
+    const [isPrivate, setIsPrivate] = useState(false);
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -30,7 +32,7 @@ export const useCompleteProfile = () => {
         auditoria.decisaoRedirecionamento(user);
         if (!user) {
             navigate('/');
-        } else if (user.isProfileCompleted) { // FIX: Checa a flag correta
+        } else if (user.isProfileCompleted) {
             navigate('/feed');
         }
     }, [navigate]);
@@ -47,6 +49,10 @@ export const useCompleteProfile = () => {
         
         setFormData(prev => ({ ...prev, [name]: finalValue }));
         auditoria.alteracaoFormulario(name, finalValue);
+    };
+    
+    const handlePrivacyChange = (isPrivate: boolean) => {
+        setIsPrivate(isPrivate);
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,7 +96,7 @@ export const useCompleteProfile = () => {
             bio: formData.bio || '',
             photoUrl: '',
             website: '',
-            isPrivate: false,
+            isPrivate,
             cpf: '',
             phone: ''
         };
@@ -102,7 +108,6 @@ export const useCompleteProfile = () => {
                 profileData.photoUrl = await fileService.uploadFile(selectedFile);
             }
 
-            // authService.completeProfile agora retorna o usuário atualizado do backend
             const userAtualizado = await authService.completeProfile(profileData);
             
             auditoria.sucessoNaConclusao({ success: true });
@@ -112,7 +117,6 @@ export const useCompleteProfile = () => {
             if (userAtualizado?.isProfileCompleted) {
                 navigate('/feed');
             } else {
-                // O log 'estadoAposSalvar' vai mostrar que isProfileCompleted é false, revelando o bug.
                 alert("Não foi possível confirmar a conclusão do seu perfil. Verifique os logs.");
             }
 
@@ -138,6 +142,7 @@ export const useCompleteProfile = () => {
 
     return {
         formData, 
+        isPrivate, 
         imagePreview, 
         loading, 
         usernameError, 
@@ -147,6 +152,7 @@ export const useCompleteProfile = () => {
         handleChange, 
         handleImageChange, 
         handleCroppedImage, 
+        handlePrivacyChange, 
         handleSubmit,
         handleLogout
     };

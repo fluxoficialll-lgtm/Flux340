@@ -1,10 +1,13 @@
+
 import React, { useRef } from 'react';
 import { useCompleteProfile } from '../hooks/useCompleteProfile';
 import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
+import { Switch } from '../Componentes/ComponenteDeInterfaceDeUsuario/Switch';
 
 export const CompleteProfile: React.FC = () => {
     const {
         formData,
+        isPrivate,
         imagePreview,
         loading,
         usernameError,
@@ -14,6 +17,7 @@ export const CompleteProfile: React.FC = () => {
         handleChange,
         handleImageChange,
         handleCroppedImage,
+        handlePrivacyChange,
         handleSubmit,
         handleLogout
     } = useCompleteProfile();
@@ -61,6 +65,15 @@ export const CompleteProfile: React.FC = () => {
                         <label>Sua bio</label>
                         <textarea name="bio" value={formData.bio || ''} onChange={handleChange} placeholder="Fale um pouco sobre você" rows={2}></textarea>
                     </div>
+
+                    <div className="input-group">
+                        <Switch 
+                            label="Conta Privada" 
+                            isChecked={isPrivate} 
+                            onChange={handlePrivacyChange} 
+                        />
+                    </div>
+
                     <button type="submit" className="submit-btn" disabled={loading}>{loading ? 'Finalizando...' : 'Concluir Cadastro'}</button>
                 </form>
 
