@@ -32,8 +32,8 @@ const router = express.Router();
 // Rota de Configuração (ex: /api/v1/config/boot)
 router.use('/v1/config', rotasGestaoVariaveis);
 
-// Rotas de Autenticação (ex: /api/auth/register, /api/auth/login)
-router.use('/auth', rotasCriacaoConta);
+// Rotas de Autenticação e Usuário (ex: /register, /login, /me)
+router.use('/', rotasCriacaoConta);
 
 // Rotas de Gestão de Perfil (ex: /api/profiles/:userId)
 router.use('/profiles', rotasCriacaoPerfilFlux);
