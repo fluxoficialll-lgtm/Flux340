@@ -3,16 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { UserProfile } from '../types';
+import ServicoAuditoriaCriarPerfil from '../ServiçosFrontend/ServicoLogs/Servico.Auditoria.Criar.Perfil.js';
 
 export const useCompleteProfile = () => {
     const navigate = useNavigate();
-    
+    const auditoria = ServicoAuditoriaCriarPerfil;
+
     const [formData, setFormData] = useState<Partial<UserProfile>>({
         name: '',
         nickname: '',
         bio: '',
     });
-    
+
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
@@ -22,28 +24,35 @@ export const useCompleteProfile = () => {
     const [rawImage, setRawImage] = useState<string>('');
 
     useEffect(() => {
+        auditoria.iniciarProcesso();
         const user = authService.getCurrentUser();
+        
+        auditoria.decisaoRedirecionamento(user);
         if (!user) {
             navigate('/');
-        } else if (user.profile?.nickname) {
+        } else if (user.isProfileCompleted) { // FIX: Checa a flag correta
             navigate('/feed');
         }
     }, [navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        let finalValue = value;
+
         if (name === 'nickname') {
             const cleanValue = value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
-            setFormData(prev => ({ ...prev, [name]: cleanValue }));
+            finalValue = cleanValue;
             setUsernameError('');
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
         }
+        
+        setFormData(prev => ({ ...prev, [name]: finalValue }));
+        auditoria.alteracaoFormulario(name, finalValue);
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            auditoria.selecaoDeImagem(file.name);
             const reader = new FileReader();
             reader.onload = (ev) => {
                 setRawImage(ev.target?.result as string);
@@ -54,6 +63,7 @@ export const useCompleteProfile = () => {
     };
 
     const handleCroppedImage = (croppedBase64: string) => {
+        auditoria.imagemCortada();
         setImagePreview(croppedBase64);
         fetch(croppedBase64)
           .then(res => res.blob())
@@ -74,28 +84,40 @@ export const useCompleteProfile = () => {
 
         setLoading(true);
 
+        const profileData: UserProfile = {
+            name: formData.name || '',
+            nickname: formData.nickname || '',
+            bio: formData.bio || '',
+            photoUrl: '',
+            website: '',
+            isPrivate: false,
+            cpf: '',
+            phone: ''
+        };
+
+        auditoria.tentativaDeSubmissao(profileData);
+
         try {
-            let photoUrl: string | undefined = undefined;
             if (selectedFile) {
-                photoUrl = await fileService.uploadFile(selectedFile);
+                profileData.photoUrl = await fileService.uploadFile(selectedFile);
             }
 
-            const profileData = {
-                name: formData.name || '',
-                nickname: formData.nickname || '',
-                bio: formData.bio || '',
-                photoUrl: photoUrl,
-                website: '',
-                isPrivate: false,
-                cpf: '',
-                phone: ''
-            };
-
-            await authService.completeProfile(profileData);
+            // authService.completeProfile agora retorna o usuário atualizado do backend
+            const userAtualizado = await authService.completeProfile(profileData);
             
-            navigate('/feed');
+            auditoria.sucessoNaConclusao({ success: true });
+            auditoria.estadoAposSalvar(userAtualizado);
+            auditoria.decisaoRedirecionamento(userAtualizado);
+
+            if (userAtualizado?.isProfileCompleted) {
+                navigate('/feed');
+            } else {
+                // O log 'estadoAposSalvar' vai mostrar que isProfileCompleted é false, revelando o bug.
+                alert("Não foi possível confirmar a conclusão do seu perfil. Verifique os logs.");
+            }
 
         } catch (err: any) {
+            auditoria.falhaNaConclusao(err, profileData);
             console.error("Falha ao completar o perfil no hook 'useCompleteProfile':", err);
             
             if (err.message && err.message.includes('NAME_TAKEN')) {
@@ -109,6 +131,7 @@ export const useCompleteProfile = () => {
     };
     
     const handleLogout = () => {
+        auditoria.logout();
         authService.logout();
         navigate('/');
     };

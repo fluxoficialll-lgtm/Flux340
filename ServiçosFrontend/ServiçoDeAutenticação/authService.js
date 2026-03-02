@@ -68,23 +68,39 @@ export const authService = {
         }
 
         try {
-            const updatedProfile = await profileService.atualizarPerfil(profileData);
-
-            const currentUser = this.getCurrentUser();
-            // Combina o usuário atual com o perfil atualizado, garantindo que todos os campos estejam presentes.
-            const updatedUser = { 
-                ...currentUser, 
-                profile: { ...currentUser.profile, ...updatedProfile }
-            };
-
-            // Re-armazena a sessão com os dados do usuário atualizado.
-            storeSession(token, updatedUser);
-
+            // Atualiza o perfil no backend
+            await profileService.atualizarPerfil(profileData);
+            
+            // Busca o estado mais recente do usuário do backend e atualiza a sessão local
+            const updatedUser = await this.refreshUser();
+            
             return updatedUser;
         } catch (error) {
             console.error("Falha detalhada ao completar o perfil no authService:", error);
-            // Propaga um erro mais descritivo para a UI.
             throw new Error(`Falha ao atualizar o perfil: ${error.message}`);
+        }
+    },
+
+    async refreshUser() {
+        const token = this.getToken();
+        if (!token) return null;
+
+        try {
+            // profileService.getMyProfile() busca os dados do endpoint /api/profiles/me
+            // Assumimos que este endpoint retorna o objeto User completo e atualizado.
+            const refreshedUser = await profileService.getMyProfile(); 
+            
+            // Atualiza a sessão com o usuário "refrescado"
+            storeSession(token, refreshedUser);
+            
+            return refreshedUser;
+        } catch (error) {
+            console.error("Falha ao atualizar os dados do usuário:", error);
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                this.logout();
+            }
+            // Em caso de falha, retorna o que já temos no cache para não quebrar a UI
+            return this.getCurrentUser();
         }
     },
 
