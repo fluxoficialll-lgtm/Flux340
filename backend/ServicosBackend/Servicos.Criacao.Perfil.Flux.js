@@ -20,7 +20,6 @@ const updateProfile = async (userId, profileData, requestingUser) => {
     const auditoria = ServicoAuditoriaCriarPerfil;
     auditoria.iniciarProcesso(userId, requestingUser);
 
-    // Regra de negócio: Apenas o próprio usuário pode atualizar seu perfil.
     const temPermissao = userId === requestingUser.id;
     auditoria.validacaoDePermissao(userId, requestingUser.id, temPermissao);
     
@@ -30,20 +29,18 @@ const updateProfile = async (userId, profileData, requestingUser) => {
         throw erro;
     }
 
-    // Outras validações podem ser adicionadas aqui
-
     try {
         auditoria.tentativaDeGravacao(userId, profileData);
         
+        // Correção: capturar e retornar o resultado do repositório
         const perfilAtualizado = await repositorioCriacaoPerfil.updateProfileByUserId(userId, profileData);
         
         auditoria.sucessoNaGravacao(userId, perfilAtualizado);
 
-        return perfilAtualizado;
+        return perfilAtualizado; // Retornar o perfil atualizado
 
     } catch (error) {
         auditoria.falhaNaGravacao(userId, error, profileData);
-        // Propaga o erro para ser tratado pelo controlador
         throw error; 
     }
 };
@@ -51,7 +48,6 @@ const updateProfile = async (userId, profileData, requestingUser) => {
 const deleteProfile = async (userId, requestingUser) => {
     console.log(`Serviço: Deletando perfil para o usuário ID: ${userId}`);
 
-    // Regra de negócio: Apenas o próprio usuário pode deletar seu perfil.
     if (userId !== requestingUser.id) {
         throw new Error('Acesso negado. Você não tem permissão para deletar este perfil.');
     }
