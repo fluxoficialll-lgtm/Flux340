@@ -49,9 +49,12 @@ const deleteProfileByUserId = async (userId) => {
 };
 
 const findUserById = async (userId) => {
-    // CORREÇÃO: A coluna se chama "profile_completed" e não "perfil_completo".
-    // Esta função é usada pela auditoria para capturar o estado ANTES da alteração.
-    const query = 'SELECT id, email, profile_completed FROM users WHERE id = $1';
+    const query = `
+        SELECT u.id, u.email, up.profile_completed
+        FROM users u
+        LEFT JOIN user_profiles up ON u.id = up.user_id
+        WHERE u.id = $1;
+    `;
     try {
         const { rows } = await pool.query(query, [userId]);
         if (rows.length === 0) {

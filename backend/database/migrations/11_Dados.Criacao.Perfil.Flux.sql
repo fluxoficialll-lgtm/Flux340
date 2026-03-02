@@ -21,6 +21,7 @@ CREATE TABLE user_profiles (
     notifications_enabled BOOLEAN DEFAULT TRUE,
     last_login_at TIMESTAMPTZ,
     location TEXT, -- Adicionando a coluna de localização
+    profile_completed BOOLEAN DEFAULT FALSE, -- Adiciona a coluna para rastrear se o perfil está completo
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
