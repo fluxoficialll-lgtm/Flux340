@@ -2,27 +2,27 @@
 // backend/controles/Controles.Publicacao.Marketplace.js
 import ServicoMarketplace from '../ServicosBackend/Servicos.Publicacao.Marketplace.js';
 
-const createItem = async (req, res) => {
+const criarItem = async (req, res) => {
     try {
-        const item = await ServicoMarketplace.createItem(req.body, req.user.id);
+        const item = await ServicoMarketplace.criarItem(req.body, req.user.id);
         res.status(201).json(item);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-const getAllItems = async (req, res) => {
+const obterTodosItens = async (req, res) => {
     try {
-        const items = await ServicoMarketplace.getAllItems(req.query);
+        const items = await ServicoMarketplace.obterTodosItens(req.query);
         res.status(200).json(items);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-const getItemById = async (req, res) => {
+const obterItemPorId = async (req, res) => {
     try {
-        const item = await ServicoMarketplace.getItemById(req.params.itemId);
+        const item = await ServicoMarketplace.obterItemPorId(req.params.itemId);
         if (!item) {
             return res.status(404).json({ message: 'Item não encontrado.' });
         }
@@ -32,18 +32,18 @@ const getItemById = async (req, res) => {
     }
 };
 
-const updateItem = async (req, res) => {
+const atualizarItem = async (req, res) => {
     try {
-        const updatedItem = await ServicoMarketplace.updateItem(req.params.itemId, req.body, req.user.id);
+        const updatedItem = await ServicoMarketplace.atualizarItem(req.params.itemId, req.body, req.user.id);
         res.status(200).json(updatedItem);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-const deleteItem = async (req, res) => {
+const deletarItem = async (req, res) => {
     try {
-        await ServicoMarketplace.deleteItem(req.params.itemId, req.user.id);
+        await ServicoMarketplace.deletarItem(req.params.itemId, req.user.id);
         res.status(204).send();
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -51,9 +51,9 @@ const deleteItem = async (req, res) => {
 };
 
 export default {
-    createItem,
-    getAllItems,
-    getItemById,
-    updateItem,
-    deleteItem
+    criarItem,
+    obterTodosItens,
+    obterItemPorId,
+    atualizarItem,
+    deletarItem
 };

@@ -3,14 +3,14 @@
 import RepositorioMarketplace from '../Repositorios/Repositorio.Publicacao.Marketplace.js';
 
 // Função auxiliar para verificar permissões do usuário
-const checkPermissions = (userId, item) => {
+const verificarPermissoes = (userId, item) => {
     if (!item || !item.user_id) {
         throw new Error('Dados do item incompletos para verificação de permissão.');
     }
     return item.user_id === userId;
 };
 
-const createItem = async (itemData, userId) => {
+const criarItem = async (itemData, userId) => {
     // Lógica de negócio: validar dados essenciais antes de criar
     if (!itemData.title || !itemData.price || !itemData.category) {
         throw new Error('Título, preço e categoria são obrigatórios.');
@@ -19,62 +19,62 @@ const createItem = async (itemData, userId) => {
     const fullItemData = { ...itemData, user_id: userId };
     
     // Chama o repositório para criar o item
-    return RepositorioMarketplace.createItem(fullItemData);
+    return RepositorioMarketplace.criarItem(fullItemData);
 };
 
-const getAllItems = async (options) => {
+const obterTodosItens = async (options) => {
     // Lógica de negócio: definir filtros/padrões para a busca
     const searchOptions = { limit: 20, offset: 0, ...options };
-    return RepositorioMarketplace.findAllItems(searchOptions);
+    return RepositorioMarketplace.encontrarTodosItens(searchOptions);
 };
 
-const getItemById = async (itemId) => {
+const obterItemPorId = async (itemId) => {
     if (!itemId || isNaN(parseInt(itemId))) {
         throw new Error('ID do item inválido.');
     }
-    return RepositorioMarketplace.findItemById(itemId);
+    return RepositorioMarketplace.encontrarItemPorId(itemId);
 };
 
-const updateItem = async (itemId, updates, userId) => {
+const atualizarItem = async (itemId, updates, userId) => {
     if (!itemId || isNaN(parseInt(itemId))) {
         throw new Error('ID do item inválido para atualização.');
     }
     
-    const item = await RepositorioMarketplace.findItemById(itemId);
+    const item = await RepositorioMarketplace.encontrarItemPorId(itemId);
     if (!item) {
         throw new Error('Item não encontrado.');
     }
 
     // Lógica de negócio: verificar permissão antes de atualizar
-    if (!checkPermissions(userId, item)) {
+    if (!verificarPermissoes(userId, item)) {
         throw new Error('Você não tem permissão para editar este item.');
     }
 
-    return RepositorioMarketplace.updateItem(itemId, updates);
+    return RepositorioMarketplace.atualizarItem(itemId, updates);
 };
 
-const deleteItem = async (itemId, userId) => {
+const deletarItem = async (itemId, userId) => {
     if (!itemId || isNaN(parseInt(itemId))) {
         throw new Error('ID do item inválido para exclusão.');
     }
 
-    const item = await RepositorioMarketplace.findItemById(itemId);
+    const item = await RepositorioMarketplace.encontrarItemPorId(itemId);
     if (!item) {
         throw new Error('Item não encontrado.');
     }
 
     // Lógica de negócio: verificar permissão antes de deletar
-    if (!checkPermissions(userId, item)) {
+    if (!verificarPermissoes(userId, item)) {
         throw new Error('Você não tem permissão para deletar este item.');
     }
 
-    await RepositorioMarketplace.deleteItem(itemId);
+    await RepositorioMarketplace.deletarItem(itemId);
 };
 
 export default {
-    createItem,
-    getAllItems,
-    getItemById,
-    updateItem,
-    deleteItem
+    criarItem,
+    obterTodosItens,
+    obterItemPorId,
+    atualizarItem,
+    deletarItem
 };

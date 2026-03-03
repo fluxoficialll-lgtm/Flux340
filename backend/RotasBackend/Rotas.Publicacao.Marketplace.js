@@ -12,38 +12,38 @@ const router = express.Router();
 // @route   POST /
 // @desc    Criar um novo item no marketplace
 // @access  Private
-router.post('/', authMiddleware, marketplaceControle.createItem);
+router.post('/', authMiddleware, marketplaceControle.criarItem);
 
 // @route   GET /
 // @desc    Obter todos os itens do marketplace
 // @access  Public
-router.get('/', marketplaceControle.getAllItems);
+router.get('/', marketplaceControle.obterTodosItens);
 
 // @route   GET /:itemId
 // @desc    Obter um item específico do marketplace
 // @access  Public
-router.get('/:itemId', marketplaceControle.getItemById);
+router.get('/:itemId', marketplaceControle.obterItemPorId);
 
 // @route   PUT /:itemId
 // @desc    Atualizar um item do marketplace
 // @access  Private
-router.put('/:itemId', authMiddleware, marketplaceControle.updateItem);
+router.put('/:itemId', authMiddleware, marketplaceControle.atualizarItem);
 
 // @route   DELETE /:itemId
 // @desc    Deletar um item do marketplace
 // @access  Private
-router.delete('/:itemId', authMiddleware, marketplaceControle.deleteItem);
+router.delete('/:itemId', authMiddleware, marketplaceControle.deletarItem);
 
 // --- Rotas de Comentários Aninhados ---
 
 // @route   POST /:itemId/comments
 // @desc    Adicionar um comentário a um item do marketplace
 // @access  Private
-router.post('/:itemId/comments', authMiddleware, comentariosMarketplaceControle.createCommentForItem);
+router.post('/:itemId/comments', authMiddleware, comentariosMarketplaceControle.criarComentario);
 
 // @route   GET /:itemId/comments
 // @desc    Buscar todos os comentários de um item do marketplace
 // @access  Public
-router.get('/:itemId/comments', comentariosMarketplaceControle.getCommentsByItemId);
+router.get('/:itemId/comments', comentariosMarketplaceControle.obterComentariosPorItemId);
 
 export default router;
