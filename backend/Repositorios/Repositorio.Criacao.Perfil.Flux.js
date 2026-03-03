@@ -27,7 +27,7 @@ const PossibilidadeDeletarPerfilPorIdUsuario = async (userId) => {
 // CORREÇÃO: Expondo a nova função para que o controlador possa usá-la.
 const PossibilidadeBuscarUsuarioPorId = async (userId) => {
     console.log(`Repositório: Buscando usuário (para auditoria) com ID: ${userId}`);
-    return await consultas.ConsultarUsuarioPorId(userId);
+    return await consultas.ConsultarPerfilPorIdUsuario(userId);
 };
 
 const repositorioCriacaoPerfil = {
