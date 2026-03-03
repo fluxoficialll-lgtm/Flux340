@@ -8,11 +8,11 @@ const router = express.Router();
 // @route   PUT /:commentId
 // @desc    Atualizar um comentário específico do feed
 // @access  Private
-router.put('/:commentId', authMiddleware, comentariosController.updateComment);
+router.put('/:commentId', authMiddleware, comentariosController.atualizarComentario);
 
 // @route   DELETE /:commentId
 // @desc    Deletar um comentário específico do feed
 // @access  Private
-router.delete('/:commentId', authMiddleware, comentariosController.deleteComment);
+router.delete('/:commentId', authMiddleware, comentariosController.deletarComentario);
 
 export default router;
