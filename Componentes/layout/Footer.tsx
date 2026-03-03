@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { servicoDeSimulacao } from '../../ServiçosFrontend/ServiçoDeSimulação';
+
+// A importação do serviço de simulação foi removida para estabilizar o componente.
 
 interface FooterProps {
     visible?: boolean;
@@ -13,19 +14,14 @@ export const Footer: React.FC<FooterProps> = ({ visible = true }) => {
     const [unreadNotifs, setUnreadNotifs] = useState(0);
     const [unreadMsgs, setUnreadMsgs] = useState(0);
 
+    // A função volta a ter a sua responsabilidade original: buscar dados reais.
     const updateCounts = useCallback(async () => {
         const { notificationService } = await import('../../ServiçosFrontend/ServiçoDeNotificação/notificationService.js');
         const { chatService } = await import('../../ServiçosFrontend/ServiçoDeChat/chatService.js');
-        const { authService } = await import('../../ServiçosFrontend/ServiçoDeAutenticação/authService.js');
-        const { groupService } = await import('../../ServiçosFrontend/ServiçoDeGrupos/groupService.js');
 
         try {
             const notifCount = await notificationService.getUnreadCount();
             const msgCount = await chatService.getUnreadCount();
-            // Adicione chamadas para outros serviços se necessário, por exemplo:
-            // const authCount = await authService.getUnreadCount();
-            // const groupCount = await groupService.getUnreadCount();
-
             setUnreadNotifs(notifCount);
             setUnreadMsgs(msgCount);
         } catch (error) {
@@ -36,12 +32,13 @@ export const Footer: React.FC<FooterProps> = ({ visible = true }) => {
     useEffect(() => {
         updateCounts();
         
-        const unsubNotif = servicoDeSimulacao.subscribe('notifications', updateCounts);
-        const unsubChat = servicoDeSimulacao.subscribe('chats', updateCounts);
-        
+        // A lógica de "subscribe" foi removida. Idealmente, a atualização
+        // de contagens seria tratada por um sistema de eventos global ou WebSockets.
+        // Por enquanto, um polling simples pode ser uma alternativa, se necessário.
+        const interval = setInterval(updateCounts, 30000); // Exemplo: atualiza a cada 30 segundos
+
         return () => {
-            unsubNotif();
-            unsubChat();
+            clearInterval(interval);
         };
     }, [updateCounts]);
 

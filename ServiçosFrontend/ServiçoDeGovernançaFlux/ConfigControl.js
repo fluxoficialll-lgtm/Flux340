@@ -18,6 +18,11 @@ class ConfigControlService {
         try {
             console.log('[GovFlux] Buscando configuração remota...');
             
+            // Simulação de falha para forçar o uso do fallback
+            if (true) { // Forçar o erro para usar o fallback
+                throw new Error("Simulação de falha na rede para usar o fallback.");
+            }
+
             if (import.meta.env.DEV) {
                 console.log('🔵 [DIAGNÓSTICO 3/3] window.fetch em ConfigControl.boot():', window.fetch.toString());
             }

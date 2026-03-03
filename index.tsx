@@ -7,16 +7,15 @@ import './ServiçosFrontend/ServiçoDeSegurançaDeConteúdo/i18n.js';
 import { initAuditorDeRequisições } from './ServiçosFrontend/ServiçoDeTelemetria/AuditorDeRequisições.js';
 import { loadEnvironment } from './ServiçosFrontend/ValidaçãoDeAmbiente/config.ts';
 import MonitorDeErrosDeInterface from './Componentes/ComponentesDePrevençãoDeErros/MonitorDeErrosDeInterface.jsx';
-import { ControleDeSimulacao } from './ServiçosFrontend/ServiçoDeSimulação/ControleDeSimulacao.js';
+import { ControleDeSimulacao } from './ServiçosFrontend/ServiçoDeSimulação/ControleDeSimulacao.ts';
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuditorDeRequisições();
 
-  if (import.meta.env.DEV) {
-    ControleDeSimulacao.ativarSimulacao();
-    // PONTO DE CONTROLO 1: Confirma que a simulação foi ativada.
-    console.log('🔵 [DIAGNÓSTICO 1/3] window.fetch em index.tsx:', window.fetch.toString());
-  }
+  // if (import.meta.env.DEV) {
+  //   ControleDeSimulacao.ativarSimulacao();
+  //   console.log('🔵 [DIAGNÓSTICO 1/3] window.fetch em index.tsx:', window.fetch.toString());
+  // }
 
   loadEnvironment();
 

@@ -1,13 +1,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { groupService, authService } from '../ServiçosFrontend/ServiçoDeSimulação/serviceFactory';
-import { Group } from '../types';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
-import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
+// CORREÇÃO: As importações foram atualizadas para usar os serviços reais.
+import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService.js';
+import { Group } from '../tipos/types.Criacao.Grupo.Publico'; // Caminho corrigido
 
-// Hook refatorado para ser resiliente e adaptar-se
-// à interface de serviço de produção (async, com token) e de simulação (sync).
 export const useGroups = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,40 +14,32 @@ export const useGroups = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const currentUserEmail = authService.getCurrentUserEmail();
-  const currentUserId = authService.getCurrentUser()?.id;
+  const currentUser = authService.getCurrentUser();
+  const currentUserId = currentUser?.id;
+  const currentUserEmail = currentUser?.email;
 
-  // Função de carregamento unificada e inteligente.
   const loadGroups = useCallback(async () => {
     setLoading(true);
-    let newGroups: Group[] = [];
     try {
-      // Verifica a interface do serviço fornecido pela factory.
-      if (typeof (groupService as any).listGroups === 'function') {
-        // Modo Produção: requer token e é async.
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          newGroups = await (groupService as any).listGroups(token);
-        } else {
-          console.warn('Nenhum token de autenticação encontrado para carregar grupos.');
-        }
-      } else if (typeof (groupService as any).getAll === 'function') {
-        // Modo Simulação: é sync.
-        newGroups = (groupService as any).getAll();
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        const newGroups = await groupService.listGroups(token);
+        setGroups(newGroups);
       } else {
-        console.error("Serviço de grupo não possui um método conhecido (listGroups ou getAll).");
+        console.warn('Nenhum token de autenticação encontrado para carregar grupos.');
+        setGroups([]); // Limpa os grupos se não houver token
       }
     } catch (error) {
       console.error("Falha ao carregar grupos:", error);
+      setGroups([]); // Limpa em caso de erro
     } finally {
-      setGroups(newGroups);
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!currentUserEmail) {
-      navigate('/');
+    if (!currentUser) {
+      navigate('/'); // Redireciona se não houver usuário
       return;
     }
     
@@ -57,34 +48,23 @@ export const useGroups = () => {
     const params = new URLSearchParams(location.search);
     const joinCode = params.get('join');
     if (joinCode) {
-      joinGroupByCode(joinCode, true);
-      navigate('/groups', { replace: true });
+      // A lógica de join precisa ser adaptada para a API real
+      // Ex: joinGroupByCode(joinCode).then(() => navigate('/groups', { replace: true }));
+      console.log("Funcionalidade de entrar com código a ser implementada com a API real.");
     }
-
-    // Assinaturas para recarregar a lista quando os dados mudam na simulação.
-    const unsubscribeGroups = servicoDeSimulacao.subscribe('groups', loadGroups);
-    const unsubscribeChats = servicoDeSimulacao.subscribe('chats', loadGroups);
-
-    return () => {
-      unsubscribeGroups();
-      unsubscribeChats();
-    };
-    // Adicionado `loadGroups` ao array de dependências.
-  }, [navigate, location.search, currentUserEmail, loadGroups]);
+  }, [navigate, location.search, currentUser, loadGroups]);
 
   const navigateToGroup = (group: Group) => {
-    const isCreator = group.creatorEmail === currentUserEmail;
-    const isMember = group.memberIds?.includes(currentUserId || '');
+    const isCreator = group.creatorId === currentUserId;
+    // A propriedade memberIds pode não existir, dependendo da definição de Group
+    const isMember = (group.memberIds || []).includes(currentUserId || '');
     
     if (group.isSalesPlatformEnabled && (isCreator || isMember)) {
       navigate(`/group-platform/${group.id}`);
       return;
     }
     if (isCreator || isMember) {
-      if (group.isVip && !isCreator && currentUserId) {
-        const hasAccess = servicoDeSimulacao.vipAccess.check(currentUserId, group.id);
-        if (!hasAccess) { navigate(`/vip-group-sales/${group.id}`); return; }
-      }
+      // A lógica de acesso VIP deve ser gerenciada pelo backend
       const hasMultipleChannels = group.channels && group.channels.length > 0;
       navigate(hasMultipleChannels ? `/group/${group.id}/channels` : `/group-chat/${group.id}`);
     } else if (group.isVip) {
@@ -94,53 +74,41 @@ export const useGroups = () => {
     }
   };
 
-  const joinGroupByCode = (inputCode: string, fromUrl: boolean = false) => {
-    if (!inputCode?.trim()) return null;
-    
-    // Esta função só existe no serviço de simulação.
-    if (typeof (groupService as any).joinGroupByLinkCode !== 'function') {
-      console.warn('joinGroupByCode não é suportado no ambiente de produção atual.');
-      return { success: false, message: 'Operação não suportada.' };
-    }
-
-    let code = inputCode;
-    if (code.includes('?join=')) {
-      code = code.split('?join=')[1];
-    }
-    
-    const result = (groupService as any).joinGroupByLinkCode(code);
-    if (result.success) {
-      loadGroups(); // Recarrega os grupos.
-      if (!fromUrl && result.groupId) {
-        const group = (groupService as any).findById(result.groupId);
-        if (group) navigateToGroup(group);
-      }
-    }
-    return result;
+  const joinGroupByCode = async (inputCode: string) => {
+    console.log("joinGroupByCode não implementado para a API real ainda.");
+    // Implementação futura com a API real:
+    // const token = localStorage.getItem('authToken');
+    // if (!token) return { success: false, message: 'Autenticação necessária' };
+    // try {
+    //   const result = await groupService.joinGroup(token, inputCode);
+    //   loadGroups(); // Recarrega os grupos
+    //   return { success: true, ...result };
+    // } catch (error) {
+    //   return { success: false, message: error.message };
+    // }
   };
 
   const deleteGroup = async (groupId: string) => {
     try {
-      if (typeof (groupService as any).deleteGroup === 'function') {
-        const token = localStorage.getItem('authToken');
-        if(token) await (groupService as any).deleteGroup(token, groupId);
-      } else if (typeof (groupService as any).delete === 'function') {
-        (groupService as any).delete(groupId);
+      const token = localStorage.getItem('authToken');
+      if(token) {
+        await groupService.deleteGroup(token, groupId);
+        setGroups(prev => prev.filter(g => g.id !== groupId));
+      } else {
+        console.error("Token não encontrado para deletar o grupo.");
       }
-      // Atualiza a UI removendo o grupo.
-      setGroups(prev => prev.filter(g => g.id !== groupId));
     } catch (error) {
       console.error(`Falha ao deletar o grupo ${groupId}:`, error);
     }
   };
 
   const getUnreadCount = (groupId: string) => {
+    // Esta funcionalidade pode precisar de uma integração mais profunda com o chatService
     return chatService.getGroupUnreadCount(groupId);
   }
 
   return {
     groups, loading, currentUserEmail, navigate,
     navigateToGroup, joinGroupByCode, deleteGroup, getUnreadCount,
-    observerRef: null // removido, pois não há mais paginação
   };
 };

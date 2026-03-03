@@ -1,7 +1,9 @@
 
+// ServiçosFrontend/ServiçoDeSimulação/simulacoes/SimulacaoDeFeed.ts
 import { Post, PollOption } from '../../../types';
 
-const todosOsPostsSimulados: Post[] = Array.from({ length: 50 }, (_, i) => criarPostSimulado(i + 1));
+// --- LÓGICA DE GERAÇÃO DE DADOS INTEGRADA ---
+// A simulação agora é autônoma e não depende de arquivos externos.
 
 function criarPostSimulado(id: number): Post {
     const nomes = ['Alice', 'Beto', 'Carla', 'Daniel', 'Eva', 'Fernanda', 'Gabriel'];
@@ -32,7 +34,7 @@ function criarPostSimulado(id: number): Post {
         id: `mock_${id}`,
         username: nomes[index],
         avatar: avatares[index],
-        authorId: userIds[index], // ID do autor consistente
+        authorId: userIds[index],
         authorEmail: `${nomes[index].toLowerCase()}@email.com`,
         timestamp: new Date(Date.now() - id * 3600000).toISOString(),
         text: conteudos[index],
@@ -51,7 +53,7 @@ function criarPostSimulado(id: number): Post {
         ctaLink: null,
         ctaText: null,
         relatedGroupId: null,
-        type: 'text' // Default type
+        type: 'text'
     };
 
     switch (postType) {
@@ -63,8 +65,12 @@ function criarPostSimulado(id: number): Post {
     }
 }
 
-const handleFeedSimulado = (urlObj: URL): Promise<Response> => {
-    console.log('[SIMULAÇÃO] ✅ Retornando mock para: GET /api/posts');
+const todosOsPostsSimulados: Post[] = Array.from({ length: 50 }, (_, i) => criarPostSimulado(i + 1));
+
+// --- HANDLERS DA API SIMULADA ---
+
+export const handleFeedSimulado = (urlObj: URL): Promise<Response> => {
+    console.log(`[SIMULAÇÃO] ✅ Retornando mock para: GET /api/feed`);
     const cursor = parseInt(urlObj.searchParams.get('cursor') || '0', 10);
     const limit = parseInt(urlObj.searchParams.get('limit') || '10', 10);
     const postsData: Post[] = todosOsPostsSimulados.slice(cursor, cursor + limit);
@@ -72,7 +78,7 @@ const handleFeedSimulado = (urlObj: URL): Promise<Response> => {
     return Promise.resolve(new Response(JSON.stringify({ data: postsData, nextCursor }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
 };
 
-const handlePostDetailsSimulado = (url: URL): Promise<Response> => {
+export const handlePostDetailsSimulado = (url: URL): Promise<Response> => {
     const postId = url.pathname.split('/').pop();
     console.log(`[SIMULAÇÃO] ✅ Retornando mock para detalhes do post: ${postId}`);
     const post = todosOsPostsSimulados.find(p => p.id === postId);
@@ -84,55 +90,12 @@ const handlePostDetailsSimulado = (url: URL): Promise<Response> => {
     }
 };
 
-
 export const handleUserPostsSimulado = (url: URL): Promise<Response> => {
     const userIdMatch = url.pathname.match(/api\/users\/(.*?)\/posts/);
     if (!userIdMatch) return Promise.resolve(new Response(JSON.stringify({ message: 'ID de usuário não encontrado na URL' }), { status: 400 }));
     
     const userId = userIdMatch[1];
     console.log(`[SIMULAÇÃO] ✅ Retornando mock para posts do usuário: ${userId}`);
-
     const userPosts = todosOsPostsSimulados.filter(p => p.authorId === userId);
-
-    return Promise.resolve(new Response(JSON.stringify({ data: userPosts }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-    }));
-};
-
-export const feedHandlers: Record<string, (url: URL, config?: RequestInit) => Promise<Response>> = {
-    '/api/posts': handleFeedSimulado,
-    '/api/posts/:id': handlePostDetailsSimulado,
-};
-
-export const mockPostService = {
-    async listPosts(token: string | null, { limit, cursor }: { limit: number; cursor?: number | null }): Promise<{ data: Post[]; nextCursor: number | null; }> {
-        console.log('[SIMULAÇÃO] ✅ Retornando mock para: GET /api/posts via mockPostService');
-        const numericCursor = cursor || 0;
-        const postsData = todosOsPostsSimulados.slice(numericCursor, numericCursor + limit);
-        const nextCursor = (numericCursor + limit < todosOsPostsSimulados.length) ? numericCursor + limit : null;
-        return Promise.resolve({ data: postsData, nextCursor });
-    },
-
-    async getPostById(token: string, postId: string): Promise<Post> {
-        console.log(`[SIMULAÇÃO] ✅ Retornando mock para detalhes do post: ${postId} via mockPostService`);
-        const post = todosOsPostsSimulados.find(p => p.id === postId);
-        if (post) {
-            return Promise.resolve(post);
-        } else {
-            return Promise.reject(new Error('Post não encontrado'));
-        }
-    },
-
-    async getUserPosts(userId: string): Promise<Post[]> { // FUNÇÃO ADICIONADA
-        console.log(`[SIMULAÇÃO] ✅ Retornando mock para posts do usuário: ${userId} via mockPostService`);
-        const userPosts = todosOsPostsSimulados.filter(p => p.authorId === userId);
-        return Promise.resolve(userPosts);
-    },
-
-    async incrementView(postId: string): Promise<void> { console.log(`[SIMULAÇÃO] ✅ View incrementada para post: ${postId}`); return Promise.resolve(); },
-    async deletePost(id: string): Promise<void> { console.log(`[SIMULAÇÃO] ✅ Post deletado: ${id}`); return Promise.resolve(); },
-    async toggleLike(id: string): Promise<void> { console.log(`[SIMULAÇÃO] ✅ Like alterado para post: ${id}`); return Promise.resolve(); },
-    async voteOnPoll(postId: string, index: number): Promise<void> { console.log(`[SIMULAÇÃO] ✅ Voto na enquete: Post ${postId}, Opção ${index}`); return Promise.resolve(); },
-    async incrementShare(id: string): Promise<void> { console.log(`[SIMULAÇÃO] ✅ Compartilhamento incrementado para post: ${id}`); return Promise.resolve(); },
+    return Promise.resolve(new Response(JSON.stringify({ data: userPosts }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
 };

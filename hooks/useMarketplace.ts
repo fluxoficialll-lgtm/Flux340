@@ -34,7 +34,11 @@ export const useMarketplace = () => {
         setCurrentUserEmail(email);
         loadItems();
         marketplaceService.fetchItems().catch(err => console.warn("Marketplace sync failed", err));
-        const unsubscribe = servicoDeSimulacao.subscribe('marketplace', () => { loadItems(); });
+        
+        // CORREÇÃO: A chamada a subscribe foi ajustada para passar apenas a função de callback,
+        // alinhando com a assinatura correta do método em ControleDeSimulacao.
+        const unsubscribe = servicoDeSimulacao.subscribe(() => { loadItems(); });
+        
         return () => unsubscribe();
     }, [loadItems]);
 

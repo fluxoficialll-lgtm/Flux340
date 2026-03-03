@@ -1,36 +1,9 @@
 
-import { sqlite } from './cache/engine';
-import { initializeCache } from './cache/OrquestradorDeCacheMock';
-import * as gestores from './gestores';
+import { ControleDeSimulacao } from './ControleDeSimulacao';
 
-const CHAVE_ARMAZENAMENTO_ID_SESSAO = 'app_current_user_id';
-
-class FachadaDeSimulacao {
-    public users = gestores.userManager;
-    public posts = gestores.postManager;
-    public groups = gestores.groupManager;
-    public chats = gestores.chatManager;
-    public notifications = gestores.notificationManager;
-    public relationships = gestores.relationshipManager;
-    
-    private fin = gestores.financialManager;
-    public vipAccess = this.fin.vip;
-    public marketplace = this.fin.marketplace;
-    public ads = this.fin.ads;
-
-    constructor() {
-        initializeCache();
-    }
-
-    public subscribe = (table: any, cb: () => void) => sqlite.subscribe(table, cb);
-
-    public auth = {
-        currentUserId: () => localStorage.getItem(CHAVE_ARMAZENAMENTO_ID_SESSAO),
-        setCurrentUserId: (id: string) => localStorage.setItem(CHAVE_ARMAZENAMENTO_ID_SESSAO, id),
-        clearSession: () => {
-            localStorage.removeItem(CHAVE_ARMAZENAMENTO_ID_SESSAO);
-        }
-    };
-}
-
-export const servicoDeSimulacao = new FachadaDeSimulacao();
+/**
+ * Exporta a instância única do ControleDeSimulacao como o serviço de simulação padrão.
+ * Isso garante que toda a aplicação use a mesma instância do orquestrador de simulação,
+ * resolvendo o erro de "subscribe is not a function" e unificando o controle.
+ */
+export const servicoDeSimulacao = ControleDeSimulacao;

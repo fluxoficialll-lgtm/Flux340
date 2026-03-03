@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { authService } from '../ServiçosFrontend/ServiçoDeSimulação/serviceFactory';
-import { User } from '../types';
+// CORREÇÃO: A importação foi atualizada para usar o serviço de autenticação real.
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import { User } from '../tipos/types.Usuario'; // Caminho corrigido para o tipo User
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(() => authService.getCurrentUser());

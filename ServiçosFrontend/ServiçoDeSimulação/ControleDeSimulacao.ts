@@ -1,47 +1,55 @@
 
 // --- CONTROLE CENTRAL DE SIMULAÇÃO (ORQUESTRADOR) ---
 
-import { feedHandlers, handleUserPostsSimulado } from './simulacoes/SimulacaoDeFeed';
+import { handleFeedSimulado, handleUserPostsSimulado, handlePostDetailsSimulado } from './simulacoes/SimulacaoDeFeed';
 import { authHandlers, ServicoAutenticacaoMock } from './simulacoes/SimulacaoDeAuth';
-import { servicoDeSimulacao } from './index';
+import { handleGetProfile, handleFollowProfile, handleProfileMe } from './simulacoes/Simulacao.Perfil.Flux';
 import { simulacaoDeMarketplace } from './simulacoes/SimulacaoDeMarketplace';
-import { MarketplaceItem } from '../../types';
 
+// --- CONFIGURAÇÃO DOS HANDLERS ---
 const configBootHandler = (urlObj: URL): Promise<Response> => {
     console.log('[SIMULAÇÃO] ✅ Retornando mock para: GET /api/v1/config/boot');
     return Promise.resolve(new Response(JSON.stringify({ maintenanceMode: false, ambiente: 'local-simulado' }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
 };
 
+const handleMarketplaceSimulado = (): Promise<Response> => {
+    console.log('[SIMULAÇÃO] ✅ Retornando mock para: GET /api/marketplace');
+    const items = simulacaoDeMarketplace();
+    return Promise.resolve(new Response(JSON.stringify(items), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+};
+
 const staticHandlers: Record<string, (url: URL, config?: RequestInit) => Promise<Response>> = {
-    ...feedHandlers,
     ...authHandlers,
     '/api/v1/config/boot': configBootHandler,
 };
 
-const dynamicHandlers: { regex: RegExp; handler: (url: URL, config?: RequestInit) => Promise<Response> }[] = [
+const dynamicHandlers: { regex: RegExp; handler: (url: URL, config?: RequestInit) => Promise<any> }[] = [
+    { regex: /^\/api\/feed\/?$/, handler: handleFeedSimulado },
     { regex: /\/api\/users\/(.*?)\/posts/, handler: handleUserPostsSimulado },
+    { regex: /^\/api\/profiles\/me\/?$/, handler: handleProfileMe }, // Rota /me movida para dinâmico
+    { regex: /^\/api\/profiles\/([^/]+)\/follow$/, handler: handleFollowProfile },
+    { regex: /^\/api\/profiles\/([^/]+)$/, handler: handleGetProfile },
+    { regex: /^\/api\/feed\/([^/]+)$/, handler: handlePostDetailsSimulado },
+    { regex: /^\/api\/marketplace\/?$/, handler: handleMarketplaceSimulado },
 ];
 
+// --- ESTADO E CONTROLE DA SIMULAÇÃO ---
 let mockModeAtivado = false;
+// CORREÇÃO: Garante que o `fetch` original mantenha o contexto `window` correto.
+const originalFetch = window.fetch.bind(window);
+const listeners = new Set<(isMockMode: boolean) => void>();
 
-const popularDadosDeSimulacao = () => {
-    console.log('[SIMULAÇÃO] Populando a cache com dados de simulação...');
-    const marketplaceItems = simulacaoDeMarketplace();
-    marketplaceItems.forEach(item => {
-        servicoDeSimulacao.marketplace.add(item as unknown as MarketplaceItem);
-    });
-    console.log(`[SIMULAÇÃO] ✅ ${marketplaceItems.length} itens de marketplace adicionados à cache.`);
+const notify = () => {
+  listeners.forEach(listener => listener(mockModeAtivado));
 };
 
 const loginUsuarioSimulado = () => {
     if (!ServicoAutenticacaoMock.isAuthenticated()) {
-        console.log('[SIMULAÇÃO] Nenhum usuário autenticado. Logando usuário mock padrão...');
-        ServicoAutenticacaoMock.login('mock@user.com');
-    } else {
-        console.log('[SIMULAÇÃO] Usuário mock já está autenticado.');
+        ServicoAutenticacaoMock.login('mock@user.com', 'password123');
     }
 };
 
+// --- CLASSE DE CONTROLE DE SIMULAÇÃO ---
 class SimulationControl {
     isMockMode(): boolean {
         return mockModeAtivado;
@@ -54,37 +62,42 @@ class SimulationControl {
         console.warn('***********************************************************');
         console.warn('** MODO DE SIMULAÇÃO ATIVADO. API REAL DESABILITADA. **');
         console.warn('***********************************************************');
-        
-        loginUsuarioSimulado();
-        popularDadosDeSimulacao();
 
-        const originalFetch = window.fetch;
+        loginUsuarioSimulado();
+        notify();
 
         window.fetch = async (url: RequestInfo | URL, config?: RequestInit): Promise<Response> => {
             const urlObj = new URL(url.toString(), window.location.origin);
-            
-            let handler = staticHandlers[urlObj.pathname];
+            const path = urlObj.pathname;
 
-            if (!handler) {
-                const dynamicMatch = dynamicHandlers.find(h => h.regex.test(urlObj.pathname));
-                if (dynamicMatch) {
-                    handler = dynamicMatch.handler;
+            const staticHandler = staticHandlers[path];
+            if (staticHandler) {
+                 return staticHandler(urlObj, config);
+            }
+
+            for (const dynamic of dynamicHandlers) {
+                if (dynamic.regex.test(path)) {
+                    return dynamic.handler(urlObj, config);
                 }
             }
-
-            if (handler) {
-                console.log(`[SIMULAÇÃO] Interceptado: ${config?.method || 'GET'} ${urlObj.pathname}`);
-                return handler(urlObj, config);
-            }
-
-            console.error(`[SIMULAÇÃO] ❌ ERRO: Requisição para "${urlObj.pathname}" não foi simulada.`);
-            console.error('[SIMULAÇÃO] 💡 Para corrigir, adicione um handler para esta URL no ficheiro de simulação apropriado.');
-
-            return Promise.resolve(new Response(
-                JSON.stringify({ error: 'Endpoint não simulado', message: `A requisição para ${urlObj.pathname} foi interceptada, mas não há um mock para ela.` }),
-                { status: 404, statusText: 'Not Found (Mock Missing)', headers: { 'Content-Type': 'application/json' } }
-            ));
+            
+            // CORREÇÃO: Se nenhum handler for encontrado, executa a chamada de rede real.
+            console.warn(`[SIMULAÇÃO] 🟡 Handler não encontrado para "${path}". Usando fetch real.`);
+            return originalFetch(url, config);
         };
+    }
+
+    desativarSimulacao(): void {
+        if (!mockModeAtivado) return;
+        mockModeAtivado = false;
+        window.fetch = originalFetch;
+        notify();
+    }
+
+    subscribe(listener: (isMockMode: boolean) => void): () => void {
+        listeners.add(listener);
+        listener(mockModeAtivado);
+        return () => listeners.delete(listener);
     }
 }
 

@@ -4,7 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { MainHeader } from '../layout/MainHeader';
 import { Settings, Trophy } from 'lucide-react';
 
-export const CabecalhoPerfil = () => {
+interface CabecalhoPerfilProps {
+    username: string;
+}
+
+export const CabecalhoPerfil: React.FC<CabecalhoPerfilProps> = ({ username }) => {
     const navigate = useNavigate();
 
     const handleSettingsClick = () => {
@@ -22,6 +26,7 @@ export const CabecalhoPerfil = () => {
                     <Trophy size={24} color="#00c2ff" />
                 </button>
             }
+            centerContent={<h1 className="text-lg font-bold text-white">{username}</h1>}
             rightContent={
                 <button onClick={handleSettingsClick} className="p-2 rounded-full hover:bg-white/10">
                     <Settings size={24} color="#00c2ff" />

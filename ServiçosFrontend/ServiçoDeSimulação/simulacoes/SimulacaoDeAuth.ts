@@ -1,127 +1,66 @@
 
-import { User, AuthResponse } from '../../../types';
+// --- SIMULAÇÃO DO SERVIÇO DE AUTENTICAÇÃO ---
 
-const USER_KEY = 'currentUser';
-const TOKEN_KEY = 'authToken';
+import { User } from "../../../types";
 
-const dispatchAuthChange = () => {
-    window.dispatchEvent(new CustomEvent('authChange'));
+// --- ESTADO DA SIMULAÇÃO ---
+const mockUser: User = {
+    id: 'uuid-gerado-na-simulacao',
+    email: 'mock@user.com',
+    name: 'Usuário Mockado',
+    nickname: 'mock_user',
+    photoUrl: 'https://i.pravatar.cc/150?u=mockuser',
+    profile_completed: false,
 };
 
+let isAuthenticated = false;
+
+// --- SERVIÇO DE AUTENTICAÇÃO MOCK ---
 export const ServicoAutenticacaoMock = {
-  async login(email: string, password?: string): Promise<AuthResponse> {
-    console.log(`[MOCK] Realizando login para: ${email}`);
+    login: (email?: string, password?: string): User => {
+        console.log(`[SIMULAÇÃO] ✅ Tentativa de login para: ${email}`);
+        isAuthenticated = true;
+        // Retorna uma cópia para evitar mutações externas no objeto mockUser
+        return { ...mockUser }; 
+    },
 
-    const mockUser: User = {
-      id: 'user-mock-123',
-      uid: 'user-mock-123',
-      email: email,
-      isProfileCompleted: true, 
-      name: email.split('@')[0],
-      avatar: 'https://i.pravatar.cc/150?u=' + email,
-      bio: 'Entusiasta de tecnologia e café. Explorando o mundo do desenvolvimento web.',
-      level: 5,
-      xp: 450,
-      requiredXp: 500,
-    };
-    const mockToken = 'token-mock-abc-123-xyz';
+    logout: (): void => {
+        console.log('[SIMULAÇÃO] ✅ Usuário deslogado.');
+        isAuthenticated = false;
+    },
 
-    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
-    localStorage.setItem(TOKEN_KEY, mockToken);
-    dispatchAuthChange();
-
-    return {
-      user: mockUser,
-      token: mockToken,
-      nextStep: '/feed',
-    };
-  },
-
-  async loginWithGoogle(credential: any, referredBy?: string): Promise<AuthResponse> {
-    console.log('[MOCK] Realizando login com Google.');
-
-    const mockUser: User = {
-      id: 'user-mock-google-456',
-      uid: 'user-mock-google-456',
-      email: 'google.mock@example.com',
-      isProfileCompleted: true,
-      name: 'Usuário Google',
-      avatar: 'https://i.pravatar.cc/150?u=googlemock',
-      bio: 'Apenas um usuário de testes do Google.',
-      level: 1,
-      xp: 10,
-      requiredXp: 100,
-    };
-    const mockToken = 'token-mock-google-xyz-456';
-
-    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
-    localStorage.setItem(TOKEN_KEY, mockToken);
-    dispatchAuthChange();
-
-    return {
-      user: mockUser,
-      token: mockToken,
-      nextStep: '/feed',
-    };
-  },
-
-  isAuthenticated: (): boolean => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    return !!token;
-  },
-
-  getCurrentUser: (): User | null => {
-    const userStr = localStorage.getItem(USER_KEY);
-    try {
-      return userStr ? JSON.parse(userStr) as User : null;
-    } catch (e) {
-      return null;
-    }
-  },
-
-  getToken: (): string | null => {
-    return localStorage.getItem(TOKEN_KEY);
-  },
-
-  logout: async (): Promise<void> => {
-    console.log('[MOCK] Realizando logout e limpando sessão.');
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(TOKEN_KEY);
-    dispatchAuthChange();
-    return Promise.resolve();
-  },
+    isAuthenticated: (): boolean => {
+        return isAuthenticated;
+    },
+    
+    // Atualiza o usuário mockado e o retorna
+    completeProfile: (profileData: Partial<User>): User => {
+        console.log('[SIMULAÇÃO] ✅ Completando perfil com dados:', profileData);
+        Object.assign(mockUser, { ...profileData, profile_completed: true });
+        console.log('[SIMULAÇÃO] ✅ Perfil do usuário mockado atualizado:', mockUser);
+        return { ...mockUser };
+    },
 };
 
-const loginHandler = async (urlObj: URL, config?: RequestInit): Promise<Response> => {
-    if (config?.method?.toUpperCase() !== 'POST') {
-        return new Response(JSON.stringify({ message: 'Only POST method is allowed for login.' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-    }
-    if (!config?.body) {
-        return new Response(JSON.stringify({ message: 'Request body is missing.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-    }
+// --- HANDLERS PARA O ORQUESTRADOR DE SIMULAÇÃO ---
 
-    try {
-        const { email, password } = JSON.parse(config.body as string);
-        
-        if (!email) {
-            return new Response(JSON.stringify({ message: 'Email is required for login.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-
-        console.log(`[SIMULAÇÃO] ✅ Recebida requisição de login para: ${email}`);
-        const result = await ServicoAutenticacaoMock.login(email, password);
-
-        return new Response(JSON.stringify(result), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-    } catch (error: any) {
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        console.error('[SIMULAÇÃO] ❌ Erro no handler de login:', error);
-        return new Response(JSON.stringify({ message: 'Erro interno no simulador de login.', error: errorMessage }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-    }
+const handleLogin = (): Promise<Response> => {
+    const user = ServicoAutenticacaoMock.login();
+    const responseBody = JSON.stringify({ 
+        token: 'jwt-token-simulado-12345', 
+        user 
+    });
+    return Promise.resolve(new Response(responseBody, { status: 200, headers: { 'Content-Type': 'application/json' } }));
 };
 
-export const authHandlers: Record<string, (url: URL, config?: RequestInit) => Promise<Response>> = {
-    '/api/auth/login': loginHandler,
+const handleLogout = (): Promise<Response> => {
+    ServicoAutenticacaoMock.logout();
+    return Promise.resolve(new Response(null, { status: 204 }));
+};
+
+// Agrupa todos os handlers de autenticação para exportação
+// A rota /api/profiles/me foi removida daqui e centralizada em Simulacao.Perfil.Flux.ts
+export const authHandlers = {
+    '/api/auth/login': handleLogin,
+    '/api/auth/logout': handleLogout,
 };

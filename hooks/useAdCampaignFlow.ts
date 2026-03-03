@@ -1,9 +1,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { authService, groupService } from '../ServiçosFrontend/ServiçoDeSimulação/serviceFactory';
+// CORREÇÃO: As importações foram atualizadas para usar os serviços reais.
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
-import { AdCampaign, Group, Post } from '../types';
+import { AdCampaign, Post } from '../tipos/types.Anuncios'; // Caminhos corrigidos
+import { Group } from '../tipos/types.Criacao.Grupo.Publico';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { AdFlowStep } from '../Componentes/ads/constants/AdConstants';
 
@@ -42,16 +45,14 @@ export const useAdCampaignFlow = () => {
         targetGroupId: ''
     });
 
-    // Correção Definitiva: Usa o `groupService` adaptado e unificado.
     useEffect(() => {
         const initializeFlow = async () => {
-            // 1. Configurar conteúdo turbinado, se houver.
             const state = location.state as { boostedContent?: Post } | null;
             if (state?.boostedContent) {
                 const post = state.boostedContent;
                 setSelectedContent(post);
                 const type = post.type === 'video' ? 'video' : 'image';
-                const url = post.video || post.image;
+                const url = post.videoUrl || post.imageUrl; // Corrigido para nomes de propriedade reais
                 
                 const forcedPlacement = post.type === 'video' ? ['reels'] : ['feed'];
                 setPreviewTab(post.type === 'video' ? 'reels' : 'feed');
@@ -69,13 +70,12 @@ export const useAdCampaignFlow = () => {
                 }));
             }
 
-            // 2. Buscar os grupos do usuário de forma assíncrona e segura.
             const user = authService.getCurrentUser();
-            if (user?.email) {
+            const token = localStorage.getItem('authToken');
+            if (user && token) {
                 try {
-                    // A chamada agora é para o método `getGroups` do adaptador.
-                    const allGroups = await groupService.getGroups();
-                    const ownedGroups = allGroups.filter((g: Group) => g.creatorEmail === user.email);
+                    const allGroups = await groupService.listGroups(token);
+                    const ownedGroups = allGroups.filter((g: Group) => g.creatorId === user.id);
                     setMyGroups(ownedGroups);
                 } catch (error) {
                     console.error("Falha ao buscar grupos:", error);
@@ -158,9 +158,10 @@ export const useAdCampaignFlow = () => {
     const submitCampaign = async () => {
         setIsLoading(true);
         const user = authService.getCurrentUser();
-        if (user) {
-            const finalCampaign = { ...campaign, ownerId: user.id, ownerEmail: user.email };
-            await adService.createCampaign(finalCampaign as AdCampaign);
+        const token = localStorage.getItem('authToken');
+        if (user && token) {
+            const finalCampaign = { ...campaign, ownerId: user.id };
+            await adService.createCampaign(token, finalCampaign as AdCampaign);
             navigate('/my-store');
         } else {
             setIsLoading(false);

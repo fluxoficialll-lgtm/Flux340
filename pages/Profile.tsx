@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom'; // Importa o hook para ler parâmetros da URL
-
-import { useUserProfile } from '../hooks/useUserProfile'; // Nosso novo hook
+import { useParams } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth'; // Importa o hook de autenticação
+import { useUserProfile } from '../hooks/useUserProfile';
 
 import { CabecalhoPerfil } from '../Componentes/ComponentesPerfilProprio/CabecalhoPerfil';
 import { CartaoDeInformacoesDoPerfil } from '../Componentes/ComponentesPerfilProprio/CartaoDeInformacoesDoPerfil';
@@ -10,7 +10,7 @@ import { CardCategoriasPerfil } from '../Componentes/ComponentesPerfilProprio/Ca
 import { Footer } from '../Componentes/layout/Footer';
 import { ModalListaDeSeguidores } from '../Componentes/ComponentesPerfilProprio/ModalListaDeSeguidores';
 import { AvatarPreviewModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
-import { LoadingScreen } from '../Componentes/ComponenteDeInterfaceDeUsuario/LoadingScreen'; // Um componente de loading
+import { LoadingScreen } from '../Componentes/ComponenteDeInterfaceDeUsuario/LoadingScreen';
 
 // Importando as grades
 import { GradeDePostagens } from '../Componentes/ComponentesPerfilProprio/Grade.Postagens';
@@ -19,7 +19,12 @@ import { GradeDeFotos } from '../Componentes/ComponentesPerfilProprio/Grade.Foto
 import { GradeDeReels } from '../Componentes/ComponentesPerfilProprio/Grade.Reels';
 
 export const Profile = () => {
-    const { id: userId } = useParams<{ id: string }>(); // Pega o ID do usuário da URL
+    const { id: paramId } = useParams<{ id: string }>(); // Pega o ID do usuário da URL
+    const { user: loggedInUser } = useAuth(); // Pega o usuário logado
+
+    // Se não houver ID na URL, usa o ID do usuário logado
+    const userId = paramId || loggedInUser?.id;
+
     const { profile, isLoading, error, handleFollow } = useUserProfile(userId);
 
     const [activeTab, setActiveTab] = useState('posts');
@@ -27,27 +32,25 @@ export const Profile = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalUsers, setModalUsers] = useState([]);
 
-    // Dados mock para as grades, pois o foco era o cartão de perfil
+    // Dados mock para as grades
     const mockPosts = [{ id: '1', type: 'photo', src: 'https://source.unsplash.com/random/500x500?sig=1' }];
     const mockProducts = [{ id: '1', name: 'Produto', price: 'R$ 99', image: 'https://source.unsplash.com/random/400x400?sig=10' }];
     const mockPhotos = [{ id: '1', src: 'https://source.unsplash.com/random/500x500?sig=20' }];
     const mockReels = [{ id: '1', thumbnail: 'https://source.unsplash.com/random/270x480?sig=30' }];
 
     const handleFollowersClick = () => {
-        // TODO: Buscar a lista real de seguidores
         setModalTitle('Seguidores');
-        setModalUsers([]); 
+        setModalUsers([]);
         setIsModalOpen(true);
     };
 
     const handleFollowingClick = () => {
-        // TODO: Buscar a lista real de quem o usuário segue
         setModalTitle('Seguindo');
         setModalUsers([]);
         setIsModalOpen(true);
     };
 
-    if (isLoading) {
+    if (isLoading || !userId) {
         return <LoadingScreen />;
     }
 
@@ -67,13 +70,16 @@ export const Profile = () => {
         );
     }
 
+    // Determina se o perfil sendo visto é o do próprio usuário logado
+    const isOwnProfile = loggedInUser?.id === profile.id;
+
     return (
         <div className="h-[100dvh] bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
             <style>{`
                 main { flex-grow: 1; overflow-y: auto; padding-top: 80px; padding-bottom: 100px; }
             `}</style>
 
-            <CabecalhoPerfil username={profile.nickname} />
+            <CabecalhoPerfil username={profile.nickname} isOwnProfile={isOwnProfile} />
 
             <main className="flex-grow w-full overflow-y-auto no-scrollbar">
                 <div style={{width:'100%', maxWidth:'500px', margin:'0 auto', paddingTop:'10px'}}>
@@ -88,8 +94,8 @@ export const Profile = () => {
                         onFollowClick={handleFollow}
                         onFollowersClick={handleFollowersClick}
                         onFollowingClick={handleFollowingClick}
-                        // TODO: Conectar a funcionalidade de ver o avatar
                         onAvatarClick={() => {}}
+                        isOwnProfile={isOwnProfile} // Passa a informação se é o perfil próprio
                     />
                 </div>
 
@@ -97,16 +103,16 @@ export const Profile = () => {
                     <CardCategoriasPerfil 
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
-                        hasProducts={mockProducts.length > 0}
+                        hasProducts={mockProducts.length > 0} // Usando mock data por enquanto
                     />
                 </div>
 
                 <div style={{width:'100%', maxWidth:'500px', margin:'0 auto', paddingBottom: '100px'}}>
                     <div className="tab-content mt-4">
-                        {activeTab === 'posts' && <GradeDePostagens posts={mockPosts} />}
-                        {activeTab === 'products' && <GradeDeProdutos products={mockProducts} />}
-                        {activeTab === 'fotos' && <GradeDeFotos photos={mockPhotos} />}
-                        {activeTab === 'reels' && <GradeDeReels reels={mockReels} />}
+                        {activeTab === 'posts' && <GradeDePostagens posts={profile.posts || []} />}
+                        {activeTab === 'products' && <GradeDeProdutos products={profile.products || []} />}
+                        {activeTab === 'fotos' && <GradeDeFotos photos={profile.photos || []} />}
+                        {activeTab === 'reels' && <GradeDeReels reels={profile.reels || []} />}
                     </div>
                 </div>
             </main>
@@ -120,7 +126,6 @@ export const Profile = () => {
                 title={modalTitle} 
             />
 
-            {/* TODO: Conectar o modal de preview do avatar */}
             <AvatarPreviewModal isOpen={false} imageSrc="" username="" />
         </div>
     );
