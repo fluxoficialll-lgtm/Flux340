@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 interface ProtectedRouteProps {
@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -22,14 +23,25 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   }
 
   if (!user) {
+    // Usuário não logado, redireciona para a página de login
     return <Navigate to="/" replace />;
   }
 
-  // Adiciona a lógica de redirecionamento baseada no perfil completo
-  if (user && !user.profile_completed) {
-    // Se o usuário está logado mas o perfil não está completo, redireciona
-    return <Navigate to="/complete-profile" replace />;
+  // Usuário está logado
+  if (user.profile_completed) {
+    // Perfil completo. Se tentar acessar login ou complete-profile, redireciona para o feed
+    if (location.pathname === '/' || location.pathname === '/complete-profile') {
+      return <Navigate to="/feed" replace />;
+    }
+  } else {
+    // Perfil incompleto. Redireciona para complete-profile se ainda não estiver lá
+    if (location.pathname !== '/complete-profile') {
+      return <Navigate to="/complete-profile" replace />;
+    }
   }
 
+  // Se nenhuma das condições de redirecionamento for atendida, renderiza o elemento solicitado.
+  // Isso acontece quando o usuário está logado com perfil completo e acessa uma rota protegida válida,
+  // ou quando está com perfil incompleto e acessa a página /complete-profile.
   return element;
 };
