@@ -1,40 +1,66 @@
 
-// backend/Repositorios/Repositorio.Criacao.Perfil.Flux.js
+import-se de que o pool seja importado corretamente
+import pool from '../database/pool.js';
+import queries from '../database/GestaoDeDados/PostgreSQL/Consultas.Criacao.Perfil.Flux.js';
 
-import consultas from '../database/GestaoDeDados/PostgreSQL/Consultas.Criacao.Perfil.Flux.js';
+const PossibilidadeAtualizarPerfil = async (userId, profileData) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-/**
- * Repositório para o fluxo de criação de perfil.
- * Abstrai a fonte de dados (PostgreSQL, etc.) e fornece uma interface
- * para o serviço de negócio interagir com os dados do perfil.
- */
+        const { name, nickname, bio, photoUrl, website, isPrivate, profile_completed } = profileData;
 
-const PossibilidadeBuscarPerfilPorIdUsuario = async (userId) => {
-    console.log(`Repositório: Buscando perfil para o usuário ID: ${userId}`);
-    return await consultas.ConsultarPerfilPorIdUsuario(userId);
+        // Tenta ATUALIZAR o perfil existente
+        const updateQuery = `
+            UPDATE user_profiles
+            SET
+                name = $1, nickname = $2, bio = $3, photo_url = $4, website = $5, 
+                is_private = $6, profile_completed = $7, updated_at = NOW()
+            WHERE user_id = $8
+            RETURNING *;
+        `;
+        const updateValues = [name, nickname, bio, photoUrl, website, isPrivate, profile_completed, userId];
+        const res = await client.query(updateQuery, updateValues);
+
+        let userProfile;
+        // Se a atualização funcionou (afetou 1 linha), use esse resultado
+        if (res.rows.length > 0) {
+            userProfile = res.rows[0];
+            console.log(`[Repositório] Perfil para o usuário ${userId} foi ATUALIZADO.`);
+        } else {
+            // Se a atualização não afetou nenhuma linha (perfil não existe), CRIE um novo
+            const insertQuery = `
+                INSERT INTO user_profiles (user_id, name, nickname, bio, photo_url, website, is_private, profile_completed)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING *;
+            `;
+            const insertValues = [userId, name, nickname, bio, photoUrl, website, isPrivate, profile_completed];
+            const insertRes = await client.query(insertQuery, insertValues);
+            userProfile = insertRes.rows[0];
+            console.log(`[Repositório] Perfil para o usuário ${userId} foi CRIADO.`);
+        }
+
+        await client.query('COMMIT');
+        return userProfile;
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(`[Repositório] Erro na operação de upsert do perfil para o usuário ${userId}:`, error);
+        if (error.code === '23505' && error.constraint === 'user_profiles_nickname_key') {
+            throw new Error(`O nickname '${profileData.nickname}' já está em uso.`);
+        }
+        throw new Error('Erro no repositório ao tentar criar ou atualizar o perfil.');
+    } finally {
+        client.release();
+    }
 };
 
-const PossibilidadeAtualizarPerfilPorIdUsuario = async (userId, profileData) => {
-    console.log(`Repositório: Atualizando perfil para o usuário ID: ${userId}`);
-    return await consultas.AtualizarPerfilPorIdUsuario(userId, profileData);
-};
 
-const PossibilidadeDeletarPerfilPorIdUsuario = async (userId) => {
-    console.log(`Repositório: Deletando perfil para o usuário ID: ${userId}`);
-    return await consultas.DeletarPerfilPorIdUsuario(userId);
-};
-
-// CORREÇÃO: Expondo a nova função para que o controlador possa usá-la.
 const PossibilidadeBuscarUsuarioPorId = async (userId) => {
-    console.log(`Repositório: Buscando usuário (para auditoria) com ID: ${userId}`);
-    return await consultas.ConsultarPerfilPorIdUsuario(userId);
+    return await queries.ConsultarPerfilPorIdUsuario(userId);
 };
 
-const repositorioCriacaoPerfil = {
-    PossibilidadeBuscarPerfilPorIdUsuario,
-    PossibilidadeAtualizarPerfilPorIdUsuario,
-    PossibilidadeDeletarPerfilPorIdUsuario,
-    PossibilidadeBuscarUsuarioPorId // Exportando a função.
+export default {
+    PossibilidadeAtualizarPerfil,
+    PossibilidadeBuscarUsuarioPorId,
 };
-
-export default repositorioCriacaoPerfil;
