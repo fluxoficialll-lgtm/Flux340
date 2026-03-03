@@ -15,8 +15,6 @@ CREATE TABLE user_profiles (
     photo_url TEXT,
     website TEXT,
     is_private BOOLEAN DEFAULT FALSE,
-    cpf TEXT UNIQUE,
-    phone TEXT,
     profile_completed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),

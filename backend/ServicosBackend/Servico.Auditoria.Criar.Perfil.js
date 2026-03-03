@@ -6,7 +6,7 @@
  * Foco em registrar o **estado** dos dados em pontos críticos para revelar bugs de inconsistência.
  */
 
-import ServicoDeLog from './Servico.Logs.Backend.js'; // CORRIGIDO: Apontando para o novo serviço de log do backend.
+import ServicoDeLog from './Servico.Logs.Backend.js';
 
 const CONTEXTO = "Auditoria.Criacao.Perfil.Backend";
 
@@ -20,13 +20,12 @@ const ServicoAuditoriaCriarPerfil = {
         );
     },
 
-    // NOVO: Loga o estado ANTES da operação no banco.
     estadoAntes(userAtual) {
         ServicoDeLog.info(
             "Estado atual do usuário antes da atualização",
             {
                 userId: userAtual.id,
-                perfilCompleto: userAtual.perfil_completo // Ajustado para o padrão snake_case do banco
+                perfilCompleto: userAtual.perfil_completo
             },
             CONTEXTO
         );
@@ -41,42 +40,35 @@ const ServicoAuditoriaCriarPerfil = {
     },
 
     tentativaDeGravacao(userId, profileData) {
-        const dadosLogaveis = { ...profileData };
-        delete dadosLogaveis.cpf;
-        delete dadosLogaveis.phone;
-
         ServicoDeLog.info(
             `Tentativa de gravação no banco de dados para o usuário ${userId}`,
-            { userId, data: dadosLogaveis },
+            { userId, data: profileData },
             CONTEXTO
         );
     },
 
-    // NOVO: Loga o resultado exato que a query do banco retornou.
     resultadoQuery(userAtualizado) {
         ServicoDeLog.info(
             "Resultado da atualização no banco (RETURNING)",
             {
                 userId: userAtualizado.id,
-                perfilCompleto: userAtualizado.perfil_completo // Ajustado para o padrão snake_case
+                perfilCompleto: userAtualizado.perfil_completo
             },
             CONTEXTO
         );
     },
 
-    // NOVO: Loga o valor específico do campo que controla o fluxo.
     verificacaoPerfilCompleto(user) {
-        ServicoDeLog.warn( // Usando warn para destacar este log
+        ServicoDeLog.warn(
             "Verificação de perfil completo antes de enviar ao frontend",
             {
                 userId: user.id,
-                perfilCompleto: user.perfil_completo // Ajustado para o padrão snake_case
+                perfilCompleto: user.perfil_completo
             },
             CONTEXTO
         );
     },
 
-    // NOVO: Loga a resposta exata enviada ao cliente.
     respostaEnviada(response) {
         ServicoDeLog.info(
             "Resposta final enviada ao frontend",

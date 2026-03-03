@@ -106,11 +106,8 @@ export const useCompleteProfile = () => {
             auditoria.estadoAposSalvar(usuarioAtualizado);
             auditoria.decisaoRedirecionamento(usuarioAtualizado);
 
-            if (usuarioAtualizado?.profile_completed) {
-                navigate('/feed');
-            } else {
-                setErrors({ formulario: "Não foi possível confirmar a conclusão do seu perfil. Verifique os logs." });
-            }
+            // Redireciona para o feed após o sucesso
+            navigate('/feed');
 
         } catch (err: any) {
             auditoria.falhaNaConclusao(err, dadosParaApi);
