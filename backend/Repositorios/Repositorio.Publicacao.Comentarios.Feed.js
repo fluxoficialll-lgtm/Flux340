@@ -2,30 +2,30 @@
 // backend/Repositorios/Repositorio.Publicacao.Comentarios.Feed.js
 import ComentariosFeedDB from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Feed.js';
 
-const createComment = async (commentData) => {
-    return ComentariosFeedDB.create(commentData);
+const criarComentario = async (commentData) => {
+    return ComentariosFeedDB.criar(commentData);
 };
 
-const findCommentsByPostId = async (postId, options) => {
-    return ComentariosFeedDB.findByPostId(postId, options);
+const buscarComentariosPorPostId = async (postId, options) => {
+    return ComentariosFeedDB.buscarPorPostId(postId, options);
 };
 
-const findCommentById = async (commentId) => {
-    return ComentariosFeedDB.findById(commentId);
+const buscarComentarioPorId = async (commentId) => {
+    return ComentariosFeedDB.buscarPorId(commentId);
 };
 
-const updateComment = async (commentId, updates) => {
-    return ComentariosFeedDB.update(commentId, updates);
+const atualizarComentario = async (commentId, updates) => {
+    return ComentariosFeedDB.atualizar(commentId, updates);
 };
 
-const deleteComment = async (commentId) => {
-    return ComentariosFeedDB.remove(commentId);
+const deletarComentario = async (commentId) => {
+    return ComentariosFeedDB.remover(commentId);
 };
 
 export default {
-    createComment,
-    findCommentsByPostId,
-    findCommentById,
-    updateComment,
-    deleteComment
+    criarComentario,
+    buscarComentariosPorPostId,
+    buscarComentarioPorId,
+    atualizarComentario,
+    deletarComentario
 };

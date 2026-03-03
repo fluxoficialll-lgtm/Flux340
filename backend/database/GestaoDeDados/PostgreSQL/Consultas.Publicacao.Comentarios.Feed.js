@@ -2,7 +2,7 @@
 // backend/database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Feed.js
 import pool from '../../pool.js';
 
-const create = async (commentData) => {
+const criar = async (commentData) => {
     const { post_id, user_id, content } = commentData;
     const query = `
         INSERT INTO feed_comments (post_id, user_id, content, created_at, updated_at)
@@ -13,7 +13,7 @@ const create = async (commentData) => {
     return rows[0];
 };
 
-const findByPostId = async (postId, { limit = 10, offset = 0 }) => {
+const buscarPorPostId = async (postId, { limit = 10, offset = 0 }) => {
     const query = `
         SELECT c.*, u.username, u.avatar_url
         FROM feed_comments c
@@ -26,7 +26,7 @@ const findByPostId = async (postId, { limit = 10, offset = 0 }) => {
     return rows;
 };
 
-const findById = async (commentId) => {
+const buscarPorId = async (commentId) => {
     const query = `
         SELECT * FROM feed_comments WHERE id = $1;
     `;
@@ -34,7 +34,7 @@ const findById = async (commentId) => {
     return rows[0];
 };
 
-const update = async (commentId, updates) => {
+const atualizar = async (commentId, updates) => {
     const { content } = updates;
     const query = `
         UPDATE feed_comments
@@ -46,15 +46,15 @@ const update = async (commentId, updates) => {
     return rows[0];
 };
 
-const remove = async (commentId) => {
+const remover = async (commentId) => {
     const { rowCount } = await pool.query('DELETE FROM feed_comments WHERE id = $1', [commentId]);
     return rowCount > 0;
 };
 
 export default {
-    create,
-    findByPostId,
-    findById,
-    update,
-    remove
+    criar,
+    buscarPorPostId,
+    buscarPorId,
+    atualizar,
+    remover
 };

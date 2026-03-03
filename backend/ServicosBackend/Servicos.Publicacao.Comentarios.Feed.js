@@ -9,31 +9,31 @@ const checkPermissions = (userId, comment) => {
     return comment.user_id === userId;
 };
 
-const createComment = async (commentBody, postId, userId) => {
+const criarComentario = async (commentBody, postId, userId) => {
     const { content } = commentBody;
     if (!content) {
         throw new Error('O conteúdo do comentário não pode estar vazio.');
     }
 
     const commentData = { post_id: postId, user_id: userId, content };
-    return RepositorioComentariosFeed.createComment(commentData);
+    return RepositorioComentariosFeed.criarComentario(commentData);
 };
 
-const getCommentsForPost = async (postId, options) => {
+const obterComentariosPorPostId = async (postId, options) => {
     if (!postId) {
         throw new Error('O ID do post é necessário para buscar os comentários.');
     }
     const queryOptions = { limit: 10, offset: 0, ...options };
-    return RepositorioComentariosFeed.findCommentsByPostId(postId, queryOptions);
+    return RepositorioComentariosFeed.buscarComentariosPorPostId(postId, queryOptions);
 };
 
-const updateComment = async (commentId, updates, userId) => {
+const atualizarComentario = async (commentId, updates, userId) => {
     const { content } = updates;
     if (!content) {
         throw new Error('O conteúdo para atualização não pode ser vazio.');
     }
 
-    const comment = await RepositorioComentariosFeed.findCommentById(commentId);
+    const comment = await RepositorioComentariosFeed.buscarComentarioPorId(commentId);
     if (!comment) {
         throw new Error('Comentário não encontrado.');
     }
@@ -42,11 +42,11 @@ const updateComment = async (commentId, updates, userId) => {
         throw new Error('Você não tem permissão para editar este comentário.');
     }
 
-    return RepositorioComentariosFeed.updateComment(commentId, { content });
+    return RepositorioComentariosFeed.atualizarComentario(commentId, { content });
 };
 
-const deleteComment = async (commentId, userId) => {
-    const comment = await RepositorioComentariosFeed.findCommentById(commentId);
+const deletarComentario = async (commentId, userId) => {
+    const comment = await RepositorioComentariosFeed.buscarComentarioPorId(commentId);
     if (!comment) {
         throw new Error('Comentário não encontrado.');
     }
@@ -55,12 +55,12 @@ const deleteComment = async (commentId, userId) => {
         throw new Error('Você não tem permissão para deletar este comentário.');
     }
 
-    await RepositorioComentariosFeed.deleteComment(commentId);
+    await RepositorioComentariosFeed.deletarComentario(commentId);
 };
 
 export default {
-    createComment,
-    getCommentsForPost,
-    updateComment,
-    deleteComment
+    criarComentario,
+    obterComentariosPorPostId,
+    atualizarComentario,
+    deletarComentario
 };
