@@ -1,6 +1,6 @@
 
 // backend/Repositorios/Repositorio.Publicacao.Comentarios.Feed.js
-import ComentariosFeedDB from '../database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Feed.js';
+import ComentariosFeedDB from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Feed.js';
 
 const createComment = async (commentData) => {
     return ComentariosFeedDB.create(commentData);

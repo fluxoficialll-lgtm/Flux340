@@ -1,60 +1,63 @@
 
 import express from 'express';
 
-// Importando as novas rotas de autenticação e o novo serviço de perfil
+// --- Rotas de Infraestrutura e Autenticação ---
+import rotasGestaoVariaveis from './Rotas.Gestao.Variaveis.js';
 import rotasCriacaoConta from './Rotas.Criacao.Conta.Flux.js';
 import rotasCriacaoPerfilFlux from './Rotas.Criacao.Perfil.Flux.js';
 
-// Importando as rotas de publicação
+// --- Rotas de Canais de Conteúdo ---
+// Feed (Posts)
 import rotasPublicacaoFeed from './Rotas.Publicacao.Feed.js';
+import rotasComentariosFeed from './Rotas.Publicacao.Comentarios.Feed.js'; // Nome corrigido
+
+// Marketplace
+import rotasPublicacaoMarketplace from './Rotas.Publicacao.Marketplace.js';
+import rotasComentariosMarketplace from './Rotas.Publicacao.Comentarios.Marketplace.js'; // Nome corrigido
+
+// Reels
+import rotasPublicacaoReels from './Rotas.Publicacao.Reels.js';
+import rotasComentariosReels from './Rotas.Publicacao.Comentarios.Reels.js'; // Nome corrigido
+
+// --- Rotas de Grupos (Legado ou Futuro) ---
 import rotasCriacaoGrupoPublico from './Rotas.Criacao.Grupo.Publico.js';
 import rotasCriacaoGrupoPrivado from './Rotas.Criacao.Grupo.Privado.js';
 import rotasCriacaoGrupoPago from './Rotas.Criacao.Grupo.Pago.js';
 
-// Importando as rotas dos provedores de pagamento
+// --- Rotas de Pagamento (Legado ou Futuro) ---
 import rotasSyncPay from './Rotas.Provedor.SyncPay.js';
 import rotasPayPal from './Rotas.Provedor.PayPal.js';
 import rotasStripe from './Rotas.Provedor.Stripe.js';
 import rotasCredencialStripe from './Rotas.Gestao.Credencial.Stripe.js';
 
-// Importando a nova rota de gestão de variáveis
-import rotasGestaoVariaveis from './Rotas.Gestao.Variaveis.js';
-
-// Importando as rotas de métricas
-import rotasMetricasComentarioFeed from './Rotas.Metricas.Comentario.Feed.js';
-import rotasMetricasComentarioMarketplace from './Rotas.Metricas.Comentario.Marketplace.js';
-import rotasMetricasComentarioReels from './Rotas.Metricas.Comentario.Reels.js';
-import rotasMetricasPublicacaoFeed from './Rotas.Metricas.Publicacao.Feed.js';
-import rotasMetricasPublicacaoReels from './Rotas.Metricas.Publicacao.Reels.js';
-
 const router = express.Router();
 
-// Rota de Configuração (ex: /api/v1/config/boot)
+// --- Configuração e Autenticação ---
 router.use('/v1/config', rotasGestaoVariaveis);
-
-// Rotas de Autenticação e Usuário (ex: /register, /login, /me)
-router.use('/', rotasCriacaoConta);
-
-// Rotas de Gestão de Perfil (ex: /api/profiles/:userId)
+router.use('/auth', rotasCriacaoConta);
 router.use('/profiles', rotasCriacaoPerfilFlux);
 
-// Rotas de Publicação
-router.use('/feed', rotasPublicacaoFeed);
+// --- Canais Principais ---
+
+// Feed
+router.use('/posts', rotasPublicacaoFeed); // Rota principal para posts e comentários aninhados
+router.use('/comments', rotasComentariosFeed); // Rota para editar/deletar comentários
+
+// Marketplace
+router.use('/marketplace/items', rotasPublicacaoMarketplace); // Rota principal para itens e comentários aninhados
+router.use('/marketplace/comments', rotasComentariosMarketplace); // Rota para editar/deletar comentários
+
+// Reels
+router.use('/reels', rotasPublicacaoReels); // Rota principal para reels e comentários aninhados
+router.use('/reels/comments', rotasComentariosReels); // Rota para editar/deletar comentários
+
+// --- Rotas Adicionais ---
 router.use('/groups/public', rotasCriacaoGrupoPublico);
 router.use('/groups/private', rotasCriacaoGrupoPrivado);
 router.use('/groups/paid', rotasCriacaoGrupoPago);
-
-// ---- Rotas dos Provedores de Pagamento ----
 router.use('/syncpay', rotasSyncPay);
 router.use('/paypal', rotasPayPal);
 router.use('/stripe', rotasStripe);
 router.use('/credenciais-stripe', rotasCredencialStripe);
-
-// ---- Rotas de Métricas ----
-router.use('/metrics/feed', rotasMetricasComentarioFeed);
-router.use('/metrics/marketplace', rotasMetricasComentarioMarketplace);
-router.use('/metrics/reels', rotasMetricasComentarioReels);
-router.use('/metrics/post', rotasMetricasPublicacaoFeed);
-router.use('/metrics/reels', rotasMetricasPublicacaoReels);
 
 export default router;

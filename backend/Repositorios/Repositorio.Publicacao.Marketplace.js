@@ -1,6 +1,6 @@
 
 // backend/Repositorios/Repositorio.Publicacao.Marketplace.js
-import MarketplaceDB from '../database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Marketplace.js';
+import MarketplaceDB from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Marketplace.js';
 
 /**
  * O Repositório atua como uma camada de abstração entre o serviço e as consultas de banco de dados.

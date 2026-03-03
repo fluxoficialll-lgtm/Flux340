@@ -1,10 +1,12 @@
 
 import express from 'express';
-import reelsControle from '../controles/Controles.Publicacao.Reels.js'; // Corrigido
-import rotasComentariosReels from './Rotas.Comentarios.Reels.js';
+import reelsControle from '../controles/Controles.Publicacao.Reels.js';
+import comentariosReelsControle from '../controles/Controles.Publicacao.Comentarios.Reels.js'; // Importando o controle de comentários
 import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
+
+// --- Rotas de Reels ---
 
 // @route   POST /
 // @desc    Criar um novo Reel
@@ -31,9 +33,16 @@ router.put('/:reelId', authMiddleware, reelsControle.updateReel);
 // @access  Private
 router.delete('/:reelId', authMiddleware, reelsControle.deleteReel);
 
-// Aninhando as rotas de comentários
-// /api/reels/:reelId/comments
-router.use('/:reelId/comments', rotasComentariosReels);
+// --- Rotas de Comentários Aninhados ---
 
+// @route   POST /:reelId/comments
+// @desc    Adicionar um comentário a um Reel
+// @access  Private
+router.post('/:reelId/comments', authMiddleware, comentariosReelsControle.createComment);
+
+// @route   GET /:reelId/comments
+// @desc    Buscar todos os comentários de um Reel
+// @access  Public
+router.get('/:reelId/comments', comentariosReelsControle.getCommentsForReel);
 
 export default router;

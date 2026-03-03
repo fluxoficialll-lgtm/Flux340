@@ -1,28 +1,17 @@
 
 import express from 'express';
-import comentariosMarketplaceControle from '../controles/Controles.Comentarios.Marketplace.js';
-import authMiddleware from '../../config/Middleware.Autenticacao.JWT.js';
+import comentariosMarketplaceControle from '../controles/Controle.Publicacao.Comentarios.Marketplace.js';
+import authMiddleware from '../config/Middleware.Autenticacao.JWT.js'; // Caminho corrigido
 
-// Este router será montado sob /api/marketplace/:itemId/comments
-const router = express.Router({ mergeParams: true });
-
-// @route   POST /
-// @desc    Criar um novo comentário em um item do marketplace
-// @access  Private
-router.post('/', authMiddleware, comentariosMarketplaceControle.createComment);
-
-// @route   GET /
-// @desc    Obter todos os comentários de um item do marketplace
-// @access  Public
-router.get('/', comentariosMarketplaceControle.getCommentsForItem);
+const router = express.Router();
 
 // @route   PUT /:commentId
-// @desc    Atualizar um comentário
+// @desc    Atualizar um comentário no marketplace
 // @access  Private
 router.put('/:commentId', authMiddleware, comentariosMarketplaceControle.updateComment);
 
 // @route   DELETE /:commentId
-// @desc    Deletar um comentário
+// @desc    Deletar um comentário no marketplace
 // @access  Private
 router.delete('/:commentId', authMiddleware, comentariosMarketplaceControle.deleteComment);
 

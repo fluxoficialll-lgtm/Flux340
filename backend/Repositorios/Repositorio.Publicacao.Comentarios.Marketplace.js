@@ -2,7 +2,7 @@
 // backend/Repositorios/Repositorio.Publicacao.Comentarios.Marketplace.js
 
 import pool from '../database/pool.js';
-import { queries } from '../database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Marketplace.js';
+import { queries } from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Marketplace.js';
 
 async function createComment(itemId, userId, content) {
     const { rows } = await pool.query(queries.createComment, [itemId, userId, content]);

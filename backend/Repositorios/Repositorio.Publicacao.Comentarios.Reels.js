@@ -1,5 +1,5 @@
 
-import ComentariosReelsDB from '../database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Reels.js';
+import ComentariosReelsDB from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Comentarios.Reels.js';
 
 const create = async (commentData) => {
     return ComentariosReelsDB.create(commentData);

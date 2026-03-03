@@ -1,6 +1,6 @@
 
 // backend/Repositorios/Repositorio.Publicacao.Reels.js
-import ReelsDB from '../database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Reels.js';
+import ReelsDB from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Reels.js';
 
 /**
  * O Repositório atua como uma camada de abstração entre o serviço e as consultas de banco de dados,
