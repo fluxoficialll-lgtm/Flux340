@@ -6,10 +6,10 @@ import { User } from "../../../types";
 // --- ESTADO DA SIMULAÇÃO ---
 const mockUser: User = {
     id: 'uuid-gerado-na-simulacao',
-    email: 'mock@user.com',
-    name: 'Usuário Mockado',
-    nickname: 'mock_user',
-    photoUrl: 'https://i.pravatar.cc/150?u=mockuser',
+    email: 'qualquer@email.com',
+    name: 'Usuário Simulado',
+    nickname: 'user_simulado',
+    photoUrl: 'https://i.pravatar.cc/150?u=simulado',
     profile_completed: false,
 };
 
@@ -17,8 +17,14 @@ let isAuthenticated = false;
 
 // --- SERVIÇO DE AUTENTICAÇÃO MOCK ---
 export const ServicoAutenticacaoMock = {
+    /**
+     * Simula o login do usuário. No modo de simulação, qualquer credencial é válida.
+     * @param {string} [email] - O e-mail fornecido (ignorado).
+     * @param {string} [password] - A senha fornecida (ignorada).
+     * @returns {User} O objeto do usuário mockado.
+     */
     login: (email?: string, password?: string): User => {
-        console.log(`[SIMULAÇÃO] ✅ Tentativa de login para: ${email}`);
+        console.log(`[SIMULAÇÃO] ✅ Login solicitado com e-mail: ${email}. Credenciais aceitas automaticamente.`);
         isAuthenticated = true;
         // Retorna uma cópia para evitar mutações externas no objeto mockUser
         return { ...mockUser }; 
@@ -44,13 +50,25 @@ export const ServicoAutenticacaoMock = {
 
 // --- HANDLERS PARA O ORQUESTRADOR DE SIMULAÇÃO ---
 
-const handleLogin = (): Promise<Response> => {
+/**
+ * Manipulador para a rota de login (/api/auth/login).
+ * Simula uma resposta de login bem-sucedida para qualquer requisição, 
+ * retornando um token e os dados do usuário mockado.
+ */
+const handleLogin = async (url: URL, config?: RequestInit): Promise<Response> => {
+    // No modo de simulação, não validamos as credenciais.
+    // Apenas chamamos o serviço de login mock para manter o estado.
     const user = ServicoAutenticacaoMock.login();
+    
     const responseBody = JSON.stringify({ 
-        token: 'jwt-token-simulado-12345', 
+        token: 'jwt-token-simulado-qualquer-credencial-12345', 
         user 
     });
-    return Promise.resolve(new Response(responseBody, { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    
+    // Simula um pequeno atraso de rede para uma experiência mais realista
+    await new Promise(res => setTimeout(res, 300));
+
+    return new Response(responseBody, { status: 200, headers: { 'Content-Type': 'application/json' } });
 };
 
 const handleLogout = (): Promise<Response> => {

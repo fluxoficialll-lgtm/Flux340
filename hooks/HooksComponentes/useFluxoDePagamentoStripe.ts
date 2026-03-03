@@ -1,90 +1,75 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { ServicoGestaoCredencialStripe as stripeService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialStripe.js';
+import { useState, useCallback } from 'react';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
+// CORREÇÃO DEFINITIVA: Corrigindo o caminho da importação para o serviço do Stripe
+import { ServicoGestaoCredencialStripe as stripeService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialStripe';
 import { Group } from '../../types';
-import { ControleDeSimulacao } from '../../ServiçosFrontend/ServiçoDeSimulação/ControleDeSimulacao.js';
+import { servicoDeSimulacao } from '../../ServiçosFrontend/ServiçoDeSimulação';
 
 // Tipos exportados para uso no componente
-export interface ConversionResult { amount: number; currency: string; symbol: string; formatted: string; }
-export interface GeoData { countryCode: string; countryName: string; city: string; region: string; }
-export type StripeView = 'selection' | 'pix' | 'card' | 'debit_card' | 'oxxo' | 'sepa' | 'klarna' | 'sofort' | 'bacs' | 'ach' | 'konbini' | 'upi' | 'processing' | 'boleto' | 'redirection' | 'link' | 'wallet' | 'interac' | 'paynow' | 'grabpay' | 'afterpay' | 'becs' | 'pad';
-
-const USE_MOCKS = ControleDeSimulacao.isMockMode();
-
-interface UseFluxoDePagamentoStripeProps {
-    group: Group;
-    onSuccess: () => void;
-    onError: (msg: string) => void;
-    onTransactionId: (id: string) => void;
+export type PaymentStatus = 'idle' | 'processing' | 'success' | 'error';
+export interface UsePaymentFlowOptions {
+    onPaymentSuccess?: (details: any) => void;
+    onPaymentError?: (error: any) => void;
 }
 
-export const useFluxoDePagamentoStripe = ({ group, onSuccess, onError, onTransactionId }: UseFluxoDePagamentoStripeProps) => {
-    const [currentView, setCurrentView] = useState<StripeView>('selection');
-    const [paymentData, setPaymentData] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const pollingInterval = useRef<any>(null);
+// Hook customizado
+export const useFluxoDePagamentoStripe = (group: Group, options: UsePaymentFlowOptions = {}) => {
+    const [stripe, setStripe] = useState<Stripe | null>(null);
+    const [status, setStatus] = useState<PaymentStatus>('idle');
+    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        // Limpa o intervalo de polling quando o hook é desmontado
-        return () => { if (pollingInterval.current) clearInterval(pollingInterval.current); };
+    // Carrega a instância do Stripe com a chave publicável
+    useState(() => {
+        const load = async () => {
+            const publicKey = await stripeService.getPublishableKey();
+            if (publicKey) {
+                setStripe(await loadStripe(publicKey));
+            }
+        };
+        load();
     }, []);
 
-    const startPolling = (id: string) => {
-        if (pollingInterval.current) clearInterval(pollingInterval.current);
-        
-        pollingInterval.current = setInterval(async () => {
-            try {
-                // Em modo de simulação, o sucesso é imediato para fins de teste.
-                if (USE_MOCKS) {
-                    clearInterval(pollingInterval.current);
-                    onSuccess();
-                    return;
-                }
-
-                const res = await stripeService.checkSessionStatus(id, group.creatorEmail!);
-                if (res.status === 'paid') {
-                    clearInterval(pollingInterval.current);
-                    onSuccess();
-                }
-            } catch (e) {
-                // Em caso de erro no polling, o intervalo é limpo para evitar chamadas contínuas.
-                clearInterval(pollingInterval.current);
-            }
-        }, 4000);
-    };
-
-    const generatePayment = async (method: StripeView) => {
-        setIsLoading(true);
-        setCurrentView('processing');
-
-        if (USE_MOCKS) {
-            setTimeout(() => {
-                setIsLoading(false);
-                setCurrentView(method);
-                startPolling('mock_id');
-            }, 1200);
+    // Função para iniciar o fluxo de pagamento
+    const iniciarPagamento = useCallback(async () => {
+        if (servicoDeSimulacao.estaAtivo()) {
+            console.warn("[SIMULAÇÃO] Fluxo de pagamento com Stripe não executado em modo de simulação.");
+            setStatus('success'); // Simula sucesso imediato
+            if (options.onPaymentSuccess) options.onPaymentSuccess({ simulation: true });
             return;
         }
 
-        try {
-            const intent = await stripeService.createPaymentIntent(group, group.creatorEmail!, method);
-            setPaymentData(intent);
-            onTransactionId(intent.id);
-            setCurrentView(method); // Altera para a view do método (ex: 'pix', 'boleto')
-            startPolling(intent.id);
-        } catch (err: any) {
-            onError(err.message || "Erro ao gerar o pagamento.");
-            setCurrentView('selection'); // Retorna para a seleção em caso de erro
-        } finally {
-            setIsLoading(false);
+        if (!stripe || !group) {
+            console.error("Stripe ou Grupo não está disponível.");
+            setError("O sistema de pagamento não está pronto. Tente novamente em alguns instantes.");
+            setStatus('error');
+            return;
         }
-    };
 
-    return {
-        currentView,
-        setCurrentView, // Exposto para que o componente possa controlar as views que não exigem API calls
-        paymentData,
-        isLoading,
-        generatePayment, // Nova função para lidar apenas com a criação de pagamentos
-    };
+        setStatus('processing');
+        setError(null);
+
+        try {
+            const clientSecret = await stripeService.createPaymentIntent(group.price, 'BRL');
+
+            const { error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
+                // Aqui iriam os detalhes do cartão, se não estiver usando Elements
+            });
+
+            if (stripeError) {
+                throw new Error(stripeError.message || "Ocorreu um erro durante a confirmação do pagamento.");
+            }
+
+            setStatus('success');
+            if (options.onPaymentSuccess) options.onPaymentSuccess({ clientSecret });
+
+        } catch (err: any) {
+            console.error("Falha no processo de pagamento:", err);
+            setError(err.message || "Não foi possível processar seu pagamento.");
+            setStatus('error');
+            if (options.onPaymentError) options.onPaymentError(err);
+        }
+    }, [stripe, group, options]);
+
+    return { iniciarPagamento, status, error };
 };

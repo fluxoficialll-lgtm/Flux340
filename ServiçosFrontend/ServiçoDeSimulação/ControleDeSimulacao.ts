@@ -1,104 +1,58 @@
 
-// --- CONTROLE CENTRAL DE SIMULAÇÃO (ORQUESTRADOR) ---
+import { SafeFetchPatcher } from '../SafeFetchPatcher';
+import { getSimulationHandlers } from './index'; // Importa os handlers de simulação
 
-import { handleFeedSimulado, handleUserPostsSimulado, handlePostDetailsSimulado } from './simulacoes/SimulacaoDeFeed';
-import { authHandlers, ServicoAutenticacaoMock } from './simulacoes/SimulacaoDeAuth';
-import { handleGetProfile, handleFollowProfile, handleProfileMe } from './simulacoes/Simulacao.Perfil.Flux';
-import { simulacaoDeMarketplace } from './simulacoes/SimulacaoDeMarketplace';
+class ControleDeSimulacao {
+    private isSimulationActive: boolean = false;
+    private originalFetch: Function | null = null;
 
-// --- CONFIGURAÇÃO DOS HANDLERS ---
-const configBootHandler = (urlObj: URL): Promise<Response> => {
-    console.log('[SIMULAÇÃO] ✅ Retornando mock para: GET /api/v1/config/boot');
-    return Promise.resolve(new Response(JSON.stringify({ maintenanceMode: false, ambiente: 'local-simulado' }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
-};
-
-const handleMarketplaceSimulado = (): Promise<Response> => {
-    console.log('[SIMULAÇÃO] ✅ Retornando mock para: GET /api/marketplace');
-    const items = simulacaoDeMarketplace();
-    return Promise.resolve(new Response(JSON.stringify(items), { status: 200, headers: { 'Content-Type': 'application/json' } }));
-};
-
-const staticHandlers: Record<string, (url: URL, config?: RequestInit) => Promise<Response>> = {
-    ...authHandlers,
-    '/api/v1/config/boot': configBootHandler,
-};
-
-const dynamicHandlers: { regex: RegExp; handler: (url: URL, config?: RequestInit) => Promise<any> }[] = [
-    { regex: /^\/api\/feed\/?$/, handler: handleFeedSimulado },
-    { regex: /\/api\/users\/(.*?)\/posts/, handler: handleUserPostsSimulado },
-    { regex: /^\/api\/profiles\/me\/?$/, handler: handleProfileMe }, // Rota /me movida para dinâmico
-    { regex: /^\/api\/profiles\/([^/]+)\/follow$/, handler: handleFollowProfile },
-    { regex: /^\/api\/profiles\/([^/]+)$/, handler: handleGetProfile },
-    { regex: /^\/api\/feed\/([^/]+)$/, handler: handlePostDetailsSimulado },
-    { regex: /^\/api\/marketplace\/?$/, handler: handleMarketplaceSimulado },
-];
-
-// --- ESTADO E CONTROLE DA SIMULAÇÃO ---
-let mockModeAtivado = false;
-// CORREÇÃO: Garante que o `fetch` original mantenha o contexto `window` correto.
-const originalFetch = window.fetch.bind(window);
-const listeners = new Set<(isMockMode: boolean) => void>();
-
-const notify = () => {
-  listeners.forEach(listener => listener(mockModeAtivado));
-};
-
-const loginUsuarioSimulado = () => {
-    if (!ServicoAutenticacaoMock.isAuthenticated()) {
-        ServicoAutenticacaoMock.login('mock@user.com', 'password123');
-    }
-};
-
-// --- CLASSE DE CONTROLE DE SIMULAÇÃO ---
-class SimulationControl {
-    isMockMode(): boolean {
-        return mockModeAtivado;
+    constructor() {
+        console.log("Controle de Simulação inicializado.");
+        // Aplica o wrapper de simulação imediatamente usando o patcher seguro
+        this.applySimulationWrapper();
     }
 
-    ativarSimulacao(): void {
-        if (mockModeAtivado) return;
-        mockModeAtivado = true;
+    private applySimulationWrapper() {
+        SafeFetchPatcher.apply(async (next, url, config) => {
+            // Se a simulação não estiver ativa, simplesmente continua a cadeia
+            if (!this.isSimulationActive) {
+                return next(url, config);
+            }
 
-        console.warn('***********************************************************');
-        console.warn('** MODO DE SIMULAÇÃO ATIVADO. API REAL DESABILITADA. **');
-        console.warn('***********************************************************');
-
-        loginUsuarioSimulado();
-        notify();
-
-        window.fetch = async (url: RequestInfo | URL, config?: RequestInit): Promise<Response> => {
             const urlObj = new URL(url.toString(), window.location.origin);
-            const path = urlObj.pathname;
+            const handlers = getSimulationHandlers();
+            const handler = handlers[urlObj.pathname];
 
-            const staticHandler = staticHandlers[path];
-            if (staticHandler) {
-                 return staticHandler(urlObj, config);
+            if (handler) {
+                console.log(`[SIMULAÇÃO] Interceptando requisição para: ${urlObj.pathname}`);
+                return handler(urlObj, config);
+            } else {
+                console.log(`[SIMULAÇÃO] Sem handler para ${urlObj.pathname}. Deixando passar.`);
+                // Se não houver um handler de simulação, continua para a chamada de rede real
+                return next(url, config);
             }
-
-            for (const dynamic of dynamicHandlers) {
-                if (dynamic.regex.test(path)) {
-                    return dynamic.handler(urlObj, config);
-                }
-            }
-            
-            // CORREÇÃO: Se nenhum handler for encontrado, executa a chamada de rede real.
-            console.warn(`[SIMULAÇÃO] 🟡 Handler não encontrado para "${path}". Usando fetch real.`);
-            return originalFetch(url, config);
-        };
+        });
     }
 
-    desativarSimulacao(): void {
-        if (!mockModeAtivado) return;
-        mockModeAtivado = false;
-        window.fetch = originalFetch;
-        notify();
+    iniciarSimulacao() {
+        if (!this.isSimulationActive) {
+            this.isSimulationActive = true;
+            console.log("--- MODO DE SIMULAÇÃO ATIVADO ---");
+            // Não precisa mais mexer no window.fetch aqui
+        }
     }
 
-    subscribe(listener: (isMockMode: boolean) => void): () => void {
-        listeners.add(listener);
-        listener(mockModeAtivado);
-        return () => listeners.delete(listener);
+    pararSimulacao() {
+        if (this.isSimulationActive) {
+            this.isSimulationActive = false;
+            console.log("--- MODO DE SIMULAÇÃO DESATIVADO ---");
+            // Não precisa mais restaurar o window.fetch aqui
+        }
+    }
+
+    estaAtivo(): boolean {
+        return this.isSimulationActive;
     }
 }
 
-export const ControleDeSimulacao = new SimulationControl();
+export const controleDeSimulacao = new ControleDeSimulacao();
