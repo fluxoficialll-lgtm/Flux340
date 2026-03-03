@@ -1,5 +1,3 @@
-
-import-se de que o pool seja importado corretamente
 import pool from '../database/pool.js';
 import queries from '../database/GestaoDeDados/PostgreSQL/Consultas.Criacao.Perfil.Flux.js';
 
