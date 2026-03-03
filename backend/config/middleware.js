@@ -55,6 +55,8 @@ export const setupMiddlewares = (app, io) => {
     // Middleware Central de Logging e Contexto
     app.use((req, res, next) => {
         const start = Date.now();
+        // Correção: Captura o caminho original da requisição no início.
+        const originalPath = req.originalUrl || req.path;
 
         // 1. Geração e atribuição do Trace ID
         const traceId = req.headers['x-flux-trace-id'] || crypto.randomUUID();
@@ -69,11 +71,12 @@ export const setupMiddlewares = (app, io) => {
 
         // 3. Log de Requisição de Entrada (Inbound)
         if (req.method === 'OPTIONS') {
-            req.logger.debug('CORS_PREFLIGHT', { method: req.method, path: req.path, origin: req.headers.origin });
+            req.logger.debug('CORS_PREFLIGHT', { method: req.method, path: originalPath, origin: req.headers.origin });
         } else {
             req.logger.log('INBOUND_REQUEST', { 
                 method: req.method, 
-                path: req.path, 
+                // Correção: Usa o caminho original no log de entrada.
+                path: originalPath, 
                 ip: req.ip, 
                 clientId: req.headers['x-flux-client-id'] 
             });
@@ -86,7 +89,8 @@ export const setupMiddlewares = (app, io) => {
 
             const logData = {
                 method: req.method,
-                path: req.path,
+                // Correção: Usa o caminho original no log de saída para evitar confusão.
+                path: originalPath,
                 statusCode,
                 duration_ms: duration,
             };
