@@ -1,7 +1,21 @@
+
 import pool from '../../pool.js';
 
 const ConsultarPerfilPorIdUsuario = async (userId) => {
-    // ... (código existente sem alterações)
+    console.log(`[Consulta SQL] Buscando perfil com base no ID do usuário: ${userId}`);
+    const query = 'SELECT * FROM user_profiles WHERE user_id = $1';
+    try {
+        const { rows } = await pool.query(query, [userId]);
+        if (rows.length === 0) {
+            console.log(`[Consulta SQL] Nenhum perfil encontrado para o usuário: ${userId}`);
+        } else {
+            console.log(`[Consulta SQL] Perfil encontrado para o usuário: ${userId}`);
+        }
+        return rows[0];
+    } catch (error) {
+        console.error(`[Consulta SQL] Erro ao buscar perfil para o usuário: ${userId}`, error);
+        throw new Error('Erro no banco de dados ao buscar o perfil.');
+    }
 };
 
 const AtualizarPerfilPorIdUsuario = async (userId, profileData) => {
@@ -16,7 +30,7 @@ const AtualizarPerfilPorIdUsuario = async (userId, profileData) => {
             photo_url = $4,
             website = $5, 
             is_private = $6,
-            profile_completed = $7, // Campo adicionado
+            profile_completed = $7,
             updated_at = NOW()
         WHERE user_id = $8
         RETURNING *;
@@ -29,7 +43,7 @@ const AtualizarPerfilPorIdUsuario = async (userId, profileData) => {
         photoUrl, 
         website, 
         isPrivate, 
-        profile_completed, // Valor adicionado
+        profile_completed,
         userId
     ];
 
@@ -47,12 +61,30 @@ const AtualizarPerfilPorIdUsuario = async (userId, profileData) => {
 };
 
 const DeletarPerfilPorIdUsuario = async (userId) => {
-    // ... (código existente sem alterações)
+    console.log(`[Consulta SQL] Deletando perfil com base no ID do usuário: ${userId}`);
+    const query = 'DELETE FROM user_profiles WHERE user_id = $1 RETURNING *;';
+    try {
+        const { rows } = await pool.query(query, [userId]);
+        console.log(`[Consulta SQL] Perfil deletado com sucesso para o usuário: ${userId}`);
+        return rows[0];
+    } catch (error) {
+        console.error(`[Consulta SQL] Erro ao deletar perfil para o usuário: ${userId}`, error);
+        throw new Error('Erro no banco de dados ao deletar o perfil.');
+    }
 };
 
 const ConsultarUsuarioPorId = async (userId) => {
-    // ... (código existente sem alterações)
+    console.log(`[Consulta SQL] Buscando usuário com ID: ${userId}`);
+    const query = 'SELECT * FROM user_profiles WHERE user_id = $1';
+    try {
+        const { rows } = await pool.query(query, [userId]);
+        return rows[0];
+    } catch (error) {
+        console.error(`[Consulta SQL] Erro ao buscar usuário com ID: ${userId}`, error);
+        throw new Error('Erro no banco de dados ao buscar o usuário.');
+    }
 };
+
 
 export default {
     ConsultarPerfilPorIdUsuario,
