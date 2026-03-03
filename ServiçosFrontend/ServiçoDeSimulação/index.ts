@@ -5,17 +5,18 @@ import { authHandlers } from './simulacoes/SimulacaoDeAuth';
 import { feedHandlers } from './simulacoes/SimulacaoDeFeed';
 import { marketplaceHandlers } from './simulacoes/SimulacaoDeMarketplace';
 import { profileHandlers } from './simulacoes/Simulacao.Perfil.Flux';
+import { metricsHandlers } from './simulacoes/SimulacaoDeMetricas'; // IMPORTADO
 
-// A CORREÇÃO ESTÁ AQUI: Re-exporta o serviço de controle da simulação com o nome esperado.
+// Re-exporta o serviço de controle da simulação com o nome esperado.
 export { controleDeSimulacao as servicoDeSimulacao } from './ControleDeSimulacao';
 
-
-// Centraliza todos os handlers de simulação de diferentes módulos em um único objeto.
+// Centraliza todos os handlers de simulação em um único objeto.
 const allSimulationHandlers = {
     ...authHandlers,
     ...feedHandlers,
     ...marketplaceHandlers,
     ...profileHandlers,
+    ...metricsHandlers, // ADICIONADO
 };
 
 /**

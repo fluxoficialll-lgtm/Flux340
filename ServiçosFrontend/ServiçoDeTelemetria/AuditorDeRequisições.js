@@ -1,52 +1,41 @@
 
 // ServiçosFrontend/ServiçoDeTelemetria/AuditorDeRequisições.js
+import { SafeFetchPatcher } from '../SafeFetchPatcher'; // Corrigido para usar o patcher
 
-// Objeto para manter o estado do auditor
 const auditorState = {
   isInitialized: false,
-  originalFetch: null,
 };
 
-// Função para inicializar o auditor de requisições
 export function initAuditorDeRequisições() {
-  // Evita reinicialização, que pode causar loops infinitos
   if (auditorState.isInitialized) {
     return;
   }
-  
-  // Armazena a função fetch original apenas uma vez
-  auditorState.originalFetch = window.fetch;
-  
-  // Substitui a função fetch global
-  window.fetch = async (...args) => {
-    const [resource, config] = args;
-    
-    // Extrai a URL, tratando tanto o caso de ser uma string quanto um objeto Request
-    const url = typeof resource === 'string' ? resource : resource.url;
+  auditorState.isInitialized = true;
+
+  console.log("[TELEMETRIA] ✅ Auditor de Requisições inicializado e aplicado ao SafeFetchPatcher.");
+
+  // Aplica o wrapper de telemetria usando o SafeFetchPatcher
+  SafeFetchPatcher.apply(async (next, url, config) => {
     const startTime = performance.now();
 
     try {
-      // Executa a requisição usando a função fetch original armazenada
-      const response = await auditorState.originalFetch(...args);
+      // Chama a próxima função na cadeia (seja o fetch nativo ou outro wrapper)
+      const response = await next(url, config);
+
       const duration = performance.now() - startTime;
+      const finalUrl = url.toString();
 
-      // Log de sucesso
-      console.log(`[AUDITOR] Sucesso: ${response.status} ${url} (${duration.toFixed(2)}ms)`);
+      // Clona a resposta para ler o status sem consumir o corpo
+      const responseForLog = response.clone();
       
-      return response;
+      console.log(`[TELEMETRIA] Requisição auditada: ${config?.method || 'GET'} ${finalUrl} - Status: ${responseForLog.status} (${duration.toFixed(2)}ms)`);
 
+      return response; // Retorna a resposta original para a aplicação
     } catch (error) {
       const duration = performance.now() - startTime;
-
-      // Log de erro
-      console.error(`[AUDITOR] Falha: ${url} (${duration.toFixed(2)}ms)`, error);
-
-      // Propaga o erro para que a aplicação possa tratá-lo
-      throw error;
+      const finalUrl = url.toString();
+      console.error(`[TELEMETRIA] Falha na requisição: ${config?.method || 'GET'} ${finalUrl} (${duration.toFixed(2)}ms)`, error);
+      throw error; // Re-lança o erro para não quebrar a aplicação
     }
-  };
-
-  // Marca o auditor como inicializado
-  auditorState.isInitialized = true;
-  console.log("[AUDITOR] Auditor de Requisições iniciado.");
+  });
 }
