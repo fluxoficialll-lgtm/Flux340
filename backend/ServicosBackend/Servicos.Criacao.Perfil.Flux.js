@@ -5,7 +5,8 @@ import repositorioCriacaoPerfil from '../Repositorios/Repositorio.Criacao.Perfil
 import ServicoAuditoriaCriarPerfil from './Servico.Auditoria.Criar.Perfil.js';
 
 const PossibilidadeBuscarPerfil = async (userId) => {
-    return await repositorioCriacaoPerfil.PossibilidadeBuscarPerfilPorIdUsuario(userId);
+    // Esta função permanece, caso seja necessária em outro lugar
+    return await repositorioCriacaoPerfil.PossibilidadeBuscarUsuarioPorId(userId);
 };
 
 const PossibilidadeAtualizarPerfil = async (userId, profileData, requestingUser) => {
@@ -21,11 +22,9 @@ const PossibilidadeAtualizarPerfil = async (userId, profileData, requestingUser)
         throw erro;
     }
 
-    // Lógica para determinar se o perfil está completo
     const { name, nickname } = profileData;
-    const isProfileCompleted = name && name.trim() !== '' && nickname && nickname.trim() !== '';
+    const isProfileCompleted = !!(name && name.trim() && nickname && nickname.trim());
     
-    // Adiciona o status de "completo" aos dados a serem salvos
     const dataToUpdate = {
         ...profileData,
         profile_completed: isProfileCompleted
@@ -34,7 +33,8 @@ const PossibilidadeAtualizarPerfil = async (userId, profileData, requestingUser)
     try {
         auditoria.tentativaDeGravacao(userId, dataToUpdate);
         
-        const perfilAtualizado = await repositorioCriacaoPerfil.PossibilidadeAtualizarPerfilPorIdUsuario(userId, dataToUpdate);
+        // CORREÇÃO: Chamando a função de upsert correta no repositório
+        const perfilAtualizado = await repositorioCriacaoPerfil.PossibilidadeAtualizarPerfil(userId, dataToUpdate);
         
         auditoria.sucessoNaGravacao(userId, perfilAtualizado);
 
@@ -51,13 +51,12 @@ const PossibilidadeDeletarPerfil = async (userId, requestingUser) => {
     if (!temPermissao) {
         throw new Error('Acesso negado. Você não tem permissão para deletar este perfil.');
     }
+    // A função de deletar pode continuar como está, se existir no repositório
     return await repositorioCriacaoPerfil.PossibilidadeDeletarPerfilPorIdUsuario(userId);
 };
 
-const servicoCriacaoPerfil = {
+export default {
     PossibilidadeBuscarPerfil,
     PossibilidadeAtualizarPerfil,
     PossibilidadeDeletarPerfil,
 };
-
-export default servicoCriacaoPerfil;

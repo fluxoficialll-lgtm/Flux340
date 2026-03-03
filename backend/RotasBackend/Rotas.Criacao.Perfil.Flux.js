@@ -6,24 +6,25 @@ import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
 
-// @route   GET /me
+// As rotas agora usam os nomes de função exportados corretamente do controlador.
+
+// @route   GET /api/profiles/me
 // @desc    Buscar o perfil do usuário autenticado
 // @access  Private
-router.get('/me', authMiddleware, ControlesCriacaoPerfilFlux.PossibilidadeBuscarPerfilAutenticado);
+router.get('/me', authMiddleware, ControlesCriacaoPerfilFlux.buscarPerfil);
 
-// @route   PUT /me
-// @desc    Atualizar o perfil do usuário autenticado
+// @route   PUT /api/profiles/me
+// @desc    Atualizar (ou criar) o perfil do usuário autenticado
 // @access  Private
-router.put('/me', authMiddleware, ControlesCriacaoPerfilFlux.PossibilidadeProcessarAtualizacaoPerfil);
+router.put('/me', authMiddleware, ControlesCriacaoPerfilFlux.atualizarPerfil);
 
-// @route   DELETE /me
+// @route   DELETE /api/profiles/me
 // @desc    Deletar o perfil do usuário autenticado
 // @access  Private
-router.delete('/me', authMiddleware, ControlesCriacaoPerfilFlux.PossibilidadeSolicitarExclusaoPerfil);
+router.delete('/me', authMiddleware, ControlesCriacaoPerfilFlux.deletarPerfil);
 
-// @route   GET /:userId
-// @desc    Buscar perfil de um usuário público
-// @access  Public
-router.get('/:userId', ControlesCriacaoPerfilFlux.PossibilidadeBuscarPerfilPublico);
+// As rotas públicas, se existirem, não precisam de autenticação.
+// Exemplo: buscar perfil público de outro usuário.
+// router.get('/:userId', ControlesCriacaoPerfilFlux.buscarPerfilPublico);
 
 export default router;
