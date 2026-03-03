@@ -2,51 +2,60 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { ErroSenha } from '@/tipos';
+import { DadosEntradaRegistro, ErrosRegistro } from '../tipos';
+import { ErroSenha } from '../tipos';
 
 export const useRegister = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    
-    // Form State
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [termsAccepted, setTermsAccepted] = useState(false);
-    
-    // UI State
-    const [errors, setErrors] = useState<{ email?: string, password?: string, confirm?: string, form?: string }>({});
+
+    // Estado unificado para o formulário
+    const [dados, setDados] = useState<DadosEntradaRegistro>({
+        email: '',
+        senha: '',
+        confirmacaoSenha: '',
+        termosAceitos: false,
+        indicadoPor: undefined,
+    });
+
+    // Estado da interface do usuário
+    const [errors, setErrors] = useState<ErrosRegistro>({});
     const [loading, setLoading] = useState(false);
     const [isValid, setIsValid] = useState(false);
-    
-    // Referral State
-    const [referredBy, setReferredBy] = useState<string | null>(null);
+
+    // Função genérica para atualizar campos do formulário
+    const updateField = (key: keyof DadosEntradaRegistro, value: string | boolean) => {
+        setDados((prev) => ({ ...prev, [key]: value }));
+    };
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const ref = params.get('ref');
         if (ref) {
-            setReferredBy(ref);
+            updateField('indicadoPor', ref);
         }
+    }, [location]);
 
-        const newErrors: any = {};
+    useEffect(() => {
+        const newErrors: ErrosRegistro = {};
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-        if (email && !emailRegex.test(email)) {
+
+        if (dados.email && !emailRegex.test(dados.email)) {
             newErrors.email = ErroSenha.FORMATO_INVALIDO;
         }
-        if (password && password.length < 6) {
-            newErrors.password = ErroSenha.SENHA_MUITO_CURTA;
+        if (dados.senha && dados.senha.length < 6) {
+            newErrors.senha = ErroSenha.SENHA_MUITO_CURTA;
         }
-        if (confirmPassword && password !== confirmPassword) {
-            newErrors.confirm = ErroSenha.SENHAS_NAO_CONFEREM;
+        if (dados.confirmacaoSenha && dados.senha !== dados.confirmacaoSenha) {
+            newErrors.confirmacao = ErroSenha.SENHAS_NAO_CONFEREM;
         }
 
         setErrors(newErrors);
-        
-        const allFilled = email && password && confirmPassword && termsAccepted;
+
+        const allFilled = dados.email && dados.senha && dados.confirmacaoSenha && dados.termosAceitos;
         setIsValid(!!allFilled && Object.keys(newErrors).length === 0);
 
-    }, [email, password, confirmPassword, termsAccepted, location]);
+    }, [dados]);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,28 +65,27 @@ export const useRegister = () => {
         setErrors({});
 
         try {
-            // Chama o serviço de autenticação centralizado para registrar o usuário
-            await authService.register({ email, password, referredBy: referredBy || undefined });
+            await authService.register({
+                email: dados.email,
+                password: dados.senha,
+                referredBy: dados.indicadoPor,
+            });
             
-            // Redireciona para a página de verificação de e-mail após o sucesso
             navigate('/verify-email');
 
         } catch (err: any) {
-            setErrors(prev => ({ ...prev, form: err.message || 'Ocorreu um erro no cadastro.' }));
+            setErrors(prev => ({ ...prev, formulario: err.message || 'Ocorreu um erro no cadastro.' }));
         } finally {
             setLoading(false);
         }
-    }, [isValid, email, password, referredBy, navigate]);
+    }, [isValid, dados, navigate]);
 
     return {
-        email, setEmail,
-        password, setPassword,
-        confirmPassword, setConfirmPassword,
-        termsAccepted, setTermsAccepted,
+        dados,
+        updateField,
         errors,
         loading,
         isValid,
-        referredBy,
         handleSubmit,
     };
 };

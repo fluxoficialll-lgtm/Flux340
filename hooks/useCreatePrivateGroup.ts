@@ -1,82 +1,91 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ServiçoCriaçãoGrupoPrivado from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Privado.js';
+import { DadosGrupoPrivado, ErrosCriacaoGrupoPrivado } from '../tipos';
 
 export const useCreatePrivateGroup = () => {
   const navigate = useNavigate();
-  const [groupName, setGroupName] = useState('');
-  const [description, setDescription] = useState('');
-  const [coverImage, setCoverImage] = useState<string | undefined>(undefined);
-  const [rawImage, setRawImage] = useState<string>('');
+
+  // Estado unificado para os dados do formulário
+  const [dadosGrupo, setDadosGrupo] = useState<DadosGrupoPrivado>({ 
+    nomeGrupo: '',
+    descricao: '',
+    arquivoCapa: null 
+  });
+
+  // Estados da UI
+  const [imagemCapaPreview, setImagemCapaPreview] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isCropOpen, setIsCropOpen] = useState(false);
+  const [rawImage, setRawImage] = useState<string | null>(null);
+  const [errors, setErrors] = useState<ErrosCriacaoGrupoPrivado>({});
 
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setRawImage(ev.target?.result as string);
-        setIsCropOpen(true);
-      };
-      reader.readAsDataURL(file);
+  // Função genérica para atualizar os campos do formulário
+  const updateField = useCallback((field: keyof DadosGrupoPrivado, value: any) => {
+    setDadosGrupo(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setRawImage(e.target?.result as string);
+            setIsCropOpen(true);
+        };
+        reader.readAsDataURL(file);
     }
   };
 
-  const handleCroppedImage = (croppedBase64: string) => {
-    setCoverImage(croppedBase64);
+  // Converte a imagem cortada (base64) para um File e atualiza o estado
+  const handleCroppedImage = async (base64Image: string) => {
+    setIsCropOpen(false);
+    setImagemCapaPreview(base64Image);
+    const blob = await fetch(base64Image).then(res => res.blob());
+    const file = new File([blob], "cover.png", { type: "image/png" });
+    updateField('arquivoCapa', file);
   };
 
-  const handleBack = () => {
-      if (window.history.state && window.history.state.idx > 0) {
-          navigate(-1);
-      } else {
-          navigate('/create-group'); // Rota de fallback
-      }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isCreating) return;
-
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!dadosGrupo.nomeGrupo.trim()) {
+      setErrors({ nomeGrupo: 'O nome do grupo é obrigatório.' });
+      return;
+    }
+    setErrors({});
     setIsCreating(true);
-    
+
     try {
-        let coverImageBlob: Blob | null = null;
-        if (coverImage) {
-            coverImageBlob = await fetch(coverImage).then(res => res.blob());
-        }
-
         await ServiçoCriaçãoGrupoPrivado.criar({
-            name: groupName,
-            description: description,
-            coverImageBlob: coverImageBlob,
+            name: dadosGrupo.nomeGrupo,
+            description: dadosGrupo.descricao,
+            coverImageBlob: dadosGrupo.arquivoCapa,
         });
-
-      navigate('/groups');
+        navigate('/groups');
     } catch (error) {
-      console.error(error); // Log do erro para depuração
-      alert((error as Error).message || "Erro ao criar grupo privado.");
+        console.error("Falha ao criar o grupo privado:", error);
+        setErrors({ geral: (error as Error).message || 'Ocorreu uma falha ao criar o grupo privado.' });
     } finally {
-      setIsCreating(false);
+        setIsCreating(false);
     }
   };
+
+  const handleBack = () => navigate('/create-group');
 
   return {
-    groupName,
-    setGroupName,
-    description,
-    setDescription,
-    coverImage,
+    dadosGrupo,
+    updateField,
+    imagemCapaPreview,
     isCreating,
     isCropOpen,
     setIsCropOpen,
     rawImage,
+    errors,
     handleCoverChange,
     handleCroppedImage,
-    handleSubmit,
     handleBack,
+    handleSubmit,
     navigate
   };
 };

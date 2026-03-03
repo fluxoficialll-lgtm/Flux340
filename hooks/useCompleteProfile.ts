@@ -1,28 +1,29 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { UserProfile } from '../types';
 import ServicoAuditoriaCriarPerfil from '../ServiçosFrontend/ServicoLogs/Servico.Auditoria.Criar.Perfil.js';
-import type { DadosFormularioPerfil } from '@/tipos/CompleteProfile.types';
+import type { DadosFormularioPerfil, ErrosCompletarPerfil } from '@/tipos/CompleteProfile.types';
 
 export const useCompleteProfile = () => {
     const navigate = useNavigate();
     const auditoria = ServicoAuditoriaCriarPerfil;
 
-    const [dadosFormulario, setDadosFormulario] = useState<DadosFormularioPerfil>({
+    // Estado unificado para os dados do perfil
+    const [dadosPerfil, setDadosPerfil] = useState<DadosFormularioPerfil>({
         name: '',
         nickname: '',
         bio: '',
+        perfilPrivado: false,
     });
-    const [perfilPrivado, setPerfilPrivado] = useState(false);
 
+    // Estados da interface e de controle
     const [previaImagem, setPreviaImagem] = useState<string | null>(null);
     const [arquivoSelecionado, setArquivoSelecionado] = useState<File | null>(null);
     const [carregando, setCarregando] = useState(false);
-    const [erroNomeUsuario, setErroNomeUsuario] = useState('');
-
+    const [errors, setErrors] = useState<ErrosCompletarPerfil>({});
     const [cortarAberto, setCortarAberto] = useState(false);
     const [imagemOriginal, setImagemOriginal] = useState<string>('');
 
@@ -33,28 +34,24 @@ export const useCompleteProfile = () => {
         auditoria.decisaoRedirecionamento(user);
         if (!user) {
             navigate('/');
-        } else if (user.profile_completed) { // CORRIGIDO
+        } else if (user.profile_completed) {
             navigate('/feed');
         }
     }, [navigate]);
 
-    const aoMudarInput = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+    // Função genérica para atualizar campos do formulário
+    const updateField = useCallback((key: keyof DadosFormularioPerfil, value: string | boolean) => {
         let valorFinal = value;
-
-        if (name === 'nickname') {
+        if (key === 'nickname' && typeof value === 'string') {
             const valorLimpo = value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
             valorFinal = valorLimpo;
-            setErroNomeUsuario('');
+            setErrors(prev => ({ ...prev, nomeUsuario: undefined })); // Limpa o erro ao digitar
         }
         
-        setDadosFormulario(prev => ({ ...prev, [name]: valorFinal }));
-        auditoria.alteracaoFormulario(name, valorFinal);
-    };
-    
-    const aoMudarPrivacidade = (privado: boolean) => {
-        setPerfilPrivado(privado);
-    };
+        setDadosPerfil(prev => ({ ...prev, [key]: valorFinal }));
+        auditoria.alteracaoFormulario(key, valorFinal);
+    }, [auditoria]);
+
 
     const aoMudarImagem = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -82,51 +79,51 @@ export const useCompleteProfile = () => {
 
     const aoSubmeter = async (e: React.FormEvent) => {
         e.preventDefault();
-        setErroNomeUsuario('');
+        setErrors({});
 
-        if (!dadosFormulario.nickname?.trim()) {
-            setErroNomeUsuario('Nome de usuário é obrigatório.');
+        if (!dadosPerfil.nickname?.trim()) {
+            setErrors({ nomeUsuario: 'Nome de usuário é obrigatório.' });
             return;
         }
 
         setCarregando(true);
 
-        const dadosPerfil: UserProfile = {
-            name: dadosFormulario.name || '',
-            nickname: dadosFormulario.nickname || '',
-            bio: dadosFormulario.bio || '',
-            photoUrl: '',
-            website: '',
-            isPrivate: perfilPrivado,
+        const dadosParaApi: UserProfile = {
+            name: dadosPerfil.name || '',
+            nickname: dadosPerfil.nickname || '',
+            bio: dadosPerfil.bio || '',
+            photoUrl: '', // Será preenchido após o upload
+            website: '', // Não está no formulário, então fica vazio
+            isPrivate: dadosPerfil.perfilPrivado,
         };
 
-        auditoria.tentativaDeSubmissao(dadosPerfil);
+        auditoria.tentativaDeSubmissao(dadosParaApi);
 
         try {
             if (arquivoSelecionado) {
-                dadosPerfil.photoUrl = await fileService.uploadFile(arquivoSelecionado);
+                dadosParaApi.photoUrl = await fileService.uploadFile(arquivoSelecionado);
             }
 
-            const usuarioAtualizado = await authService.completeProfile(dadosPerfil);
+            const usuarioAtualizado = await authService.completeProfile(dadosParaApi);
             
             auditoria.sucessoNaConclusao({ success: true });
             auditoria.estadoAposSalvar(usuarioAtualizado);
             auditoria.decisaoRedirecionamento(usuarioAtualizado);
 
-            if (usuarioAtualizado?.profile_completed) { // CORRIGIDO
+            if (usuarioAtualizado?.profile_completed) {
                 navigate('/feed');
             } else {
-                alert("Não foi possível confirmar a conclusão do seu perfil. Verifique os logs.");
+                setErrors({ formulario: "Não foi possível confirmar a conclusão do seu perfil. Verifique os logs." });
             }
 
         } catch (err: any) {
-            auditoria.falhaNaConclusao(err, dadosPerfil);
+            auditoria.falhaNaConclusao(err, dadosParaApi);
             console.error("Falha ao completar o perfil no hook 'useCompleteProfile':", err);
             
             if (err.message && err.message.includes('NAME_TAKEN')) {
-                setErroNomeUsuario('Este nome de usuário já está em uso.');
+                setErrors({ nomeUsuario: 'Este nome de usuário já está em uso.' });
             } else {
-                alert(err.message || 'Ocorreu um erro ao finalizar o perfil. Tente novamente.');
+                setErrors({ formulario: err.message || 'Ocorreu um erro ao finalizar o perfil. Tente novamente.' });
             }
         } finally {
             setCarregando(false);
@@ -140,18 +137,16 @@ export const useCompleteProfile = () => {
     };
 
     return {
-        dadosFormulario, 
-        perfilPrivado, 
+        dadosPerfil, 
+        updateField,
         previaImagem, 
         carregando, 
-        erroNomeUsuario, 
+        errors,
         cortarAberto, 
         setCortarAberto, 
-        imagemOriginal, 
-        aoMudarInput, 
+        imagemOriginal,
         aoMudarImagem, 
-        aoSalvarImagemCortada, 
-        aoMudarPrivacidade, 
+        aoSalvarImagemCortada,
         aoSubmeter,
         aoSair
     };

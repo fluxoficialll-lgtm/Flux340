@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import type { LoginDadosEmailProps } from '@/pages/tipos/Login.types';
+import type { LoginDadosEmailProps } from '../../../tipos';
 
 export const LoginEmailCard: React.FC<LoginDadosEmailProps> = ({
     email, definirEmail, senha, definirSenha, aoSubmeter, aoVoltar, carregando, erro

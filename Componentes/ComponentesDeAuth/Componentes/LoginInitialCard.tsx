@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import type { LoginDadosIniciaisProps } from '@/pages/tipos/Login.types';
+import type { LoginDadosIniciaisProps } from '../../../tipos';
 
 export const LoginInitialCard: React.FC<LoginDadosIniciaisProps> = ({ 
     onSelecionarEmail, 

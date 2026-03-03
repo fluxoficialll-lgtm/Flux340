@@ -1,16 +1,30 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ServiçoCriaçãoGrupoPublico from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Publico.js';
+import { DadosGrupoPublico, ErrosCriacaoGrupoPublico } from '../tipos';
 
 export const useCreatePublicGroup = () => {
   const navigate = useNavigate();
-  const [groupName, setGroupName] = useState('');
-  const [description, setDescription] = useState('');
-  const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [rawImage, setRawImage] = useState<string | null>(null);
+
+  // Estado unificado para os dados do formulário
+  const [dadosGrupo, setDadosGrupo] = useState<DadosGrupoPublico>({ 
+    nomeGrupo: '',
+    descricao: '',
+    arquivoCapa: null 
+  });
+
+  // Estados da UI
+  const [imagemCapaPreview, setImagemCapaPreview] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isCropOpen, setIsCropOpen] = useState(false);
+  const [rawImage, setRawImage] = useState<string | null>(null);
+  const [errors, setErrors] = useState<ErrosCriacaoGrupoPublico>({});
+
+  // Função genérica para atualizar os campos do formulário
+  const updateField = useCallback((field: keyof DadosGrupoPublico, value: any) => {
+    setDadosGrupo(prev => ({ ...prev, [field]: value }));
+  }, []);
 
   const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -24,32 +38,34 @@ export const useCreatePublicGroup = () => {
     }
   };
 
-  const handleCroppedImage = async (image: string) => {
+  // Converte a imagem cortada (base64) para um File e atualiza o estado
+  const handleCroppedImage = async (base64Image: string) => {
     setIsCropOpen(false);
-    setCoverImage(image);
+    setImagemCapaPreview(base64Image);
+    const blob = await fetch(base64Image).then(res => res.blob());
+    const file = new File([blob], "cover.png", { type: "image/png" });
+    updateField('arquivoCapa', file);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!groupName) return;
-
+    if (!dadosGrupo.nomeGrupo.trim()) {
+      setErrors({ nomeGrupo: 'O nome do grupo é obrigatório.' });
+      return;
+    }
+    setErrors({});
     setIsCreating(true);
+
     try {
-        let coverImageBlob: Blob | null = null;
-        if (coverImage) {
-            coverImageBlob = await fetch(coverImage).then(res => res.blob());
-        }
-
         await ServiçoCriaçãoGrupoPublico.criar({
-            name: groupName,
-            description: description,
-            coverImageBlob: coverImageBlob,
+            name: dadosGrupo.nomeGrupo,
+            description: dadosGrupo.descricao,
+            coverImageBlob: dadosGrupo.arquivoCapa,
         });
-
         navigate('/groups');
     } catch (error) {
-        console.error("Failed to create group:", error);
-        alert((error as Error).message);
+        console.error("Falha ao criar o grupo:", error);
+        setErrors({ geral: (error as Error).message || 'Ocorreu uma falha ao criar o grupo.' })
     } finally {
         setIsCreating(false);
     }
@@ -58,15 +74,14 @@ export const useCreatePublicGroup = () => {
   const handleBack = () => navigate('/create-group');
 
   return {
-    groupName,
-    setGroupName,
-    description,
-    setDescription,
-    coverImage,
+    dadosGrupo,
+    updateField,
+    imagemCapaPreview,
     isCreating,
     isCropOpen,
     setIsCropOpen,
     rawImage,
+    errors,
     handleCoverChange,
     handleCroppedImage,
     handleBack,
