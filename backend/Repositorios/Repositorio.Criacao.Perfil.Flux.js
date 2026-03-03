@@ -9,32 +9,32 @@ import consultas from '../database/GestaoDeDados/PostgreSQL/Consultas.Criacao.Pe
  * para o serviço de negócio interagir com os dados do perfil.
  */
 
-const findProfileByUserId = async (userId) => {
+const PossibilidadeBuscarPerfilPorIdUsuario = async (userId) => {
     console.log(`Repositório: Buscando perfil para o usuário ID: ${userId}`);
-    return await consultas.findProfileByUserId(userId);
+    return await consultas.ConsultarPerfilPorIdUsuario(userId);
 };
 
-const updateProfileByUserId = async (userId, profileData) => {
+const PossibilidadeAtualizarPerfilPorIdUsuario = async (userId, profileData) => {
     console.log(`Repositório: Atualizando perfil para o usuário ID: ${userId}`);
-    return await consultas.updateProfileByUserId(userId, profileData);
+    return await consultas.AtualizarPerfilPorIdUsuario(userId, profileData);
 };
 
-const deleteProfileByUserId = async (userId) => {
+const PossibilidadeDeletarPerfilPorIdUsuario = async (userId) => {
     console.log(`Repositório: Deletando perfil para o usuário ID: ${userId}`);
-    return await consultas.deleteProfileByUserId(userId);
+    return await consultas.DeletarPerfilPorIdUsuario(userId);
 };
 
 // CORREÇÃO: Expondo a nova função para que o controlador possa usá-la.
-const findUserById = async (userId) => {
+const PossibilidadeBuscarUsuarioPorId = async (userId) => {
     console.log(`Repositório: Buscando usuário (para auditoria) com ID: ${userId}`);
-    return await consultas.findUserById(userId);
+    return await consultas.ConsultarUsuarioPorId(userId);
 };
 
 const repositorioCriacaoPerfil = {
-    findProfileByUserId,
-    updateProfileByUserId,
-    deleteProfileByUserId,
-    findUserById // Exportando a função.
+    PossibilidadeBuscarPerfilPorIdUsuario,
+    PossibilidadeAtualizarPerfilPorIdUsuario,
+    PossibilidadeDeletarPerfilPorIdUsuario,
+    PossibilidadeBuscarUsuarioPorId // Exportando a função.
 };
 
 export default repositorioCriacaoPerfil;

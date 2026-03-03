@@ -1,10 +1,10 @@
 import pool from '../../pool.js';
 
-const findProfileByUserId = async (userId) => {
+const ConsultarPerfilPorIdUsuario = async (userId) => {
     // ... (código existente sem alterações)
 };
 
-const updateProfileByUserId = async (userId, profileData) => {
+const AtualizarPerfilPorIdUsuario = async (userId, profileData) => {
     const { name, nickname, bio, photoUrl, website, isPrivate, profile_completed } = profileData;
 
     const query = `
@@ -46,17 +46,17 @@ const updateProfileByUserId = async (userId, profileData) => {
     }
 };
 
-const deleteProfileByUserId = async (userId) => {
+const DeletarPerfilPorIdUsuario = async (userId) => {
     // ... (código existente sem alterações)
 };
 
-const findUserById = async (userId) => {
+const ConsultarUsuarioPorId = async (userId) => {
     // ... (código existente sem alterações)
 };
 
 export default {
-    findProfileByUserId,
-    updateProfileByUserId,
-    deleteProfileByUserId,
-    findUserById
+    ConsultarPerfilPorIdUsuario,
+    AtualizarPerfilPorIdUsuario,
+    DeletarPerfilPorIdUsuario,
+    ConsultarUsuarioPorId
 };

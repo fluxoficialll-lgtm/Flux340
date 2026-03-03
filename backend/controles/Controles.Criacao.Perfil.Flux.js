@@ -7,10 +7,10 @@ import ServicoAuditoriaCriarPerfil from '../ServicosBackend/Servico.Auditoria.Cr
 
 const ControlesCriacaoPerfilFlux = {
 
-    async buscarMeuPerfil(req, res) {
+    async PossibilidadeBuscarPerfilAutenticado(req, res) {
         try {
             const userId = req.user.id;
-            const perfil = await repositorioCriacaoPerfil.findUserById(userId);
+            const perfil = await repositorioCriacaoPerfil.PossibilidadeBuscarUsuarioPorId(userId);
             if (!perfil) {
                 return res.status(404).json({ message: 'Perfil não encontrado.' });
             }
@@ -21,16 +21,15 @@ const ControlesCriacaoPerfilFlux = {
         }
     },
 
-    async buscarPerfil(req, res) {
+    async PossibilidadeBuscarPerfilPublico(req, res) {
         try {
             const { userId } = req.params;
-            const perfil = await repositorioCriacaoPerfil.findUserById(userId);
+            const perfil = await repositorioCriacaoPerfil.PossibilidadeBuscarUsuarioPorId(userId);
 
             if (!perfil) {
                 return res.status(404).json({ message: 'Perfil não encontrado.' });
             }
 
-            // Apenas retornando dados públicos
             const perfilPublico = {
                 id: perfil.id,
                 nome_usuario: perfil.nome_usuario,
@@ -47,7 +46,7 @@ const ControlesCriacaoPerfilFlux = {
         }
     },
 
-    async atualizarPerfil(req, res) {
+    async PossibilidadeProcessarAtualizacaoPerfil(req, res) {
         const userId = req.user.id;
         const profileData = req.body;
         const auditoria = ServicoAuditoriaCriarPerfil;
@@ -55,13 +54,13 @@ const ControlesCriacaoPerfilFlux = {
         auditoria.iniciarProcesso(userId, req.user);
 
         try {
-            const userAtual = await repositorioCriacaoPerfil.findUserById(userId); 
+            const userAtual = await repositorioCriacaoPerfil.PossibilidadeBuscarUsuarioPorId(userId); 
             if (!userAtual) {
                 return res.status(404).json({ message: "Usuário não encontrado." });
             }
             auditoria.estadoAntes(userAtual);
 
-            const perfilAtualizado = await servicoCriacaoPerfil.updateProfile(userId, profileData, req.user);
+            const perfilAtualizado = await servicoCriacaoPerfil.PossibilidadeAtualizarPerfil(userId, profileData, req.user);
 
             auditoria.resultadoQuery(perfilAtualizado);
             auditoria.verificacaoPerfilCompleto(perfilAtualizado);
@@ -83,11 +82,10 @@ const ControlesCriacaoPerfilFlux = {
         }
     },
 
-    async deletarPerfil(req, res) {
+    async PossibilidadeSolicitarExclusaoPerfil(req, res) {
         try {
             const userId = req.user.id;
-            // Assumindo que o serviço 'deleteProfile' existe e lida com a lógica de deleção
-            await servicoCriacaoPerfil.deleteProfile(userId, req.user);
+            await servicoCriacaoPerfil.PossibilidadeDeletarPerfil(userId, req.user);
             res.status(200).json({ message: 'Perfil deletado com sucesso.' });
         } catch (error) {
             console.error(`[Controle Perfil] Erro ao deletar perfil ${req.user.id}:`, error);
