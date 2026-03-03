@@ -1,6 +1,8 @@
 
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../hooks/useAuth';
 import { useLogin } from '../hooks/useLogin';
 import { LoginInitialCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginInitialCard';
 import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginEmailCard';
@@ -8,6 +10,7 @@ import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/Log
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export const Login: React.FC = () => {
+    const { user, loading: authLoading } = useAuth();
     const {
         carregando,
         processando,
@@ -21,6 +24,21 @@ export const Login: React.FC = () => {
         submeterLoginEmail,
         submeterLoginGoogle,
     } = useLogin();
+
+    if (authLoading) {
+        return (
+            <div className="h-screen w-full bg-[#0c0f14] flex flex-col items-center justify-center gap-4">
+                <i className="fa-solid fa-circle-notch fa-spin text-[#00c2ff] text-2xl"></i>
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">
+                    Verificando Credenciais...
+                </span>
+            </div>
+        );
+    }
+
+    if (user) {
+        return <Navigate to={user.profile_completed ? '/feed' : '/complete-profile'} replace />;
+    }
 
     const CamadaDeProcessamento = () => (
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-[32px] flex items-center justify-center z-50">
@@ -50,14 +68,6 @@ export const Login: React.FC = () => {
             </div>
         );
     };
-
-    if (carregando) {
-        return (
-            <div className="h-screen w-full bg-[#0c0f14] flex items-center justify-center">
-                <i className="fa-solid fa-circle-notch fa-spin text-[#00c2ff] text-3xl"></i>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-white font-['Inter'] relative overflow-hidden">

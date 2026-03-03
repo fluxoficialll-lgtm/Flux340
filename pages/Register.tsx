@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useRegister } from '../hooks/useRegister'; // Importando o novo hook
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { useRegister } from '../hooks/useRegister';
 import { RegisterCard } from '../Componentes/ComponentesDeAuth/Componentes/RegisterCard';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
-  
-  // Utilizando o hook para obter todos os estados e manipuladores
+  const { user, loading: authLoading } = useAuth();
   const {
     email, setEmail,
     password, setPassword,
@@ -19,6 +19,21 @@ export const Register: React.FC = () => {
     referredBy,
     handleSubmit,
   } = useRegister();
+
+  if (authLoading) {
+    return (
+        <div className="h-screen w-full bg-[#0c0f14] flex flex-col items-center justify-center gap-4">
+            <i className="fa-solid fa-circle-notch fa-spin text-[#00c2ff] text-2xl"></i>
+            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">
+                Verificando Credenciais...
+            </span>
+        </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to={user.profile_completed ? '/feed' : '/complete-profile'} replace />;
+  }
 
   return (
     <div className="h-screen w-full overflow-y-auto bg-[#0c0f14] text-white font-['Inter'] flex items-center justify-center p-5">
