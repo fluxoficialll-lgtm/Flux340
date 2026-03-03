@@ -5,13 +5,12 @@ import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authS
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { UserProfile } from '../types';
 import ServicoAuditoriaCriarPerfil from '../ServiçosFrontend/ServicoLogs/Servico.Auditoria.Criar.Perfil.js';
-import type { DadosFormularioPerfil, ErrosCompletarPerfil } from '@/tipos/CompleteProfile.types';
+import type { DadosFormularioPerfil, ErrosCompletarPerfil } from '@/tipos/types.Criacao.Perfil.Flux';
 
 export const useCompleteProfile = () => {
     const navigate = useNavigate();
     const auditoria = ServicoAuditoriaCriarPerfil;
 
-    // Estado unificado para os dados do perfil
     const [dadosPerfil, setDadosPerfil] = useState<DadosFormularioPerfil>({
         name: '',
         nickname: '',
@@ -19,7 +18,6 @@ export const useCompleteProfile = () => {
         perfilPrivado: false,
     });
 
-    // Estados da interface e de controle
     const [previaImagem, setPreviaImagem] = useState<string | null>(null);
     const [arquivoSelecionado, setArquivoSelecionado] = useState<File | null>(null);
     const [carregando, setCarregando] = useState(false);
@@ -39,19 +37,17 @@ export const useCompleteProfile = () => {
         }
     }, [navigate]);
 
-    // Função genérica para atualizar campos do formulário
     const updateField = useCallback((key: keyof DadosFormularioPerfil, value: string | boolean) => {
         let valorFinal = value;
         if (key === 'nickname' && typeof value === 'string') {
             const valorLimpo = value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
             valorFinal = valorLimpo;
-            setErrors(prev => ({ ...prev, nomeUsuario: undefined })); // Limpa o erro ao digitar
+            setErrors(prev => ({ ...prev, nomeUsuario: undefined }));
         }
         
         setDadosPerfil(prev => ({ ...prev, [key]: valorFinal }));
         auditoria.alteracaoFormulario(key, valorFinal);
     }, [auditoria]);
-
 
     const aoMudarImagem = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -92,8 +88,8 @@ export const useCompleteProfile = () => {
             name: dadosPerfil.name || '',
             nickname: dadosPerfil.nickname || '',
             bio: dadosPerfil.bio || '',
-            photoUrl: '', // Será preenchido após o upload
-            website: '', // Não está no formulário, então fica vazio
+            photoUrl: '', 
+            website: '', 
             isPrivate: dadosPerfil.perfilPrivado,
         };
 
@@ -137,16 +133,18 @@ export const useCompleteProfile = () => {
     };
 
     return {
-        dadosPerfil, 
-        updateField,
-        previaImagem, 
-        carregando, 
-        errors,
-        cortarAberto, 
-        setCortarAberto, 
+        dadosFormulario: dadosPerfil,
+        perfilPrivado: dadosPerfil.perfilPrivado,
+        previaImagem,
+        carregando,
+        erroNomeUsuario: errors.nomeUsuario,
+        cortarAberto,
+        setCortarAberto,
         imagemOriginal,
-        aoMudarImagem, 
+        aoMudarInput: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => updateField(e.target.name as keyof DadosFormularioPerfil, e.target.value),
+        aoMudarImagem,
         aoSalvarImagemCortada,
+        aoMudarPrivacidade: (marcado: boolean) => updateField('perfilPrivado', marcado),
         aoSubmeter,
         aoSair
     };
