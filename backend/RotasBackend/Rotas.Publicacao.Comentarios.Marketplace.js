@@ -8,11 +8,11 @@ const router = express.Router();
 // @route   PUT /:commentId
 // @desc    Atualizar um comentário no marketplace
 // @access  Private
-router.put('/:commentId', authMiddleware, comentariosMarketplaceControle.updateComment);
+router.put('/:commentId', authMiddleware, comentariosMarketplaceControle.atualizarComentario);
 
 // @route   DELETE /:commentId
 // @desc    Deletar um comentário no marketplace
 // @access  Private
-router.delete('/:commentId', authMiddleware, comentariosMarketplaceControle.deleteComment);
+router.delete('/:commentId', authMiddleware, comentariosMarketplaceControle.deletarComentario);
 
 export default router;
