@@ -24,6 +24,6 @@ router.delete('/me', authMiddleware, ControlesCriacaoPerfilFlux.deletarPerfil);
 // @route   GET /:userId
 // @desc    Buscar perfil de um usuário público
 // @access  Public
-router.get('/:userId', ControlesCriacaoPerfilFlux.buscarPerfil);
+router.get('/:userId', ControlesCriacaoPerfilFlux.buscarPerfilPublico);
 
 export default router;
