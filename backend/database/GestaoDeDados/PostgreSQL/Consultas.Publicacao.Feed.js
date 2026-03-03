@@ -1,87 +1,59 @@
 
-// backend/database/GestãoDeDados/PostgreSQL/Consultas.Publicacao.Feed.js
+// backend/database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Feed.js
 
-import feedRepository from '../../../Repositorios/Repositorio.Publicacao.Feed.js';
+import repositorioPublicacaoFeed from '../../../Repositorios/Repositorio.Publicacao.Feed.js';
 
-// A validação de dados de entrada acontece aqui
-const validatePostData = (data) => {
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+}
+
+const validarDadosDoPost = (data) => {
     if (!data.content || typeof data.content !== 'string' || data.content.trim().length === 0) {
-        throw new Error('O conteúdo do post é obrigatório.');
+        throw new AppError('O conteúdo do post é obrigatório.', 400);
     }
     if (!data.author_id) {
-        throw new Error('A identidade do usuário é inválida.');
+        throw new AppError('A identidade do usuário é inválida.', 401);
     }
     return true;
 };
 
-const createPost = async (postData) => {
-    validatePostData(postData);
-    // Esta camada prepara os dados e os envia para o repositório
-    try {
-        return await feedRepository.create(postData);
-    } catch (error) {
-        console.error('Erro na camada de gestão de dados (createPost):', error);
-        // Pode-se lançar um erro mais específico de negócio aqui
-        throw new Error('Falha ao processar a criação do post.');
-    }
+const criarPost = async (postData) => {
+    validarDadosDoPost(postData);
+    return await repositorioPublicacaoFeed.criar(postData);
 };
 
-const getAllPosts = async (options) => {
-    // A camada de gestão pode processar as opções (paginação, filtros) antes de passá-las ao repositório
-    try {
-        return await feedRepository.findAll(options);
-    } catch (error) {
-        console.error('Erro na camada de gestão de dados (getAllPosts):', error);
-        throw new Error('Falha ao processar a busca dos posts.');
-    }
+const obterTodosOsPosts = async (options) => {
+    return await repositorioPublicacaoFeed.obterTodos(options);
 };
 
-const getPostById = async (postId) => {
-    // Validação de formato do ID
+const obterPostPorId = async (postId) => {
     if (!postId || isNaN(parseInt(postId))) {
-        throw new Error('ID de post inválido.');
+        throw new AppError('ID de post inválido.', 400);
     }
-    try {
-        return await feedRepository.findById(postId);
-    } catch (error) {
-        console.error('Erro na camada de gestão de dados (getPostById):', error);
-        throw new Error('Falha ao processar a busca do post.');
-    }
+    return await repositorioPublicacaoFeed.obterPorId(postId);
 };
 
-const updatePost = async (postId, postData) => {
-    // Validação de formato do ID
+const atualizarPost = async (postId, postData) => {
     if (!postId || isNaN(parseInt(postId))) {
-        throw new Error('ID de post inválido.');
+        throw new AppError('ID de post inválido.', 400);
     }
-    // Pode validar o conteúdo de postData aqui também
-
-    try {
-        return await feedRepository.update(postId, postData);
-    } catch (error) {
-        console.error('Erro na camada de gestão de dados (updatePost):', error);
-        throw new Error('Falha ao processar a atualização do post.');
-    }
+    return await repositorioPublicacaoFeed.atualizar(postId, postData);
 };
 
-const deletePost = async (postId) => {
-    // Validação de formato do ID
+const deletarPost = async (postId) => {
     if (!postId || isNaN(parseInt(postId))) {
-        throw new Error('ID de post inválido.');
+        throw new AppError('ID de post inválido.', 400);
     }
-
-    try {
-        return await feedRepository.remove(postId);
-    } catch (error) {
-        console.error('Erro na camada de gestão de dados (deletePost):', error);
-        throw new Error('Falha ao processar a deleção do post.');
-    }
+    return await repositorioPublicacaoFeed.remover(postId);
 };
 
 export default {
-    createPost,
-    getAllPosts,
-    getPostById,
-    updatePost,
-    deletePost,
+    criarPost,
+    obterTodosOsPosts,
+    obterPostPorId,
+    atualizarPost,
+    deletarPost,
 };

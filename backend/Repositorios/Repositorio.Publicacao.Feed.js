@@ -2,7 +2,7 @@
 // backend/Repositorios/Repositorio.Publicacao.Feed.js
 import pool from '../database/pool.js';
 
-const create = async (postData) => {
+const criar = async (postData) => {
     const { content, author_id, mediaUrl, parentPostId, type, pollOptions, ctaLink, ctaText } = postData;
     const query = `
         INSERT INTO posts (author_id, content, media_url, parent_post_id, type, poll_options, cta_link, cta_text)
@@ -14,7 +14,7 @@ const create = async (postData) => {
     return rows[0];
 };
 
-const findAll = async ({ limit = 10, cursor, locationFilter, allowAdultContent = false }) => {
+const obterTodos = async ({ limit = 10, cursor, locationFilter, allowAdultContent = false }) => {
     const params = [];
     const whereClauses = ['p.parent_post_id IS NULL'];
 
@@ -55,7 +55,7 @@ const findAll = async ({ limit = 10, cursor, locationFilter, allowAdultContent =
     return { data: rows, nextCursor };
 };
 
-const findById = async (postId) => {
+const obterPorId = async (postId) => {
     const query = `
         SELECT p.*, u.username, u.avatar_url, up.location 
         FROM posts p
@@ -67,7 +67,7 @@ const findById = async (postId) => {
     return rows[0];
 };
 
-const update = async (postId, postData) => {
+const atualizar = async (postId, postData) => {
     const { content } = postData;
     const query = `
         UPDATE posts
@@ -79,15 +79,15 @@ const update = async (postId, postData) => {
     return rows[0];
 };
 
-const remove = async (postId) => {
+const remover = async (postId) => {
     const { rowCount } = await pool.query('DELETE FROM posts WHERE id = $1', [postId]);
     return rowCount > 0;
 };
 
 export default {
-    create,
-    findAll,
-    findById,
-    update,
-    remove,
+    criar,
+    obterTodos,
+    obterPorId,
+    atualizar,
+    remover,
 };

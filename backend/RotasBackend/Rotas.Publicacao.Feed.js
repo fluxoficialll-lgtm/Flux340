@@ -1,7 +1,8 @@
 
 import express from 'express';
+// CORREÇÃO: Os nomes das funções no controlador de feed foram atualizados
 import feedControle from '../controles/Controles.Publicacao.Feed.js';
-import comentariosFeedControle from '../controles/Controles.Comentarios.Feed.js'; // Supondo que este controle exista
+import comentariosFeedControle from '../controles/Controles.Publicacao.Comentarios.Feed.js';
 import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
@@ -11,38 +12,38 @@ const router = express.Router();
 // @route   POST /
 // @desc    Criar um novo post no feed
 // @access  Private
-router.post('/', authMiddleware, feedControle.createPost);
+router.post('/', authMiddleware, feedControle.criarPost);
 
 // @route   GET /
 // @desc    Obter todos os posts do feed
 // @access  Public
-router.get('/', feedControle.getAllPosts);
+router.get('/', feedControle.obterTodosOsPosts);
 
 // @route   GET /:postId
 // @desc    Obter um post específico do feed
 // @access  Public
-router.get('/:postId', feedControle.getPostById);
+router.get('/:postId', feedControle.obterPostPorId);
 
 // @route   PUT /:postId
 // @desc    Atualizar um post do feed
 // @access  Private
-router.put('/:postId', authMiddleware, feedControle.updatePost);
+router.put('/:postId', authMiddleware, feedControle.atualizarPost);
 
 // @route   DELETE /:postId
 // @desc    Deletar um post do feed
 // @access  Private
-router.delete('/:postId', authMiddleware, feedControle.deletePost);
+router.delete('/:postId', authMiddleware, feedControle.deletarPost);
 
 // --- Rotas de Comentários Aninhados ---
 
 // @route   POST /:postId/comments
 // @desc    Adicionar um comentário a um post
 // @access  Private
-router.post('/:postId/comments', authMiddleware, comentariosFeedControle.createComment);
+router.post('/:postId/comments', authMiddleware, comentariosFeedControle.criarComentario);
 
 // @route   GET /:postId/comments
 // @desc    Buscar todos os comentários de um post
 // @access  Public
-router.get('/:postId/comments', comentariosFeedControle.getCommentsByPostId);
+router.get('/:postId/comments', comentariosFeedControle.obterComentariosPorPostId);
 
 export default router;

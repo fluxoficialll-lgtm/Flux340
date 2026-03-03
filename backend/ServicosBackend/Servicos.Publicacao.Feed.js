@@ -1,7 +1,7 @@
 
 // backend/ServicosBackend/Servicos.Publicacao.Feed.js
 
-import feedManager from '../database/GestaoDeDados/PostgreSQL/Consultas.Publicacao.Feed.js';
+import repositorioPublicacaoFeed from '../Repositorios/Repositorio.Publicacao.Feed.js';
 
 class AppError extends Error {
     constructor(message, statusCode) {
@@ -10,70 +10,69 @@ class AppError extends Error {
     }
 }
 
-const createPost = async (postData, user) => {
-    // Lógica de negócio de alto nível no serviço
-    // Por exemplo, verificar o status do usuário, etc.
+const criarPost = async (postData, user) => {
     if (!user || !user.id) {
         throw new AppError('Autenticação necessária para criar um post.', 401);
     }
 
-    // Passa para a camada de gestão de dados para validação e criação
-    return await feedManager.createPost({ ...postData, author_id: user.id });
+    // Validação de dados de entrada pode ser feita aqui ou delegada
+    if (!postData.content || typeof postData.content !== 'string' || postData.content.trim().length === 0) {
+        throw new AppError('O conteúdo do post é obrigatório.', 400);
+    }
+
+    return await repositorioPublicacaoFeed.criar({ ...postData, author_id: user.id });
 };
 
-const getAllPosts = async (options) => {
-    // O serviço pode enriquecer os dados ou aplicar regras de negócio aos resultados
-    return await feedManager.getAllPosts(options);
+const obterTodosOsPosts = async (options) => {
+    return await repositorioPublicacaoFeed.obterTodos(options);
 };
 
-const getPostById = async (postId) => {
-    const post = await feedManager.getPostById(postId);
+const obterPostPorId = async (postId) => {
+    const post = await repositorioPublicacaoFeed.obterPorId(postId);
     if (!post) {
         throw new AppError('Post não encontrado.', 404);
     }
     return post;
 };
 
-const updatePost = async (postId, postData, user) => {
+const atualizarPost = async (postId, postData, user) => {
     if (!user || !user.id) {
         throw new AppError('Autenticação necessária.', 401);
     }
 
-    const post = await feedManager.getPostById(postId);
+    const post = await repositorioPublicacaoFeed.obterPorId(postId);
     if (!post) {
         throw new AppError('Post não encontrado para atualização.', 404);
     }
 
-    // Regra de negócio de permissão
     if (post.author_id !== user.id) {
         throw new AppError('Usuário não autorizado a editar este post.', 403);
     }
 
-    return await feedManager.updatePost(postId, postData);
+    return await repositorioPublicacaoFeed.atualizar(postId, postData);
 };
 
-const deletePost = async (postId, user) => {
+const deletarPost = async (postId, user) => {
     if (!user || !user.id) {
         throw new AppError('Autenticação necessária.', 401);
     }
 
-    const post = await feedManager.getPostById(postId);
+    const post = await repositorioPublicacaoFeed.obterPorId(postId);
     if (!post) {
         throw new AppError('Post não encontrado para deleção.', 404);
     }
 
-    // Regra de negócio de permissão
     if (post.author_id !== user.id) {
         throw new AppError('Usuário não autorizado a deletar este post.', 403);
     }
 
-    return await feedManager.deletePost(postId);
+    return await repositorioPublicacaoFeed.remover(postId);
 };
 
 export default {
-    createPost,
-    getAllPosts,
-    getPostById,
-    updatePost,
-    deletePost,
+    criarPost,
+    obterTodosOsPosts,
+    obterPostPorId,
+    atualizarPost,
+    deletarPost,
 };

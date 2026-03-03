@@ -1,0 +1,38 @@
+# Documentação da Camada de Rotas (Backend)
+
+Este diretório (`/backend/RotasBackend`) é responsável por definir todos os endpoints da API do servidor. Ele atua como a porta de entrada para todas as requisições HTTP que chegam ao backend.
+
+## Estrutura e Organização
+
+Os arquivos de rotas são modularizados e organizados por funcionalidade/domínio para manter o código limpo e de fácil manutenção. A nomenclatura segue um padrão claro:
+
+`Rotas.{Dominio}.{Subdominio}.js`
+
+### Principais Domínios:
+
+- **Criação:**
+  - `Rotas.Criacao.Conta.Flux.js`: Endpoints para registro de novas contas.
+  - `Rotas.Criacao.Perfil.Flux.js`: Endpoints para criação de perfis de usuário.
+  - `Rotas.Criacao.Grupo.*.js`: Endpoints para criação dos diferentes tipos de grupos (público, privado, pago).
+
+- **Publicação:**
+  - `Rotas.Publicacao.Feed.js`: Endpoints para o CRUD (Criar, Ler, Atualizar, Deletar) de posts no feed.
+  - `Rotas.Publicacao.Comentarios.*.js`: Endpoints para gerenciar comentários em diferentes seções (Feed, Marketplace, Reels).
+  - `Rotas.Publicacao.Marketplace.js`: Endpoints relacionados aos produtos e listagens do marketplace.
+  - `Rotas.Publicacao.Reels.js`: Endpoints para a funcionalidade de vídeos curtos (Reels).
+
+- **Métricas:**
+  - `Rotas.Metricas.*.js`: Endpoints para coletar e expor métricas de engajamento, como contagem de likes, visualizações, etc.
+
+- **Provedores de Pagamento:**
+  - `Rotas.Provedor.*.js`: Endpoints que lidam com a lógica de webhooks e interações com gateways de pagamento como Stripe, PayPal e SyncPay.
+
+- **Gestão:**
+  - `Rotas.Gestao.*.js`: Endpoints para tarefas administrativas e de gerenciamento interno, como credenciais e variáveis de ambiente.
+
+- **Arquivo Principal:**
+  - `Rotas.js`: Este é o arquivo principal que importa e agrega todos os outros módulos de rota, consolidando-os em um único roteador que é então utilizado pelo servidor Express principal.
+
+## Funcionamento
+
+Cada arquivo de rota utiliza o `express.Router()` para criar um novo objeto de roteador. Ele define os caminhos (endpoints), os métodos HTTP (GET, POST, PUT, DELETE) e os middlewares (como o de autenticação) que devem ser executados antes de passar a requisição para a camada de `Controles` (Controllers), que contém a lógica de negócio.
