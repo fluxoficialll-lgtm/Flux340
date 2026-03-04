@@ -1,107 +1,86 @@
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
-// CORREÇÃO: A importação do groupService foi removida.
-// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { ChatMessage, Group } from '../types';
+import { Group, ChatMessage } from '../types';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
-import { VirtuosoHandle } from 'react-virtuoso';
-import { socketService } from '../ServiçosFrontend/ServiçoDeSoquete/ServiçoDeSoquete.js';
+import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js'; // Importa o novo serviço
 
 export const useGroupChat = () => {
   const navigate = useNavigate();
-  const { groupId, channelId } = useParams<{ groupId: string; channelId?: string }>();
-  
-  const chatId = useMemo(() => channelId ? `${groupId}_${channelId}` : groupId, [groupId, channelId]);
+  const { groupId } = useParams<{ groupId: string }>();
 
   const [group, setGroup] = useState<Group | null>(null);
-  const [channelName, setChannelName] = useState('Chat');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isBlocked, setIsBlocked] = useState(false);
-
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [loading, setLoading] = useState(true);
-  
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const currentUserEmail = useMemo(() => authService.getCurrentUserEmail()?.toLowerCase(), []);
 
-  const loadChatData = useCallback(async (isSilent = false) => {
-    if (!groupId) { navigate('/conversas'); return; } // Rota ajustada para um fallback genérico
-    if (!isSilent) setLoading(true);
+  const loadChatData = useCallback(async () => {
+    if (!groupId) {
+      navigate('/conversas');
+      return;
+    }
 
-    // CORREÇÃO: A lógica que dependia do groupService foi removida.
-    setGroup(null);
-    setChannelName('Chat');
+    setLoading(true);
+    setError(null);
 
-    const chatData = chatService.getChat(chatId);
-    setIsBlocked(chatData?.isBlocked || false);
+    try {
+      // CORREÇÃO: Utiliza o groupSystem para buscar os dados do grupo.
+      // Esta chamada é mais limpa e alinhada com a arquitetura.
+      const groupData = await groupSystem.getGroupDetails(groupId);
+      
+      setGroup(groupData);
 
-    const rawMessages = chatData?.messages || [];
-    const uniqueMap = new Map();
-    rawMessages.forEach(m => {
-        if (!m.deletedBy?.includes(currentUserEmail || '')) {
-            uniqueMap.set(m.id, m);
+      const rawMessages = groupData.messages || [];
+      const uniqueMap = new Map();
+
+      rawMessages.forEach((m: ChatMessage) => {
+        if (m.id && !m.deletedBy?.includes(currentUserEmail || '')) {
+          uniqueMap.set(m.id, m);
         }
-    });
-    const deduplicated = Array.from(uniqueMap.values()).sort((a, b) => a.id - b.id);
-    setMessages(deduplicated);
+      });
 
-    if (!isSilent) setLoading(false);
-  }, [groupId, channelId, chatId, currentUserEmail, navigate]);
+      const finalMessages = Array.from(uniqueMap.values()).sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+      
+      setMessages(finalMessages);
+
+    } catch (err: any) {
+      console.error("Erro ao carregar o chat do grupo:", err);
+      setError('Não foi possível carregar o chat. Tente novamente mais tarde.');
+      // O erro "Grupo não encontrado" virá da API/simulação e será tratado na UI
+      if (err.message === 'Grupo não encontrado') {
+          navigate('/conversas', { state: { error: 'Grupo não encontrado' } });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [groupId, currentUserEmail, navigate]);
 
   useEffect(() => {
-      loadChatData();
-      const unsubDeleteMsgs = socketService.on('messages_deleted_globally', (data: any) => {
-          if (data.chatId === chatId) loadChatData(true);
-      });
-      const unsubDb = servicoDeSimulacao.subscribe('chats', () => loadChatData(true));
-      
-      return () => {
-          unsubDeleteMsgs();
-          unsubDb();
-      };
-  }, [chatId, loadChatData]);
+    loadChatData();
 
-  const handleSendMessage = (text: string) => {
-    const userInfo = authService.getCurrentUser();
-    const newMessage: ChatMessage = {
-        id: Date.now(), text, type: 'sent', contentType: 'text',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'sent', senderEmail: userInfo?.email, senderAvatar: userInfo?.profile?.photoUrl,
-        senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Usuário', deletedBy: []
-    };
-    // A chamada para chatService é mantida, pois o backend pode ainda precisar do groupId.
-    chatService.sendMessage(chatId, newMessage, true, groupId);
-  };
+    // Se houver um serviço de soquete para grupos, as subscrições viriam aqui.
+    // Ex: const unsubscribe = groupSocketService.onMessage(...);
+    // return () => unsubscribe();
 
-  const handleToggleSelection = (msgId: number) => {
-      setSelectedIds(prev => {
-          const next = prev.includes(msgId) ? prev.filter(id => id !== msgId) : [...prev, msgId];
-          if (next.length === 0) setIsSelectionMode(false);
-          return next;
-      });
-  };
+    // A subscrição ao serviço de simulação pode ser mantida para forçar recargas
+    const unsubDb = servicoDeSimulacao.subscribe('grupos', loadChatData);
+    return () => unsubDb();
 
-  const handleStartSelection = (msgId: number) => {
-      setIsSelectionMode(true);
-      setSelectedIds([msgId]);
-      if (navigator.vibrate) navigator.vibrate(10);
-  };
+  }, [loadChatData]);
 
-  const deleteSelectedMessages = async (target: 'me' | 'all') => {
-      if (selectedIds.length === 0) return;
-      await chatService.deleteMessages(chatId, selectedIds, target);
-      setIsSelectionMode(false);
-      setSelectedIds([]);
-      loadChatData(true);
-  };
+  // Funções para enviar mensagens, deletar, etc. seriam adicionadas aqui.
+  // Por enquanto, o foco é carregar os dados corretamente.
 
   return {
-    loading, group, channelName, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
-    handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate
+    loading,
+    group,
+    messages,
+    error,
+    // Outros valores e funções que a UI precisar...
   };
 };

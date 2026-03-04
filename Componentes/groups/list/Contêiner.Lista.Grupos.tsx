@@ -2,7 +2,7 @@
 import React from 'react';
 import { Group, ChatMessage } from '../../../types';
 import { GroupMenuDropdown } from './GroupMenuDropdown';
-import { servicoDeSimulacao } from '@/ServiçosFrontend/ServiçoDeSimulação';
+import { simulationData } from '@/ServiçosFrontend/ServiçoDeSimulação';
 
 interface GroupListItemProps {
     group: Group;
@@ -27,20 +27,18 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
 }) => {
     const isCreator = group.creatorEmail === currentUserEmail;
 
-    // Busca todas as conversas do DB e filtra as que pertencem a este grupo (incluindo sub-canais)
-    const allChats = servicoDeSimulacao.chats.getAll();
+    // Correção: Usa o `simulationData` importado para acessar os chats.
+    const allChats = simulationData.chats;
     const groupChats = Object.values(allChats).filter(chat => {
         const chatIdStr = chat.id.toString();
         return chatIdStr === group.id || chatIdStr.startsWith(`${group.id}_`);
     });
 
-    // Encontra a mensagem mais recente entre todos os canais da comunidade
     let lastMsg: ChatMessage | null = null;
     groupChats.forEach(chat => {
         if (chat.messages && chat.messages.length > 0) {
             const latestInChat = chat.messages[chat.messages.length - 1];
-            // O ID da mensagem no sistema Flux é um timestamp numérico, perfeito para ordenação
-            if (!lastMsg || latestInChat.id > lastMsg.id) {
+            if (!lastMsg || new Date(latestInChat.timestamp) > new Date(lastMsg.timestamp)) {
                 lastMsg = latestInChat;
             }
         }
@@ -53,7 +51,6 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
         const sender = (lastMsg.senderEmail || lastMsg.senderId || '').toLowerCase();
         const isMe = sender === currentUserEmail?.toLowerCase();
         
-        // Formatação idêntica à lista de mensagens privadas para consistência visual
         const prefix = isMe ? 'Você: ' : (lastMsg.senderName ? `${lastMsg.senderName}: ` : '');
         
         const content = lastMsg.contentType === 'text' ? lastMsg.text : 
@@ -62,9 +59,9 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
                        (lastMsg.contentType === 'audio' ? '🎤 Áudio' : '📎 Arquivo')));
         
         displayMsg = prefix + content;
-        displayTime = lastMsg.timestamp;
+        displayTime = new Date(lastMsg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
     } else {
-        // Fallback elegante para grupos sem histórico de chat
         displayMsg = group.isSalesPlatformEnabled ? 'Acesse o catálogo do grupo' : (group.description || 'Toque para abrir a comunidade');
         displayTime = 'Novo';
     }

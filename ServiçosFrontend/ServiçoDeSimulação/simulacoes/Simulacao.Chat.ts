@@ -4,7 +4,7 @@
 // --- DADOS SIMULADOS ---
 
 // Simula um banco de dados de chats
-const mockChats = {
+export const mockChats = {
     'chat-1': {
         id: 'chat-1',
         participants: [
