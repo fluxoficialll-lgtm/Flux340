@@ -21,12 +21,31 @@ export const useGroups = () => {
     try {
         const isSimulating = localStorage.getItem('isSimulating') === 'true';
         if (isSimulating) {
-            console.log("[SIMULAÇÃO] useGroups: Buscando grupos do endpoint de simulação /api/groups");
-            const response = await fetch('/api/groups');
-            if (!response.ok) throw new Error('Falha na simulação de grupos');
-            const data = await response.json();
-            setGroups(data || []);
+            console.log("[SIMULAÇÃO] useGroups: Buscando grupos de múltiplos endpoints.");
+            
+            // Fetch public groups
+            const publicGroupsPromise = fetch('/api/groups').then(res => {
+                if (!res.ok) throw new Error('Falha na simulação de grupos públicos');
+                return res.json();
+            });
+
+            // Fetch user's own groups
+            const myGroupsPromise = fetch('/api/groups/mine').then(res => {
+                if (!res.ok) throw new Error('Falha na simulação de grupos próprios');
+                return res.json();
+            });
+
+            // Wait for both promises to resolve
+            const [publicGroups, myGroups] = await Promise.all([publicGroupsPromise, myGroupsPromise]);
+
+            // Combine the arrays, ensuring no duplicates by ID
+            const allGroups = [...(myGroups || []), ...(publicGroups || [])];
+            const uniqueGroups = Array.from(new Map(allGroups.map(group => [group.id, group])).values());
+
+            setGroups(uniqueGroups);
+
         } else {
+            // Logic for real API remains unchanged
             setGroups([]);
         }
     } catch (error) {
@@ -35,7 +54,7 @@ export const useGroups = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+}, []);
 
   useEffect(() => {
     if (!currentUser) {

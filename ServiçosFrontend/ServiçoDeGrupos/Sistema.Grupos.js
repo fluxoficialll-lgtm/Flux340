@@ -29,6 +29,25 @@ class GroupSystem {
             throw error;
         }
     }
+
+    /**
+     * Busca a lista de membros e solicitações pendentes de um grupo.
+     * @param {string} groupId O ID do grupo.
+     * @returns {Promise<{members: Array, pending: Array}>} Os membros e as solicitações.
+     */
+    async getGroupMembers(groupId) {
+        console.log(`[groupSystem] Buscando membros para o grupo: ${groupId}`);
+        try {
+            const response = await fetch(`/api/groups/${groupId}/members`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Falha ao buscar membros do grupo:", error);
+            return { members: [], pending: [] }; // Retorna um estado seguro em caso de falha.
+        }
+    }
 }
 
 // Exporta uma instância única do serviço para ser usada em toda a aplicação.

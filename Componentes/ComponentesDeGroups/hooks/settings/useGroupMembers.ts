@@ -1,8 +1,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Group, User, GroupRole } from '../../../../types';
-// CORREÇÃO: A importação do groupService foi removida.
-// import { groupService } from '../../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+import { groupSystem } from '../../../../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
 import { authService } from '../../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { servicoDeSimulacao } from '@/ServiçosFrontend/ServiçoDeSimulação';
 
@@ -11,18 +10,23 @@ export const useGroupMembers = (group: Group | null) => {
   const [pendingRequests, setPendingRequests] = useState<User[]>([]);
   const [roles, setRoles] = useState<GroupRole[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const currentUserId = authService.getCurrentUserId();
+  const currentUserId = authService.getCurrentUser()?.id;
 
-  const refreshMembers = useCallback((groupId: string) => {
+  const refreshMembers = useCallback(async (groupId: string) => {
     if (!groupId) return;
+    setIsLoading(true);
     try {
-        // CORREÇÃO: Lógica de busca de membros removida.
-        console.error("groupService not available. Returning empty member list.");
-        setMembers([]);
-        setPendingRequests([]);
+      const { members: fetchedMembers, pending } = await groupSystem.getGroupMembers(groupId);
+      setMembers(fetchedMembers || []);
+      setPendingRequests(pending || []);
     } catch (e) {
-        console.error("Erro ao carregar membros do grupo (simulado):", e);
+      console.error("Erro ao carregar membros do grupo:", e);
+      setMembers([]); 
+      setPendingRequests([]);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -31,8 +35,10 @@ export const useGroupMembers = (group: Group | null) => {
       setRoles(group.roles || []);
       refreshMembers(group.id);
 
-      const unsub = servicoDeSimulacao.subscribe('groups', () => refreshMembers(group.id));
-      return () => unsub();
+      // CORREÇÃO: A linha abaixo causava o erro e foi removida.
+      // A funcionalidade de subscribe não existe no serviço de simulação.
+      // const unsub = servicoDeSimulacao.subscribe('groups', () => refreshMembers(group.id));
+      // return () => unsub();
     }
   }, [group, refreshMembers]);
 
@@ -42,25 +48,24 @@ export const useGroupMembers = (group: Group | null) => {
       if (!term) return activeMembers;
 
       return activeMembers.filter(m => {
-          const name = m.profile?.name?.toLowerCase() || '';
-          const nickname = m.profile?.nickname?.toLowerCase() || '';
+          const name = m.name?.toLowerCase() || '';
+          const nickname = m.username?.toLowerCase() || '';
           return name.includes(term) || nickname.includes(term);
       });
   }, [members, searchQuery]);
 
   const mappedMembers = useMemo(() => {
       if (!group) return [];
-      const safeFiltered = filteredMembers || [];
       
       const userRolesMap = (group as any).userRoles || {};
 
-      return safeFiltered.map(u => ({
+      return filteredMembers.map(u => ({
           id: u.id,
-          name: u.profile?.nickname || u.profile?.name || 'Membro Flux',
+          name: u.name || 'Membro Flux',
           role: u.id === group.creatorId ? 'Dono' : (group.adminIds?.includes(u.id) ? 'Admin' : 'Membro'),
           roleId: userRolesMap[u.id], 
           isMe: u.id === currentUserId,
-          avatar: u.profile?.photoUrl
+          avatar: u.avatar
       }));
   }, [filteredMembers, group, currentUserId]);
 
@@ -69,7 +74,8 @@ export const useGroupMembers = (group: Group | null) => {
         members: mappedMembers, 
         pendingRequests, 
         roles,
-        searchQuery 
+        searchQuery,
+        isLoading
     },
     actions: { 
         setMembers, 
