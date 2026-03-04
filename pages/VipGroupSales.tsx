@@ -4,6 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useVipGroupSales } from '../hooks/useVipGroupSales';
 import { useAutoLanguage } from '../hooks/useAutoLanguage';
 
+// Importando os dados simulados
+import { mockVipGroupSalesData } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Pagina.Vendas';
+
 // UI Components
 import { VipSalesHeader } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesHeader';
 import { VipSalesPriceBadge } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesPriceBadge';
@@ -13,9 +16,63 @@ import { VipCheckout } from '../Componentes/ComponentesDePaginasDeVendas/VipChec
 import { VipSalesModals } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesModals';
 import { VipSalesMediaZoom } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesMediaZoom';
 
+// Variável para controlar o modo de simulação
+const IS_SIMULATED_MODE = true; 
+
 export const VipGroupSales: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  // Se estiver em modo de simulação, usamos os dados do mock.
+  if (IS_SIMULATED_MODE) {
+    const [modals, setModals] = useState({ zoomIndex: null, pix: false, email: false, simulator: false });
+    const [zoom, setZoom] = useState<{ items: any[]; index: number } | null>(null);
+    const { group, media, copy, pricing } = mockVipGroupSalesData;
+
+    return (
+      <div className="min-h-screen bg-[#0c0f14] text-white font-['Inter'] flex flex-col pb-[100px]">
+        <VipSalesHeader isOwner={true} isSimulated={true} onSimulateClick={() => {}} />
+        <main className="flex-grow pt-[85px] px-5 text-center max-w-[600px] mx-auto w-full">
+          <VipSalesPriceBadge geoData={{ countryCode: 'BR', currency: 'BRL' }} />
+          <div className="mt-2 mb-6">
+            <h1 className="text-2xl font-black text-white px-4 tracking-tight">{group.name}</h1>
+          </div>
+          <VipGallery
+            mediaItems={media}
+            currentSlide={0}
+            playingIndex={-1}
+            containerRef={{ current: null }}
+            onScroll={() => {}}
+            onMediaClick={(index) => setModals({ ...modals, zoomIndex: index })}
+            onToggleVideo={() => {}}
+          />
+          <VipCopy text={copy.longDescription} />
+          <VipCheckout
+            isEnabled={true}
+            isRenewal={false}
+            ctaText={"Entrar no Clube"}
+            formattedPrice={`R$${pricing.monthly.price.toFixed(2)}`}
+            onClick={() => alert('Botão de compra clicado! Integração pendente.')}
+          />
+          <div className="mt-4 flex flex-col gap-1 items-center opacity-30">
+            <span className="text-[9px] font-black uppercase tracking-widest">Pagamento Seguro</span>
+            <div className="flex gap-4 text-sm mt-1">
+              <i className="fa-brands fa-cc-visa"></i>
+              <i className="fa-brands fa-cc-mastercard"></i>
+              <i className="fa-solid fa-pix"></i>
+            </div>
+          </div>
+        </main>
+        <VipSalesMediaZoom 
+            items={media.map(m => ({ url: m.url, type: m.type || 'image' }))}
+            initialIndex={modals.zoomIndex}
+            onClose={() => setModals({ ...modals, zoomIndex: null })}
+        />
+      </div>
+    );
+  }
+
+  // Código original para buscar dados reais (não será executado se IS_SIMULATED_MODE for true)
   const [isSimulated, setIsSimulated] = useState(false);
   const [forcedProvider, setForcedProvider] = useState<'syncpay' | 'stripe' | 'paypal' | null>(null);
   
