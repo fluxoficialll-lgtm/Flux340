@@ -41,11 +41,15 @@ export const ModalOpcoesPagamentosStripe: React.FC<ModalOpcoesPagamentosStripePr
 
     const filteredMethods = useMemo(() => {
         const config = props.group.checkoutConfig;
+        // CORREÇÃO: Verifica se a configuração e a lista de métodos existem.
         if (!config || !config.enabledMethods || config.enabledMethods.length === 0) {
+            // Se não houver configuração, retorna todos os métodos da região.
             return region.methods;
         }
+        // Se houver, filtra os métodos da região com base na lista `enabledMethods`.
         return region.methods.filter((m: any) => config.enabledMethods.includes(m.id));
     }, [region.methods, props.group.checkoutConfig]);
+
 
     const handleMethodSelection = (method: StripeView) => {
         // Adicionamos 'interac' aqui. Agora o clique no card do Interac apenas muda a view,

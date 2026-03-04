@@ -9,18 +9,25 @@ import './ServiçosFrontend/ServiçoDeSegurançaDeConteúdo/i18n.js';
 import { loadEnvironment } from './ServiçosFrontend/ValidaçãoDeAmbiente/config.ts';
 
 // INICIALIZAÇÃO DOS SERVIÇOS GLOBAIS (SINGLETONS)
-// A ordem é importante: A telemetria deve ser a primeira a "envelopar" o fetch.
-// A simulação vem depois, garantindo que ela opere dentro do ambiente de telemetria.
 import { initAuditorDeRequisições } from './ServiçosFrontend/ServiçoDeTelemetria/AuditorDeRequisições.js';
 import { servicoDeSimulacao } from './ServiçosFrontend/ServiçoDeSimulação/index.ts';
 import MonitorDeErrosDeInterface from './Componentes/ComponentesDePrevençãoDeErros/MonitorDeErrosDeInterface.jsx';
 
 // --- INICIALIZAÇÃO IMEDIATA ---
-// Garantimos que os serviços que manipulam o fetch global estejam ativos ANTES do React montar a aplicação.
-initAuditorDeRequisições();
-servicoDeSimulacao.iniciarSimulacao(); // FORÇA A ATIVAÇÃO DA SIMULAÇÃO IMEDIATAMENTE.
 
-console.log("✅ Serviços de Telemetria e Simulação (MOCK) inicializados com sucesso.");
+// Só ativamos o modo de simulação se NÃO estivermos em produção.
+const isProduction = import.meta.env.MODE === 'production';
+
+initAuditorDeRequisições();
+
+if (!isProduction) {
+  servicoDeSimulacao.iniciarSimulacao();
+  console.log("✅ Modo de Simulação ATIVADO (Ambiente de Desenvolvimento).");
+} else {
+  console.log("✅ Modo de Produção ATIVADO.");
+}
+
+console.log("✅ Serviços de Telemetria inicializados com sucesso.");
 
 
 // --- MONTAGEM DA APLICAÇÃO REACT ---

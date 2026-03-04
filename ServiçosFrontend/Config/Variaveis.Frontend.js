@@ -8,7 +8,7 @@
 
 // --- Definição das Variáveis Esperadas ---
 
-// Nomes das variáveis que são OBRIGATÓRIAS para o frontend funcionar.
+// Nomes das variáveis que são OBRIGATÓRIAS para o frontend funcionar em PRODUÇÃO.
 const VARIAVEIS_OBRIGATORIAS = [
     'VITE_API_BASE_URL',
     'VITE_GOOGLE_CLIENT_ID',
@@ -21,18 +21,29 @@ const VariaveisFrontend = {};
 
 // Lê as variáveis do `import.meta.env` fornecido pelo Vite
 const env = import.meta.env;
+const isProduction = env.MODE === 'production';
 
-// 1. Processa e valida as variáveis obrigatórias
+// 1. Processa e valida as variáveis
 VARIAVEIS_OBRIGATORIAS.forEach(nome => {
     const valor = env[nome];
-    if (!valor) {
-        // A aplicação não pode funcionar sem estas variáveis, então um erro é lançado.
-        throw new Error(`[Configuração do Frontend] A variável de ambiente obrigatória "${nome}" não foi definida. Verifique seu arquivo .env.`);
-    }
-    // Remove o prefixo VITE_ e converte para camelCase para uso no código
-    // Ex: VITE_API_BASE_URL -> apiBaseUrl
     const chaveCamelCase = nome.replace('VITE_', '').toLowerCase().replace(/_([a-z])/g, g => g[1].toUpperCase());
-    VariaveisFrontend[chaveCamelCase] = valor;
+
+    if (!valor) {
+        if (isProduction) {
+            // Em produção, a variável é obrigatória. Lança erro.
+            throw new Error(`[Configuração do Frontend] A variável de ambiente obrigatória "${nome}" não foi definida. Verifique seu arquivo .env.`);
+        } else {
+            // Em outros modos (desenvolvimento/simulação), apenas avisa no console.
+            console.warn(
+                `[Configuração do Frontend] A variável de ambiente "${nome}" não foi definida.` + 
+                ` A aplicação continuará, mas pode não funcionar como esperado.`
+            );
+            // Define um valor padrão para evitar que a aplicação quebre ao tentar acessar a variável
+            VariaveisFrontend[chaveCamelCase] = 'NAO_DEFINIDO_EM_DEV'; 
+        }
+    } else {
+        VariaveisFrontend[chaveCamelCase] = valor;
+    }
 });
 
 // 2. Exporte o objeto de configuração final, validado e pronto para uso.

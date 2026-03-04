@@ -15,6 +15,13 @@ export const CardCTAPrincipal: React.FC<CardCTAPrincipalProps> = ({
     formattedPrice, 
     onClick 
 }) => {
+    // A função de clique agora só será chamada se o botão estiver habilitado.
+    const handleClick = () => {
+        if (isEnabled) {
+            onClick();
+        }
+    };
+
     return (
         <section className="content-section p-4 max-w-[480px] mx-auto text-center pb-12"> 
             <button 
@@ -23,7 +30,7 @@ export const CardCTAPrincipal: React.FC<CardCTAPrincipalProps> = ({
                     ? 'bg-[#12161d] border-white/5 text-gray-600 cursor-not-allowed' 
                     : 'bg-[#0c0f14] border-[#00c2ff] text-white active:scale-[0.98] shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
                 }`}
-                onClick={isEnabled ? onClick : undefined}
+                onClick={handleClick} // O onClick agora aponta para a função segura.
                 disabled={!isEnabled}
             >
                 {!isEnabled ? (

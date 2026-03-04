@@ -5,77 +5,62 @@ import { GeoData } from '../../ServiçosFrontend/geoService';
 import { ConversionResult } from '../../ServiçosFrontend/currencyService';
 import { Country } from './Modal.Seletor.Pais';
 
-// --- Modais de Fluxo Real ---
+// --- COMPONENTES DE FLUXO ---
+// Unificamos tudo sob o PaymentFlowModal, que agora é inteligente o suficiente para lidar com simulação.
 const PaymentFlowModal = lazy(() => import('../ComponentesDeProvedores/PaymentFlowModal').then(m => ({ default: m.PaymentFlowModal })));
 const EmailCaptureModal = lazy(() => import('../ComponentesDeProvedores/EmailCaptureModal').then(m => ({ default: m.EmailCaptureModal })));
 const ModalSeletorProvedor = lazy(() => import('./Modal.Seletor.Provedor').then(m => ({ default: m.ModalSeletorProvedor })));
 
-// --- Modais de PRÉVIA para Simulação ---
-const ModalPreviaStripe = lazy(() => import('./Modal.Previa.Stripe').then(m => ({ default: m.ModalPreviaStripe })));
-const ModalPreviaPayPal = lazy(() => import('./Modal.Previa.PayPal').then(m => ({ default: m.ModalPreviaPayPal })));
-const ModalPreviaSyncPay = lazy(() => import('./Modal.Previa.SyncPay').then(m => ({ default: m.ModalPreviaSyncPay })));
 
 interface ModalPreviasPaisesProps {
-  isOpen: {
-    pix: boolean;
-    email: boolean;
-    simulator: boolean;
-  };
+  isOpen: { pix: boolean; email: boolean; simulator: boolean; };
   onClose: () => void;
   group: Group;
-  geoData: GeoData | null;
-  priceInfo: ConversionResult | null;
+  geoData: GeoData | null; // Usado em produção
+  priceInfo: ConversionResult | null; // Usado em produção
   onEmailSuccess: (email: string) => void;
   onSimulateConfirm?: (provider: 'syncpay' | 'stripe' | 'paypal', country: Country) => void;
-  forcedProvider?: 'syncpay' | 'stripe' | 'paypal' | null;
-
+  
+  // Props para Simulação (passadas da VipGroupSales)
   isSimulated?: boolean;
-  simulationProvider?: 'syncpay' | 'stripe' | 'paypal';
-  simulationCountryCode?: string;
+  simulationProvider?: 'syncpay' | 'stripe' | 'paypal' | null;
+  simulatedGeo?: { countryCode: string; currency: string; countryName: string; } | null;
 }
 
-// Componente interno para decidir qual modal renderizar (real ou prévia)
+// Componente interno que decide qual modal renderizar
 const ModalContent: React.FC<ModalPreviasPaisesProps> = (props) => {
-  const {
-    isOpen, onClose, group, geoData, priceInfo,
-    isSimulated, simulationProvider, simulationCountryCode
+  const { 
+    isOpen, onClose, group, 
+    isSimulated, simulationProvider, simulatedGeo, 
+    geoData, priceInfo 
   } = props;
 
-  // 1. Se estamos em MODO DE SIMULAÇÃO, renderizamos um dos modais de PRÉVIA.
-  if (isSimulated) {
-    if (!simulationProvider) return null; // Segurança: não renderiza nada se o provedor de simulação não foi escolhido.
+  // A LÓGICA FOI UNIFICADA.
+  // Tanto em produção quanto em simulação, usamos o mesmo componente de fluxo de pagamento.
+  // A única diferença é a ORIGEM dos dados (geoData real vs. simulatedGeo).
+  
+  const provider = isSimulated 
+    ? simulationProvider // Em simulação, usamos o provedor escolhido
+    : (geoData?.countryCode === 'BR' ? 'syncpay' : 'stripe'); // Em produção, a lógica de sempre
 
-    const commonProps = {
-      isOpen: isOpen.pix,
-      onClose: onClose,
-      // Usa o preço dos mocks ou um valor padrão.
-      valor: group.vipPrice || 19.99,
-      moeda: simulationCountryCode === 'BR' ? 'BRL' : 'USD'
-    };
+  const geo = isSimulated 
+    ? simulatedGeo // Em simulação, usamos o GEO escolhido
+    : geoData; // Em produção, o GEO detectado
 
-    if (simulationProvider === 'stripe') {
-      return <ModalPreviaStripe {...commonProps} />;
-    }
-    if (simulationProvider === 'paypal') {
-      return <ModalPreviaPayPal {...commonProps} />;
-    }
-    if (simulationProvider === 'syncpay') {
-      return <ModalPreviaSyncPay {...commonProps} pais={simulationCountryCode || 'BR'} />;
-    }
-    return null;
-  }
-
-  // 2. Se NÃO estamos em simulação, renderizamos o fluxo de pagamento REAL.
-  const effectiveProvider = props.forcedProvider || (geoData?.countryCode === 'BR' ? 'syncpay' : 'stripe');
+  if (!provider) return null; // Não renderiza se não houver um provedor definido.
 
   return (
     <PaymentFlowModal
       isOpen={isOpen.pix}
       onClose={onClose}
       group={group}
-      provider={effectiveProvider}
-      convertedPriceInfo={priceInfo}
-      geo={geoData}
+      provider={provider}
+      geo={geo}
+      // Em simulação, não teremos preço convertido, o que é esperado.
+      // O próprio ModalOpcoesPagamentosStripe já tem um fallback para isso.
+      convertedPriceInfo={priceInfo} 
+      // Passamos a flag de simulação para o fluxo de pagamento.
+      isSimulation={isSimulated}
     />
   );
 };
@@ -90,7 +75,7 @@ export const ModalPreviasPaises: React.FC<ModalPreviasPaisesProps> = (props) => 
             <i className="fa-solid fa-circle-notch fa-spin text-2xl text-white"></i>
         </div>
     }>
-      {/* A lógica de qual modal exibir (real vs prévia) foi movida para o ModalContent */}
+      {/* O conteúdo do modal de pagamento é sempre decidido pelo ModalContent, que agora é unificado */}
       {isOpen.pix && <ModalContent {...props} />}
 
       {isOpen.email && (
