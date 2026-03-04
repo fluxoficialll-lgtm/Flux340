@@ -11,6 +11,8 @@ import { notificationsHandlers } from './simulacoes/Simulacao.Notificacoes';
 import { chatDetailsHandlers, mockChats } from './simulacoes/Simulacao.Chat';
 import { reelsHandlers } from './simulacoes/Simulacao.Reels';
 import { groupsHandlers } from './simulacoes/Simulacao.Lista.Grupos';
+import { groupDetailsHandlers } from './simulacoes/Simulacao.Grupo.Proprio';
+import { groupMembersHandlers } from './simulacoes/Simulacao.Grupo.Membros';
 // A importação do handler de chat de grupo agora é mais específica.
 import { groupChatHandlers } from './simulacoes/Simulacao.Chat.Grupo';
 
@@ -51,6 +53,8 @@ const allSimulationHandlers = {
     ...chatDetailsHandlers,
     ...reelsHandlers,
     ...groupsHandlers,
+    ...groupDetailsHandlers,
+    ...groupMembersHandlers,
     ...staticGroupChatHandlers, // A mágica acontece aqui!
 };
 

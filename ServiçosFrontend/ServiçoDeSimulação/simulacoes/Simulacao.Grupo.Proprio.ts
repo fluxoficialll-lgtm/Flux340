@@ -48,6 +48,6 @@ const handleGetMyGroups = async (url: URL, config?: RequestInit): Promise<Respon
     });
 };
 
-export const myGroupsHandlers = {
+export const groupDetailsHandlers = {
     '/api/groups/mine': handleGetMyGroups,
 };
