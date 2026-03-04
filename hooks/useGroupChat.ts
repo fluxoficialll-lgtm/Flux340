@@ -1,29 +1,42 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js'; 
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { Group, Message } from '../types';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { VirtuosoHandle } from 'react-virtuoso';
+import { Group, Message } from '../tipos'; 
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos';
 
 export const useGroupChat = () => {
     const { id } = useParams<{ id: string }>();
-    const [groupInfo, setGroupInfo] = useState<Group | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const navigate = useNavigate();
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [newMessage, setNewMessage] = useState('');
-    const currentUser = authService.getCurrentUser();
+    const [groupInfo, setGroupInfo] = useState<Group | null>(null);
+    const [channelName, setChannelName] = useState('');
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [isBlocked, setIsBlocked] = useState(false);
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Pega o e-mail do usuário logado assim que o hook é montado
+        setCurrentUserEmail(authService.getCurrentUserEmail()?.toLowerCase() || null);
+    }, []);
 
     const loadChatData = useCallback(async (groupId: string) => {
         setLoading(true);
         setError(null);
         try {
-            // CORREÇÃO FINAL: Chamando a função correta `getGroupDetails` que existe no serviço.
-            const data = await groupSystem.getGroupDetails(groupId);
+            // CORREÇÃO: Chama a função que busca TODOS os dados do chat (grupo, canal, mensagens)
+            const data = await groupSystem.getGroupChatData(groupId);
             
-            // Assumindo que a simulação retorna { details, messages }
-            setGroupInfo(data.details);
-            setMessages(data.messages);
+            // A simulação agora retorna { group, channelName, messages }
+            setGroupInfo(data.group);
+            setChannelName(data.channelName);
+            setMessages(data.messages || []); // Garante que messages seja sempre um array
 
         } catch (err) {
             console.error("[useGroupChat] Falha ao carregar dados do chat:", err);
@@ -41,41 +54,43 @@ export const useGroupChat = () => {
         }
     }, [id, loadChatData]);
 
-    const sendMessage = async () => {
-        if (!newMessage.trim() || !id || !currentUser) return;
-
-        const tempId = Date.now().toString();
-        const messageToSend: Message = {
-            id: tempId,
-            userId: currentUser.id,
-            author: currentUser.name || 'Você',
-            avatar: currentUser.avatar,
-            text: newMessage,
+    const handleSendMessage = (text: string, media?: any) => {
+        console.log("Enviando mensagem:", { text, media });
+        // Lógica de envio de mensagem (simulada)
+        const newMessage: Message = {
+            id: `msg-${Date.now()}`,
+            senderEmail: currentUserEmail || 'unknown@user.com',
+            senderName: 'Eu', // O nome real viria do perfil
+            senderAvatar: 'https://i.pravatar.cc/150?u=me',
+            text,
             timestamp: Date.now(),
-            isMe: true,
         };
-
-        setMessages(prev => [...prev, messageToSend]);
-        setNewMessage('');
-
-        try {
-            // Este método também precisa existir no serviço. 
-            // Assumindo que `sendMessage` é o nome correto.
-            await groupSystem.sendMessage(id, newMessage);
-        } catch (err) {
-            console.error("Falha ao enviar mensagem:", err);
-            setMessages(prev => prev.filter(m => m.id !== tempId));
-            setError("Sua mensagem não pôde ser enviada.");
-        }
+        setMessages(prev => [...prev, newMessage]);
+    };
+    
+    const handleToggleSelection = (messageId: string) => {
+        setSelectedIds(prev =>
+            prev.includes(messageId)
+                ? prev.filter(id => id !== messageId)
+                : [...prev, messageId]
+        );
     };
 
+    const handleStartSelection = (messageId: string) => {
+        setIsSelectionMode(true);
+        setSelectedIds([messageId]);
+    };
+
+    const deleteSelectedMessages = (mode: 'me' | 'all') => {
+        console.log(`Deletando ${selectedIds.length} mensagens (modo: ${mode})`);
+        setMessages(prev => prev.filter(msg => !selectedIds.includes(msg.id)));
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
+
     return {
-        groupInfo,
-        messages,
-        loading,
-        error,
-        newMessage,
-        setNewMessage,
-        sendMessage,
+        loading, error, group: groupInfo, channelName, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
+        handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate
     };
 };

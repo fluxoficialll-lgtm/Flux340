@@ -1,7 +1,7 @@
 // --- SIMULAÇÃO DO SERVIÇO DE GRUPOS DO USUÁRIO ---
 
 // --- DADOS SIMULADOS ---
-const myMockGroups = [
+export const myMockGroups = [
     {
         id: 'my-group-1',
         name: 'Meu Grupo de Testes',
@@ -48,6 +48,6 @@ const handleGetMyGroups = async (url: URL, config?: RequestInit): Promise<Respon
     });
 };
 
-export const groupDetailsHandlers = {
+export const myGroupsHandlers = {
     '/api/groups/mine': handleGetMyGroups,
 };

@@ -10,38 +10,42 @@ import { conversationsHandlers } from './simulacoes/Simulacao.Lista.Conversas';
 import { notificationsHandlers } from './simulacoes/Simulacao.Notificacoes';
 import { chatDetailsHandlers, mockChats } from './simulacoes/Simulacao.Chat';
 import { reelsHandlers } from './simulacoes/Simulacao.Reels';
-import { groupsHandlers } from './simulacoes/Simulacao.Lista.Grupos';
-import { groupDetailsHandlers } from './simulacoes/Simulacao.Grupo.Proprio';
+import { groupsHandlers, mockGroups } from './simulacoes/Simulacao.Lista.Grupos';
+import { myGroupsHandlers, myMockGroups } from './simulacoes/Simulacao.Grupo.Proprio';
 import { groupMembersHandlers } from './simulacoes/Simulacao.Grupo.Membros';
-// A importação do handler de chat de grupo agora é mais específica.
 import { groupChatHandlers } from './simulacoes/Simulacao.Chat.Grupo';
+import { groupDetailsHandlers } from './simulacoes/Simulacao.Grupo.Detalhes';
 
 // Re-exporta o serviço de controle da simulação com o nome esperado.
 export { controleDeSimulacao as servicoDeSimulacao } from './ControleDeSimulacao';
 
-// --- A SOLUÇÃO DEFINITIVA E SUTIL ---
-// O handler de chat de grupo espera uma rota dinâmica (ex: /api/group-chat/:groupId).
-// Nosso controlador de simulação simples não entende isso.
-// A solução é criar as rotas explícitas que o controlador *consegue* entender.
+// --- TRATAMENTO DE ROTAS DINÂMICAS ---
 
-// 1. Pegamos a função que lida com a requisição (o handler).
-// A rota original é a chave, então a extraímos para pegar o handler associado.
-const dynamicRoute = Object.keys(groupChatHandlers)[0]; // ex: '/api/group-chat/:groupId'
-const groupChatDetailHandler = groupChatHandlers[dynamicRoute];
+// Combina todos os IDs de grupos (públicos e do usuário) para gerar as rotas dinâmicas.
+const allGroupIds = [
+    ...mockGroups.map(g => g.id),
+    ...myMockGroups.map(g => g.id),
+];
 
-// 2. Definimos os IDs dos grupos que existem na simulação.
-const simulatedGroupIds = ['group-1', 'group-2', 'group-3'];
-
-// 3. Criamos um novo objeto de handlers onde cada rota é explícita e estática.
-const staticGroupChatHandlers = {};
-simulatedGroupIds.forEach(id => {
-  // O controlador agora terá uma entrada exata para cada grupo.
-  // ex: { '/api/group-chat/group-1': handler, '/api/group-chat/group-2': handler, ... }
-  // @ts-ignore
-  staticGroupChatHandlers[`/api/group-chat/${id}`] = groupChatDetailHandler;
+// 1. Tratamento para /api/groups/:id
+const groupDetailHandler = groupDetailsHandlers['/api/groups/:id'];
+const staticGroupDetailsHandlers = {};
+allGroupIds.forEach(id => {
+    // @ts-ignore
+    staticGroupDetailsHandlers[`/api/groups/${id}`] = groupDetailHandler;
 });
 
-// 4. Centralizamos TODOS os handlers, usando a nossa versão com rotas estáticas.
+// 2. Tratamento para /api/group-chat/:groupId
+const dynamicGroupChatRoute = Object.keys(groupChatHandlers)[0];
+const groupChatDetailHandler = groupChatHandlers[dynamicGroupChatRoute];
+const staticGroupChatHandlers = {};
+// Usa o mesmo allGroupIds para o chat de grupo
+allGroupIds.forEach(id => {
+    // @ts-ignore
+    staticGroupChatHandlers[`/api/group-chat/${id}`] = groupChatDetailHandler;
+});
+
+// --- CONSOLIDAÇÃO DE TODOS OS HANDLERS ---
 const allSimulationHandlers = {
     ...authHandlers,
     ...feedHandlers,
@@ -53,9 +57,10 @@ const allSimulationHandlers = {
     ...chatDetailsHandlers,
     ...reelsHandlers,
     ...groupsHandlers,
-    ...groupDetailsHandlers,
+    ...myGroupsHandlers,
     ...groupMembersHandlers,
-    ...staticGroupChatHandlers, // A mágica acontece aqui!
+    ...staticGroupDetailsHandlers, // Rotas para detalhes de todos os grupos
+    ...staticGroupChatHandlers,    // Rotas para chat de todos os grupos
 };
 
 /**

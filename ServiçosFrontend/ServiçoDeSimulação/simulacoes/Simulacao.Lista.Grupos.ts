@@ -1,7 +1,7 @@
 // --- SIMULAÇÃO DO SERVIÇO DE GRUPOS ---
 
 // --- DADOS SIMULADOS ---
-const mockGroups = [
+export const mockGroups = [
     {
         id: 'group-1',
         name: 'Desenvolvedores Frontend BR',
