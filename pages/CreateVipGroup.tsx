@@ -4,7 +4,7 @@ import { useCreateVipGroup } from '../hooks/useCreateVipGroup';
 import { PixelSettingsModal } from '../Componentes/groups/PixelSettingsModal';
 import { AccessTypeModal } from '../Componentes/groups/AccessTypeModal';
 import { CurrencySelectorModal } from '../Componentes/groups/CurrencySelectorModal';
-import { ProviderSelectorModal } from '../Componentes/groups/ProviderSelectorModal';
+import { ModalPreviasProvedores } from '../Componentes/ComponentesDePaginasDeVendas/Modal.Previas.Provedores';
 import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
 import { UploadProgressCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
 
@@ -220,6 +220,7 @@ export const CreateVipGroup: React.FC = () => {
                                 <button type="button" className="remove-media-btn-new" onClick={() => removeMediaItem(idx)}>
                                     <i className="fa-solid fa-trash"></i>
                                 </button>
+
                             </div>
 
                             <div className="absolute bottom-1 left-1 bg-black/60 text-[7px] font-black text-white px-1 py-0.5 rounded border border-white/5">
@@ -311,7 +312,7 @@ export const CreateVipGroup: React.FC = () => {
         />
       </main>
 
-      <ProviderSelectorModal 
+      <ModalPreviasProvedores 
         isOpen={isProviderModalOpen}
         onClose={() => setIsProviderModalOpen(false)}
         selectedProviderId={selectedProviderId}

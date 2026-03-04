@@ -25,13 +25,21 @@ export const VipGroupSales: React.FC = () => {
 
   // Se estiver em modo de simulação, usamos os dados do mock.
   if (IS_SIMULATED_MODE) {
-    const [modals, setModals] = useState({ zoomIndex: null, pix: false, email: false, simulator: false });
-    const [zoom, setZoom] = useState<{ items: any[]; index: number } | null>(null);
+    const [modals, setModals] = useState({ zoomIndex: null as number | null, pix: false, email: false, simulator: false });
     const { group, media, copy, pricing } = mockVipGroupSalesData;
+
+    const openSimulator = () => setModals(prev => ({ ...prev, simulator: true }));
+    const closeModals = () => setModals({ zoomIndex: null, pix: false, email: false, simulator: false });
+
+    const handleSimulateConfirm = (provider: any, country: any) => {
+      console.log("Simulação confirmada!", { provider, country });
+      alert(`Simulação ativada para ${country.name} com ${provider}`);
+      closeModals();
+    };
 
     return (
       <div className="min-h-screen bg-[#0c0f14] text-white font-['Inter'] flex flex-col pb-[100px]">
-        <CabecalhoPaginasVendas isOwner={true} isSimulated={true} onSimulateClick={() => {}} />
+        <CabecalhoPaginasVendas isOwner={true} isSimulated={true} onSimulateClick={openSimulator} />
         <main className="flex-grow pt-[85px] px-5 text-center max-w-[600px] mx-auto w-full">
           <CardPreco geoData={{ countryCode: 'BR', currency: 'BRL' }} />
           <div className="mt-2 mb-6">
@@ -43,7 +51,7 @@ export const VipGroupSales: React.FC = () => {
             playingIndex={-1}
             containerRef={{ current: null }}
             onScroll={() => {}}
-            onMediaClick={(index) => setModals({ ...modals, zoomIndex: index })}
+            onMediaClick={(index) => setModals(prev => ({...prev, zoomIndex: index }))}
             onToggleVideo={() => {}}
           />
           <CardDescricao text={copy.longDescription} />
@@ -66,7 +74,17 @@ export const VipGroupSales: React.FC = () => {
         <CardMediaZoom 
             items={media.map(m => ({ url: m.url, type: m.type || 'image' }))}
             initialIndex={modals.zoomIndex}
-            onClose={() => setModals({ ...modals, zoomIndex: null })}
+            onClose={() => setModals(prev => ({ ...prev, zoomIndex: null }))}
+        />
+        <ModalPreviasPaises 
+          isOpen={modals}
+          onClose={closeModals}
+          group={group}
+          geoData={null}
+          priceInfo={null}
+          onEmailSuccess={() => {}}
+          onSimulateConfirm={handleSimulateConfirm}
+          forcedProvider={null}
         />
       </div>
     );

@@ -14,7 +14,7 @@ export const PREVIEW_COUNTRIES = [
     { code: 'IN', name: 'Índia', currency: 'INR', flag: '🇮🇳' },
 ];
 
-interface GlobalSimulatorModalProps {
+interface ModalSimuladorGlobalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: (provider: 'syncpay' | 'stripe' | 'paypal', country: typeof PREVIEW_COUNTRIES[0]) => void;
@@ -22,7 +22,7 @@ interface GlobalSimulatorModalProps {
 
 type Step = 'provider' | 'country';
 
-export const GlobalSimulatorModal: React.FC<GlobalSimulatorModalProps> = ({ isOpen, onClose, onConfirm }) => {
+export const ModalSimuladorGlobal: React.FC<ModalSimuladorGlobalProps> = ({ isOpen, onClose, onConfirm }) => {
     const [step, setStep] = useState<Step>('provider');
     const [selectedProvider, setSelectedProvider] = useState<'syncpay' | 'stripe' | 'paypal' | null>(null);
 

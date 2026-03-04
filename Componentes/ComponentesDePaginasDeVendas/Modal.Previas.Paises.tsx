@@ -6,7 +6,7 @@ import { ConversionResult } from '../../ServiçosFrontend/currencyService';
 
 const PaymentFlowModal = lazy(() => import('../ComponentesDeProvedores/PaymentFlowModal').then(m => ({ default: m.PaymentFlowModal })));
 const EmailCaptureModal = lazy(() => import('../ComponentesDeProvedores/EmailCaptureModal').then(m => ({ default: m.EmailCaptureModal })));
-const GlobalSimulatorModal = lazy(() => import('../groups/GlobalSimulatorModal').then(m => ({ default: m.GlobalSimulatorModal })));
+const ModalSimuladorGlobal = lazy(() => import('./Modal.Simulador.Global').then(m => ({ default: m.ModalSimuladorGlobal })));
 
 interface ModalPreviasPaisesProps {
   isOpen: {
@@ -50,7 +50,7 @@ export const ModalPreviasPaises: React.FC<ModalPreviasPaisesProps> = ({
       )}
 
       {isOpen.simulator && (
-        <GlobalSimulatorModal 
+        <ModalSimuladorGlobal 
           isOpen={isOpen.simulator} 
           onClose={onClose} 
           onConfirm={(provider, country) => {

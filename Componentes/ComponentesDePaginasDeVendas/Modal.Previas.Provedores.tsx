@@ -10,7 +10,7 @@ interface ProviderSelectorModalProps {
     onSelect: (providerId: string) => void;
 }
 
-export const ProviderSelectorModal: React.FC<ProviderSelectorModalProps> = ({ 
+export const ModalPreviasProvedores: React.FC<ProviderSelectorModalProps> = ({ 
     isOpen, 
     onClose, 
     selectedProviderId, 
