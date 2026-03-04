@@ -46,17 +46,30 @@ export const ServicoGestaoCredencialStripe = {
     // --- MÉTODOS DE PROCESSAMENTO DE PAGAMENTO ---
 
     /**
-     * Cria uma Intenção de Pagamento (Payment Intent) no backend.
-     * @param {any} group - O objeto do grupo.
+     * Busca a chave publicável do Stripe para um determinado vendedor.
+     * Esta chave é necessária para inicializar o Stripe no lado do cliente.
      * @param {string} creatorEmail - Email do criador para identificar a conta Stripe.
+     * @returns {Promise<{ publicKey: string }>} A resposta da API com a chave publicável.
+     */
+    async getPublishableKey(creatorEmail) {
+        // CORREÇÃO: Adicionando o método que faltava para buscar a chave.
+        return gestorDeRequisicoes.post('/gateways/stripe/public-key', { creatorEmail });
+    },
+
+    /**
+     * Cria uma Intenção de Pagamento (Payment Intent) no backend.
+     * @param {number} price - O preço em centavos.
+     * @param {string} currency - A moeda (ex: 'brl', 'usd').
      * @param {string} method - O método de pagamento (ex: 'pix', 'card').
+     * @param {string} creatorEmail - Email do criador para identificar a conta Stripe.
      * @returns {Promise<any>} A resposta da API com os detalhes da intenção.
      */
-    async createPaymentIntent(group, creatorEmail, method) {
+    async createPaymentIntent(price, currency, method, creatorEmail) {
         return gestorDeRequisicoes.post('/payments/stripe/create', {
-            group,
-            creatorEmail,
-            paymentMethod: method
+            price,
+            currency,
+            paymentMethod: method,
+            creatorEmail
         });
     },
 

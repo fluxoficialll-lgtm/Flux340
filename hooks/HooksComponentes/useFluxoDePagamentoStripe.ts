@@ -1,75 +1,123 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-// CORREÇÃO DEFINITIVA: Corrigindo o caminho da importação para o serviço do Stripe
 import { ServicoGestaoCredencialStripe as stripeService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialStripe';
 import { Group } from '../../types';
+import { GeoData } from '../../ServiçosFrontend/geoService';
+import { ConversionResult } from '../../ServiçosFrontend/currencyService';
+// CORREÇÃO: Importando o serviço de simulação para evitar chamadas de API desnecessárias.
 import { servicoDeSimulacao } from '../../ServiçosFrontend/ServiçoDeSimulação';
 
-// Tipos exportados para uso no componente
-export type PaymentStatus = 'idle' | 'processing' | 'success' | 'error';
-export interface UsePaymentFlowOptions {
-    onPaymentSuccess?: (details: any) => void;
-    onPaymentError?: (error: any) => void;
+
+// --- TIPOS ---
+export type StripeView = 
+    | 'selection' 
+    | 'card' 
+    | 'pix' 
+    | 'boleto' 
+    | 'oxxo' 
+    | 'upi'
+    | 'konbini'
+    | 'paynow'
+    | 'interac'
+    | 'sepa' 
+    | 'bacs' 
+    | 'ach' 
+    | 'becs' 
+    | 'pad'
+    | 'redirection';
+
+export interface PaymentData {
+    clientSecret: string;
+    transactionId: string;
 }
 
-// Hook customizado
-export const useFluxoDePagamentoStripe = (group: Group, options: UsePaymentFlowOptions = {}) => {
-    const [stripe, setStripe] = useState<Stripe | null>(null);
-    const [status, setStatus] = useState<PaymentStatus>('idle');
-    const [error, setError] = useState<string | null>(null);
+// --- PROPS DO HOOK ---
+interface UseFluxoDePagamentoStripeProps {
+    group: Group;
+    geo: GeoData | null;
+    onSuccess: (txId?: string) => void;
+    onError: (msg: string) => void;
+    onTransactionId: (id: string) => void;
+    convertedPriceInfo: ConversionResult | null;
+}
 
-    // Carrega a instância do Stripe com a chave publicável
-    useState(() => {
+// --- CORPO DO HOOK ---
+export const useFluxoDePagamentoStripe = (props: UseFluxoDePagamentoStripeProps) => {
+    const { group, geo, onSuccess, onError, onTransactionId, convertedPriceInfo } = props;
+
+    const [stripe, setStripe] = useState<Stripe | null>(null);
+    const [currentView, setCurrentView] = useState<StripeView>('selection');
+    const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Carrega a instância do Stripe
+    useEffect(() => {
         const load = async () => {
-            const publicKey = await stripeService.getPublishableKey();
-            if (publicKey) {
-                setStripe(await loadStripe(publicKey));
+            // CORREÇÃO: Se estiver em modo de simulação, não tentamos buscar uma chave real do Stripe.
+            // Isso previne o erro "Internal Server Error" e mantém a UI visível.
+            if (servicoDeSimulacao.estaAtivo()) {
+                console.log("[SIMULAÇÃO] A inicialização do Stripe foi ignorada no modo de simulação.");
+                return;
+            }
+
+            try {
+                const response = await stripeService.getPublishableKey(group.creatorEmail);
+                const publicKey = response.publicKey;
+
+                if (publicKey) {
+                    setStripe(await loadStripe(publicKey));
+                } else {
+                    throw new Error("A chave publicável do Stripe não foi encontrada na resposta do servidor.");
+                }
+            } catch (error: any) {
+                console.error("Falha ao carregar o Stripe:", error);
+                onError(error.message || "Não foi possível iniciar o sistema de pagamento.");
             }
         };
         load();
-    }, []);
+    }, [group.creatorEmail, onError]);
 
-    // Função para iniciar o fluxo de pagamento
-    const iniciarPagamento = useCallback(async () => {
-        if (servicoDeSimulacao.estaAtivo()) {
-            console.warn("[SIMULAÇÃO] Fluxo de pagamento com Stripe não executado em modo de simulação.");
-            setStatus('success'); // Simula sucesso imediato
-            if (options.onPaymentSuccess) options.onPaymentSuccess({ simulation: true });
+    const generatePayment = useCallback(async (method: string) => {
+        if (!stripe) {
+            // Em simulação, o Stripe não é inicializado, então este erro pode ser ignorado.
+            if (servicoDeSimulacao.estaAtivo()) {
+                console.log(`[SIMULAÇÃO] A geração de pagamento para o método ${method} foi interceptada.`);
+                return;
+            }
+            onError("O Stripe não foi inicializado corretamente.");
             return;
         }
-
-        if (!stripe || !group) {
-            console.error("Stripe ou Grupo não está disponível.");
-            setError("O sistema de pagamento não está pronto. Tente novamente em alguns instantes.");
-            setStatus('error');
-            return;
-        }
-
-        setStatus('processing');
-        setError(null);
-
+        setIsLoading(true);
         try {
-            const clientSecret = await stripeService.createPaymentIntent(group.price, 'BRL');
-
-            const { error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
-                // Aqui iriam os detalhes do cartão, se não estiver usando Elements
-            });
-
-            if (stripeError) {
-                throw new Error(stripeError.message || "Ocorreu um erro durante a confirmação do pagamento.");
+            const price = convertedPriceInfo?.priceInCents || group.price;
+            const currency = convertedPriceInfo?.currency || geo?.currency || 'BRL';
+            
+            const data = await stripeService.createPaymentIntent(price, currency.toLowerCase(), method, group.creatorEmail);
+            
+            if (!data.clientSecret) {
+                throw new Error("Não foi possível obter o client secret do Stripe.");
             }
 
-            setStatus('success');
-            if (options.onPaymentSuccess) options.onPaymentSuccess({ clientSecret });
+            setPaymentData({ clientSecret: data.clientSecret, transactionId: data.transactionId });
+            onTransactionId(data.transactionId);
 
-        } catch (err: any) {
-            console.error("Falha no processo de pagamento:", err);
-            setError(err.message || "Não foi possível processar seu pagamento.");
-            setStatus('error');
-            if (options.onPaymentError) options.onPaymentError(err);
+        } catch (error: any) {
+            console.error(`Erro ao criar PaymentIntent para o método ${method}:`, error);
+            onError(error.message || `Falha ao preparar o pagamento para ${method}.`);
+        } finally {
+            setIsLoading(false);
         }
-    }, [stripe, group, options]);
+    }, [stripe, group, geo, convertedPriceInfo, onError, onTransactionId]);
 
-    return { iniciarPagamento, status, error };
+    return {
+        stripe,
+        currentView,
+        setCurrentView,
+        paymentData,
+        isLoading,
+        generatePayment,
+    };
 };
+
+export type { GeoData, ConversionResult };
