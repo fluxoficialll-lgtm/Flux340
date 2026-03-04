@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface VipCheckoutProps {
+interface CardCTAPrincipalProps {
     isEnabled: boolean;
     isRenewal: boolean;
     ctaText: string;
@@ -8,7 +8,7 @@ interface VipCheckoutProps {
     onClick: () => void;
 }
 
-export const VipCheckout: React.FC<VipCheckoutProps> = ({ 
+export const CardCTAPrincipal: React.FC<CardCTAPrincipalProps> = ({ 
     isEnabled, 
     isRenewal, 
     ctaText, 

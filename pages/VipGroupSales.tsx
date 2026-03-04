@@ -8,13 +8,13 @@ import { useAutoLanguage } from '../hooks/useAutoLanguage';
 import { mockVipGroupSalesData } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Pagina.Vendas';
 
 // UI Components
-import { VipSalesHeader } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesHeader';
-import { VipSalesPriceBadge } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesPriceBadge';
-import { VipGallery } from '../Componentes/ComponentesDePaginasDeVendas/VipGallery';
-import { VipCopy } from '../Componentes/ComponentesDePaginasDeVendas/VipCopy';
-import { VipCheckout } from '../Componentes/ComponentesDePaginasDeVendas/VipCheckout';
-import { VipSalesModals } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesModals';
-import { VipSalesMediaZoom } from '../Componentes/ComponentesDePaginasDeVendas/VipSalesMediaZoom';
+import { CabecalhoPaginasVendas } from '../Componentes/ComponentesDePaginasDeVendas/Cabecalho.Paginas.Vendas';
+import { CardPreco } from '../Componentes/ComponentesDePaginasDeVendas/Card.Preco';
+import { CardPrevias } from '../Componentes/ComponentesDePaginasDeVendas/Card.Previas';
+import { CardDescricao } from '../Componentes/ComponentesDePaginasDeVendas/Card.Descricao';
+import { CardCTAPrincipal } from '../Componentes/ComponentesDePaginasDeVendas/Card.CTA.principal';
+import { ModalPreviasPaises } from '../Componentes/ComponentesDePaginasDeVendas/Modal.Previas.Paises';
+import { CardMediaZoom } from '../Componentes/ComponentesDePaginasDeVendas/Card.MediaZoom';
 
 // Variável para controlar o modo de simulação
 const IS_SIMULATED_MODE = true; 
@@ -31,13 +31,13 @@ export const VipGroupSales: React.FC = () => {
 
     return (
       <div className="min-h-screen bg-[#0c0f14] text-white font-['Inter'] flex flex-col pb-[100px]">
-        <VipSalesHeader isOwner={true} isSimulated={true} onSimulateClick={() => {}} />
+        <CabecalhoPaginasVendas isOwner={true} isSimulated={true} onSimulateClick={() => {}} />
         <main className="flex-grow pt-[85px] px-5 text-center max-w-[600px] mx-auto w-full">
-          <VipSalesPriceBadge geoData={{ countryCode: 'BR', currency: 'BRL' }} />
+          <CardPreco geoData={{ countryCode: 'BR', currency: 'BRL' }} />
           <div className="mt-2 mb-6">
             <h1 className="text-2xl font-black text-white px-4 tracking-tight">{group.name}</h1>
           </div>
-          <VipGallery
+          <CardPrevias
             mediaItems={media}
             currentSlide={0}
             playingIndex={-1}
@@ -46,8 +46,8 @@ export const VipGroupSales: React.FC = () => {
             onMediaClick={(index) => setModals({ ...modals, zoomIndex: index })}
             onToggleVideo={() => {}}
           />
-          <VipCopy text={copy.longDescription} />
-          <VipCheckout
+          <CardDescricao text={copy.longDescription} />
+          <CardCTAPrincipal
             isEnabled={true}
             isRenewal={false}
             ctaText={"Entrar no Clube"}
@@ -63,7 +63,7 @@ export const VipGroupSales: React.FC = () => {
             </div>
           </div>
         </main>
-        <VipSalesMediaZoom 
+        <CardMediaZoom 
             items={media.map(m => ({ url: m.url, type: m.type || 'image' }))}
             initialIndex={modals.zoomIndex}
             onClose={() => setModals({ ...modals, zoomIndex: null })}
@@ -144,14 +144,14 @@ export const VipGroupSales: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0c0f14] text-white font-['Inter'] flex flex-col pb-[100px]">
-      <VipSalesHeader 
+      <CabecalhoPaginasVendas 
         isOwner={isCreator} 
         isSimulated={isSimulated}
         onSimulateClick={openSimulator}
       />
       
       <main className="flex-grow pt-[85px] px-5 text-center max-w-[600px] mx-auto w-full">
-        <VipSalesPriceBadge geoData={geoData} />
+        <CardPreco geoData={geoData} />
         
         <div className="mt-2 mb-6">
             <h1 className="text-2xl font-black text-white px-4 tracking-tight">
@@ -159,7 +159,7 @@ export const VipGroupSales: React.FC = () => {
             </h1>
         </div>
 
-        <VipGallery 
+        <CardPrevias 
           mediaItems={normalizedMedia} 
           currentSlide={currentSlide}
           playingIndex={playingIndex}
@@ -169,9 +169,9 @@ export const VipGroupSales: React.FC = () => {
           onToggleVideo={handleToggleVideo}
         />
 
-        <VipCopy text={translatedData?.vipDoorText || group.vipDoor?.text || ''} />
+        <CardDescricao text={translatedData?.vipDoorText || group.vipDoor?.text || ''} />
         
-        <VipCheckout 
+        <CardCTAPrincipal
           isEnabled={isPurchaseEnabled}
           isRenewal={false} 
           ctaText={translatedData?.vipButtonText || group.vipDoor?.buttonText || t('buy_now')}
@@ -189,7 +189,7 @@ export const VipGroupSales: React.FC = () => {
         </div>
       </main>
 
-      <VipSalesModals 
+      <ModalPreviasPaises 
         isOpen={{ ...modals, pix: modals.pix, email: modals.email, simulator: modals.simulator }}
         onClose={() => {
             closeModals();
@@ -203,7 +203,7 @@ export const VipGroupSales: React.FC = () => {
         forcedProvider={forcedProvider}
       />
 
-      <VipSalesMediaZoom 
+      <CardMediaZoom 
         items={normalizedMedia}
         initialIndex={modals.zoomIndex}
         onClose={closeModals}

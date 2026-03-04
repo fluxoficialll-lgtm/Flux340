@@ -1,11 +1,11 @@
 import React from 'react';
 import { GeoData } from '../../ServiçosFrontend/geoService';
 
-interface VipSalesPriceBadgeProps {
+interface CardPrecoProps {
     geoData: GeoData | null;
 }
 
-export const VipSalesPriceBadge: React.FC<VipSalesPriceBadgeProps> = ({ geoData }) => {
+export const CardPreco: React.FC<CardPrecoProps> = ({ geoData }) => {
     if (!geoData) return null;
 
     return (

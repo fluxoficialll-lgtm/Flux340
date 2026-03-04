@@ -1,11 +1,11 @@
 
 import React from 'react';
 
-interface VipCopyProps {
+interface CardDescricaoProps {
     text: string;
 }
 
-export const VipCopy: React.FC<VipCopyProps> = ({ text }) => {
+export const CardDescricao: React.FC<CardDescricaoProps> = ({ text }) => {
     return (
         <section className="content-section p-4 max-w-[480px] mx-auto mt-4">
             <div className="relative">

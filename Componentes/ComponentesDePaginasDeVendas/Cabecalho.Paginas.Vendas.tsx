@@ -2,13 +2,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-interface VipSalesHeaderProps {
+interface CabecalhoPaginasVendasProps {
     isOwner?: boolean;
     onSimulateClick?: () => void;
     isSimulated?: boolean;
 }
 
-export const VipSalesHeader: React.FC<VipSalesHeaderProps> = ({ isOwner, onSimulateClick, isSimulated }) => {
+export const CabecalhoPaginasVendas: React.FC<CabecalhoPaginasVendasProps> = ({ isOwner, onSimulateClick, isSimulated }) => {
     const navigate = useNavigate();
     
     return (

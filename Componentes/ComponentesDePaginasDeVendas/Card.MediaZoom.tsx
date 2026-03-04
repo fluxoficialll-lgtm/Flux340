@@ -2,13 +2,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { VipMediaItem } from '../../types';
 
-interface VipSalesMediaZoomProps {
+interface CardMediaZoomProps {
     items: VipMediaItem[];
     initialIndex: number | null;
     onClose: () => void;
 }
 
-export const VipSalesMediaZoom: React.FC<VipSalesMediaZoomProps> = ({ items, initialIndex, onClose }) => {
+export const CardMediaZoom: React.FC<CardMediaZoomProps> = ({ items, initialIndex, onClose }) => {
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
     const [showHUD, setShowHUD] = useState(true);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -48,7 +48,7 @@ export const VipSalesMediaZoom: React.FC<VipSalesMediaZoomProps> = ({ items, ini
             onClick={() => setShowHUD(!showHUD)}
         >
             <style>{`
-                .hud-btn-vip {
+                .hud-btn {
                     backdrop-filter: blur(25px);
                     -webkit-backdrop-filter: blur(25px);
                     background: rgba(255, 255, 255, 0.08);
@@ -57,12 +57,12 @@ export const VipSalesMediaZoom: React.FC<VipSalesMediaZoomProps> = ({ items, ini
                     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                     pointer-events: auto;
                 }
-                .hud-hidden-vip {
+                .hud-hidden {
                     opacity: 0;
                     pointer-events: none;
                     transform: translateY(-15px);
                 }
-                .close-pill-vip {
+                .close-pill {
                     width: 54px;
                     height: 54px;
                     border-radius: 50%;
@@ -72,9 +72,9 @@ export const VipSalesMediaZoom: React.FC<VipSalesMediaZoomProps> = ({ items, ini
                     font-size: 20px;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
                 }
-                .close-pill-vip:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+                .close-pill:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
                 
-                .count-pill-vip {
+                .count-pill {
                     padding: 8px 16px;
                     border-radius: 14px;
                     font-size: 11px;
@@ -110,11 +110,11 @@ export const VipSalesMediaZoom: React.FC<VipSalesMediaZoomProps> = ({ items, ini
             `}</style>
 
             {/* HUD: Superior (Contador e Fechar - Padrão Hub) */}
-            <div className={`absolute top-0 left-0 w-full p-6 flex items-start justify-between z-50 pointer-events-none transition-all duration-500 ${!showHUD ? 'hud-hidden-vip' : ''}`}>
+            <div className={`absolute top-0 left-0 w-full p-6 flex items-start justify-between z-50 pointer-events-none transition-all duration-500 ${!showHUD ? 'hud-hidden' : ''}`}>
                 <div className="w-10"></div> {/* Espaçador */}
 
                 {/* Pill de Contagem centralizada */}
-                <div className="hud-btn-vip count-pill-vip shadow-2xl">
+                <div className="hud-btn count-pill shadow-2xl">
                     <span className="opacity-40">{(currentIndex ?? 0) + 1}</span>
                     <div className="w-px h-3 bg-white/10"></div>
                     <span>{items.length}</span>
@@ -123,7 +123,7 @@ export const VipSalesMediaZoom: React.FC<VipSalesMediaZoomProps> = ({ items, ini
                 {/* Botão Fechar Sofisticado */}
                 <button 
                     onClick={(e) => { e.stopPropagation(); onClose(); }} 
-                    className="hud-btn-vip close-pill-vip"
+                    className="hud-btn close-pill"
                 >
                     <i className="fa-solid fa-xmark"></i>
                 </button>

@@ -8,7 +8,7 @@ const PaymentFlowModal = lazy(() => import('../ComponentesDeProvedores/PaymentFl
 const EmailCaptureModal = lazy(() => import('../ComponentesDeProvedores/EmailCaptureModal').then(m => ({ default: m.EmailCaptureModal })));
 const GlobalSimulatorModal = lazy(() => import('../groups/GlobalSimulatorModal').then(m => ({ default: m.GlobalSimulatorModal })));
 
-interface VipSalesModalsProps {
+interface ModalPreviasPaisesProps {
   isOpen: {
     pix: boolean;
     email: boolean;
@@ -23,7 +23,7 @@ interface VipSalesModalsProps {
   forcedProvider?: 'syncpay' | 'stripe' | 'paypal' | null;
 }
 
-export const VipSalesModals: React.FC<VipSalesModalsProps> = ({
+export const ModalPreviasPaises: React.FC<ModalPreviasPaisesProps> = ({
   isOpen, onClose, group, geoData, priceInfo, onEmailSuccess, onSimulateConfirm, forcedProvider
 }) => {
   return (

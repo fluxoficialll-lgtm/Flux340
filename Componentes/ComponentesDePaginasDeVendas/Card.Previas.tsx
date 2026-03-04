@@ -70,7 +70,7 @@ const VideoItem: React.FC<VideoItemProps> = ({ url, isPlaying, onToggle }) => {
     );
 };
 
-interface VipGalleryProps {
+interface CardPreviasProps {
     mediaItems: VipMediaItem[];
     currentSlide: number;
     playingIndex: number | null;
@@ -80,7 +80,7 @@ interface VipGalleryProps {
     onToggleVideo: (index: number) => void;
 }
 
-export const VipGallery: React.FC<VipGalleryProps> = ({ 
+export const CardPrevias: React.FC<CardPreviasProps> = ({ 
     mediaItems, 
     currentSlide, 
     playingIndex,
