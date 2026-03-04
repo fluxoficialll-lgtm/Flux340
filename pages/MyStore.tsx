@@ -116,15 +116,15 @@ export const MyStore: React.FC = () => {
         ) : dashboardData && (
             <div className="animate-fade-in">
                 <div className="store-tabs">
-                    <button className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>Meus Produtos ({dashboardData.stats.totalProducts})</button>
-                    <button className={`tab-btn ${activeTab === 'campaigns' ? 'active' : ''}`} onClick={() => setActiveTab('campaigns')}>Minhas Campanhas ({dashboardData.stats.activeAds})</button>
+                    <button className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>Meus Produtos ({dashboardData.stats?.totalProducts || 0})</button>
+                    <button className={`tab-btn ${activeTab === 'campaigns' ? 'active' : ''}`} onClick={() => setActiveTab('campaigns')}>Minhas Campanhas ({dashboardData.stats?.activeAds || 0})</button>
                 </div>
 
                 {activeTab === 'products' ? (
-                    <ProductStoreList products={dashboardData.lists.products} onDelete={handleDeleteProduct} />
+                    <ProductStoreList products={dashboardData.lists?.products || []} onDelete={handleDeleteProduct} />
                 ) : (
                     <CampaignStoreList 
-                        campaigns={dashboardData.lists.campaigns} 
+                        campaigns={dashboardData.lists?.campaigns || []} 
                         onEnd={handleEndCampaign}
                         onResume={handleResumeCampaign}
                         onDelete={handleDeleteCampaign}

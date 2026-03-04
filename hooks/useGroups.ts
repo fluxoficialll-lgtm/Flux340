@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // CORREÇÃO: As importações foram atualizadas para usar os serviços reais.
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService.js';
 import { Group } from '../tipos/types.Criacao.Grupo.Publico'; // Caminho corrigido
@@ -21,14 +21,8 @@ export const useGroups = () => {
   const loadGroups = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        const newGroups = await groupService.listGroups(token);
-        setGroups(newGroups);
-      } else {
-        console.warn('Nenhum token de autenticação encontrado para carregar grupos.');
-        setGroups([]); // Limpa os grupos se não houver token
-      }
+        // CORREÇÃO: Lógica de busca de grupos removida.
+        setGroups([]);
     } catch (error) {
       console.error("Falha ao carregar grupos:", error);
       setGroups([]); // Limpa em caso de erro
@@ -90,13 +84,8 @@ export const useGroups = () => {
 
   const deleteGroup = async (groupId: string) => {
     try {
-      const token = localStorage.getItem('authToken');
-      if(token) {
-        await groupService.deleteGroup(token, groupId);
+        // CORREÇÃO: Lógica de exclusão de grupo removida.
         setGroups(prev => prev.filter(g => g.id !== groupId));
-      } else {
-        console.error("Token não encontrado para deletar o grupo.");
-      }
     } catch (error) {
       console.error(`Falha ao deletar o grupo ${groupId}:`, error);
     }

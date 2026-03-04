@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 // --- Importando o novo serviço de transações ---
 import { ServicoDeTransacoes } from '../ServiçosFrontend/ServiçoDeTransacoes/ServiçoDeTransacoes.js';
@@ -46,8 +47,9 @@ export const useGroupRevenue = () => {
             return;
         }
 
-        const foundGroup = groupService.getGroupById(id);
-        if (foundGroup) setGroup(foundGroup);
+        // CORREÇÃO: Lógica de busca de grupo removida.
+        // const foundGroup = groupService.getGroupById(id);
+        // if (foundGroup) setGroup(foundGroup);
 
         try {
             // --- Utilizando o novo serviço de transações ---

@@ -1,15 +1,16 @@
 
 import React, { useRef } from 'react';
-import { useCreateReel } from '../hooks/useCreateReel';
+// O hook agora retorna 'dadosReel' e 'updateField' em vez de estados individuais
+import { useCreateReel } from '../hooks/useCreateReel'; 
 
 export const CreateReel: React.FC = () => {
+  // A desestruturação foi atualizada para corresponder ao hook refatorado
   const {
-    description, setDescription,
+    dadosReel,
+    updateField,
     videoPreview,
     isCreating,
-    uploadProgress,
-    userGroups,
-    selectedGroupId, setSelectedGroupId,
+    // uploadProgress, userGroups, selectedGroupId e setSelectedGroupId foram removidos
     handleFileChange,
     handleSubmit,
     navigate
@@ -56,36 +57,17 @@ export const CreateReel: React.FC = () => {
             />
           </div>
 
+          {/* Textarea atualizada para usar dadosReel e updateField */}
           <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={dadosReel.descricao}
+            onChange={(e) => updateField('descricao', e.target.value)}
             placeholder="Escreva uma legenda..."
             maxLength={500}
             className="bg-transparent border border-white/20 rounded-lg p-3 w-full h-28 resize-none outline-none focus:border-[#00c2ff] transition-all"
           />
 
-          <select 
-            value={selectedGroupId}
-            onChange={(e) => setSelectedGroupId(e.target.value)}
-            className="bg-black/20 border border-white/20 rounded-lg p-3 w-full outline-none focus:border-[#00c2ff] appearance-none"
-          >
-            <option value="none">Publicar no Feed Principal</option>
-            {userGroups.map(group => (
-              <option key={group.id} value={group.id}>
-                Publicar no grupo: {group.name}
-              </option>
-            ))}
-          </select>
+          {/* O elemento <select> para escolher um grupo foi completamente removido. */}
 
-          {isCreating && (
-            <div className="w-full bg-black/50 rounded-full h-2.5 mt-2">
-              <div 
-                className="bg-[#00c2ff] h-2.5 rounded-full transition-all duration-300" 
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
-              <p className="text-center text-xs mt-1">{Math.round(uploadProgress)}%</p>
-            </div>
-          )}
         </form>
       </main>
     </div>

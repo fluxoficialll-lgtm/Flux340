@@ -1,9 +1,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
+import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 import { MarketplaceItem } from '../types';
 
 export const useMarketplace = () => {
@@ -14,16 +13,19 @@ export const useMarketplace = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [currentUserEmail, setCurrentUserEmail] = useState<string | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const loadItems = useCallback(async () => {
+    const fetchMarketplaceItems = useCallback(async () => {
         setIsLoading(true);
-        const email = authService.getCurrentUserEmail() || undefined;
+        setError(null);
         try {
-            const items = await marketplaceService.getRecommendedItems(email);
+            // O marketplaceService agora usa fetch internamente, que será interceptado.
+            const items = await marketplaceService.fetchItems();
             setAllItems(items || []);
-        } catch (error) {
-            console.error("Erro ao carregar itens do marketplace:", error);
-            setAllItems([]);
+        } catch (err) {
+            console.error("Erro ao carregar itens do marketplace:", err);
+            setError(err instanceof Error ? err.message : 'Ocorreu um erro desconhecido.');
+            setAllItems([]); // Garante que não haja dados antigos em caso de erro
         } finally {
             setIsLoading(false);
         }
@@ -32,23 +34,19 @@ export const useMarketplace = () => {
     useEffect(() => {
         const email = authService.getCurrentUserEmail() || undefined;
         setCurrentUserEmail(email);
-        loadItems();
-        marketplaceService.fetchItems().catch(err => console.warn("Marketplace sync failed", err));
         
-        // CORREÇÃO: A chamada a subscribe foi ajustada para passar apenas a função de callback,
-        // alinhando com a assinatura correta do método em ControleDeSimulacao.
-        const unsubscribe = servicoDeSimulacao.subscribe(() => { loadItems(); });
-        
-        return () => unsubscribe();
-    }, [loadItems]);
+        // Busca os itens ao montar o componente.
+        fetchMarketplaceItems();
+
+        // Não há mais necessidade de subscribe, o fetch resolve tudo.
+    }, [fetchMarketplaceItems]);
 
     const filteredProducts = useMemo(() => {
         if (!Array.isArray(allItems)) return [];
         let result = [...allItems];
         
         if (activeCategory !== 'Todos') {
-            if (activeCategory === 'Destaque') result = result.filter(p => p && p.isAd);
-            else result = result.filter(p => p && p.category === activeCategory);
+            result = result.filter(p => p && p.category === activeCategory);
         }
         
         if (searchTerm.trim()) {
@@ -63,14 +61,11 @@ export const useMarketplace = () => {
 
     const handleProductClick = (item: MarketplaceItem) => {
         if (!item) return;
-        if (currentUserEmail) marketplaceService.trackView(item, currentUserEmail);
-        
-        if (item.isAd && item.ctaLink) {
-            if (item.ctaLink.startsWith('http')) window.open(item.ctaLink, '_blank');
-            else navigate(item.ctaLink);
-        } else { 
-            navigate(`/marketplace/product/${item.id}`); 
+        if (currentUserEmail) {
+            marketplaceService.trackView(item, currentUserEmail);
         }
+        
+        navigate(`/marketplace/product/${item.id}`); 
     };
 
     return {
@@ -81,6 +76,7 @@ export const useMarketplace = () => {
         isMenuOpen,
         setIsMenuOpen,
         isLoading,
+        error, // Expondo o erro para a UI
         filteredProducts,
         handleProductClick
     };

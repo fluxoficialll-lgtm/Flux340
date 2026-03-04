@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
+import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { Post } from '../types';
 
 export const useReelsSearch = () => {
@@ -20,7 +21,8 @@ export const useReelsSearch = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const searchResults = await ServiçoPublicaçãoFeed.searchPosts(query);
+        // CORREÇÃO: A função foi renomeada de 'searchPosts' para 'search' para corresponder ao serviço.
+        const searchResults = await ServiçoPublicaçãoFeed.search(query);
         setResults(searchResults);
       } catch (err) {
         setError('Falha ao buscar resultados.');

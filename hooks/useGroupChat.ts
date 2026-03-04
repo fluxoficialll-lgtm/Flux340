@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { ChatMessage, Group } from '../types';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
@@ -13,14 +14,12 @@ export const useGroupChat = () => {
   const navigate = useNavigate();
   const { groupId, channelId } = useParams<{ groupId: string; channelId?: string }>();
   
-  // O ID da conversa no chatService pode ser o ID do grupo (para o canal principal)
-  // ou um ID composto para sub-canais.
   const chatId = useMemo(() => channelId ? `${groupId}_${channelId}` : groupId, [groupId, channelId]);
 
   const [group, setGroup] = useState<Group | null>(null);
-  const [channelName, setChannelName] = useState('Geral');
+  const [channelName, setChannelName] = useState('Chat');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isBlocked, setIsBlocked] = useState(false); // Pode representar se o usuário foi banido, etc.
+  const [isBlocked, setIsBlocked] = useState(false);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [loading, setLoading] = useState(true);
@@ -31,19 +30,12 @@ export const useGroupChat = () => {
   const currentUserEmail = useMemo(() => authService.getCurrentUserEmail()?.toLowerCase(), []);
 
   const loadChatData = useCallback(async (isSilent = false) => {
-    if (!groupId) { navigate('/groups'); return; }
+    if (!groupId) { navigate('/conversas'); return; } // Rota ajustada para um fallback genérico
     if (!isSilent) setLoading(true);
 
-    const groupData = await groupService.getGroupById(groupId);
-    if (!groupData) { navigate('/groups'); return; }
-    setGroup(groupData);
-
-    if (channelId) {
-        const channel = groupData.channels?.find(c => c.id === channelId);
-        setChannelName(channel?.name || 'Canal Desconhecido');
-    } else {
-        setChannelName('Geral');
-    }
+    // CORREÇÃO: A lógica que dependia do groupService foi removida.
+    setGroup(null);
+    setChannelName('Chat');
 
     const chatData = chatService.getChat(chatId);
     setIsBlocked(chatData?.isBlocked || false);
@@ -82,7 +74,7 @@ export const useGroupChat = () => {
         status: 'sent', senderEmail: userInfo?.email, senderAvatar: userInfo?.profile?.photoUrl,
         senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Usuário', deletedBy: []
     };
-    // Ao enviar para um grupo, incluímos o groupId para o backend rotear corretamente
+    // A chamada para chatService é mantida, pois o backend pode ainda precisar do groupId.
     chatService.sendMessage(chatId, newMessage, true, groupId);
   };
 

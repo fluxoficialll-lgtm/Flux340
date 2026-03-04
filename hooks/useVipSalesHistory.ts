@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-// --- Importando o novo serviço de transações ---
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { ServicoDeTransacoes } from '../ServiçosFrontend/ServiçoDeTransacoes/ServiçoDeTransacoes.js';
 
 export const useVipSalesHistory = () => {
@@ -24,16 +24,17 @@ export const useVipSalesHistory = () => {
               return;
           }
 
-          const group = groupService.getGroupById(id);
-          if (group) setGroupName(group.name);
+          // CORREÇÃO: A lógica que dependia do groupService foi removida.
+          // const group = groupService.getGroupById(id);
+          // if (group) setGroupName(group.name);
+          setGroupName('Histórico de Vendas'); // Define um título genérico
 
           try {
-              // --- Utilizando o novo serviço de transações ---
               const transactions = await ServicoDeTransacoes.obterTransacoes(id);
               
               const filtered = transactions.filter(t => {
                   const isPaid = ['paid', 'completed', 'approved', 'settled'].includes((t.status || '').toLowerCase());
-                  // O filtro de `groupId` já é feito no backend pela API, mas podemos manter por segurança.
+                  // O filtro de `groupId` já é feito no backend, então a lógica pode ser mantida para um futuro `userId`
                   return t.groupId === id && isPaid;
               });
 
@@ -57,8 +58,6 @@ export const useVipSalesHistory = () => {
 
       loadData();
   }, [id]);
-
-  // --- As funções auxiliares permanecem as mesmas ---
 
   const formatDate = (dateStr?: string) => {
       if (!dateStr) return '-';

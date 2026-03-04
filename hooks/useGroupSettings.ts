@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 import { Group, User, GroupLink, VipMediaItem } from '../types';
@@ -18,7 +19,7 @@ export const useGroupSettings = () => {
     const [isOwner, setIsOwner] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
 
-    // Form States
+    // ... (estados do formulário permanecem os mesmos)
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
     const [coverImage, setCoverImage] = useState<string | undefined>(undefined);
@@ -40,106 +41,29 @@ export const useGroupSettings = () => {
     const [vipMediaItems, setVipMediaItems] = useState<VipMediaItem[]>([]);
     const [pixelId, setPixelId] = useState('');
     const [pixelToken, setPixelToken] = useState('');
-
-    // Sales Platform Mode
     const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(false);
     const [salesFoldersCount, setSalesFoldersCount] = useState(0);
 
     useEffect(() => {
+        // CORREÇÃO: Lógica de busca de grupo removida.
+        console.error("groupService not available. Group settings will not be loaded.");
         const currentUserId = authService.getCurrentUserId();
         const email = authService.getCurrentUserEmail();
         setCurrentUserEmail(email);
-
-        if (id) {
-            const foundGroup = groupService.getGroupById(id);
-            if (foundGroup) {
-                setGroup(foundGroup);
-                const owner = foundGroup.creatorId === currentUserId;
-                const admin = owner || (currentUserId && foundGroup.adminIds?.includes(currentUserId)) || false;
-                setIsOwner(owner);
-                setIsAdmin(admin);
-
-                setGroupName(foundGroup.name);
-                setDescription(foundGroup.description);
-                setCoverImage(foundGroup.coverImage);
-
-                if (foundGroup.settings) {
-                    setApproveMembers(foundGroup.settings.approveMembers || false);
-                    setOnlyAdminsPost(foundGroup.settings.onlyAdminsPost || false);
-                    setMsgSlowMode(foundGroup.settings.msgSlowMode || false);
-                    setMsgSlowModeInterval(foundGroup.settings.msgSlowModeInterval?.toString() || '30');
-                    setJoinSlowMode(foundGroup.settings.joinSlowMode || false);
-                    setJoinSlowModeInterval(foundGroup.settings.joinSlowModeInterval?.toString() || '60');
-                    setMemberLimit(foundGroup.settings.memberLimit || '');
-                    setForbiddenWords(foundGroup.settings.forbiddenWords || []);
-                }
-
-                setLinks(foundGroup.links || []);
-                setPendingRequests(groupService.getPendingMembers(id));
-                const rawMembers = groupService.getGroupMembers(id);
-                setMembers(rawMembers.map(u => ({
-                    id: u.id,
-                    name: u.profile?.nickname || u.profile?.name || 'Usuário',
-                    role: u.id === foundGroup.creatorId ? 'Dono' : (foundGroup.adminIds?.includes(u.id) ? 'Admin' : 'Membro'),
-                    isMe: u.id === currentUserId,
-                    avatar: u.profile?.photoUrl
-                })));
-
-                if (foundGroup.isVip) {
-                    setVipPrice(foundGroup.price ? parseFloat(foundGroup.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '');
-                    setVipCurrency((foundGroup.currency as 'BRL' | 'USD') || 'BRL');
-                    setVipDoorText(foundGroup.vipDoor?.text || '');
-                    setVipButtonText(foundGroup.vipDoor?.buttonText || '');
-                    setVipMediaItems(foundGroup.vipDoor?.mediaItems || (foundGroup.vipDoor?.media ? [{url: foundGroup.vipDoor.media, type: 'image'}] : []));
-                    setPixelId(foundGroup.pixelId || '');
-                    setPixelToken(foundGroup.pixelToken || '');
-                }
-
-                setIsSalesPlatformEnabled(foundGroup.isSalesPlatformEnabled || false);
-                setSalesFoldersCount(foundGroup.salesFoldersCount || 0);
-            }
-            setLoading(false);
-        }
+        setLoading(false);
     }, [id]);
 
     const handleSave = async () => {
-        if (!group) return;
-        const rawPrice = vipPrice.replace(/\./g, '').replace(',', '.');
-        const updatedGroup: Group = {
-            ...group,
-            name: groupName,
-            description,
-            coverImage,
-            price: rawPrice,
-            currency: vipCurrency,
-            pixelId,
-            pixelToken,
-            isSalesPlatformEnabled,
-            salesFoldersCount,
-            vipDoor: group.isVip ? { ...group.vipDoor, text: vipDoorText, buttonText: vipButtonText, mediaItems: vipMediaItems } : group.vipDoor,
-            settings: {
-                approveMembers,
-                onlyAdminsPost,
-                msgSlowMode,
-                msgSlowModeInterval: parseInt(msgSlowModeInterval),
-                joinSlowMode,
-                joinSlowModeInterval: parseInt(joinSlowModeInterval),
-                memberLimit: memberLimit === '' ? undefined : Number(memberLimit),
-                forbiddenWords
-            }
-        };
-        await groupService.updateGroup(updatedGroup);
-        await showAlert('Sucesso', 'Configurações salvas com sucesso!');
+        // CORREÇÃO: Lógica de salvar removida.
+        console.error("groupService not available. Cannot save group settings.");
+        await showAlert('Funcionalidade Desativada', 'A edição de grupos não está disponível no momento.');
     };
 
     const handleLeaveDelete = async (type: 'leave' | 'delete') => {
-        if (!group) return;
-        const msg = type === 'leave' ? 'Sair do grupo?' : 'EXCLUIR GRUPO PERMANENTEMENTE?';
-        if (await showConfirm(type === 'leave' ? 'Sair' : 'Excluir', msg)) {
-            if (type === 'leave') await groupService.leaveGroup(group.id);
-            else await groupService.deleteGroup(group.id);
-            navigate('/groups');
-        }
+        // CORREÇÃO: Lógica de sair/deletar removida.
+        console.error("groupService not available. Cannot leave or delete group.");
+        const action = type === 'leave' ? 'Sair do' : 'Excluir o';
+        await showAlert('Funcionalidade Desativada', `${action} grupo não está disponível no momento.`);
     };
 
     return {

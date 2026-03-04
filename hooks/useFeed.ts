@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+// CORREÇÃO: A importação foi alterada para a sintaxe de importação padrão.
+import ServiçoPublicacaoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { MetricasPublicacaoFeed } from '../ServiçosFrontend/SistemaDeMétricas/Metricas.Publicação.Feed.js';
 import { recommendationService } from '../ServiçosFrontend/ServiçoDeRecomendação/recommendationService.js';
 import { Post } from '../types';
@@ -37,7 +38,8 @@ export const useFeed = () => {
             const storedFilter = localStorage.getItem('feed_location_filter');
             const filterValue = (storedFilter === 'Global' || !storedFilter) ? null : storedFilter;
             
-            const response = await ServiçoPublicaçãoFeed.getFeed('home', {
+            // A chamada para getFeed continua correta, usando o serviço importado como padrão.
+            const response = await ServiçoPublicacaoFeed.getFeed('home', {
                 limit: PAGE_SIZE, 
                 cursor: cursor, 
                 locationFilter: filterValue, 

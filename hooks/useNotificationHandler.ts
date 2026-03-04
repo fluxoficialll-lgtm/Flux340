@@ -1,8 +1,36 @@
 
 import { useCallback } from 'react';
 import { NotificationItem } from '../types';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { useNavigate } from 'react-router-dom';
+
+// CORREÇÃO: A função formatRelativeTime foi movida para cá, eliminando a dependência do groupService.
+const formatRelativeTime = (timestamp: string | number | Date): string => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    let interval = seconds / 31536000; // Anos
+    if (interval > 1) {
+        return Math.floor(interval) + "a";
+    }
+    interval = seconds / 2592000; // Meses
+    if (interval > 1) {
+        return Math.floor(interval) + "m";
+    }
+    interval = seconds / 86400; // Dias
+    if (interval > 1) {
+        return Math.floor(interval) + "d";
+    }
+    interval = seconds / 3600; // Horas
+    if (interval > 1) {
+        return Math.floor(interval) + "h";
+    }
+    interval = seconds / 60; // Minutos
+    if (interval > 1) {
+        return Math.floor(interval) + "min";
+    }
+    return Math.floor(seconds) + "s";
+};
 
 interface NotificationHandlerProps {
     notif: NotificationItem & { displayName?: string };
@@ -41,7 +69,8 @@ export const useNotificationHandler = ({
         onPendingAction('reject', notif);
     }, [notif, onPendingAction]);
 
-    const formattedTime = groupService.formatRelativeTime(notif.timestamp);
+    // A chamada agora usa a função local.
+    const formattedTime = formatRelativeTime(notif.timestamp);
 
     return {
         handleCardClick,

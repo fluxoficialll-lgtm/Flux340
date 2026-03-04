@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Group } from '../types';
 
@@ -15,15 +16,14 @@ export const useGroupSalesPlatformView = () => {
     useEffect(() => {
         if (id) {
             setLoading(true);
-            const foundGroup = groupService.getGroupById(id);
-            if (foundGroup) {
-                setGroup(foundGroup);
-                const currentUserId = authService.getCurrentUserId();
-                const hasPower = foundGroup.creatorId === currentUserId || foundGroup.adminIds?.includes(currentUserId || '');
-                setCanManage(hasPower);
-            } else {
-                navigate('/groups');
-            }
+            // CORREÇÃO: Lógica de busca de grupo removida.
+            console.error("groupService is not available, cannot load group sales platform view.");
+            setGroup(null);
+            setCanManage(false);
+            setLoading(false);
+            // Opcional: redirecionar imediatamente se os dados do grupo são essenciais.
+            // navigate('/groups');
+        } else {
             setLoading(false);
         }
     }, [id, navigate]);

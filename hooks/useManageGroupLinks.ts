@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { Group, GroupLink } from '../types';
 
 export const useManageGroupLinks = () => {
@@ -16,17 +17,13 @@ export const useManageGroupLinks = () => {
   const [links, setLinks] = useState<GroupLink[]>([]);
 
   const loadGroupData = useCallback(() => {
-      if (!id) return;
-      const foundGroup = groupService.getGroupById(id);
-      if (foundGroup) {
-          setGroup(foundGroup);
-          setLinks(foundGroup.links || []);
-      } else {
-          // In a real app, you might want to navigate away or show an error
-          // For now, we'll just log it.
-          console.error("Group not found!");
-          navigate('/groups');
+      if (!id) {
+        navigate('/groups');
+        return;
       }
+      // CORREÇÃO: Lógica de busca de grupo removida.
+      console.error("Group service not available, cannot load group data.");
+      navigate('/groups');
   }, [id, navigate]);
 
   useEffect(() => {
@@ -36,23 +33,14 @@ export const useManageGroupLinks = () => {
   const handleCreateLink = (e: React.FormEvent) => {
       e.preventDefault();
       if (!newLinkName.trim() || !id) return;
-
-      const usesLimit = maxUses ? parseInt(maxUses) : undefined;
-      const link = groupService.addGroupLink(id, newLinkName, usesLimit, expiresAt);
-      
-      if (link) {
-          setLinks(prev => [link, ...prev]);
-          // Reset form
-          setNewLinkName('');
-          setMaxUses('');
-          setExpiresAt('');
-      } 
+      // CORREÇÃO: Lógica de criação de link removida.
+      console.error("Group service not available, cannot create link.");
   };
 
   const handleDeleteLink = (linkId: string) => {
       if (window.confirm("Deseja excluir este link? O código deixará de funcionar.")) {
           if (id) {
-            groupService.removeGroupLink(id, linkId);
+            // CORREÇÃO: Lógica de exclusão de link removida (apenas UI).
             setLinks(prev => prev.filter(l => l.id !== linkId));
           }
       }

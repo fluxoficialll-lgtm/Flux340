@@ -3,14 +3,35 @@ import React from 'react';
 import { useCreatePost } from '../hooks/useCreatePost';
 
 export const CreatePost: React.FC = () => {
+  // A desestruturação foi completamente atualizada para corresponder ao hook refatorado.
   const {
-    isAd, text, setText, mediaFiles, isPublishDisabled, isProcessing, adBudget, setAdBudget, adLink, setAdLink,
-    isLocationModalOpen, setIsLocationModalOpen, displayLocation, 
-    isGroupModalOpen, setIsGroupModalOpen, myGroups, selectedGroup, setSelectedGroup,
-    avatarUrl, username, handleMediaChange, handleRemoveMedia, handleBack, handlePublishClick,
-    targetCountry, targetState, targetCity, setTargetCity,
-    handleCountryChange, handleStateChange, saveLocation, countries, states, cities, navigate, error
+    dadosPost,
+    updateField,
+    isPublishDisabled,
+    isProcessing,
+    error,
+    handleMediaChange,
+    handleRemoveMedia,
+    handleBack,
+    handlePublishClick,
+    saveLocation,
+    handleCountryChange,
+    handleStateChange,
+    avatarUrl,
+    username,
+    isLocationModalOpen,
+    setIsLocationModalOpen,
+    targetCountry,
+    targetState,
+    targetCity,
+    setTargetCity,
+    countries,
+    states,
+    cities,
+    navigate
   } = useCreatePost();
+
+  // Variáveis relacionadas a grupos foram removidas.
 
   return (
     <div className="h-screen flex flex-col bg-[#0c0f14] text-white font-['Inter'] overflow-hidden">
@@ -54,10 +75,6 @@ export const CreatePost: React.FC = () => {
         .modal-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
         .save-btn { background: #00c2ff; color: #000; }
         .cancel-btn { background: transparent; border: 1px solid #555; color: #aaa; }
-        
-        .group-list { max-height: 200px; overflow-y: auto; }
-        .group-item { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .group-item:hover { background: rgba(255,255,255,0.05); }
       `}</style>
 
       <header>
@@ -69,18 +86,18 @@ export const CreatePost: React.FC = () => {
             disabled={isPublishDisabled} 
             onClick={handlePublishClick}
         >
-            {isProcessing ? '...' : (isAd ? 'Confirmar' : 'Publicar')}
+            {isProcessing ? '...' : (dadosPost.isAnuncio ? 'Confirmar' : 'Publicar')}
         </button>
       </header>
 
-      {error && <div className="error-banner">{error}</div>}
+      {error?.geral && <div className="error-banner">{error.geral}</div>}
 
       <main>
-        {isAd && (
+        {dadosPost.isAnuncio && (
             <div className="ad-box">
                 <div style={{color: '#FFD700', fontSize:'12px', fontWeight: '900', marginBottom:'5px'}}>IMPULSIONAMENTO PUBLICITÁRIO</div>
-                <input type="number" className="ad-input" placeholder="Investimento (Min R$ 10,00)" value={adBudget} onChange={e => setAdBudget(e.target.value)} />
-                <input type="text" className="ad-input" placeholder="Link de Ação (https://...)" value={adLink} onChange={e => setAdLink(e.target.value)} />
+                <input type="number" className="ad-input" placeholder="Investimento (Min R$ 10,00)" value={dadosPost.orcamentoAnuncio} onChange={e => updateField('orcamentoAnuncio', e.target.value)} />
+                <input type="text" className="ad-input" placeholder="Link de Ação (https://...)" value={dadosPost.linkAnuncio} onChange={e => updateField('linkAnuncio', e.target.value)} />
             </div>
         )}
 
@@ -95,14 +112,14 @@ export const CreatePost: React.FC = () => {
             <textarea 
                 className="text-field" 
                 placeholder="No que você está pensando?" 
-                value={text} 
-                onChange={e => setText(e.target.value)}
+                value={dadosPost.texto} 
+                onChange={e => updateField('texto', e.target.value)}
             ></textarea>
         </div>
 
-        {mediaFiles.length > 0 && (
+        {dadosPost.arquivosMidia.length > 0 && (
             <div className="media-scroll">
-                {mediaFiles.map((m, idx) => (
+                {dadosPost.arquivosMidia.map((m, idx) => (
                     <div key={idx} className="media-item">
                         <img src={m.url} alt="Preview" />
                         <button className="remove-btn" onClick={() => handleRemoveMedia(idx)}>
@@ -130,24 +147,12 @@ export const CreatePost: React.FC = () => {
                     <span>Direcionamento Regional</span>
                 </div>
                 <div style={{display:'flex', alignItems:'center'}}>
-                    <span className="setting-value">{displayLocation}</span>
+                    <span className="setting-value">{dadosPost.localizacao}</span>
                     <i className="fa-solid fa-chevron-right chevron"></i>
                 </div>
             </div>
 
-            <div className="setting-item" onClick={() => setIsGroupModalOpen(true)}>
-                <div className="setting-left">
-                    <i className="fa-solid fa-users setting-icon"></i>
-                    <span>Vincular Comunidade</span>
-                </div>
-                <div style={{display:'flex', alignItems:'center'}}>
-                    <span className="setting-value" style={{color: selectedGroup ? '#00ff82' : '#555'}}>
-                        {selectedGroup ? selectedGroup.name.substring(0, 15) + '...' : 'Nenhum'}
-                    </span>
-                    {selectedGroup && <i className="fa-solid fa-xmark" style={{marginLeft:'5px', color:'#ff4d4d'}} onClick={(e) => { e.stopPropagation(); setSelectedGroup(null); }}></i>}
-                    {!selectedGroup && <i className="fa-solid fa-chevron-right chevron"></i>}
-                </div>
-            </div>
+            {/* A seção 'Vincular Comunidade' foi completamente removida. */}
         </div>
       </main>
 
@@ -173,32 +178,15 @@ export const CreatePost: React.FC = () => {
                       </select>
                   )}
                   <div className="modal-actions">
-                      <button className="modal-btn cancel-btn" onClick={() => { setDisplayLocation('Global'); setIsLocationModalOpen(false); }}>Resetar</button>
+                      {/* A lógica de reset do displayLocation precisa ser ajustada ou removida */}
+                      <button className="modal-btn cancel-btn" onClick={() => setIsLocationModalOpen(false)}>Cancelar</button>
                       <button className="modal-btn save-btn" onClick={saveLocation}>Aplicar</button>
                   </div>
               </div>
           </div>
       )}
 
-      {/* Group Modal */}
-      {isGroupModalOpen && (
-          <div className="modal-overlay" onClick={() => setIsGroupModalOpen(false)}>
-              <div className="modal" onClick={e => e.stopPropagation()}>
-                  <h3 style={{color:'#fff', marginBottom:'15px', textAlign:'center'}}>Selecionar Grupo</h3>
-                  <div className="group-list">
-                      {myGroups.length > 0 ? myGroups.map(g => (
-                          <div key={g.id} className="group-item" onClick={() => { setSelectedGroup(g); setIsGroupModalOpen(false); }}>
-                              <i className={`fa-solid ${g.isVip ? 'fa-crown text-[#FFD700]' : 'fa-users text-[#ccc]'}`}></i>
-                              <span style={{color: '#fff', fontSize: '14px'}}>{g.name}</span>
-                          </div>
-                      )) : <div style={{textAlign:'center', color:'#555'}}>Nenhum grupo encontrado.</div>}
-                  </div>
-                  <div className="modal-actions">
-                      <button className="modal-btn cancel-btn" onClick={() => setIsGroupModalOpen(false)}>Fechar</button>
-                  </div>
-              </div>
-          </div>
-      )}
+      {/* O modal de seleção de grupo foi completamente removido. */}
     </div>
   );
 };

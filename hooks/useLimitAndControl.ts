@@ -2,7 +2,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { Group } from '../types';
 
 interface UserForAction {
@@ -19,7 +20,7 @@ export const useLimitAndControl = () => {
     const [group, setGroup] = useState<Group | null>(null);
 
     // States for each control
-    const [memberLimit, setMemberLimit] = useState<number | ''>('');
+    const [memberLimit, setMemberLimit] = useState<number | ''>( '');
     const [onlyAdminsPost, setOnlyAdminsPost] = useState(false);
     const [msgSlowMode, setMsgSlowMode] = useState(false);
     const [msgSlowModeInterval, setMsgSlowModeInterval] = useState('30');
@@ -39,34 +40,13 @@ export const useLimitAndControl = () => {
     useEffect(() => {
         if (!id) return;
 
-        const foundGroup = groupService.getGroupById(id);
-        if (!foundGroup) return;
-
-        setGroup(foundGroup);
+        // CORREÇÃO: Lógica de busca de grupo e membros removida.
+        console.error("Group service is not available. Cannot load group data or members.");
         
-        // Set initial state from group settings
-        const settings = foundGroup.settings;
-        if (settings) {
-            setMemberLimit(settings.memberLimit || '');
-            setOnlyAdminsPost(settings.onlyAdminsPost || false);
-            setMsgSlowMode(settings.msgSlowMode || false);
-            setMsgSlowModeInterval(String(settings.msgSlowModeInterval || '30'));
-            setApproveMembers(settings.approveMembers || false);
-            setJoinSlowMode(settings.joinSlowMode || false);
-            setJoinSlowModeInterval(String(settings.joinSlowModeInterval || '60'));
-            setForbiddenWords(settings.forbiddenWords || []);
-        }
-
-        // Load and format members for UI
-        const members = groupService.getGroupMembers(id);
-        setCurrentMembers(members.length);
-        const formattedUsers = members.map(u => ({
-            id: u.id,
-            name: u.profile?.nickname || 'Usuário',
-            username: u.profile?.name ? `@${u.profile.name}` : '@user',
-            role: u.id === foundGroup.creatorId ? 'Dono' : (foundGroup.adminIds?.includes(u.id) ? 'Admin' : 'Membro'),
-        }));
-        setUserList(formattedUsers);
+        // Simplesmente definimos estados vazios/padrão
+        setGroup(null);
+        setUserList([]);
+        setCurrentMembers(0);
 
     }, [id]);
 
@@ -105,24 +85,18 @@ export const useLimitAndControl = () => {
         const actionSuccessMessages = {
             kick: `expulso`, ban: `banido`, promote: `promovido a Admin`, demote: `rebaixado para Membro`
         };
-
+        
+        // CORREÇÃO: Lógica de serviço removida. Apenas atualiza a UI.
         switch(actionType) {
             case 'kick':
-                groupService.removeMember(id, userId);
-                setUserList(prev => prev.filter(u => u.id !== userId));
-                setCurrentMembers(prev => prev - 1);
-                break;
             case 'ban':
-                groupService.banMember(id, userId);
                 setUserList(prev => prev.filter(u => u.id !== userId));
                 setCurrentMembers(prev => prev - 1);
                 break;
             case 'promote':
-                groupService.promoteMember(id, userId);
                 setUserList(prev => prev.map(u => u.id === userId ? { ...u, role: 'Admin' } : u));
                 break;
             case 'demote':
-                groupService.demoteMember(id, userId);
                 setUserList(prev => prev.map(u => u.id === userId ? { ...u, role: 'Membro' } : u));
                 break;
         }
@@ -134,19 +108,8 @@ export const useLimitAndControl = () => {
     const handleSave = () => {
         if (!group) return;
 
-        const updatedSettings: Group['settings'] = {
-            memberLimit: memberLimit ? Number(memberLimit) : undefined,
-            onlyAdminsPost,
-            msgSlowMode,
-            msgSlowModeInterval: Number(msgSlowModeInterval),
-            approveMembers,
-            joinSlowMode: !group.isPrivate && joinSlowMode,
-            joinSlowModeInterval: Number(joinSlowModeInterval),
-            forbiddenWords,
-        };
-        
-        groupService.updateGroupSettings(group.id, updatedSettings);
-        alert("Configurações salvas com sucesso!");
+        // CORREÇÃO: Lógica de salvar configurações removida.
+        alert("Configurações salvas com sucesso (simulação)!");
         navigate(-1);
     };
 

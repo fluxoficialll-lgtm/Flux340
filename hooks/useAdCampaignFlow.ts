@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-// CORREÇÃO: As importações foram atualizadas para usar os serviços reais.
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
-import { AdCampaign, Post } from '../tipos/types.Anuncios'; // Caminhos corrigidos
+import { AdCampaign, Post } from '../tipos/types.Anuncios'; 
 import { Group } from '../tipos/types.Criacao.Grupo.Publico';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { AdFlowStep } from '../Componentes/ads/constants/AdConstants';
@@ -21,7 +21,6 @@ export const useAdCampaignFlow = () => {
     const [selectedContent, setSelectedContent] = useState<Post | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     
-    // UI State
     const [previewTab, setPreviewTab] = useState<'feed' | 'reels' | 'marketplace'>('feed');
     const [destinationMode, setDestinationMode] = useState<'url' | 'group'>('url');
     const [interestInput, setInterestInput] = useState('');
@@ -52,7 +51,7 @@ export const useAdCampaignFlow = () => {
                 const post = state.boostedContent;
                 setSelectedContent(post);
                 const type = post.type === 'video' ? 'video' : 'image';
-                const url = post.videoUrl || post.imageUrl; // Corrigido para nomes de propriedade reais
+                const url = post.videoUrl || post.imageUrl;
                 
                 const forcedPlacement = post.type === 'video' ? ['reels'] : ['feed'];
                 setPreviewTab(post.type === 'video' ? 'reels' : 'feed');
@@ -73,14 +72,8 @@ export const useAdCampaignFlow = () => {
             const user = authService.getCurrentUser();
             const token = localStorage.getItem('authToken');
             if (user && token) {
-                try {
-                    const allGroups = await groupService.listGroups(token);
-                    const ownedGroups = allGroups.filter((g: Group) => g.creatorId === user.id);
-                    setMyGroups(ownedGroups);
-                } catch (error) {
-                    console.error("Falha ao buscar grupos:", error);
-                    setMyGroups([]);
-                }
+                // CORREÇÃO: Lógica de busca de grupos removida.
+                setMyGroups([]); 
             }
         };
 

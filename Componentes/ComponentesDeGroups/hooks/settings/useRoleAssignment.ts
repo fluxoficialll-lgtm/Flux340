@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
-import { groupService } from '../../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+// CORREÇÃO: A importação do groupService foi removida por não ser utilizada.
+// import { groupService } from '../../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { useModal } from '../../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { ConfigControl } from '../../../../ServiçosFrontend/ServiçoDeGovernançaFlux/ConfigControl.js';
 

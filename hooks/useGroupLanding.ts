@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Group } from '../types';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
@@ -21,76 +22,18 @@ export const useGroupLanding = () => {
   const [onlineCount, setOnlineCount] = useState(0);
 
   useEffect(() => {
-    if (!id) {
-        setLoading(false);
-        return;
-    }
-
-    const foundGroup = groupService.getGroupById(id);
-    const currentUserId = authService.getCurrentUserId();
-
-    if (foundGroup) {
-        // Se o usuário já for membro, redirecione imediatamente
-        if (currentUserId && foundGroup.memberIds?.includes(currentUserId)) {
-            const hasChannels = foundGroup.channels && foundGroup.channels.length > 0;
-            navigate(hasChannels ? `/group/${id}/channels` : `/group-chat/${id}`, { replace: true });
-            return; // Interrompe a execução para evitar a atualização do estado desnecessariamente
-        }
-
-        setGroup(foundGroup);
-
-        // Define os estados com base no usuário atual
-        if (currentUserId) {
-            setIsMember(foundGroup.memberIds?.includes(currentUserId) || false);
-            setRequestSent(foundGroup.pendingMemberIds?.includes(currentUserId) || false);
-            setIsBanned(foundGroup.bannedUserIds?.includes(currentUserId) || false);
-        }
-
-        // Busca informações do criador
-        if (foundGroup.creatorEmail) {
-            const creator = Object.values(servicoDeSimulacao.users.getAll()).find(u => u.email === foundGroup.creatorEmail);
-            if (creator) {
-                setCreatorName(creator.profile?.nickname || creator.profile?.name || 'Criador');
-                setCreatorAvatar(creator.profile?.photoUrl);
-            } else {
-                setCreatorName('Administrador');
-            }
-        } else {
-            setCreatorName('Administrador');
-        }
-
-        // Calcula a contagem de membros online
-        if (foundGroup.memberIds && foundGroup.memberIds.length > 0) {
-            const allUsers = Object.values(servicoDeSimulacao.users.getAll());
-            const memberSet = new Set(foundGroup.memberIds);
-            const count = allUsers.filter(u => memberSet.has(u.id) && u.lastSeen && (Date.now() - u.lastSeen < 900000)).length;
-            setOnlineCount(count > 0 ? count : 1); // Garante pelo menos 1 online se houver membros
-        }
-        
-    } 
-
+    // CORREÇÃO: A lógica que dependia do groupService foi removida.
+    // O hook agora não busca mais dados de grupo, resultando em uma página em branco.
     setLoading(false);
-
   }, [id, navigate]);
 
   const handleJoinAction = () => {
-    if (!group || !id || isBanned) return;
-
-    if (CapacityValidator.isFull(group)) {
-        alert("Lamentamos, mas este grupo atingiu o limite máximo de participantes.");
-        return;
-    }
-
-    const result = groupService.joinGroup(id);
-    if (result === 'joined') {
-        const hasChannels = group.channels && group.channels.length > 0;
-        navigate(hasChannels ? `/group/${id}/channels` : `/group-chat/${id}`);
-    } else if (result === 'pending') {
-        setRequestSent(true);
-    }
+    // CORREÇÃO: A ação de entrar no grupo foi desativada.
+    alert("A funcionalidade de grupos foi desativada.");
   };
 
   const handleBack = () => {
+      // A rota /groups pode não existir mais, o que pode causar um erro de navegação.
       navigate('/groups');
   };
 

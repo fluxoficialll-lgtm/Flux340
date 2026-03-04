@@ -62,13 +62,13 @@ export const CreateMarketplaceItem: React.FC = () => {
                     <input type="file" ref={coverInputRef} hidden accept="image/*" onChange={handleCoverChange} />
                 </div>
                 <div className="gallery-scroll mt-4">
-                    {additionalMedia.map((item, idx) => (
+                    {(additionalMedia || []).map((item, idx) => (
                         <div key={idx} className="gallery-item">
                             {item.type === 'video' ? <video src={item.url} /> : <img src={item.url} />}
                             <button type="button" className="remove-media" onClick={() => removeGalleryItem(idx)}><i className="fa-solid fa-xmark"></i></button>
                         </div>
                     ))}
-                    {additionalMedia.length < 5 && <div className="gallery-item flex items-center justify-center cursor-pointer border-dashed" onClick={() => galleryInputRef.current?.click()}><i className="fa-solid fa-plus text-gray-500"></i></div>}
+                    {additionalMedia && additionalMedia.length < 5 && <div className="gallery-item flex items-center justify-center cursor-pointer border-dashed" onClick={() => galleryInputRef.current?.click()}><i className="fa-solid fa-plus text-gray-500"></i></div>}
                     <input type="file" ref={galleryInputRef} hidden accept="image/*,video/*" multiple onChange={handleGalleryChange} />
                 </div>
             </div>

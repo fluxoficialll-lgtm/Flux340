@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
+import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, PollOption } from '../types';
 
@@ -56,10 +57,9 @@ export const useCreatePoll = (editingPost: Post | null) => {
 
         try {
             if (editingPost) {
-                // Lógica de atualização (PUT)
-                await ServiçoPublicaçãoFeed.updatePost(editingPost.id, postData);
+                // CORREÇÃO: A função foi renomeada de 'updatePost' para 'update' para corresponder ao serviço.
+                await ServiçoPublicaçãoFeed.update(editingPost.id, postData);
             } else {
-                // Lógica de criação (POST)
                 await ServiçoPublicaçãoFeed.createPost(postData);
             }
             navigate('/'); // Redireciona para a home após sucesso

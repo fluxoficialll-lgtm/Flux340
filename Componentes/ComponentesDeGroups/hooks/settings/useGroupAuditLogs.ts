@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { groupService } from '../../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { AuditLog } from '../../../../types';
 
 export const useGroupAuditLogs = (groupId: string | undefined) => {
@@ -11,23 +12,29 @@ export const useGroupAuditLogs = (groupId: string | undefined) => {
         if (!groupId) return;
         setLoading(true);
         try {
-            const group = groupService.getGroupById(groupId);
-            if (group) {
-                // Se o grupo não tiver logs reais, injetamos mocks para demonstração conforme o padrão do app
-                const auditData = group.auditLogs || [
-                    { 
-                        id: '1', 
-                        adminId: '1', 
-                        adminName: 'Sistema Flux', 
-                        action: 'Criação do Grupo', 
-                        target: 'Estrutura inicial do grupo configurada', 
-                        timestamp: Date.now() - 7200000 
-                    }
-                ];
-                setLogs(auditData.sort((a, b) => b.timestamp - a.timestamp));
-            }
+            // CORREÇÃO: Lógica de busca de grupo removida.
+            // O hook agora carrega diretamente os dados de demonstração.
+            const auditData = [
+                { 
+                    id: '1', 
+                    adminId: '1', 
+                    adminName: 'Sistema Flux (Simulação)', 
+                    action: 'Criação do Grupo', 
+                    target: 'Estrutura inicial do grupo configurada', 
+                    timestamp: Date.now() - 7200000 
+                },
+                {
+                    id: '2', 
+                    adminId: '2', 
+                    adminName: 'Admin (Simulação)', 
+                    action: 'Atualização de Configuração', 
+                    target: 'Alteradas permissões de membros', 
+                    timestamp: Date.now() - 3600000 
+                }
+            ];
+            setLogs(auditData.sort((a, b) => b.timestamp - a.timestamp));
         } catch (e) {
-            console.error("Erro ao carregar logs:", e);
+            console.error("Erro ao carregar logs (simulados):", e);
         } finally {
             setLoading(false);
         }

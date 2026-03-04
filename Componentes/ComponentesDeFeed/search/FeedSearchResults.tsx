@@ -6,7 +6,8 @@ import { ContainerFeed } from '../Container.Feed';
 import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { SearchTab } from '../../../pages/FeedSearch';
 import { UserBadge } from '../../ComponenteDeInterfaceDeUsuario/user/UserBadge';
-import { ServiçoPublicaçãoFeed } from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
+import ServiçoPublicaçãoFeed from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
 interface FeedSearchResultsProps {
     activeTab: SearchTab;
@@ -31,7 +32,8 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
     // Função de Like refatorada para usar o serviço real
     const handleLike = async (postId: string) => {
         try {
-            const post = await ServiçoPublicaçãoFeed.getPostById(postId);
+            // CORREÇÃO: A função foi renomeada de 'getPostById' para 'getById' para corresponder ao serviço.
+            const post = await ServiçoPublicaçãoFeed.getById(postId);
             if (!post) return;
             
             const updatedPost = { 
@@ -40,7 +42,8 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
                 likes: post.likes + (!post.liked ? 1 : -1) 
             };
             
-            await ServiçoPublicaçãoFeed.updatePost(postId, updatedPost);
+            // CORREÇÃO: A função foi renomeada de 'updatePost' para 'update' para corresponder ao serviço.
+            await ServiçoPublicaçãoFeed.update(postId, updatedPost);
             // Idealmente, o estado local seria atualizado aqui para refletir a mudança instantaneamente
         } catch (error) {
             console.error("Falha ao processar o like:", error);
@@ -52,7 +55,8 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
         e.stopPropagation();
         if (await showConfirm("Excluir Post", "Deseja apagar permanentemente?", "Excluir", "Cancelar")) {
             try {
-                await ServiçoPublicaçãoFeed.deletePost(postId);
+                // CORREÇÃO: A função foi renomeada de 'deletePost' para 'delete' para corresponder ao serviço.
+                await ServiçoPublicaçãoFeed.delete(postId);
                 // Idealmente, o estado local seria atualizado para remover o post da UI
             } catch (error) {
                 console.error("Falha ao deletar o post:", error);

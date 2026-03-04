@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
+import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, User } from '../types';
 
@@ -30,7 +31,8 @@ export const useFeedSearch = () => {
         setLoading(true);
         try {
             if (tab === 'posts') {
-                const data = await ServiçoPublicaçãoFeed.searchPosts(query);
+                // CORREÇÃO: A função foi renomeada de 'searchPosts' para 'search' para corresponder ao serviço.
+                const data = await ServiçoPublicaçãoFeed.search(query);
                 setPostResults(data);
             } else {
                 const data = await authService.searchUsers(query);

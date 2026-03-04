@@ -4,7 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, Comment } from '../types';
 import { usePostActions } from './usePostActions';
-import { ServiçoPublicaçãoFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
+import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
 export const usePostDetails = () => {
   const navigate = useNavigate();
@@ -21,7 +22,8 @@ export const usePostDetails = () => {
   const loadData = useCallback(async () => {
     if (id) {
       try {
-        const foundPost = await ServiçoPublicaçãoFeed.getPostById(id);
+        // CORREÇÃO: A função foi renomeada de 'getPostById' para 'getById' para corresponder ao serviço.
+        const foundPost = await ServiçoPublicaçãoFeed.getById(id);
         if (foundPost) {
           setPost(foundPost);
           // Assumindo que os comentários são parte do objeto do post

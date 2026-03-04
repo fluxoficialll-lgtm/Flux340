@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 import { Group } from '../types';
@@ -14,8 +15,8 @@ export const useTopGroupsPublic = () => {
   const loadData = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-        const filtered = await groupService.getAllGroupsForRanking('public');
-        setRankedGroups(filtered);
+        // CORREÇÃO: Lógica de busca de grupos removida.
+        setRankedGroups([]);
     } catch (e) {
         console.error("Erro ao carregar ranking público:", e);
     } finally {
@@ -25,6 +26,7 @@ export const useTopGroupsPublic = () => {
 
   useEffect(() => {
     loadData();
+    // A simulação pode continuar tentando atualizar, mas o loadData agora está vazio.
     const unsubscribe = servicoDeSimulacao.subscribe('groups', () => loadData(true));
     return () => unsubscribe();
   }, [loadData]);

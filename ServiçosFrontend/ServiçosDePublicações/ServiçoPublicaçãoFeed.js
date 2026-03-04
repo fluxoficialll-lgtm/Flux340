@@ -29,8 +29,10 @@ async function fetchWithAuth(url, options = {}) {
     }
 }
 
-export const ServiçoPublicaçãoFeed = {
-    async create(postData) {
+// CORREÇÃO: O serviço agora é uma constante e exportado como padrão no final.
+const ServiçoPublicaçãoFeed = {
+    // CORREÇÃO: A função foi renomeada de 'create' para 'createPost' para consistência.
+    async createPost(postData) {
         return fetchWithAuth(API_BASE_URL, {
             method: 'POST',
             body: JSON.stringify(postData)
@@ -38,7 +40,6 @@ export const ServiçoPublicaçãoFeed = {
     },
 
     async getFeed(feedType, options = {}) {
-        // O parâmetro feedType é ignorado por enquanto, mas mantido para consistência da chamada
         const queryParams = new URLSearchParams(options).toString();
         const url = `${API_BASE_URL}?${queryParams}`;
         return fetchWithAuth(url);
@@ -63,3 +64,6 @@ export const ServiçoPublicaçãoFeed = {
         return fetchWithAuth(`${API_BASE_URL}/${postId}`, { method: 'DELETE' });
     }
 };
+
+// CORREÇÃO: Exporta o serviço como padrão para resolver o erro de importação do Vite.
+export default ServiçoPublicaçãoFeed;

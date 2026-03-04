@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { notificationService } from '../ServiçosFrontend/ServiçoDeNotificação/notificationService.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+// CORREÇÃO: A importação do groupService foi removida por não ser utilizada.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { NotificationItem, Group, PriceInfo } from '../types';
 
 export const useNotifications = () => {

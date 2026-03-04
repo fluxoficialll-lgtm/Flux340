@@ -1,111 +1,116 @@
 
 import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ServiçoPublicaçãoMarketplace } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoMarketplace.js';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
-import { DadosItemMarketplace, TipoMidiaMarketplace, ErrosCriacaoMarketplace } from '../tipos/CriacaoMarketplace.types';
+import { ServiçoPublicaçãoMarketplace } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoMarketplace.js';
+
+// Tipagem para os itens da galeria de mídia
+interface MediaItem {
+    url: string;
+    type: 'image' | 'video';
+    file: File;
+}
 
 export const useCreateMarketplaceItem = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state as { type?: 'paid' | 'organic' } | null;
+    const navigate = useNavigate();
+    const location = useLocation();
+    const state = location.state as { type?: 'paid' | 'organic' } | null;
 
-  // Estado unificado para os dados do item
-  const [dadosItem, setDadosItem] = useState<DadosItemMarketplace>({
-    titulo: '',
-    preco: '',
-    categoria: 'Eletrônicos',
-    localizacao: '',
-    descricao: '',
-    arquivoCapa: null,
-    arquivosAdicionais: [],
-    isAnuncioPago: state?.type === 'paid',
-  });
+    // Estados individuais para cada campo do formulário
+    const [isPaid, setIsPaid] = useState(state?.type === 'paid');
+    const [title, setTitle] = useState('');
+    const [price, setPrice] = useState('');
+    const [category, setCategory] = useState('Eletrônicos');
+    const [locationVal, setLocationVal] = useState('');
+    const [description, setDescription] = useState('');
+    const [coverImage, setCoverImage] = useState<string | null>(null);
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [additionalMedia, setAdditionalMedia] = useState<MediaItem[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Estados da interface e de controle
-  const [imagemCapaPreview, setImagemCapaPreview] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<ErrosCriacaoMarketplace>({});
+    // Funções de manipulação dos inputs
+    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value.replace(/\D/g, "");
+        if (value === "") {
+            setPrice("");
+            return;
+        }
+        const numericValue = parseFloat(value) / 100;
+        setPrice(numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+    };
 
-  // Função genérica para atualizar os dados do item
-  const updateField = useCallback((key: keyof DadosItemMarketplace, value: any) => {
-    setDadosItem(prev => ({ ...prev, [key]: value }));
-  }, []);
+    const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setCoverFile(file);
+            setCoverImage(URL.createObjectURL(file));
+        }
+    };
 
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      updateField('arquivoCapa', file);
-      setImagemCapaPreview(URL.createObjectURL(file));
-      setErrors(prev => ({ ...prev, imagemCapa: undefined }));
-    }
-  };
+    const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            const newMedia: MediaItem[] = Array.from(files).map(file => ({
+                file: file,
+                url: URL.createObjectURL(file),
+                type: file.type.startsWith('video') ? 'video' : 'image'
+            }));
+            setAdditionalMedia(prev => [...prev, ...newMedia].slice(0, 5)); // Limita a 5 itens
+        }
+    };
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    if (value === "") {
-      updateField('preco', "");
-      return;
-    }
-    const numericValue = parseFloat(value) / 100;
-    updateField('preco', numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
-    setErrors(prev => ({ ...prev, preco: undefined }));
-  };
+    const removeGalleryItem = (index: number) => {
+        setAdditionalMedia(prev => prev.filter((_, i) => i !== index));
+    };
 
-  const handleBack = () => navigate(-1);
+    const handleBack = () => navigate(-1);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!coverFile) {
+            alert("A imagem de capa é obrigatória.");
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const coverImageUrl = await fileService.uploadFile(coverFile, `marketplace-items`);
+            const additionalMediaUrls = await Promise.all(
+                additionalMedia.map(item => fileService.uploadFile(item.file, `marketplace-items`))
+            );
+            const rawPrice = price.replace(/\./g, '').replace(',', '.');
+            const itemData = {
+                title,
+                price: parseFloat(rawPrice),
+                category,
+                description,
+                location: locationVal,
+                images: [coverImageUrl, ...additionalMediaUrls].filter(Boolean) as string[],
+            };
+            await ServiçoPublicaçãoMarketplace.create(itemData);
+            navigate('/marketplace');
+        } catch (err) {
+            console.error("Erro ao publicar item no marketplace:", err);
+            alert("Falha ao publicar o item. Tente novamente.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-    // Validação
-    if (!dadosItem.titulo) {
-      setErrors({ titulo: "O título é obrigatório." });
-      return;
-    }
-    if (!dadosItem.preco) {
-      setErrors({ preco: "O preço é obrigatório." });
-      return;
-    }
-    if (!dadosItem.arquivoCapa) {
-      setErrors({ imagemCapa: "A imagem de capa é obrigatória." });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const coverImageUrl = await fileService.uploadFile(dadosItem.arquivoCapa);
-      const additionalMediaUrls = await Promise.all(
-        dadosItem.arquivosAdicionais.map(item => fileService.uploadFile(item.arquivo))
-      );
-
-      const rawPrice = dadosItem.preco.replace(/\./g, '').replace(',', '.');
-
-      const itemData = {
-        title: dadosItem.titulo,
-        price: parseFloat(rawPrice),
-        category: dadosItem.categoria,
-        description: dadosItem.descricao,
-        location: dadosItem.localizacao,
-        images: [coverImageUrl, ...additionalMediaUrls].filter(Boolean),
-      };
-
-      await ServiçoPublicaçãoMarketplace.create(itemData);
-      navigate('/marketplace');
-
-    } catch (err: any) {
-      console.error("Erro ao publicar item no marketplace:", err);
-      setErrors({ geral: err.message || "Falha ao publicar o item. Tente novamente." });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // ... outras funções como handleGalleryChange, removeGalleryItem ...
-
-  return {
-    dadosItem, updateField, imagemCapaPreview, isSubmitting, errors,
-    handleCoverChange, handlePriceChange, handleBack, handleSubmit,
-  };
-};
+    // Retorna a interface esperada pelo componente
+    return {
+        isPaid,
+        title, setTitle,
+        price, handlePriceChange,
+        category, setCategory,
+        locationVal, setLocationVal,
+        description, setDescription,
+        coverImage,
+        additionalMedia,
+        isSubmitting,
+        handleCoverChange,
+        handleGalleryChange,
+        removeGalleryItem,
+        handleBack,
+        handleSubmit
+    };
+}

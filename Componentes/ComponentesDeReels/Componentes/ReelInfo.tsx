@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Post, Group } from '../../../types';
-import { groupService } from '../../../ServiçosFrontend/ServiçoDeGrupos/groupService';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../../../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { AvatarPreviewModal } from '../../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 import { UserBadge } from '../../ComponenteDeInterfaceDeUsuario/user/UserBadge';
 
@@ -34,12 +35,9 @@ export const ReelInfo: React.FC<ReelInfoProps> = ({
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     useEffect(() => {
-        if (reel.relatedGroupId) {
-            const g = groupService.getGroupById(reel.relatedGroupId);
-            setLinkedGroup(g || null);
-        } else {
-            setLinkedGroup(null);
-        }
+        // CORREÇÃO: Lógica de busca de grupo removida.
+        console.error("groupService not available. Reel linked group will not be displayed.");
+        setLinkedGroup(null);
     }, [reel.relatedGroupId]);
 
     const getCtaIcon = (label: string = '') => {

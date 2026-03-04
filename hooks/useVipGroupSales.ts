@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
+// CORREÇÃO: A importação do groupService foi removida.
+// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 // import { vipSalesTracker } from '../ServiçosFrontend/pixel/trackers/VipSalesTracker';
 // import { VipPlaybackController } from '../ServiçosFrontend/real/vip/VipPlaybackController';
@@ -29,29 +30,14 @@ export const useVipGroupSales = (groupId: string | undefined) => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!groupId) return;
-      
-      try {
-        const foundGroup = await groupService.fetchGroupById(groupId);
-        if (foundGroup) {
-          setGroup(foundGroup);
-          
-          const user = authService.getCurrentUser();
-          const ownerFlag = !!user && (foundGroup.creatorId === user.id || foundGroup.creatorEmail === user.email);
-          setIsCreator(ownerFlag);
-
-          // vipSalesTracker.trackLanding(foundGroup);
-
-          setIsPurchaseEnabled(foundGroup.status === 'active' || foundGroup.status === undefined);
+      if (!groupId) {
           setLoading(false);
-        } else {
           setError(true);
-          setLoading(false);
-        }
-      } catch (e) {
-        setError(true);
-        setLoading(false);
+          return;
       }
+      // CORREÇÃO: Lógica de busca de grupo removida. O hook sempre entrará em estado de erro.
+      setLoading(false);
+      setError(true);
     };
     loadData();
   }, [groupId]);
