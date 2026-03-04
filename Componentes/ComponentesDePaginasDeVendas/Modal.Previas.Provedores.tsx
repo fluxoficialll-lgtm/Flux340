@@ -3,6 +3,10 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
+import { ModalPreviaSyncPay } from './Modal.Previa.SyncPay';
+import { ModalPreviaStripe } from './Modal.Previa.Stripe';
+import { ModalPreviaPayPal } from './Modal.Previa.PayPal';
+
 interface ProviderSelectorModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -22,9 +26,8 @@ export const ModalPreviasProvedores: React.FC<ProviderSelectorModalProps> = ({
         const user = authService.getCurrentUser();
         if (!user) return [];
         
-        const list = [];
+        const list: { id: string; name: string; icon: string }[] = [];
         
-        // Check legacy/default provider
         if (user.paymentConfig?.isConnected) {
             list.push({
                 id: user.paymentConfig.providerId,
@@ -33,7 +36,6 @@ export const ModalPreviasProvedores: React.FC<ProviderSelectorModalProps> = ({
             });
         }
         
-        // Check multiple providers map
         if (user.paymentConfigs) {
             Object.values(user.paymentConfigs).forEach(conf => {
                 if (conf.isConnected && !list.find(l => l.id === conf.providerId)) {
@@ -54,6 +56,40 @@ export const ModalPreviasProvedores: React.FC<ProviderSelectorModalProps> = ({
     }, []);
 
     if (!isOpen) return null;
+
+    const handleSelectAndClose = (providerId: string) => {
+        onSelect(providerId);
+        onClose();
+    };
+
+    const renderProviderButton = (provider: { id: string; name: string; icon: string }) => {
+        if (provider.id === 'syncpay') {
+            return <ModalPreviaSyncPay key={provider.id} selectedProviderId={selectedProviderId} onSelect={handleSelectAndClose} />;
+        }
+        if (provider.id === 'stripe') {
+            return <ModalPreviaStripe key={provider.id} selectedProviderId={selectedProviderId} onSelect={handleSelectAndClose} />;
+        }
+        if (provider.id === 'paypal') {
+            return <ModalPreviaPayPal key={provider.id} selectedProviderId={selectedProviderId} onSelect={handleSelectAndClose} />;
+        }
+        return (
+            <button 
+                key={provider.id}
+                className={`provider-opt ${selectedProviderId === provider.id ? 'active' : ''}`}
+                onClick={() => handleSelectAndClose(provider.id)}
+            >
+                <div className="provider-icon-box">
+                    <i className={`fa-solid ${provider.icon}`}></i>
+                </div>
+                <div className="provider-info">
+                    <h4>{provider.name}</h4>
+                </div>
+                {selectedProviderId === provider.id && (
+                    <i className="fa-solid fa-circle-check ml-auto text-[#00c2ff]"></i>
+                )}
+            </button>
+        );
+    };
 
     return (
         <div className="fixed inset-0 bg-black/90 z-[130] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -130,23 +166,7 @@ export const ModalPreviasProvedores: React.FC<ProviderSelectorModalProps> = ({
                 
                 {connectedProviders.length > 0 ? (
                     <div className="space-y-1">
-                        {connectedProviders.map((p) => (
-                            <button 
-                                key={p.id}
-                                className={`provider-opt ${selectedProviderId === p.id ? 'active' : ''}`}
-                                onClick={() => { onSelect(p.id); onClose(); }}
-                            >
-                                <div className="provider-icon-box">
-                                    <i className={`fa-solid ${p.icon}`}></i>
-                                </div>
-                                <div className="provider-info">
-                                    <h4>{p.name}</h4>
-                                </div>
-                                {selectedProviderId === p.id && (
-                                    <i className="fa-solid fa-circle-check ml-auto text-[#00c2ff]"></i>
-                                )}
-                            </button>
-                        ))}
+                        {connectedProviders.map(renderProviderButton)}
                     </div>
                 ) : (
                     <div className="no-providers-box">
