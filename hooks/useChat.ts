@@ -2,149 +2,162 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
-import { ChatMessage } from '../types';
+import { ChatMessage, User } from '../types';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 import { VirtuosoHandle } from 'react-virtuoso';
 import { socketService } from '../ServiçosFrontend/ServiçoDeSoquete/ServiçoDeSoquete.js';
 
+const formatLastSeen = (timestamp?: number) => {
+    if (!timestamp) return "Offline";
+    const diff = Date.now() - timestamp;
+    if (diff < 2 * 60 * 1000) return "Online";
+    return "Offline";
+};
+
 export const useChat = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const chatId = id || '1';
+    const navigate = useNavigate();
+    const { id: chatId } = useParams<{ id: string }>();
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [contactName, setContactName] = useState('');
-  const [contactHandle, setContactHandle] = useState('');
-  const [contactAvatar, setContactAvatar] = useState<string | undefined>(undefined);
-  const [contactStatus, setContactStatus] = useState('Offline');
-  const [isBlocked, setIsBlocked] = useState(false);
-  
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
-
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
-  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-
-  const currentUserEmail = useMemo(() => authService.getCurrentUserEmail()?.toLowerCase(), []);
-
-  const loadChatData = useCallback((isSilent = false) => {
-    const chatData = chatService.getChat(chatId);
-    if (!chatData) { navigate('/messages'); return; }
-
-    setIsBlocked(chatData.isBlocked);
-    let targetUser = undefined;
-    let displayName = chatData.contactName;
-    let displayAvatar = undefined;
-    let handle = '';
-
-    if (chatId.includes('_') && chatId.includes('@') && currentUserEmail) {
-        const otherEmail = chatId.split('_').find(p => p.toLowerCase() !== currentUserEmail);
-        if (otherEmail) {
-            const userRecord = Object.values(servicoDeSimulacao.users.getAll()).find(u => u.email.toLowerCase() === otherEmail.toLowerCase());
-            if (userRecord) {
-                targetUser = userRecord;
-                displayName = userRecord.profile?.nickname || userRecord.profile?.name || `@${userRecord.profile?.name}`;
-                displayAvatar = userRecord.profile?.photoUrl;
-                handle = userRecord.profile?.name || '';
-            } else {
-                displayName = otherEmail.split('@')[0];
-            }
-        }
-    }
-
-    setContactName(displayName);
-    setContactAvatar(displayAvatar);
-    setContactHandle(handle);
-
-    if (targetUser?.lastSeen) {
-        const diff = Date.now() - targetUser.lastSeen;
-        if (diff < 2 * 60 * 1000) setContactStatus('Online');
-        else setContactStatus('Offline');
-    } else setContactStatus('Offline');
-
-    const rawMessages = chatData.messages || [];
-    const uniqueMap = new Map();
-    rawMessages.forEach(m => {
-        const deletedBy = m.deletedBy || [];
-        if (!deletedBy.includes(currentUserEmail || '')) uniqueMap.set(m.id, m);
-    });
-    const deduplicated = Array.from(uniqueMap.values()).sort((a, b) => a.id - b.id);
-    setMessages(deduplicated);
-  }, [chatId, currentUserEmail, navigate]);
-
-  useEffect(() => {
-    loadChatData();
-    const unsubDeleteChat = socketService.on('chat_deleted_globally', (data: any) => {
-        if (data.chatId === chatId) navigate('/messages', { replace: true });
-    });
-    const unsubDeleteMsgs = socketService.on('messages_deleted_globally', (data: any) => {
-        if (data.chatId === chatId) loadChatData(true);
-    });
-    const unsubDb = servicoDeSimulacao.subscribe('chats', () => loadChatData(true));
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [contactName, setContactName] = useState('');
+    const [contactHandle, setContactHandle] = useState('');
+    const [contactAvatar, setContactAvatar] = useState<string | undefined>(undefined);
+    const [contactStatus, setContactStatus] = useState('Offline');
+    const [isBlocked, setIsBlocked] = useState(false);
     
-    return () => {
-        unsubDeleteChat();
-        unsubDeleteMsgs();
-        unsubDb();
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]); // CORREÇÃO: IDs podem ser strings
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
+    const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+
+    const currentUserEmail = useMemo(() => authService.getCurrentUserEmail()?.toLowerCase(), []);
+
+    const loadChatData = useCallback(async (isSilent = false) => {
+        if (!chatId) {
+            navigate('/messages');
+            return;
+        }
+
+        try {
+            const isSimulating = localStorage.getItem('isSimulating') === 'true';
+            let chatData;
+
+            if (isSimulating) {
+                console.log(`[SIMULAÇÃO] useChat: Buscando detalhes do chat ID: ${chatId}`);
+                const response = await fetch(`/api/conversations/${chatId}`);
+                if (!response.ok) throw new Error('Chat simulado não encontrado');
+                chatData = await response.json();
+
+                const otherParticipant = chatData.participants?.find((p: any) => p.name !== 'Você');
+                setContactName(otherParticipant?.name || 'Usuário');
+                setContactAvatar(otherParticipant?.avatar);
+                setContactHandle(otherParticipant?.handle || '');
+                setContactStatus('Online'); // Simulação simples
+
+            } else {
+                const token = authService.getToken();
+                if (!token) { navigate('/'); return; }
+                chatData = await chatService.getChat(token, chatId);
+                
+                // Lógica para encontrar o outro usuário em um chat real
+                const otherParticipant = chatData.participants.find((p: any) => p.email.toLowerCase() !== currentUserEmail);
+                if (otherParticipant) {
+                    const userDetails: User = await authService.fetchUserByHandle(otherParticipant.email.split('@')[0]);
+                    setContactName(userDetails.profile?.nickname || userDetails.profile?.name || 'Usuário');
+                    setContactAvatar(userDetails.profile?.photoUrl);
+                    setContactHandle(userDetails.profile?.name || '');
+                    setContactStatus(formatLastSeen(userDetails.lastSeen));
+                }
+            }
+            
+            setIsBlocked(chatData.isBlocked || false);
+            
+            const rawMessages = chatData.messages || [];
+            const processedMessages = rawMessages
+                .filter((m: any) => !(m.deletedBy || []).includes(currentUserEmail))
+                .map((m: any): ChatMessage => ({
+                    ...m,
+                    type: m.senderEmail?.toLowerCase() === currentUserEmail ? 'sent' : 'received',
+                    timestamp: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }))
+                .sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+            setMessages(processedMessages);
+
+        } catch (error) {
+            console.error("Erro ao carregar dados do chat:", error);
+            navigate('/messages', { replace: true });
+        }
+    }, [chatId, currentUserEmail, navigate]);
+
+    useEffect(() => {
+        loadChatData();
+        const intervalId = setInterval(() => loadChatData(true), 5000); // Polling para atualizações
+        return () => clearInterval(intervalId);
+    }, [loadChatData]);
+
+    const handleSendMessage = (text: string) => {
+        if (!chatId) return;
+        const userInfo = authService.getCurrentUser();
+        const newMessage: Partial<ChatMessage> = {
+            id: Date.now().toString(), text, contentType: 'text',
+            senderEmail: userInfo?.email, 
+        };
+        // No modo real, isso enviaria para o backend e atualizaria via polling/socket
+        console.log("Enviando mensagem (simulado):", newMessage);
+        // Adiciona a mensagem otimisticamente à UI
+        setMessages(prev => [...prev, { 
+            ...newMessage, 
+            type: 'sent', 
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+            status: 'sent',
+            id: newMessage.id!
+        }]);
     };
-  }, [chatId, loadChatData, navigate]);
 
-  const handleSendMessage = (text: string) => {
-    const userInfo = authService.getCurrentUser();
-    const newMessage: ChatMessage = {
-        id: Date.now(), text, type: 'sent', contentType: 'text',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'sent', senderEmail: userInfo?.email, senderAvatar: userInfo?.profile?.photoUrl,
-        senderName: userInfo?.profile?.nickname || userInfo?.profile?.name || 'Você', deletedBy: []
+    const handleToggleSelection = (msgId: string) => {
+        setSelectedIds(prev => {
+            const next = prev.includes(msgId) ? prev.filter(id => id !== msgId) : [...prev, msgId];
+            if (next.length === 0) setIsSelectionMode(false);
+            return next;
+        });
     };
-    chatService.sendMessage(chatId, newMessage);
-  };
 
-  const handleToggleSelection = (msgId: number) => {
-    setSelectedIds(prev => {
-        const next = prev.includes(msgId) ? prev.filter(id => id !== msgId) : [...prev, msgId];
-        if (next.length === 0) setIsSelectionMode(false);
-        return next;
-    });
-  };
+    const handleStartSelection = (msgId: string) => {
+        setIsSelectionMode(true);
+        setSelectedIds([msgId]);
+        if (navigator.vibrate) navigator.vibrate(10);
+    };
 
-  const handleStartSelection = (msgId: number) => {
-    setIsSelectionMode(true);
-    setSelectedIds([msgId]);
-    if (navigator.vibrate) navigator.vibrate(10);
-  };
+    const deleteSelectedMessages = async (target: 'me' | 'all') => {
+        if (selectedIds.length === 0 || !chatId) return;
+        // No modo real, chamaria o serviço
+        console.log(`Deletando ${selectedIds.length} mensagens para ${target}`);
+        setMessages(prev => prev.filter(m => !selectedIds.includes(m.id)));
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+    
+    const filteredMessages = useMemo(() => {
+        return messages.filter(m => (m.text || '').toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [messages, searchTerm]);
 
-  const deleteSelectedMessages = async (target: 'me' | 'all') => {
-    if (selectedIds.length === 0) return;
-    await chatService.deleteMessages(chatId, selectedIds, target);
-    setIsSelectionMode(false);
-    setSelectedIds([]);
-    loadChatData(true);
-  };
+    const handleEdit = () => console.log('Editar', selectedIds);
+    const handlePin = () => console.log('Fixar', selectedIds);
+    const handleCopy = () => navigator.clipboard.writeText(messages.find(m => m.id === selectedIds[0])?.text || '');
+    const handleForward = () => console.log('Encaminhar', selectedIds);
+    const handleReply = () => console.log('Responder', selectedIds);
 
-  const filteredMessages = useMemo(() => {
-    return messages.filter(m => (m.text || '').toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [messages, searchTerm]);
-
-  // TODO: Implementar
-  const handleEdit = () => console.log('Editar', selectedIds);
-  const handlePin = () => console.log('Fixar', selectedIds);
-  const handleCopy = () => console.log('Copiar', selectedIds);
-  const handleForward = () => console.log('Encaminhar', selectedIds);
-  const handleReply = () => console.log('Responder', selectedIds);
-
-  return {
-    virtuosoRef, messages: filteredMessages, contactName, contactHandle, contactAvatar, contactStatus, isBlocked,
-    isSelectionMode, setIsSelectionMode, selectedIds, setSelectedIds, isSearchOpen, setIsSearchOpen, 
-    searchTerm, setSearchTerm, zoomedMedia, setZoomedMedia, isMenuModalOpen, setIsMenuModalOpen, 
-    isUploading, currentUserEmail, navigate, handleSendMessage, handleToggleSelection, handleStartSelection,
-    deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply
-  };
+    return {
+        virtuosoRef, messages: filteredMessages, contactName, contactHandle, contactAvatar, contactStatus, isBlocked,
+        isSelectionMode, setIsSelectionMode, selectedIds, setSelectedIds, isSearchOpen, setIsSearchOpen, 
+        searchTerm, setSearchTerm, zoomedMedia, setZoomedMedia, isMenuModalOpen, setIsMenuModalOpen, 
+        isUploading, currentUserEmail, navigate, handleSendMessage, handleToggleSelection, handleStartSelection,
+        deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply
+    };
 };

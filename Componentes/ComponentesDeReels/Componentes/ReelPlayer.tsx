@@ -1,117 +1,96 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Post } from '../../../types';
+import { Reel } from '../../../tipos/index'; // Usando o tipo Reel da simulação
 
 interface ReelPlayerProps {
-    reel: Post;
+    reel: Reel;
     isActive: boolean;
-    reportWatchTime: (id: string) => void;
-    onVideoClick: () => void;
     isMuted: boolean;
     onToggleMute: (e: React.MouseEvent) => void;
+    // Funções de relatório e clique não são críticas para a simulação inicial
+    reportWatchTime: (id: string) => void;
+    onVideoClick: () => void;
 }
 
 export const ReelPlayer: React.FC<ReelPlayerProps> = ({ 
-    reel, isActive, reportWatchTime, onVideoClick, isMuted, onToggleMute 
+    reel, isActive, isMuted, onToggleMute, onVideoClick 
 }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(true);
     const [hasError, setHasError] = useState(false);
 
-    const getVideoSrc = (src?: string) => {
-        if (!src) return '';
-        if (src.startsWith('http') || src.startsWith('data:') || src.startsWith('blob:')) return src;
-        return `${window.location.origin}${src.startsWith('/') ? '' : '/'}${src}`;
-    };
-
-    const videoSrc = getVideoSrc(reel.video);
+    // CORREÇÃO: Acessando reel.videoUrl em vez de reel.video
+    const videoSrc = reel.videoUrl;
 
     useEffect(() => {
-        let isMounted = true;
+        const videoElement = videoRef.current;
+        if (!videoElement) return;
+
         if (isActive) {
-            if (videoRef.current && !hasError && videoSrc) {
-                const playPromise = videoRef.current.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise
-                        .then(() => {
-                            if (isMounted) {
-                                setIsPlaying(true);
-                                reportWatchTime(reel.id);
-                            }
-                        })
-                        .catch((error) => {
-                            if (!isMounted) return;
-                            if (error.name === 'NotAllowedError') {
-                                setIsPlaying(false);
-                                if (videoRef.current) {
-                                    videoRef.current.muted = true;
-                                    videoRef.current.play().catch(e => {});
-                                }
-                            } else if (error.name !== 'AbortError') {
-                                setIsPlaying(false);
-                            }
-                        });
+            // Autoplay com som (se o navegador permitir)
+            videoElement.play().then(() => {
+                setIsPlaying(true);
+            }).catch(error => {
+                // Navegador bloqueou o autoplay, tenta com mudo
+                if (error.name === 'NotAllowedError') {
+                    videoElement.muted = true;
+                    videoElement.play().catch(e => console.error("Falha ao tocar o vídeo mesmo mudo", e));
                 }
-            }
+            });
         } else {
-            if (videoRef.current) {
-                videoRef.current.pause();
-                if (isMounted) setIsPlaying(false);
-                if (!videoRef.current.paused && !Number.isNaN(videoRef.current.duration)) {
-                    videoRef.current.currentTime = 0; 
-                }
-            }
+            // Pausa e reseta o vídeo se não estiver ativo
+            videoElement.pause();
+            videoElement.currentTime = 0;
+            setIsPlaying(false);
         }
-        return () => { isMounted = false; };
-    }, [isActive, hasError, videoSrc, reel.id, reportWatchTime]);
+
+        return () => {
+            if (videoElement) {
+                videoElement.pause();
+            }
+        };
+    }, [isActive, videoSrc]); // Depende apenas da ativação e da fonte do vídeo
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.muted = isMuted;
+        }
+    }, [isMuted]);
+
+    const handleCanPlay = () => {
+        setIsBuffering(false);
+        if (isActive && videoRef.current) {
+            videoRef.current.play();
+        }
+    };
+
+    if (hasError || !videoSrc) {
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-black text-white">
+                <i className="fa-solid fa-exclamation-triangle mr-2"></i> Conteúdo Indisponível
+            </div>
+        );
+    }
 
     return (
-        <div className="reel-video-container w-full h-full relative" onClick={onVideoClick}>
-            {isActive && isBuffering && !hasError && videoSrc && (
-                <div className="absolute z-10 flex items-center justify-center pointer-events-none" style={{top:'50%', left:'50%', transform:'translate(-50%, -50%)'}}>
-                    <i className="fa-solid fa-circle-notch fa-spin text-4xl text-white/80"></i>
+        <div className="w-full h-full relative" onClick={onVideoClick}>
+            {isBuffering && (
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <i className="fa-solid fa-circle-notch fa-spin text-3xl text-white/80"></i>
                 </div>
             )}
-
-            {!isPlaying && !isBuffering && !hasError && videoSrc && (
-                <div className="absolute z-10 pointer-events-none bg-black/30 rounded-full p-4 backdrop-blur-sm" style={{top:'50%', left:'50%', transform:'translate(-50%, -50%)'}}>
-                    <i className="fa-solid fa-play text-4xl text-white/90 pl-1"></i>
-                </div>
-            )}
-
-            {videoSrc && !hasError ? (
-                <video
-                    ref={videoRef}
-                    src={videoSrc}
-                    loop
-                    muted={isMuted}
-                    playsInline
-                    webkit-playsinline="true"
-                    preload="auto"
-                    className="reel-video"
-                    onWaiting={() => setIsBuffering(true)}
-                    onPlaying={() => setIsBuffering(false)}
-                    onLoadedData={() => setIsBuffering(false)}
-                    onError={() => {
-                        if (videoSrc) {
-                            setHasError(true);
-                            setIsBuffering(false);
-                        }
-                    }}
-                />
-            ) : reel.image ? (
-                <img src={reel.image} alt="Reel Content" className="reel-video object-cover" />
-            ) : (
-                <div className="video-error">
-                    <i className="fa-solid fa-triangle-exclamation"></i>
-                    <p>Conteúdo indisponível</p>
-                    <button onClick={(e) => { e.stopPropagation(); setHasError(false); setIsBuffering(true); }} className="retry-btn">
-                        <i className="fa-solid fa-rotate-right"></i> Recarregar
-                    </button>
-                </div>
-            )}
+            
+            <video
+                ref={videoRef}
+                src={videoSrc}
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+                onCanPlay={handleCanPlay}
+                onWaiting={() => setIsBuffering(true)}
+                onError={() => setHasError(true)}
+            />
         </div>
     );
 };

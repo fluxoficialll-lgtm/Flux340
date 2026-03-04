@@ -39,6 +39,20 @@ export const chatService = {
         });
         return handleResponse(res);
     },
+    
+    /**
+     * Busca os detalhes de uma conversa específica.
+     * @param {string} token - O token de autenticação.
+     * @param {string} chatId - O ID da conversa.
+     * @returns {Promise<any>} Os detalhes da conversa.
+     */
+    async getChat(token, chatId) {
+        console.log(`[chatService] Buscando chat com ID: ${chatId}`);
+        const res = await fetch(`${API_BASE_URL}/conversations/${chatId}`, { // CORREÇÃO: Endpoint ajustado
+            headers: getAuthHeaders(token),
+        });
+        return handleResponse(res);
+    },
 
     /**
      * Busca mensagens de uma conversa específica.
@@ -92,6 +106,9 @@ export const chatService = {
      */
     async getUnreadCount() {
         console.log("[Chat Mock] Contando mensagens não lidas...");
-        return Promise.resolve(0);
+        // No mundo real, isso também faria uma chamada de API.
+        // Por enquanto, apenas retorna um valor estático para fins de UI.
+        const allChats = this.listConversations(); // Simulação
+        return Promise.resolve(Object.values(allChats).reduce((acc, chat) => acc + (chat.unreadCount || 0), 0));
     }
 };

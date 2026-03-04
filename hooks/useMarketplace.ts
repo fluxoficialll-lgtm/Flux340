@@ -19,13 +19,21 @@ export const useMarketplace = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // O marketplaceService agora usa fetch internamente, que será interceptado.
-            const items = await marketplaceService.fetchItems();
-            setAllItems(items || []);
+            const isSimulating = localStorage.getItem('isSimulating') === 'true';
+
+            if (isSimulating) {
+                console.log("[SIMULAÇÃO] useMarketplace: Buscando itens do endpoint de simulação /api/marketplace/items");
+                const response = await fetch('/api/marketplace/items');
+                const items = await response.json();
+                setAllItems(items || []);
+            } else {
+                const items = await marketplaceService.fetchItems();
+                setAllItems(items || []);
+            }
         } catch (err) {
             console.error("Erro ao carregar itens do marketplace:", err);
             setError(err instanceof Error ? err.message : 'Ocorreu um erro desconhecido.');
-            setAllItems([]); // Garante que não haja dados antigos em caso de erro
+            setAllItems([]);
         } finally {
             setIsLoading(false);
         }
@@ -35,10 +43,8 @@ export const useMarketplace = () => {
         const email = authService.getCurrentUserEmail() || undefined;
         setCurrentUserEmail(email);
         
-        // Busca os itens ao montar o componente.
         fetchMarketplaceItems();
 
-        // Não há mais necessidade de subscribe, o fetch resolve tudo.
     }, [fetchMarketplaceItems]);
 
     const filteredProducts = useMemo(() => {
@@ -76,7 +82,7 @@ export const useMarketplace = () => {
         isMenuOpen,
         setIsMenuOpen,
         isLoading,
-        error, // Expondo o erro para a UI
+        error,
         filteredProducts,
         handleProductClick
     };

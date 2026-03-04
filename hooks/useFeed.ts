@@ -35,31 +35,54 @@ export const useFeed = () => {
         setLoading(true);
         
         try {
-            const storedFilter = localStorage.getItem('feed_location_filter');
-            const filterValue = (storedFilter === 'Global' || !storedFilter) ? null : storedFilter;
-            
-            // A chamada para getFeed continua correta, usando o serviço importado como padrão.
-            const response = await ServiçoPublicacaoFeed.getFeed('home', {
-                limit: PAGE_SIZE, 
-                cursor: cursor, 
-                locationFilter: filterValue, 
-                allowAdultContent: isAdultContentAllowed
-            });
+            // VERIFICA SE A SIMULAÇÃO ESTÁ ATIVA
+            const isSimulating = localStorage.getItem('isSimulating') === 'true';
 
-            const fetched = response.data || [];
-            
-            if (reset) {
-                setPosts(fetched);
+            if (isSimulating) {
+                // MODO DE SIMULAÇÃO: Busca os dados diretamente do endpoint mockado.
+                console.log("[SIMULAÇÃO] useFeed: Buscando posts do endpoint de simulação /api/feed");
+                const response = await fetch('/api/feed');
+                const fetched = await response.json();
+
+                if (reset) {
+                    setPosts(fetched);
+                } else {
+                    setPosts(prev => {
+                        const existingIds = new Set(prev.map(p => p.id));
+                        const newPosts = fetched.filter(p => !existingIds.has(p.id));
+                        return [...prev, ...newPosts];
+                    });
+                }
+                // Na simulação, não há paginação, então desativamos o "hasMore".
+                setHasMore(false);
+
             } else {
-                setPosts(prev => {
-                    const existingIds = new Set(prev.map(p => p.id));
-                    const newPosts = fetched.filter(p => !existingIds.has(p.id));
-                    return [...prev, ...newPosts];
+                // MODO NORMAL: Usa o serviço de publicação.
+                const storedFilter = localStorage.getItem('feed_location_filter');
+                const filterValue = (storedFilter === 'Global' || !storedFilter) ? null : storedFilter;
+                
+                const response = await ServiçoPublicacaoFeed.getFeed('home', {
+                    limit: PAGE_SIZE, 
+                    cursor: cursor, 
+                    locationFilter: filterValue, 
+                    allowAdultContent: isAdultContentAllowed
                 });
-            }
 
-            setNextCursor(response.nextCursor);
-            setHasMore(!!response.nextCursor && fetched.length > 0);
+                const fetched = response.data || [];
+                
+                if (reset) {
+                    setPosts(fetched);
+                } else {
+                    setPosts(prev => {
+                        const existingIds = new Set(prev.map(p => p.id));
+                        const newPosts = fetched.filter(p => !existingIds.has(p.id));
+                        return [...prev, ...newPosts];
+                    });
+                }
+
+                setNextCursor(response.nextCursor);
+                setHasMore(!!response.nextCursor && fetched.length > 0);
+            }
         } catch (error) {
             console.error("Erro ao buscar posts do feed:", error);
             if (!cursor || reset) setHasMore(false);

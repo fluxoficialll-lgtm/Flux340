@@ -1,114 +1,85 @@
 
-import React, { useState, useEffect } from 'react';
-import { Post, Group } from '../../../types';
-// CORREÇÃO: A importação do groupService foi removida.
-// import { groupService } from '../../../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { AvatarPreviewModal } from '../../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
+import React from 'react';
+import { ReelAuthor, ReelMusic } from '../../../tipos/index'; // Ajuste para os novos tipos de simulação
 import { UserBadge } from '../../ComponenteDeInterfaceDeUsuario/user/UserBadge';
+import { AvatarPreviewModal } from '../../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 
 interface ReelInfoProps {
-    reel: Post;
-    displayName: string;
-    avatar?: string;
-    onUserClick: () => void;
-    onGroupClick: (groupId: string, group: Group) => void;
-    onCtaClick: (link?: string) => void;
-    isExpanded: boolean;
-    onToggleExpand: (e: React.MouseEvent) => void;
+    author: ReelAuthor;
+    description: string;
+    music: ReelMusic;
+    // Adicione outras props conforme necessário
 }
 
-const CTA_ICONS: Record<string, string> = {
-    'conferir': 'fa-eye',
-    'participar': 'fa-user-group',
-    'comprar': 'fa-cart-shopping',
-    'assinar': 'fa-credit-card',
-    'entrar': 'fa-arrow-right-to-bracket',
-    'descubra': 'fa-compass',
-    'baixar': 'fa-download',
-    'saiba mais': 'fa-circle-info'
-};
-
-export const ReelInfo: React.FC<ReelInfoProps> = ({
-    reel, displayName, avatar, onUserClick, onGroupClick, onCtaClick, isExpanded, onToggleExpand
+export const ReelInfo: React.FC<ReelInfoProps> = ({ 
+    author, description, music 
 }) => {
-    const [linkedGroup, setLinkedGroup] = useState<Group | null>(null);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
-    useEffect(() => {
-        // CORREÇÃO: Lógica de busca de grupo removida.
-        console.error("groupService not available. Reel linked group will not be displayed.");
-        setLinkedGroup(null);
-    }, [reel.relatedGroupId]);
-
-    const getCtaIcon = (label: string = '') => {
-        const key = label.toLowerCase();
-        return CTA_ICONS[key] || 'fa-arrow-right';
-    };
+    const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
     const handleAvatarClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (avatar) setIsPreviewOpen(true);
-        else onUserClick();
+        if (author.avatar) {
+            setIsPreviewOpen(true);
+        } else {
+            // Lógica de clique de usuário se não houver avatar
+            console.log('Clicou no usuário sem avatar:', author.handle);
+        }
     };
 
+    // Simplificamos a renderização para focar na simulação
     return (
-        <div className="reel-desc-overlay">
-            {reel.isAd && reel.ctaLink ? (
-                <button 
-                    className="bg-[#00c2ff] text-black border-none px-5 py-3 rounded-xl text-xs font-black flex items-center justify-between w-full mt-3 shadow-[0_4px_15px_rgba(0,194,255,0.3)] active:scale-95"
-                    onClick={() => onCtaClick(reel.ctaLink)}
-                    style={{ pointerEvents: 'auto' }}
-                >
-                    <div className="flex items-center gap-2.5">
-                        <i className={`fa-solid ${getCtaIcon(reel.ctaText)}`}></i>
-                        <span className="uppercase tracking-wider">{reel.ctaText || 'Saiba Mais'}</span>
-                    </div>
-                    <i className="fa-solid fa-chevron-right opacity-50"></i>
-                </button>
-            ) : linkedGroup && (
-                <button 
-                    className="reel-group-btn" 
-                    onClick={() => onGroupClick(linkedGroup.id, linkedGroup)}
-                    style={linkedGroup.isVip ? { background: 'linear-gradient(90deg, #FFD700, #B8860B)', color: '#000', border: 'none', fontWeight: '800' } : { background: 'rgba(255, 255, 255, 0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}
-                >
-                    <i className={`fa-solid ${linkedGroup.isVip ? 'fa-crown' : 'fa-users'}`} style={{color: linkedGroup.isVip ? '#000' : 'inherit'}}></i>
-                    <span className="truncate max-w-[150px]">
-                        {linkedGroup.isVip ? `VIP: ${linkedGroup.name}` : linkedGroup.name}
-                    </span>
-                    <i className="fa-solid fa-chevron-right" style={{fontSize: '10px'}}></i>
-                </button>
-            )}
-
-            <div className="reel-username">
+        <div className="reel-info-overlay absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 to-transparent z-10 text-white">
+             <style>{`
+                .reel-info-overlay {
+                    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                }
+                .author-line {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 8px;
+                }
+                .author-name {
+                    font-weight: 700;
+                    font-size: 1rem; /* 16px */
+                }
+                .reel-description {
+                    font-size: 0.875rem; /* 14px */
+                    line-height: 1.4;
+                    margin-bottom: 8px;
+                }
+                .reel-music {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.875rem; /* 14px */
+                    font-weight: 500;
+                }
+             `}</style>
+            {/* Linha do Autor */}
+            <div className="author-line">
                 <UserBadge 
-                    avatarUrl={avatar}
-                    nickname={displayName}
-                    handle={reel.username}
-                    isVip={reel.isAd} // No Reel, ADs ganham destaque visual
+                    avatarUrl={author.avatar}
+                    nickname={author.name}
+                    handle={author.handle}
                     avatarSize="sm"
-                    showHandle={false}
+                    showHandle={false} // Apenas o nome é suficiente aqui
                     onAvatarClick={handleAvatarClick}
-                    onNameClick={onUserClick}
                 />
-                {reel.isAdultContent && <span className="adult-badge">18+</span>}
-                {reel.isAd && <span className="sponsored-badge">Patrocinado</span>}
             </div>
 
-            <div className="reel-title mt-1">
-                {isExpanded ? reel.text : (
-                    <>{reel.text.slice(0, 60)}{reel.text.length > 60 && <span className="reel-read-more" onClick={onToggleExpand}>mais</span>}</>
-                )}
-            </div>
-
-            <div style={{ fontSize: '12px', color: '#aaa', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <i className="fa-solid fa-play"></i> {reel.views} visualizações
+            {/* Descrição e Música */}
+            <p className="reel-description">{description}</p>
+            <div className="reel-music">
+                <i className="fa-solid fa-music"></i>
+                <span>{music.title}</span>
             </div>
 
             <AvatarPreviewModal 
                 isOpen={isPreviewOpen} 
                 onClose={() => setIsPreviewOpen(false)} 
-                imageSrc={avatar || ''} 
-                username={displayName} 
+                imageSrc={author.avatar || ''} 
+                username={author.name} 
             />
         </div>
     );

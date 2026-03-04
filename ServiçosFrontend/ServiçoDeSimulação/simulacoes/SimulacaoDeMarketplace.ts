@@ -2,7 +2,7 @@
 // --- SIMULAÇÃO DO SERVIÇO DE MARKETPLACE ---
 
 // Mock de dados para produtos do marketplace
-const mockMarketplaceItems = [
+export const mockMarketplaceItems = [
     {
         id: 'item-1',
         name: 'Grupo VIP Acesso Exclusivo',
@@ -39,7 +39,6 @@ const handleGetMarketplaceItems = async (url: URL, config?: RequestInit): Promis
     });
 };
 
-// AQUI ESTÁ A CORREÇÃO: Adicionando a palavra-chave `export`
 export const marketplaceHandlers = {
     '/api/marketplace/items': handleGetMarketplaceItems,
 };

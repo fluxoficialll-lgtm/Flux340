@@ -3,9 +3,13 @@
 
 import { authHandlers } from './simulacoes/SimulacaoDeAuth';
 import { feedHandlers } from './simulacoes/SimulacaoDeFeed';
-import { marketplaceHandlers } from './simulacoes/SimulacaoDeMarketplace';
+import { marketplaceHandlers, mockMarketplaceItems } from './simulacoes/SimulacaoDeMarketplace'; // Importa mockMarketplaceItems
 import { profileHandlers } from './simulacoes/Simulacao.Perfil.Flux';
-import { metricsHandlers } from './simulacoes/SimulacaoDeMetricas'; // IMPORTADO
+import { metricsHandlers } from './simulacoes/SimulacaoDeMetricas';
+import { conversationsHandlers } from './simulacoes/Simulacao.Lista.Conversas';
+import { notificationsHandlers } from './simulacoes/Simulacao.Notificacoes';
+import { chatDetailsHandlers } from './simulacoes/Simulacao.Chat';
+import { reelsHandlers } from './simulacoes/Simulacao.Reels'; // IMPORTADO
 
 // Re-exporta o serviço de controle da simulação com o nome esperado.
 export { controleDeSimulacao as servicoDeSimulacao } from './ControleDeSimulacao';
@@ -16,7 +20,11 @@ const allSimulationHandlers = {
     ...feedHandlers,
     ...marketplaceHandlers,
     ...profileHandlers,
-    ...metricsHandlers, // ADICIONADO
+    ...metricsHandlers,
+    ...conversationsHandlers,
+    ...notificationsHandlers,
+    ...chatDetailsHandlers,
+    ...reelsHandlers, // ADICIONADO
 };
 
 /**
@@ -25,4 +33,9 @@ const allSimulationHandlers = {
  */
 export const getSimulationHandlers = () => {
     return allSimulationHandlers;
+};
+
+// Exporta os dados de simulação para serem usados diretamente pelos serviços
+export const simulationData = {
+    marketplace: mockMarketplaceItems,
 };

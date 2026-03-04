@@ -3,9 +3,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { notificationService } from '../ServiçosFrontend/ServiçoDeNotificação/notificationService.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-// CORREÇÃO: A importação do groupService foi removida por não ser utilizada.
-// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { NotificationItem, Group, PriceInfo } from '../types';
+import { MockNotification } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Notificacoes'; // IMPORTANDO O TIPO
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -19,14 +18,38 @@ export const useNotifications = () => {
     const fetchNotifications = useCallback(async () => {
         setIsLoading(true);
         try {
-            const fetchedNotifications = await notificationService.getNotifications();
-            const notificationsWithDisplayNames = await Promise.all(
-                fetchedNotifications.map(async (notif) => {
-                    const user = await authService.fetchUserByHandle(notif.username);
-                    return { ...notif, displayName: user?.profile?.nickname || user?.profile?.name || notif.username };
-                })
-            );
-            setNotifications(notificationsWithDisplayNames);
+            const isSimulating = localStorage.getItem('isSimulating') === 'true';
+
+            if (isSimulating) {
+                console.log("[SIMULAÇÃO] useNotifications: Buscando notificações do endpoint de simulação /api/notificacoes");
+                const response = await fetch('/api/notificacoes');
+                const mockData: MockNotification[] = await response.json();
+
+                const formattedNotifications = mockData.map((notif): NotificationItem => ({
+                    id: notif.id,
+                    // @ts-ignore - Mapeando tipos de simulação para tipos de UI
+                    type: notif.type === 'new_follower' ? 'follow' : notif.type,
+                    username: notif.actor.handle,
+                    displayName: notif.actor.name,
+                    avatarUrl: notif.actor.avatar,
+                    timestamp: notif.timestamp,
+                    relatedContent: notif.entity?.text,
+                    isFollowing: false, // Valor padrão para simulação
+                    isRead: notif.read,
+                }));
+
+                setNotifications(formattedNotifications);
+
+            } else {
+                 const fetchedNotifications = await notificationService.getNotifications();
+                 const notificationsWithDisplayNames = await Promise.all(
+                     fetchedNotifications.map(async (notif) => {
+                         const user = await authService.fetchUserByHandle(notif.username);
+                         return { ...notif, displayName: user?.profile?.nickname || user?.profile?.name || notif.username };
+                     })
+                 );
+                 setNotifications(notificationsWithDisplayNames);
+            }
         } catch (error) {
             console.error("Erro ao buscar notificações:", error);
         } finally {
@@ -38,16 +61,15 @@ export const useNotifications = () => {
         const loadInitialData = async () => {
             const token = authService.getToken();
             if (!token) { 
-                navigate('/'); // Redireciona se não houver token
+                navigate('/');
                 return; 
             }
-            
             await fetchNotifications();
         };
-
         loadInitialData();
     }, [fetchNotifications, navigate]);
 
+    // ... (resto do hook permanece o mesmo)
     const handleFollowToggle = useCallback(async (id: number, username: string) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isFollowing: !n.isFollowing } : n));
         try {
@@ -100,7 +122,7 @@ export const useNotifications = () => {
         isPaymentModalOpen,
         setIsPaymentModalOpen,
         selectedGroup,
-        displayPriceInfo,
+        displayInfo: displayPriceInfo,
         handleFollowToggle,
         handlePendingAction,
         handleIgnoreExpiring,
