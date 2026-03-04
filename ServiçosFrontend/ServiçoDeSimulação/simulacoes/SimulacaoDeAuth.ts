@@ -4,13 +4,22 @@
 import { User } from "../../../types";
 
 // --- ESTADO DA SIMULAÇÃO ---
+// CORREÇÃO: O usuário mockado agora inclui todos os campos esperados pela interface de perfil.
 const mockUser: User = {
     id: 'uuid-gerado-na-simulacao',
     email: 'qualquer@email.com',
     name: 'Usuário Simulado',
-    nickname: 'user_simulado',
-    photoUrl: 'https://i.pravatar.cc/150?u=simulado',
-    profile_completed: false,
+    username: 'user_simulado', // Adicionado
+    nickname: 'Simulado',      // Alterado para um nome mais amigável
+    avatar: 'https://i.pravatar.cc/150?u=simulado', // Renomeado de photoUrl
+    bio: 'Este é um perfil simulado para fins de desenvolvimento. Explorando o universo Flux!', // Adicionado
+    website: 'https://flux.plus', // Adicionado
+    profile_completed: true, // Alterado para true
+    stats: { // Adicionado o objeto de estatísticas
+        posts: 15,
+        followers: 1337,
+        following: 42,
+    },
 };
 
 // --- SERVIÇO DE AUTENTICAÇÃO MOCK ---
@@ -40,7 +49,6 @@ export const ServicoAutenticacaoMock = {
 
 // --- HANDLERS PARA O ORQUESTRADOR DE SIMULAÇÃO ---
 
-// CORREÇÃO: Simplificado para sempre retornar um usuário mockado, ignorando o corpo da requisição.
 const handleLogin = async (url: URL, config?: RequestInit): Promise<Response> => {
     console.log("[SIMULAÇÃO] Interceptando requisição de login.");
     const user = ServicoAutenticacaoMock.login();
