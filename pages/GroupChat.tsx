@@ -54,7 +54,7 @@ export const GroupChat: React.FC = () => {
         subtitle={`# ${channelName}`}
         avatar={group?.avatarUrl}
         onBack={() => navigate(`/groups/${group?.id}`)}
-        onInfoClick={() => navigate(`/groups/info/${group?.id}`)}
+        onInfoClick={() => navigate(`/group-settings/${group?.id}`)} // CORREÇÃO APLICADA AQUI
         isSelectionMode={isSelectionMode}
         selectedCount={selectedIds.length}
         onCancelSelection={() => { setIsSelectionMode(false); setSelectedIds([]); }}

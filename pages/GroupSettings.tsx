@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { SessaoEstruturaEIdentidade } from '../Componentes/ComponentesDeGroups/SessaoEstruturaEIdentidade';
@@ -12,11 +12,7 @@ export const GroupSettings: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { group, loading, isOwner, isAdmin, handleLeaveDelete, form } = useGroupSettings();
 
-    useEffect(() => {
-        if (!loading && group && !isAdmin) {
-            navigate(`/group-chat/${id}`, { replace: true });
-        }
-    }, [loading, group, isAdmin, navigate, id]);
+    // O useEffect que causava o redirecionamento foi removido daqui.
 
     if (loading || !group || !id) {
         return (
@@ -36,6 +32,7 @@ export const GroupSettings: React.FC = () => {
             </header>
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
+                {/* As seções podem ter sua própria lógica interna para mostrar/ocultar opções com base em isAdmin ou isOwner */}
                 <SessaoEstruturaEIdentidade
                     navigate={navigate}
                     id={id}
