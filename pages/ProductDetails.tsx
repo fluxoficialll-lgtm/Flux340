@@ -12,7 +12,7 @@ import { ProductSellerCard } from '../Componentes/ComponentesDeMarketplace/Compo
 import { ProductDescription } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductDescription';
 import { ProductBottomBar } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductBottomBar';
 import { ProductLightbox } from '../Componentes/ComponentesDeMarketplace/Componentes/details/ProductLightbox';
-import { PainelGestorComentarios, GestorTiposComentarios } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/Painel.Gestor.Comentarios';
+import { PainelComentariosMarketplace } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/Card.Comentario.Marketplace';
 
 export const ProductDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -46,7 +46,6 @@ export const ProductDetails: React.FC = () => {
       <style>{`
         .product-container { padding: 0; position: relative; z-index: 10; width: 100%; max-width: 600px; margin: 0 auto; }
         .details-wrapper { background: #0c0f14; border-top-left-radius: 20px; border-top-right-radius: 20px; margin-top: -20px; position: relative; z-index: 5; padding: 25px 20px; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
-        /* Outros estilos permanecem os mesmos... */
       `}</style>
 
       <ProductHeader />
@@ -92,7 +91,7 @@ export const ProductDetails: React.FC = () => {
         onClose={() => setZoomedMedia(null)}
       />
 
-      <PainelGestorComentarios 
+      <PainelComentariosMarketplace 
         isOpen={isCommentModalOpen}
         onClose={() => setIsCommentModalOpen(false)}
         title={`Perguntas (${questions.length})`}
@@ -108,7 +107,7 @@ export const ProductDetails: React.FC = () => {
         onCancelReply={() => setReplyingTo(null)}
         onReplyClick={(cid, user) => setReplyingTo({ id: cid, username: user })}
         placeholder={isSeller ? "Responda a dúvida do cliente..." : "Escreva sua dúvida para o vendedor..."}
-        channelType={GestorTiposComentarios.MARKETPLACE}
+        currentUserAvatar={currentUser?.avatar}
       />
     </div>
   );
