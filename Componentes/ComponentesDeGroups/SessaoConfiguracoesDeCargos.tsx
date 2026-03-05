@@ -19,19 +19,19 @@ export const SessaoConfiguracoesDeCargos: React.FC<SessaoConfiguracoesDeCargosPr
             <h2>Configurações de Cargos</h2>
             <ItemConfiguracao
                 icon="fa-id-card-clip"
-                label="Gestão de Cargos"
+                label="Criação de Cargos"
                 onClick={() => navigate(`/group-settings/${id}/roles`)}
                 rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
             <ItemConfiguracao
-                icon="fa-sliders"
-                label="Regras de Chat"
-                onClick={() => navigate(`/group-settings/${id}/moderation`)}
+                icon="fa-users"
+                label="Distribuição de Cargos"
+                onClick={() => navigate(`/group-settings/${id}/members`)}
             />
             <ItemConfiguracao
-                icon="fa-users"
-                label="Lista de Membros"
-                onClick={() => navigate(`/group-settings/${id}/members`)}
+                icon="fa-wrench"
+                label="Manutenção de Cargos"
+                onClick={() => navigate(`/group-settings/${id}/maintenance`)}
             />
         </div>
     );

@@ -28,8 +28,8 @@ export const SessaoConfiguracoesDeModeracao: React.FC<SessaoConfiguracoesDeModer
             />
             <ItemConfiguracao
                 icon="fa-shield-halved"
-                label="Ações administrativas"
-                onClick={() => {}}
+                label="Moderação do Grupo"
+                onClick={() => navigate(`/group-settings/${id}/moderation`)}
                 rightElement={<div className="flex items-center"><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
             <ItemConfiguracao

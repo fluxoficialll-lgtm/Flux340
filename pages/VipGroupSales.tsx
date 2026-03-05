@@ -75,7 +75,7 @@ export const VipGroupSales: React.FC = () => {
 
     const handlePurchase = () => {
         if (!simulationProvider) {
-            alert("Por favor, primeiro selecione um provedor e país no modo de simulação (botão no cabeçalho).");
+            openSimulator();
             return;
         }
         setModals(prev => ({ ...prev, pix: true })); 
@@ -97,6 +97,7 @@ export const VipGroupSales: React.FC = () => {
             ctaText={simulatedCtaText}
             formattedPrice={simulatedPrice}
             onClick={handlePurchase}
+            hasSelectedProvider={!!simulationProvider}
           />
           <div className="mt-4 flex flex-col gap-1 items-center opacity-30">
             <span className="text-[9px] font-black uppercase tracking-widest">Pagamento Seguro</span>
@@ -160,7 +161,7 @@ export const VipGroupSales: React.FC = () => {
         <div className="mt-2 mb-6"><h1 className="text-2xl font-black text-white px-4 tracking-tight">{translatedData?.name || group.name}</h1></div>
         <CardPrevias mediaItems={normalizedMedia} currentSlide={currentSlide} playingIndex={playingIndex} containerRef={carouselRef} onScroll={handleScroll} onMediaClick={setZoom} onToggleVideo={handleToggleVideo} />
         <CardDescricao text={translatedData?.vipDoorText || group.vipDoor?.text || ''} />
-        <CardCTAPrincipal isEnabled={isPurchaseEnabled} isRenewal={false} ctaText={translatedData?.vipButtonText || group.vipDoor?.buttonText || t('buy_now')} formattedPrice={displayPriceInfo?.formatted} onClick={handlePurchase} />
+        <CardCTAPrincipal isEnabled={isPurchaseEnabled} isRenewal={false} ctaText={translatedData?.vipButtonText || group.vipDoor?.buttonText || t('buy_now')} formattedPrice={displayPriceInfo?.formatted} onClick={handlePurchase} hasSelectedProvider={true} />
         <div className="mt-4 flex flex-col gap-1 items-center opacity-30"><span className="text-[9px] font-black uppercase tracking-widest">{t('secure_payment')}</span><div className="flex gap-4 text-sm mt-1"><i className="fa-brands fa-cc-visa"></i><i className="fa-brands fa-cc-mastercard"></i><i className="fa-solid fa-pix"></i></div></div>
       </main>
       <ModalPreviasPaises isOpen={modals} onClose={closeModals} group={group} geoData={geoData} priceInfo={displayPriceInfo} onEmailSuccess={onEmailSuccess} onSimulateConfirm={handleApplySimulation} forcedProvider={forcedProvider} />

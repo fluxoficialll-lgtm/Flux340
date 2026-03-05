@@ -6,6 +6,7 @@ interface CardCTAPrincipalProps {
     ctaText: string;
     formattedPrice?: string;
     onClick: () => void;
+    hasSelectedProvider: boolean;
 }
 
 export const CardCTAPrincipal: React.FC<CardCTAPrincipalProps> = ({ 
@@ -13,9 +14,9 @@ export const CardCTAPrincipal: React.FC<CardCTAPrincipalProps> = ({
     isRenewal, 
     ctaText, 
     formattedPrice, 
-    onClick 
+    onClick, 
+    hasSelectedProvider
 }) => {
-    // A função de clique agora só será chamada se o botão estiver habilitado.
     const handleClick = () => {
         if (isEnabled) {
             onClick();
@@ -30,7 +31,7 @@ export const CardCTAPrincipal: React.FC<CardCTAPrincipalProps> = ({
                     ? 'bg-[#12161d] border-white/5 text-gray-600 cursor-not-allowed' 
                     : 'bg-[#0c0f14] border-[#00c2ff] text-white active:scale-[0.98] shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
                 }`}
-                onClick={handleClick} // O onClick agora aponta para a função segura.
+                onClick={handleClick}
                 disabled={!isEnabled}
             >
                 {!isEnabled ? (
@@ -38,18 +39,19 @@ export const CardCTAPrincipal: React.FC<CardCTAPrincipalProps> = ({
                 ) : (
                     <>
                         <span className="text-[15px] font-black uppercase tracking-[2px] text-[#00c2ff]">
-                            {isRenewal ? 'RENOVAR ACESSO AGORA' : ctaText}
+                            {!hasSelectedProvider ? "Selecione o Provedor" : (isRenewal ? 'RENOVAR ACESSO AGORA' : ctaText)}
                         </span>
                         
-                        <div className="flex items-center gap-2">
-                            <span className="text-2xl font-black tracking-tight text-white">
-                                {formattedPrice || '...'}
-                            </span>
-                        </div>
+                        {hasSelectedProvider && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-2xl font-black tracking-tight text-white">
+                                    {formattedPrice || '...'}
+                                </span>
+                            </div>
+                        )}
                     </>
                 )}
                 
-                {/* Subtle highlight line at the top for depth */}
                 {isEnabled && (
                     <div className="absolute top-0 left-0 w-full h-[1px] bg-white/10"></div>
                 )}
