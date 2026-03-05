@@ -5,8 +5,9 @@ import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSys
 import { useSettings } from '../hooks/useSettings';
 import { Footer } from '../Componentes/layout/Footer';
 import { SessaoConta } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoConta';
-import { SessaoPrivacidade } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoPrivacidade';
-import { SessaoGeral } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoGeral';
+import { SessaoSegurancaEPrivacidade } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoSegurancaEPrivacidade';
+import { SessaoNotificacoes } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoNotificacoes';
+import { SessaoFinanceiro } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoFinanceiro';
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -63,13 +64,14 @@ export const Settings: React.FC = () => {
 
       <main className="no-scrollbar">
         <SessaoConta />
-        <SessaoPrivacidade 
+        <SessaoFinanceiro />
+        <SessaoNotificacoes />
+        <SessaoSegurancaEPrivacidade 
             isPrivate={isPrivate}
             onTogglePrivacy={handleTogglePrivacy}
             isAdultContent={isAdultContent}
             onToggleAdult={toggleAdultContent}
         />
-        <SessaoGeral />
         <div className="logout-container">
             <button onClick={handleLogout} className="logout-btn"><i className="fas fa-sign-out-alt"></i> Sair da Conta</button>
             <div className="text-center mt-6 opacity-20 text-[10px] uppercase font-black tracking-widest">

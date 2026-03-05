@@ -1,24 +1,57 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ItemConfiguracao } from './ItemConfiguracao';
+import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import { ModalDeSelecaoDeIdioma, IDIOMAS } from './ModalDeSelecaoDeIdioma';
+import { preferenceService } from '../../ServiçosFrontend/ServiçoDePreferências/preferenceService.js';
 
 export const SessaoConta: React.FC = () => {
     const navigate = useNavigate();
+    const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+    
+    const user = authService.getCurrentUser();
+    // State to hold the current language, so the UI can update without a page reload
+    const [currentLangId, setCurrentLangId] = useState(user?.language || localStorage.getItem('app_language') || 'pt');
+
+    const currentLangLabel = IDIOMAS.find(l => l.id === currentLangId)?.label || 'Português';
+
+    const handleLanguageSelect = async (langId: string) => {
+        if (user?.email) {
+            await preferenceService.updateLanguage(user.email, langId);
+            setCurrentLangId(langId); // Update local state to reflect the change immediately
+        }
+        setIsLanguageModalOpen(false); // Close the modal after selection
+    };
 
     return (
-        <div className="settings-group">
-            <h2>Conta</h2>
-            <ItemConfiguracao 
-                icon="fa-user-edit" 
-                label="Editar Perfil" 
-                onClick={() => navigate('/edit-profile')} 
+        <>
+            <div className="settings-group">
+                <h2>Configurações de conta</h2>
+                <ItemConfiguracao 
+                    icon="fa-user-edit" 
+                    label="Editar Perfil" 
+                    onClick={() => navigate('/edit-profile')} 
+                />
+                <ItemConfiguracao 
+                    icon="fa-language" 
+                    label="Idioma" 
+                    onClick={() => setIsLanguageModalOpen(true)} 
+                    rightElement={
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-gray-500 uppercase">{currentLangLabel}</span>
+                            <i className="fas fa-chevron-right text-gray-600 text-xs"></i>
+                        </div>
+                    }
+                />
+            </div>
+
+            <ModalDeSelecaoDeIdioma
+                isOpen={isLanguageModalOpen}
+                onClose={() => setIsLanguageModalOpen(false)}
+                currentLanguage={currentLangId}
+                onSelect={handleLanguageSelect}
             />
-            <ItemConfiguracao 
-                icon="fa-wallet" 
-                label="Resgatar Saldo (Financeiro)" 
-                onClick={() => navigate('/financial')} 
-            />
-        </div>
+        </>
     );
 };
