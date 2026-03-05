@@ -9,28 +9,17 @@ const NewBadge = () => (
     </span>
 );
 
-interface SessaoMonetizacaoEEscalaProps {
+interface SessaoConfiguracoesDeModeracaoProps {
     navigate: (path: string) => void;
     id: string;
     group: Group;
     isOwner: boolean;
 }
 
-export const SessaoMonetizacaoEEscala: React.FC<SessaoMonetizacaoEEscalaProps> = ({ navigate, id, group, isOwner }) => {
+export const SessaoConfiguracoesDeModeracao: React.FC<SessaoConfiguracoesDeModeracaoProps> = ({ navigate, id, group, isOwner }) => {
     return (
         <div className="settings-group">
-            <h2>Monetização e Escala</h2>
-            <ItemConfiguracao
-                icon="fa-cash-register"
-                label="Configurações de Checkout"
-                onClick={() => navigate(`/group-settings/${id}/checkout-config`)}
-                rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
-            />
-            <ItemConfiguracao
-                icon="fa-chart-pie"
-                label="Faturamento Detalhado"
-                onClick={() => navigate(`/group-revenue/${id}`)}
-            />
+            <h2>Configurações de moderação</h2>
             <ItemConfiguracao
                 icon="fa-calendar-check"
                 label="Mensagens Agendadas"

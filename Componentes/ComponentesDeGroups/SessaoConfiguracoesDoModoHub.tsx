@@ -9,26 +9,16 @@ const ActiveBadge = () => (
     </div>
 );
 
-interface SessaoEstruturaEIdentidadeProps {
+interface SessaoConfiguracoesDoModoHubProps {
     navigate: (path: string) => void;
     id: string;
     isSalesPlatformEnabled: boolean;
 }
 
-export const SessaoEstruturaEIdentidade: React.FC<SessaoEstruturaEIdentidadeProps> = ({ navigate, id, isSalesPlatformEnabled }) => {
+export const SessaoConfiguracoesDoModoHub: React.FC<SessaoConfiguracoesDoModoHubProps> = ({ navigate, id, isSalesPlatformEnabled }) => {
     return (
         <div className="settings-group">
-            <h2>Estrutura e Identidade</h2>
-            <ItemConfiguracao
-                icon="fa-circle-info"
-                label="Informações Principais"
-                onClick={() => navigate(`/group-settings/${id}/info`)}
-            />
-            <ItemConfiguracao
-                icon="fa-chart-simple"
-                label="Estatísticas de Capacidade"
-                onClick={() => navigate(`/group-settings/${id}/stats`)}
-            />
+            <h2>Configurações do Modo Hub</h2>
             <ItemConfiguracao
                 icon="fa-cubes-stacked"
                 label="Modo Hub (Conteúdo e Chat)"

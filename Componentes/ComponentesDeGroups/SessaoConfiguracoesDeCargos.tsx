@@ -8,15 +8,15 @@ const NewBadge = () => (
     </span>
 );
 
-interface SessaoSegurancaEModeracaoProps {
+interface SessaoConfiguracoesDeCargosProps {
     navigate: (path: string) => void;
     id: string;
 }
 
-export const SessaoSegurancaEModeracao: React.FC<SessaoSegurancaEModeracaoProps> = ({ navigate, id }) => {
+export const SessaoConfiguracoesDeCargos: React.FC<SessaoConfiguracoesDeCargosProps> = ({ navigate, id }) => {
     return (
         <div className="settings-group">
-            <h2>Segurança e Moderação</h2>
+            <h2>Configurações de Cargos</h2>
             <ItemConfiguracao
                 icon="fa-id-card-clip"
                 label="Gestão de Cargos"

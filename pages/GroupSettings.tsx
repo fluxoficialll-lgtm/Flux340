@@ -2,10 +2,15 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
-import { SessaoEstruturaEIdentidade } from '../Componentes/ComponentesDeGroups/SessaoEstruturaEIdentidade';
-import { SessaoSegurancaEModeracao } from '../Componentes/ComponentesDeGroups/SessaoSegurancaEModeracao';
-import { SessaoMonetizacaoEEscala } from '../Componentes/ComponentesDeGroups/SessaoMonetizacaoEEscala';
+import { SessaoConfiguracoesDeInformacoesDoGrupo } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeInformacoesDoGrupo';
+import { SessaoConfiguracoesDeCargos } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeCargos';
+import { SessaoConfiguracoesDeModeracao } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeModeracao';
 import { SessaoZonaCritica } from '../Componentes/ComponentesDeGroups/SessaoZonaCritica';
+import { SessaoConfiguracoesFinanceiras } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesFinanceiras';
+import { SessaoConfiguracoesDeNotificacaoDoGrupo } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeNotificacaoDoGrupo';
+import { SessaoConfiguracoesDeMarketing } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeMarketing';
+import { SessaoConfiguracoesDeAuditoria } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeAuditoria';
+import { SessaoConfiguracoesDoModoHub } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDoModoHub';
 
 export const GroupSettings: React.FC = () => {
     const navigate = useNavigate();
@@ -40,9 +45,14 @@ export const GroupSettings: React.FC = () => {
             </header>
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <SessaoEstruturaEIdentidade navigate={navigate} id={id} isSalesPlatformEnabled={group.isSalesPlatformEnabled} />
-                <SessaoSegurancaEModeracao navigate={navigate} id={id} />
-                <SessaoMonetizacaoEEscala navigate={navigate} id={id} group={group} isOwner={isOwner} />
+                <SessaoConfiguracoesDeInformacoesDoGrupo navigate={navigate} id={id} isSalesPlatformEnabled={group.isSalesPlatformEnabled} />
+                <SessaoConfiguracoesDeCargos navigate={navigate} id={id} />
+                <SessaoConfiguracoesDeModeracao navigate={navigate} id={id} group={group} isOwner={isOwner} />
+                <SessaoConfiguracoesFinanceiras navigate={navigate} id={id} />
+                <SessaoConfiguracoesDeNotificacaoDoGrupo navigate={navigate} id={id} />
+                <SessaoConfiguracoesDeMarketing navigate={navigate} id={id} />
+                <SessaoConfiguracoesDeAuditoria navigate={navigate} id={id} />
+                <SessaoConfiguracoesDoModoHub navigate={navigate} id={id} isSalesPlatformEnabled={group.isSalesPlatformEnabled} />
                 <SessaoZonaCritica handleLeaveDelete={() => {}} isOwner={isOwner} />
 
                 <div className="text-center mt-8 opacity-20 text-[9px] uppercase font-black tracking-[3px]">
