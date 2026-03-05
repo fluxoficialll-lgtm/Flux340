@@ -19,7 +19,7 @@ interface SessaoConfiguracoesDeModeracaoProps {
 export const SessaoConfiguracoesDeModeracao: React.FC<SessaoConfiguracoesDeModeracaoProps> = ({ navigate, id, group, isOwner }) => {
     return (
         <div className="settings-group">
-            <h2>Configurações de moderação</h2>
+            <h2>Moderação</h2>
             <ItemConfiguracao
                 icon="fa-key"
                 label="Acesso e Convites"
@@ -28,14 +28,14 @@ export const SessaoConfiguracoesDeModeracao: React.FC<SessaoConfiguracoesDeModer
             />
             <ItemConfiguracao
                 icon="fa-shield-halved"
-                label="Moderação do Grupo"
-                onClick={() => navigate(`/group-settings/${id}/moderation`)}
+                label="Ações administrativas"
+                onClick={() => navigate(`/group-settings/${id}/admin-actions`)} // Updated path
                 rightElement={<div className="flex items-center"><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
             <ItemConfiguracao
                 icon="fa-book"
                 label="Diretrizes do grupo"
-                onClick={() => {}}
+                onClick={() => navigate(`/group-settings/${id}/guidelines`)}
                 rightElement={<div className="flex items-center"><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
             <ItemConfiguracao

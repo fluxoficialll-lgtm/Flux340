@@ -10,7 +10,7 @@ import { InfoproductPreviewModal } from '../../Componentes/ComponentesDeGroups/C
 import { AddFileSophisticatedButton } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/AddFileSophisticatedButton';
 import { UploadProgressCard } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
 
-export const SalesFolderContentPage: React.FC = () => {
+export const PGGrupoConteudoPastaVendas: React.FC = () => {
     const {
         loading,
         folder,

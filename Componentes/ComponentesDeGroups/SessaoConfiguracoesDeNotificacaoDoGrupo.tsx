@@ -14,7 +14,7 @@ export const SessaoConfiguracoesDeNotificacaoDoGrupo: React.FC<SessaoConfiguraco
             <ItemConfiguracao
                 icon="fa-bell"
                 label="Notificações Gerais"
-                onClick={() => {}}
+                onClick={() => navigate(`/group-settings/${id}/general-notifications`)}
             />
         </div>
     );

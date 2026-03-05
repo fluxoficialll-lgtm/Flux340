@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { SessaoConfiguracoesDeInformacoesDoGrupo } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeInformacoesDoGrupo';
@@ -16,6 +16,12 @@ export const GroupSettings: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { group, loading, isOwner } = useGroupSettings();
+    const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(group?.isSalesPlatformEnabled || false);
+
+    const handleToggleSalesPlatform = () => {
+        // Aqui você faria a chamada de API para atualizar o status do Modo Hub
+        setIsSalesPlatformEnabled(previousState => !previousState);
+    };
 
     if (loading || !group || !id) {
         return (
@@ -45,14 +51,14 @@ export const GroupSettings: React.FC = () => {
             </header>
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <SessaoConfiguracoesDeInformacoesDoGrupo navigate={navigate} id={id} isSalesPlatformEnabled={group.isSalesPlatformEnabled} />
+                <SessaoConfiguracoesDeInformacoesDoGrupo navigate={navigate} id={id} isSalesPlatformEnabled={isSalesPlatformEnabled} />
                 <SessaoConfiguracoesDeCargos navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeModeracao navigate={navigate} id={id} group={group} isOwner={isOwner} />
                 <SessaoConfiguracoesFinanceiras navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeNotificacaoDoGrupo navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeMarketing navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeAuditoria navigate={navigate} id={id} />
-                <SessaoConfiguracoesDoModoHub navigate={navigate} id={id} isSalesPlatformEnabled={group.isSalesPlatformEnabled} />
+                <SessaoConfiguracoesDoModoHub id={id} isSalesPlatformEnabled={isSalesPlatformEnabled} onToggleSalesPlatform={handleToggleSalesPlatform} />
                 <SessaoZonaCritica handleLeaveDelete={() => {}} isOwner={isOwner} />
 
                 <div className="text-center mt-8 opacity-20 text-[9px] uppercase font-black tracking-[3px]">

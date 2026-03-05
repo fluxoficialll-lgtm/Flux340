@@ -26,12 +26,12 @@ export const SessaoConfiguracoesDeCargos: React.FC<SessaoConfiguracoesDeCargosPr
             <ItemConfiguracao
                 icon="fa-users"
                 label="Distribuição de Cargos"
-                onClick={() => navigate(`/group-settings/${id}/members`)}
+                onClick={() => navigate(`/group-settings/${id}/role-distribution`)} // Updated path
             />
             <ItemConfiguracao
                 icon="fa-wrench"
                 label="Manutenção de Cargos"
-                onClick={() => navigate(`/group-settings/${id}/maintenance`)}
+                onClick={() => navigate(`/group-settings/${id}/role-maintenance`)}
             />
         </div>
     );

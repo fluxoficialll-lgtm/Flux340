@@ -7,7 +7,7 @@ import { LoadingScreen } from '../../Componentes/ComponenteDeInterfaceDeUsuario/
 import { SalesPlatformEmptyState } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/SalesPlatformEmptyState';
 import { SalesPlatformSection } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/SalesPlatformSection';
 
-export const GroupSalesPlatformView: React.FC = () => {
+export const PGPlataformaHospedagemArquivos: React.FC = () => {
     const {
         group,
         canManage,

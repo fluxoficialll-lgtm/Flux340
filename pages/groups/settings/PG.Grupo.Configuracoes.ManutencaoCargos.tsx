@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
-import { CabecalhoConfiguracaoCargos } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Cargos';
+import { CabecalhoConfiguracaoManutencaoCargos } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Manutencao.Cargos';
 
 // Mock data for roles - replace with actual data from your backend
 const mockRoles = [
@@ -11,7 +11,7 @@ const mockRoles = [
     { id: '3', name: 'Member', color: '#0000ff' },
 ];
 
-export const PGGrupoConfiguracoesCargos: React.FC = () => {
+export const PGGrupoConfiguracoesManutencaoCargos: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { group, loading } = useGroupSettings();
@@ -52,7 +52,7 @@ export const PGGrupoConfiguracoesCargos: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
-            <CabecalhoConfiguracaoCargos titulo="Criação de Cargos" onBack={() => navigate(-1)} />
+            <CabecalhoConfiguracaoManutencaoCargos titulo="Manutenção de Cargos" onBack={() => navigate(-1)} />
 
             <main className="pt-[85px] pb-[120px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
                 <div className="space-y-4">
