@@ -2,80 +2,81 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
-import { Group, User, GroupLink, VipMediaItem } from '../types';
+import { Group, SalesSection } from '../types';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 
 export const useGroupSettings = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { showConfirm, showAlert } = useModal();
+    const { showAlert } = useModal();
     
     const [group, setGroup] = useState<Group | null>(null);
     const [loading, setLoading] = useState(true);
-    const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
     const [isOwner, setIsOwner] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
 
-    // ... (estados do formulário)
+    // Estados do formulário
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
-    const [coverImage, setCoverImage] = useState<string | undefined>(undefined);
-    const [approveMembers, setApproveMembers] = useState(false);
-    const [pendingRequests, setPendingRequests] = useState<User[]>([]);
-    const [links, setLinks] = useState<GroupLink[]>([]);
-    const [onlyAdminsPost, setOnlyAdminsPost] = useState(false);
-    const [msgSlowMode, setMsgSlowMode] = useState(false);
-    const [msgSlowModeInterval, setMsgSlowModeInterval] = useState('30');
-    const [joinSlowMode, setJoinSlowMode] = useState(false);
-    const [joinSlowModeInterval, setJoinSlowModeInterval] = useState('60');
-    const [memberLimit, setMemberLimit] = useState<number | ''>('');
-    const [forbiddenWords, setForbiddenWords] = useState<string[]>([]);
-    const [members, setMembers] = useState<{ id: string, name: string, role: string, isMe: boolean, avatar?: string }[]>([]);
-    const [vipPrice, setVipPrice] = useState('');
-    const [vipCurrency, setVipCurrency] = useState<'BRL' | 'USD'>('BRL');
-    const [vipDoorText, setVipDoorText] = useState('');
-    const [vipButtonText, setVipButtonText] = useState('');
-    const [vipMediaItems, setVipMediaItems] = useState<VipMediaItem[]>([]);
-    const [pixelId, setPixelId] = useState('');
-    const [pixelToken, setPixelToken] = useState('');
     const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(false);
-    const [salesFoldersCount, setSalesFoldersCount] = useState(0);
+    const [salesPlatformSections, setSalesPlatformSections] = useState<SalesSection[]>([]);
 
     useEffect(() => {
-        console.error("groupService not available. Group settings will not be loaded.");
-        // CORREÇÃO: Utiliza a função correta para obter o ID do usuário.
-        const currentUserId = authService.getCurrentUser()?.id;
-        const email = authService.getCurrentUserEmail();
-        setCurrentUserEmail(email);
-        setLoading(false);
-    }, [id]);
+        if (!id) {
+            setLoading(false);
+            navigate('/groups');
+            return;
+        }
+
+        const fetchGroupData = async () => {
+            try {
+                setLoading(true);
+
+                // A CORREÇÃO REAL E DEFINITIVA:
+                // Substitui a chamada quebrada "servicoDeSimulacao.get" por um "fetch" padrão,
+                // que é interceptado corretamente pelo sistema de simulação.
+                const response = await fetch(`/api/groups/${id}`);
+                if (!response.ok) {
+                    throw new Error('A resposta da rede não foi OK');
+                }
+                const groupData: Group = await response.json();
+
+                setGroup(groupData);
+
+                const currentUser = authService.getCurrentUser();
+                const owner = groupData.ownerId === currentUser?.id;
+                setIsOwner(owner);
+
+                // Populando o estado do formulário com os dados do fetch
+                setGroupName(groupData.name || '');
+                setDescription(groupData.description || '');
+                setIsSalesPlatformEnabled(groupData.isSalesPlatformEnabled || false);
+                setSalesPlatformSections(groupData.salesPlatformSections || []);
+
+            } catch (error) {
+                console.error("Erro definitivo ao carregar os detalhes do grupo:", error);
+                showAlert('Erro de Simulação', 'Não foi possível carregar as configurações do grupo.');
+                navigate('/groups');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGroupData();
+    }, [id, navigate, showAlert]);
 
     const handleSave = async () => {
-        console.error("groupService not available. Cannot save group settings.");
-        await showAlert('Funcionalidade Desativada', 'A edição de grupos não está disponível no momento.');
-    };
-
-    const handleLeaveDelete = async (type: 'leave' | 'delete') => {
-        console.error("groupService not available. Cannot leave or delete group.");
-        const action = type === 'leave' ? 'Sair do' : 'Excluir o';
-        await showAlert('Funcionalidade Desativada', `${action} grupo não está disponível no momento.`);
+        console.log('Salvando configurações (simulado)...');
+        await showAlert('Simulação', 'As configurações foram salvas com sucesso (simulado).');
     };
 
     return {
-        id, group, loading, isOwner, isAdmin, handleSave, handleLeaveDelete,
+        id, group, loading, isOwner,
+        handleSave,
         form: {
-            groupName, setGroupName, description, setDescription, coverImage, setCoverImage,
-            approveMembers, setApproveMembers, pendingRequests, setPendingRequests,
-            links, setLinks, onlyAdminsPost, setOnlyAdminsPost,
-            msgSlowMode, setMsgSlowMode, msgSlowModeInterval, setMsgSlowModeInterval,
-            joinSlowMode, setJoinSlowMode, joinSlowModeInterval, setJoinSlowModeInterval,
-            memberLimit, setMemberLimit, forbiddenWords, setForbiddenWords,
-            members, setMembers, vipPrice, setVipPrice, vipCurrency, setVipCurrency,
-            vipDoorText, setVipDoorText, vipButtonText, setVipButtonText,
-            vipMediaItems, setVipMediaItems, pixelId, setPixelId, pixelToken, setPixelToken,
+            groupName, setGroupName,
+            description, setDescription,
             isSalesPlatformEnabled, setIsSalesPlatformEnabled,
-            salesFoldersCount, setSalesFoldersCount
+            salesPlatformSections, setSalesPlatformSections
         }
     };
 };

@@ -1,16 +1,15 @@
-// --- SIMULAÇÃO DO SERVIÇO DE DETALHES DE GRUPOS ---
+// --- SIMULAÇÃO ESPECÍFICA PARA O MODO HUB ---
 
 // --- DADOS SIMULADOS ---
-const mockGroupDetails: { [key: string]: any } = {
+const mockHubGroupDetails: { [key: string]: any } = {
     'my-group-1': {
         id: 'my-group-1',
-        name: 'Meu Grupo de Testes',
-        description: 'Este é um grupo que eu possuo para testar funcionalidades.',
+        name: 'Meu Grupo de Testes (Modo Hub)',
+        description: 'Este é um grupo com o Modo Hub ativado para testes.',
         memberCount: 10,
         avatar: 'https://i.pravatar.cc/150?u=my-group-1',
         isPrivate: false,
-        ownerId: 'user-123',
-        creatorEmail: 'qualquer@email.com',
+        ownerId: 'user-123', // ID de usuário estático para a simulação
         isOwner: true,
         isSalesPlatformEnabled: true,
         salesPlatformSections: [
@@ -40,27 +39,25 @@ const mockGroupDetails: { [key: string]: any } = {
     },
     'my-group-2': {
         id: 'my-group-2',
-        name: 'Grupo VIP Secreto',
-        description: 'Um grupo VIP super exclusivo que eu administro.',
+        name: 'Grupo VIP Secreto (Modo Hub)',
+        description: 'Um grupo VIP com modo hub desativado.',
         memberCount: 5,
         avatar: 'https://i.pravatar.cc/150?u=my-group-2',
         isPrivate: true,
         ownerId: 'user-123',
-        creatorEmail: 'qualquer@email.com',
         isOwner: true,
         isSalesPlatformEnabled: false,
         salesPlatformSections: []
     },
-    'my-group-3': {
+     'my-group-3': {
         id: 'my-group-3',
-        name: 'Grupo VIP Exclusivo',
+        name: 'Grupo VIP Exclusivo (Modo Hub)',
         description: 'Acesso exclusivo para membros VIP.',
         memberCount: 25,
         avatar: 'https://i.pravatar.cc/150?u=my-group-3',
         isPrivate: true,
         isVip: true,
         ownerId: 'user-123',
-        creatorEmail: 'qualquer@email.com',
         isOwner: true,
         isSalesPlatformEnabled: true,
         salesPlatformSections: [
@@ -78,72 +75,28 @@ const mockGroupDetails: { [key: string]: any } = {
     },
 };
 
-const mockGroupStructure: { [key: string]: any } = {
-    'my-group-1': {
-        isSalesPlatformEnabled: true,
-        structure: {
-            folders: [
-                { id: 'folder-1', name: 'Recursos Introdutórios', fileCount: 5 },
-                { id: 'folder-2', name: 'Materiais Avançados', fileCount: 8 },
-                { id: 'folder-3', name: 'Sessões Ao Vivo', fileCount: 2 },
-            ]
-        }
-    },
-    'my-group-2': {
-        isSalesPlatformEnabled: false,
-        structure: { folders: [] }
-    },
-    'my-group-3': {
-        isSalesPlatformEnabled: true,
-        structure: {
-            folders: [
-                { id: 'folder-vip-1', name: 'Boas-vindas VIP', fileCount: 1 },
-                { id: 'folder-vip-2', name: 'Conteúdo Exclusivo', fileCount: 12 },
-            ]
-        }
-    }
-};
-
-// --- HANDLERS ---
-const handleGetGroupDetails = async (url: URL, config?: RequestInit): Promise<Response> => {
+// --- HANDLER PARA DETALHES DO GRUPO (MODO HUB) ---
+const handleGetGroupDetailsForHub = async (url: URL, config?: RequestInit): Promise<Response> => {
     const groupId = url.pathname.split('/').pop() || '';
-    const group = mockGroupDetails[groupId];
+    const group = mockHubGroupDetails[groupId];
 
-    console.log(`[SIMULAÇÃO] ✅ Buscando detalhes para o grupo: ${groupId}`);
+    console.log(`[SIMULAÇÃO MODO HUB] ✅ Buscando detalhes para o grupo: ${groupId}`);
 
     if (group) {
-        await new Promise(res => setTimeout(res, 400));
+        await new Promise(res => setTimeout(res, 250)); // Simula latência de rede
         return new Response(JSON.stringify(group), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });
     } else {
-        return new Response(JSON.stringify({ message: 'Grupo não encontrado' }), {
+        return new Response(JSON.stringify({ message: 'Grupo não encontrado na simulação do Modo Hub' }), {
             status: 404,
             headers: { 'Content-Type': 'application/json' },
         });
     }
 };
 
-const handleGetGroupStructure = async (url: URL, config?: RequestInit): Promise<Response> => {
-    const groupIdMatch = url.pathname.match(/groups\/([\w-]+)\/structure/);
-    const groupId = groupIdMatch ? groupIdMatch[1] : '';
-    const structure = mockGroupStructure[groupId];
-    
-    console.log(`[SIMULAÇÃO] ✅ Buscando estrutura para o grupo: ${groupId}`);
-
-    const responseData = structure || { isSalesPlatformEnabled: false, structure: { folders: [] } };
-    
-    await new Promise(res => setTimeout(res, 350));
-    return new Response(JSON.stringify(responseData), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-    });
-};
-
-// --- EXPORT --
-export const groupDetailsHandlers = {
-    '/api/groups/:id': handleGetGroupDetails,
-    '/api/groups/mine/:id': handleGetGroupDetails,
-    '/api/groups/:id/structure': handleGetGroupStructure,
+// --- EXPORT DOS HANDLERS DO MODO HUB ---
+export const modoHubHandlers = {
+    '/api/groups/:id': handleGetGroupDetailsForHub,
 };
