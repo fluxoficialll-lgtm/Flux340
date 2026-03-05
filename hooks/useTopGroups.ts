@@ -1,58 +1,30 @@
 
-import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { Group } from '../types';
-import { useGroupRanking } from './useGroupRanking';
+import { useQuery } from '@tanstack/react-query';
+import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
+import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
 export const useTopGroups = () => {
-  const navigate = useNavigate();
-  const currentUserId = authService.getCurrentUserId();
-  
-  // O hook useGroupRanking já lida com a busca de dados e o estado de loading
-  const { groups, loading, activeTab } = useGroupRanking();
+  // CORREÇÃO: O método correto é `getCurrentUser`, que retorna um objeto.
+  // O ID do usuário é então acessado a partir desse objeto.
+  const userId = authService.getCurrentUser()?.id;
 
-  const handleTabChange = (newTab: 'public' | 'private' | 'vip') => {
-      // A lógica de navegação para mudar a aba é parte da UI desta página
-      if (newTab !== activeTab) {
-          navigate(`/top-groups/${newTab}`);
-      }
-  };
-
-  const handleGroupAction = (group: Group) => {
-      if (!currentUserId) {
-          // Idealmente, isso seria tratado por um modal de alerta global
-          alert('Você precisa estar logado para interagir com os grupos.');
-          return;
-      }
-      
-      const isMember = group.memberIds?.includes(currentUserId);
-      
-      if (isMember) {
-          navigate(`/group-chat/${group.id}`);
-      } else {
-          if (group.isVip) {
-              navigate(`/vip-group-sales/${group.id}`);
-          } else {
-              navigate(`/group-landing/${group.id}`);
-          }
-      }
-  };
-
-  const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-        navigate(-1);
-    } else {
-        navigate('/groups'); // Fallback para a página principal de grupos
+  const fetchTopGroups = async () => {
+    if (!userId) {
+      return [];
     }
+    const groups = await groupSystem.getTopGroups(userId);
+    return groups;
   };
+
+  const { data: groups, isLoading, error } = useQuery({
+    queryKey: ['topGroups', userId],
+    queryFn: fetchTopGroups,
+    enabled: !!userId, // A query só será executada se o userId existir.
+  });
 
   return {
-    groups,
-    loading,
-    activeTab,
-    currentUserId,
-    handleTabChange,
-    handleGroupAction,
-    handleBack
+    groups: groups || [],
+    isLoading,
+    error,
   };
 };

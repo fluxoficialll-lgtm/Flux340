@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// CORREÇÃO: A importação do groupService foi removida.
-// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 import { Group, User, GroupLink, VipMediaItem } from '../types';
@@ -19,7 +17,7 @@ export const useGroupSettings = () => {
     const [isOwner, setIsOwner] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
 
-    // ... (estados do formulário permanecem os mesmos)
+    // ... (estados do formulário)
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
     const [coverImage, setCoverImage] = useState<string | undefined>(undefined);
@@ -45,22 +43,20 @@ export const useGroupSettings = () => {
     const [salesFoldersCount, setSalesFoldersCount] = useState(0);
 
     useEffect(() => {
-        // CORREÇÃO: Lógica de busca de grupo removida.
         console.error("groupService not available. Group settings will not be loaded.");
-        const currentUserId = authService.getCurrentUserId();
+        // CORREÇÃO: Utiliza a função correta para obter o ID do usuário.
+        const currentUserId = authService.getCurrentUser()?.id;
         const email = authService.getCurrentUserEmail();
         setCurrentUserEmail(email);
         setLoading(false);
     }, [id]);
 
     const handleSave = async () => {
-        // CORREÇÃO: Lógica de salvar removida.
         console.error("groupService not available. Cannot save group settings.");
         await showAlert('Funcionalidade Desativada', 'A edição de grupos não está disponível no momento.');
     };
 
     const handleLeaveDelete = async (type: 'leave' | 'delete') => {
-        // CORREÇÃO: Lógica de sair/deletar removida.
         console.error("groupService not available. Cannot leave or delete group.");
         const action = type === 'leave' ? 'Sair do' : 'Excluir o';
         await showAlert('Funcionalidade Desativada', `${action} grupo não está disponível no momento.`);
