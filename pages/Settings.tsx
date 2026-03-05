@@ -63,12 +63,13 @@ export const Settings: React.FC = () => {
       </header>
 
       <main className="no-scrollbar">
-        <SessaoConta />
+        <SessaoConta 
+            isPrivate={isPrivate}
+            onTogglePrivacy={handleTogglePrivacy}
+        />
         <SessaoFinanceiro />
         <SessaoNotificacoes />
         <SessaoSegurancaEPrivacidade 
-            isPrivate={isPrivate}
-            onTogglePrivacy={handleTogglePrivacy}
             isAdultContent={isAdultContent}
             onToggleAdult={toggleAdultContent}
         />

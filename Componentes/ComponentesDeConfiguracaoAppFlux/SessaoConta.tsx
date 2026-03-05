@@ -6,12 +6,16 @@ import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/au
 import { ModalDeSelecaoDeIdioma, IDIOMAS } from './ModalDeSelecaoDeIdioma';
 import { preferenceService } from '../../ServiçosFrontend/ServiçoDePreferências/preferenceService.js';
 
-export const SessaoConta: React.FC = () => {
+interface SessaoContaProps {
+    isPrivate: boolean;
+    onTogglePrivacy: () => void;
+}
+
+export const SessaoConta: React.FC<SessaoContaProps> = ({ isPrivate, onTogglePrivacy }) => {
     const navigate = useNavigate();
     const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
     
     const user = authService.getCurrentUser();
-    // State to hold the current language, so the UI can update without a page reload
     const [currentLangId, setCurrentLangId] = useState(user?.language || localStorage.getItem('app_language') || 'pt');
 
     const currentLangLabel = IDIOMAS.find(l => l.id === currentLangId)?.label || 'Português';
@@ -19,10 +23,17 @@ export const SessaoConta: React.FC = () => {
     const handleLanguageSelect = async (langId: string) => {
         if (user?.email) {
             await preferenceService.updateLanguage(user.email, langId);
-            setCurrentLangId(langId); // Update local state to reflect the change immediately
+            setCurrentLangId(langId);
         }
-        setIsLanguageModalOpen(false); // Close the modal after selection
+        setIsLanguageModalOpen(false);
     };
+
+    const renderSwitch = (checked: boolean, onChange: () => void) => (
+        <label className="switch" onClick={(e) => e.stopPropagation()}>
+            <input type="checkbox" checked={checked} onChange={onChange} />
+            <span className="slider"></span>
+        </label>
+    );
 
     return (
         <>
@@ -32,6 +43,12 @@ export const SessaoConta: React.FC = () => {
                     icon="fa-user-edit" 
                     label="Editar Perfil" 
                     onClick={() => navigate('/edit-profile')} 
+                />
+                <ItemConfiguracao 
+                    icon="fa-lock" 
+                    label="Conta Privada" 
+                    onClick={onTogglePrivacy}
+                    rightElement={renderSwitch(isPrivate, onTogglePrivacy)}
                 />
                 <ItemConfiguracao 
                     icon="fa-language" 

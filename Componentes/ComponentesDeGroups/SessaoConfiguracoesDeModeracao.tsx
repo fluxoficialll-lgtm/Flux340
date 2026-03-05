@@ -21,9 +21,28 @@ export const SessaoConfiguracoesDeModeracao: React.FC<SessaoConfiguracoesDeModer
         <div className="settings-group">
             <h2>Configurações de moderação</h2>
             <ItemConfiguracao
+                icon="fa-key"
+                label="Acesso e Convites"
+                onClick={() => navigate(`/group-settings/${id}/access`)}
+                rightElement={<div className="flex items-center"><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
+            />
+            <ItemConfiguracao
+                icon="fa-shield-halved"
+                label="Ações administrativas"
+                onClick={() => {}}
+                rightElement={<div className="flex items-center"><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
+            />
+            <ItemConfiguracao
+                icon="fa-book"
+                label="Diretrizes do grupo"
+                onClick={() => {}}
+                rightElement={<div className="flex items-center"><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
+            />
+            <ItemConfiguracao
                 icon="fa-calendar-check"
                 label="Mensagens Agendadas"
                 onClick={() => navigate(`/group-settings/${id}/schedule`)}
+                rightElement={<div className="flex items-center"><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
             {group.isVip && isOwner && (
                 <ItemConfiguracao

@@ -4,15 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { ItemConfiguracao } from './ItemConfiguracao';
 
 interface SessaoSegurancaEPrivacidadeProps {
-    isPrivate: boolean;
-    onTogglePrivacy: () => void;
     isAdultContent: boolean;
     onToggleAdult: () => void;
 }
 
 export const SessaoSegurancaEPrivacidade: React.FC<SessaoSegurancaEPrivacidadeProps> = ({ 
-    isPrivate, 
-    onTogglePrivacy, 
     isAdultContent, 
     onToggleAdult 
 }) => {
@@ -29,13 +25,6 @@ export const SessaoSegurancaEPrivacidade: React.FC<SessaoSegurancaEPrivacidadePr
         <div className="settings-group">
             <h2>Configurações de segurança e privacidade</h2>
             
-            <ItemConfiguracao 
-                icon="fa-lock" 
-                label="Conta Privada" 
-                onClick={onTogglePrivacy}
-                rightElement={renderSwitch(isPrivate, onTogglePrivacy)}
-            />
-
             <ItemConfiguracao 
                 icon="fa-triangle-exclamation" 
                 label="Habilitar Conteúdo +18" 

@@ -15,6 +15,12 @@ export const SessaoFinanceiro: React.FC = () => {
                 label="Resgatar Saldo (Financeiro)" 
                 onClick={() => navigate('/financial')} 
             />
+
+            <ItemConfiguracao 
+                icon="fa-building-columns"
+                label="Configurar provedor"
+                onClick={() => navigate('/provider-settings')}
+            />
         </div>
     );
 };

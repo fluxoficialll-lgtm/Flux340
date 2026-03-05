@@ -24,11 +24,6 @@ export const SessaoConfiguracoesDeCargos: React.FC<SessaoConfiguracoesDeCargosPr
                 rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
             <ItemConfiguracao
-                icon="fa-key"
-                label="Acesso e Convites"
-                onClick={() => navigate(`/group-settings/${id}/access`)}
-            />
-            <ItemConfiguracao
                 icon="fa-sliders"
                 label="Regras de Chat"
                 onClick={() => navigate(`/group-settings/${id}/moderation`)}

@@ -18,9 +18,15 @@ export const SessaoConfiguracoesDeMarketing: React.FC<SessaoConfiguracoesDeMarke
         <div className="settings-group">
             <h2>Configurações de Marketing</h2>
             <ItemConfiguracao
-                icon="fa-cash-register"
-                label="Configurações de Checkout"
+                icon="fa-store"
+                label="Editar Página de vendas"
                 onClick={() => navigate(`/group-settings/${id}/checkout-config`)}
+                rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
+            />
+            <ItemConfiguracao
+                icon="fa-rectangle-ad"
+                label="Plataformas ADS"
+                onClick={() => {}}
                 rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
         </div>
