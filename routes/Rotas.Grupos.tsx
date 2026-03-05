@@ -40,11 +40,13 @@ const GroupLimits = lazy(() => import('../pages/LimitAndControl').then(m => ({ d
 const ManageGroupLinks = lazy(() => import('../pages/ManageGroupLinks').then(m => ({ default: m.ManageGroupLinks })));
 const GroupRevenue = lazy(() => import('../pages/GroupRevenue').then(m => ({ default: m.GroupRevenue })));
 const VipSalesHistory = lazy(() => import('../pages/VipSalesHistory').then(m => ({ default: m.VipSalesHistory })));
+const PG_Chat_Grupo = lazy(() => import('../pages/PG.Chat.Grupo').then(m => ({ default: m.PG_Chat_Grupo })));
 
 export const groupRoutes = [
     { path: '/groups', element: <ProtectedRoute><Groups /></ProtectedRoute> },
     { path: '/group-chat/:id', element: <ProtectedRoute><GroupChat /></ProtectedRoute> },
     { path: '/group-chat/:id/:channelId', element: <ProtectedRoute><GroupChat /></ProtectedRoute> },
+    { path: '/pg-chat-grupo', element: <PG_Chat_Grupo /> },
     { path: '/group-landing/:id', element: <GroupLanding /> },
     { path: '/vip-group-sales/:id', element: <VipGroupSales /> },
     { path: '/create-group', element: <ProtectedRoute><CreateGroup /></ProtectedRoute> },

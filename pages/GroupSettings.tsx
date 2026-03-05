@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { SessaoConfiguracoesDeInformacoesDoGrupo } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeInformacoesDoGrupo';
@@ -16,11 +16,21 @@ export const GroupSettings: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { group, loading, isOwner } = useGroupSettings();
-    const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(group?.isSalesPlatformEnabled || false);
+    
+    // Estado centralizado para o Modo Hub
+    const [isHubModeEnabled, setIsHubModeEnabled] = useState(false);
 
-    const handleToggleSalesPlatform = () => {
-        // Aqui você faria a chamada de API para atualizar o status do Modo Hub
-        setIsSalesPlatformEnabled(previousState => !previousState);
+    useEffect(() => {
+        // Inicializa o estado com o valor do grupo quando carregado
+        if (group) {
+            setIsHubModeEnabled(group.isHubModeEnabled || false);
+        }
+    }, [group]);
+
+    const handleToggleHubMode = () => {
+        // Aqui, no futuro, você faria a chamada de API para salvar a alteração
+        setIsHubModeEnabled(previousState => !previousState);
+        console.log('Modo Hub alterado para:', !isHubModeEnabled);
     };
 
     if (loading || !group || !id) {
@@ -51,14 +61,18 @@ export const GroupSettings: React.FC = () => {
             </header>
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <SessaoConfiguracoesDeInformacoesDoGrupo navigate={navigate} id={id} isSalesPlatformEnabled={isSalesPlatformEnabled} />
+                <SessaoConfiguracoesDeInformacoesDoGrupo navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeCargos navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeModeracao navigate={navigate} id={id} group={group} isOwner={isOwner} />
                 <SessaoConfiguracoesFinanceiras navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeNotificacaoDoGrupo navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeMarketing navigate={navigate} id={id} />
                 <SessaoConfiguracoesDeAuditoria navigate={navigate} id={id} />
-                <SessaoConfiguracoesDoModoHub id={id} isSalesPlatformEnabled={isSalesPlatformEnabled} onToggleSalesPlatform={handleToggleSalesPlatform} />
+                <SessaoConfiguracoesDoModoHub 
+                    id={id} 
+                    isHubModeEnabled={isHubModeEnabled} 
+                    onToggle={handleToggleHubMode} 
+                />
                 <SessaoZonaCritica handleLeaveDelete={() => {}} isOwner={isOwner} />
 
                 <div className="text-center mt-8 opacity-20 text-[9px] uppercase font-black tracking-[3px]">

@@ -35,13 +35,13 @@ export const SessaoSegurancaEPrivacidade: React.FC<SessaoSegurancaEPrivacidadePr
             <ItemConfiguracao 
                 icon="fa-shield-alt" 
                 label="Segurança e Login" 
-                onClick={() => navigate('/security-login')} 
+                onClick={() => navigate('/pg-configuracao-seguranca-e-login')} 
             />
 
             <ItemConfiguracao 
                 icon="fa-user-slash" 
                 label="Gerenciar Bloqueios" 
-                onClick={() => navigate('/blocked-users')} 
+                onClick={() => navigate('/pg-configuracao-gestao-de-bloqueios')} 
             />
 
             <ItemConfiguracao 

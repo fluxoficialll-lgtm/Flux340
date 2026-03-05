@@ -13,7 +13,7 @@ export const CreateVipGroup: React.FC = () => {
     groupName, setGroupName,
     description, setDescription,
     coverImage,
-    vipMediaItems,
+    vipMediaItems: vipMediaItemsFromHook, // Renomeado para evitar conflito
     vipDoorText, setVipDoorText,
     vipButtonText, setVipButtonText,
     price,
@@ -50,6 +50,9 @@ export const CreateVipGroup: React.FC = () => {
     setCurrency,
     navigate
   } = useCreateVipGroup();
+
+  // Garante que vipMediaItems seja sempre um array
+  const vipMediaItems = Array.isArray(vipMediaItemsFromHook) ? vipMediaItemsFromHook : [];
 
   const getCurrencySymbol = () => {
     switch (currency) {

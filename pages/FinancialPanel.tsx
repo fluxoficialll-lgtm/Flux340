@@ -2,7 +2,6 @@
 import React from 'react';
 import { useFinancialPanel } from '../hooks/useFinancialPanel';
 import { AffiliateCard } from '../Componentes/financial/AffiliateCard';
-import { GatewayCard } from '../Componentes/financial/GatewayCard';
 import { CashFlowCard } from '../Componentes/financial/CashFlowCard';
 import { TransactionsCard } from '../Componentes/financial/TransactionsCard';
 import { CardSaldoStripe, CardSaldoPayPal, CardSaldoSyncPay } from '../Componentes/ComponentesDeProvedores/CardsSaldo';
@@ -100,10 +99,6 @@ export const FinancialPanel: React.FC = () => {
                 onOpenTracking={() => {}}
               />
             }
-            <GatewayCard 
-                activeProvider={activeProviderName}
-                onManage={() => navigate('/financial/providers')}
-            />
           </>
         )}
       </main>
