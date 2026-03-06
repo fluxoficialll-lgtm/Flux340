@@ -3,8 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Comment, ReplyingTo } from '../../../types';
 import { formatRelativeTime, trackMarketplaceCommentLike, trackMarketplaceCommentReply } from '../../../ServiçosFrontend/SistemaDeMétricas/Métricas.Comentários.Marketplace.js';
 
-// --- COMPONENTE INTERNO PARA UM ÚNICO ITEM DE COMENTÁRIO ---
-const ComentarioItem: React.FC<{
+// --- COMPONENTE DO CARD DE COMENTÁRIO (AGORA EXPORTADO) ---
+export const CardComentarioMarketplace: React.FC<{
     comment: Comment;
     onReplyClick: (commentId: string, username: string) => void;
     onLike: (id: string) => void;
@@ -112,7 +112,7 @@ const ComentarioItem: React.FC<{
                         <>
                             <div className="flex flex-col">
                                 {comment.replies.slice(0, visibleCount).map(reply => (
-                                    <ComentarioItem key={reply.id} comment={reply} onReplyClick={onReplyClick} onLike={onLike} onDelete={onDelete} onUserClick={onUserClick} currentUserId={currentUserId} depth={1} />
+                                    <CardComentarioMarketplace key={reply.id} comment={reply} onReplyClick={onReplyClick} onLike={onLike} onDelete={onDelete} onUserClick={onUserClick} currentUserId={currentUserId} depth={1} />
                                 ))}
                             </div>
                             <div className="flex items-center justify-between pr-2 mt-1">
@@ -132,7 +132,7 @@ const ComentarioItem: React.FC<{
 };
 
 
-// --- COMPONENTE PRINCIPAL EXPORTADO (O PAINEL) ---
+// --- COMPONENTE PRINCIPAL DO PAINEL ---
 interface PainelComentariosMarketplaceProps {
     isOpen: boolean;
     onClose: () => void;
@@ -181,7 +181,7 @@ export const PainelComentariosMarketplace: React.FC<PainelComentariosMarketplace
                 <div className="flex-1 overflow-y-auto p-4">
                     {comments.length > 0 ? (
                         comments.map(comment => (
-                            <ComentarioItem key={comment.id} comment={comment} onReplyClick={onReplyClick} onLike={onLike} onDelete={onDelete} onUserClick={onUserClick} currentUserId={currentUserId} />
+                            <CardComentarioMarketplace key={comment.id} comment={comment} onReplyClick={onReplyClick} onLike={onLike} onDelete={onDelete} onUserClick={onUserClick} currentUserId={currentUserId} />
                         ))
                     ) : (
                         <div className="text-center text-gray-500 pt-16">

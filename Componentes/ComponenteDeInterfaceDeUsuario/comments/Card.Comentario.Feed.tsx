@@ -5,7 +5,7 @@ import { ServiçoPublicacaoComentariosFeed } from '../../../ServiçosFrontend/Se
 import { trackFeedCommentLike, trackFeedCommentReply } from '../../../ServiçosFrontend/SistemaDeMétricas/Métricas.Comentários.Feed.js';
 
 // --- COMPONENTE INTERNO PARA UM ÚNICO ITEM DE COMENTÁRIO ---
-const ComentarioItem: React.FC<{
+export const ComentarioItem: React.FC<{ // Made exportable
     comment: Comment;
     onReplyClick: (commentId: string, username: string) => void;
     onLike: (id: string) => void;

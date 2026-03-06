@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Post } from '../../types/Post';
 import { PostHeader } from './PostHeader';
@@ -24,11 +25,13 @@ export const ContainerFeed: React.FC<Props> = React.memo(({
     
     const isOwner = post.authorId === currentUserId;
     const userHasVoted = post.poll?.options.some(o => o.voters.includes(currentUserId || ''));
+    
+    // Simplificando a verificação se o usuário curtiu o post.
+    const userHasLiked = post.likedBy?.includes(currentUserId || '') || false;
 
     const handleMediaClick = () => {
-        if (post.link) {
-            onCtaClick?.(post.link);
-        }
+        // Navega para a página de detalhes ao clicar na mídia do post
+        onCommentClick(post.id);
     };
 
     return (
@@ -40,11 +43,11 @@ export const ContainerFeed: React.FC<Props> = React.memo(({
                 onUserClick={() => onUserClick(post.author.username)} 
             />
 
-            <div className="post-content">
+            <div className="post-content" onClick={handleMediaClick}>
                 <PostText text={post.text} />
                 
                 {post.mediaUrl && (
-                    <div className={`media-container ${post.link ? 'cursor-pointer' : ''}`} onClick={handleMediaClick}>
+                    <div className="media-container cursor-pointer">
                         <LazyMedia 
                             src={post.mediaUrl}
                             alt="Post media"
@@ -64,12 +67,13 @@ export const ContainerFeed: React.FC<Props> = React.memo(({
             </div>
 
             <PostActions 
-                post={post} 
-                onLike={() => onLike(post.id)} 
-                onComment={() => onCommentClick(post.id)} 
+                likes={post.likes}
+                comments={post.commentsCount}
+                views={post.views || 0}
+                liked={userHasLiked}
+                onLike={() => onLike(post.id)}
+                onCommentClick={() => onCommentClick(post.id)}
                 onShare={() => onShare(post)}
-                onCtaClick={onCtaClick}
-                userHasLiked={post.likes > 0}
             />
         </div>
     );
