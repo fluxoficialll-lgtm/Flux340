@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService.js';
-import { Group } from '../tipos/types.Criacao.Grupo.Publico';
+import { Group } from '../tipos/types.Grupo';
 
 export const useGroups = () => {
   const navigate = useNavigate();
@@ -23,29 +23,24 @@ export const useGroups = () => {
         if (isSimulating) {
             console.log("[SIMULAÇÃO] useGroups: Buscando grupos de múltiplos endpoints.");
             
-            // Fetch public groups
             const publicGroupsPromise = fetch('/api/groups').then(res => {
                 if (!res.ok) throw new Error('Falha na simulação de grupos públicos');
                 return res.json();
             });
 
-            // Fetch user's own groups
             const myGroupsPromise = fetch('/api/groups/mine').then(res => {
                 if (!res.ok) throw new Error('Falha na simulação de grupos próprios');
                 return res.json();
             });
 
-            // Wait for both promises to resolve
             const [publicGroups, myGroups] = await Promise.all([publicGroupsPromise, myGroupsPromise]);
 
-            // Combine the arrays, ensuring no duplicates by ID
             const allGroups = [...(myGroups || []), ...(publicGroups || [])];
             const uniqueGroups = Array.from(new Map(allGroups.map(group => [group.id, group])).values());
 
             setGroups(uniqueGroups);
 
         } else {
-            // Logic for real API remains unchanged
             setGroups([]);
         }
     } catch (error) {
@@ -75,18 +70,33 @@ export const useGroups = () => {
     const isCreator = group.creatorId === currentUserId;
     const isMember = (group.memberIds || []).includes(currentUserId || '');
     
-    if (group.isSalesPlatformEnabled && (isCreator || isMember)) {
-      navigate(`/group-platform/${group.id}`);
+    // 1. PRIORIDADE MÁXIMA: Se for plataforma de vendas, vai direto para o conteúdo.
+    if (group.isSalesPlatformEnabled) {
+      navigate(`/groups/${group.id}/conteudo-pasta-vendas`);
       return;
     }
+
+    // 2. Se for modo Hub, vai para a página de vendas do Hub.
+    if (group.isHubModeEnabled) {
+      navigate(`/group/${group.id}/sales-content`);
+      return;
+    }
+
+    // 3. Se for membro ou criador, entra no chat ou nos canais.
     if (isCreator || isMember) {
       const hasMultipleChannels = group.channels && group.channels.length > 0;
       navigate(hasMultipleChannels ? `/group/${group.id}/channels` : `/group-chat/${group.id}`);
-    } else if (group.isVip) {
-      navigate(`/vip-group-sales/${group.id}`);
-    } else {
-      navigate(`/group-landing/${group.id}`);
+      return;
     }
+    
+    // 4. Se não for membro e o grupo for VIP, vai para a página de vendas VIP.
+    if (group.isVip) {
+      navigate(`/vip-group-sales/${group.id}`);
+      return;
+    }
+
+    // 5. Caso contrário (público e não-membro), vai para a landing page.
+    navigate(`/group-landing/${group.id}`);
   };
 
   const joinGroupByCode = async (inputCode: string) => {
@@ -102,7 +112,6 @@ export const useGroups = () => {
   };
 
   const getUnreadCount = (groupId: string) => {
-    // Correção: Retorna 0 em modo de simulação para evitar o erro.
     return 0;
   }
 

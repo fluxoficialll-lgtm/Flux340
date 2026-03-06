@@ -2,103 +2,78 @@
 
 // --- DADOS SIMULADOS ---
 const mockGroupDetails: { [key: string]: any } = {
-    'my-group-1': {
-        id: 'my-group-1',
-        name: 'Meu Grupo de Testes',
-        description: 'Este é um grupo que eu possuo para testar funcionalidades.',
-        memberCount: 10,
-        avatar: 'https://i.pravatar.cc/150?u=my-group-1',
+    'group-1': {
+        id: 'group-1',
+        creatorId: 'user-1',
+        name: 'Desenvolvedores Frontend BR',
+        description: 'Grupo para desenvolvedores frontend discutirem as últimas tecnologias.',
+        memberCount: 150,
+        avatar: 'https://i.pravatar.cc/150?u=frontend-devs',
         isPrivate: false,
-        ownerId: 'user-123',
-        creatorEmail: 'qualquer@email.com',
-        isOwner: true,
-        isSalesPlatformEnabled: true,
-        salesPlatformSections: [
-            {
-                id: 'sec_1',
-                name: 'Módulo Introdutório',
-                folders: [
-                    { id: 'fold_1', name: 'Boas-vindas', itemsCount: 2, allowDownload: true, allowMemberUpload: false },
-                    { id: 'fold_2', name: 'Recursos Principais', itemsCount: 5, allowDownload: true, allowMemberUpload: false },
-                ],
-                channels: [
-                    { id: 'ch_1', name: 'Canal de Discussão', type: 'text', onlyAdminsPost: false },
-                ]
-            },
-            {
-                id: 'sec_2',
-                name: 'Módulo Avançado',
-                folders: [
-                    { id: 'fold_3', name: 'Estratégias de Crescimento', itemsCount: 8, allowDownload: false, allowMemberUpload: true },
-                ],
-                channels: [
-                    { id: 'ch_2', name: 'Anúncios Importantes', type: 'text', onlyAdminsPost: true },
-                    { id: 'ch_3', name: 'Laboratório de Ideias', type: 'text', onlyAdminsPost: false },
-                ]
-            }
-        ]
-    },
-    'my-group-2': {
-        id: 'my-group-2',
-        name: 'Grupo VIP Secreto',
-        description: 'Um grupo VIP super exclusivo que eu administro.',
-        memberCount: 5,
-        avatar: 'https://i.pravatar.cc/150?u=my-group-2',
-        isPrivate: true,
-        ownerId: 'user-123',
-        creatorEmail: 'qualquer@email.com',
-        isOwner: true,
+        isHubModeEnabled: true, // Habilitado para corresponder à lista
+        isVip: false,
         isSalesPlatformEnabled: false,
+        ownerId: 'user-1',
+        creatorEmail: 'dev@email.com',
+        isOwner: true,
+        memberIds: ['user-1', 'user-2'],
+        salesPlatformSections: [] // Estrutura básica
+    },
+    'group-2': {
+        id: 'group-2',
+        creatorId: 'user-2',
+        name: 'Gamers de Plantão',
+        description: 'Comunidade para todos os tipos de gamers.',
+        memberCount: 300,
+        avatar: 'https://i.pravatar.cc/150?u=gamers',
+        isPrivate: false,
+        isHubModeEnabled: false,
+        isVip: false,
+        isSalesPlatformEnabled: true,
+        ownerId: 'user-2',
+        creatorEmail: 'gamer@email.com',
+        isOwner: false,
+        memberIds: ['user-1', 'user-2'],
         salesPlatformSections: []
     },
-    'my-group-3': {
-        id: 'my-group-3',
-        name: 'Grupo VIP Exclusivo',
-        description: 'Acesso exclusivo para membros VIP.',
-        memberCount: 25,
-        avatar: 'https://i.pravatar.cc/150?u=my-group-3',
+    'group-3': {
+        id: 'group-3',
+        creatorId: 'user-3',
+        name: 'Clube do Livro',
+        description: 'Discussões mensais sobre livros de ficção e não-ficção.',
+        memberCount: 50,
+        avatar: 'https://i.pravatar.cc/150?u=book-club',
         isPrivate: true,
+        isHubModeEnabled: false,
         isVip: true,
-        ownerId: 'user-123',
-        creatorEmail: 'qualquer@email.com',
-        isOwner: true,
-        isSalesPlatformEnabled: true,
-        salesPlatformSections: [
-            {
-                id: 'sec_vip_1',
-                name: 'Benefícios VIP',
-                folders: [
-                    { id: 'fold_vip_1', name: 'Downloads Exclusivos', itemsCount: 12, allowDownload: true, allowMemberUpload: false },
-                ],
-                channels: [
-                    { id: 'ch_vip_1', name: 'Canal VIP', type: 'text', onlyAdminsPost: true },
-                ]
-            }
-        ]
+        isSalesPlatformEnabled: false,
+        ownerId: 'user-3',
+        creatorEmail: 'books@email.com',
+        isOwner: false,
+        memberIds: ['user-3'],
+        salesPlatformSections: []
     },
 };
 
 const mockGroupStructure: { [key: string]: any } = {
-    'my-group-1': {
+    'group-1': {
         isSalesPlatformEnabled: true,
         structure: {
             folders: [
                 { id: 'folder-1', name: 'Recursos Introdutórios', fileCount: 5 },
                 { id: 'folder-2', name: 'Materiais Avançados', fileCount: 8 },
-                { id: 'folder-3', name: 'Sessões Ao Vivo', fileCount: 2 },
             ]
         }
     },
-    'my-group-2': {
+    'group-2': {
         isSalesPlatformEnabled: false,
         structure: { folders: [] }
     },
-    'my-group-3': {
+    'group-3': {
         isSalesPlatformEnabled: true,
         structure: {
             folders: [
                 { id: 'folder-vip-1', name: 'Boas-vindas VIP', fileCount: 1 },
-                { id: 'folder-vip-2', name: 'Conteúdo Exclusivo', fileCount: 12 },
             ]
         }
     }
@@ -118,6 +93,7 @@ const handleGetGroupDetails = async (url: URL, config?: RequestInit): Promise<Re
             headers: { 'Content-Type': 'application/json' },
         });
     } else {
+        console.error(`[SIMULAÇÃO] ❌ Grupo não encontrado para o ID: ${groupId}`);
         return new Response(JSON.stringify({ message: 'Grupo não encontrado' }), {
             status: 404,
             headers: { 'Content-Type': 'application/json' },
@@ -141,7 +117,7 @@ const handleGetGroupStructure = async (url: URL, config?: RequestInit): Promise<
     });
 };
 
-// --- EXPORT --
+// --- EXPORT ---
 export const groupDetailsHandlers = {
     '/api/groups/:id': handleGetGroupDetails,
     '/api/groups/mine/:id': handleGetGroupDetails,

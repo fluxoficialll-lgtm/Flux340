@@ -9,3 +9,4 @@ export * from './types.Autenticacao.Registro';
 export * from './types.Criacao.Grupo.Publico';
 export * from './types.Criacao.Grupo.Privado';
 export * from './types.Criacao.Reels';
+export * from './types.Grupo';

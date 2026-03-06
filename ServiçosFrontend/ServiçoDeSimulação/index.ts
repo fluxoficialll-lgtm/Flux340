@@ -15,7 +15,8 @@ import { myGroupsHandlers, myMockGroups } from './simulacoes/Simulacao.Grupo.Pro
 import { groupMembersHandlers } from './simulacoes/Simulacao.Grupo.Membros';
 import { groupChatHandlers } from './simulacoes/Simulacao.Chat.Grupo';
 import { groupDetailsHandlers } from './simulacoes/Simulacao.Grupo.Detalhes';
-import { modoHubHandlers } from './simulacoes/Simulacao.ModoHub'; // <-- ARQUIVO NOVO
+import { modoHubHandlers } from './simulacoes/Simulacao.ModoHub';
+import { groupSalesPlatformHandlers } from './simulacoes/Simulacao.Grupo.Plataforma'; // <-- ARQUIVO NOVO
 
 // Re-exporta o serviço de controle da simulação com o nome esperado.
 export { controleDeSimulacao as servicoDeSimulacao } from './ControleDeSimulacao';
@@ -28,7 +29,6 @@ const allGroupIds = [
 ];
 
 // 1. Tratamento para /api/groups/:id, PRIORIZANDO O MODO HUB
-// Usa o handler do novo arquivo de simulação do Modo Hub como a fonte da verdade.
 const groupDetailHandler = modoHubHandlers['/api/groups/:id']; 
 const staticGroupDetailsHandlers = {};
 allGroupIds.forEach(id => {
@@ -45,6 +45,14 @@ allGroupIds.forEach(id => {
     staticGroupChatHandlers[`/api/group-chat/${id}`] = groupChatDetailHandler;
 });
 
+// 3. Tratamento para /api/groups/platform/:id
+const salesPlatformHandler = groupSalesPlatformHandlers['/api/groups/platform/:id'];
+const staticSalesPlatformHandlers = {};
+allGroupIds.forEach(id => {
+    // @ts-ignore
+    staticSalesPlatformHandlers[`/api/groups/platform/${id}`] = salesPlatformHandler;
+});
+
 // --- CONSOLIDAÇÃO DE TODOS OS HANDLERS ---
 const allSimulationHandlers = {
     ...authHandlers,
@@ -59,10 +67,10 @@ const allSimulationHandlers = {
     ...groupsHandlers,
     ...myGroupsHandlers,
     ...groupMembersHandlers,
-    ...groupDetailsHandlers, // Inclui outras rotas de detalhes (ex: /structure)
+    ...groupDetailsHandlers,
     ...staticGroupChatHandlers,
-    // Sobrescreve as rotas de detalhes com as do Modo Hub, que agora são estáticas.
-    ...staticGroupDetailsHandlers, 
+    ...staticGroupDetailsHandlers,
+    ...staticSalesPlatformHandlers, // <-- NOVO HANDLER REGISTRADO
 };
 
 /**

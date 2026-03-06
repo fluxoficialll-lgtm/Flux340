@@ -68,7 +68,9 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     }
 
     const handleItemClick = () => {
-        if (group.navigateTo) {
+        if (group.isSalesPlatformEnabled) {
+            navigate(`/group-platform/${group.id}`);
+        } else if (group.navigateTo) {
             navigate(group.navigateTo);
         } else {
             onItemClick();
