@@ -1,11 +1,12 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Group, ChatMessage } from '../../../types';
 import { GroupMenuDropdown } from './GroupMenuDropdown';
 import { simulationData } from '@/ServiçosFrontend/ServiçoDeSimulação';
 
 interface GroupListItemProps {
-    group: Group;
+    group: Group & { navigateTo?: string };
     currentUserEmail: string | null;
     unreadCount: number;
     isMenuActive: boolean;
@@ -25,9 +26,9 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     onTracking,
     onDelete
 }) => {
+    const navigate = useNavigate();
     const isCreator = group.creatorEmail === currentUserEmail;
 
-    // Correção: Usa o `simulationData` importado para acessar os chats.
     const allChats = simulationData.chats;
     const groupChats = Object.values(allChats).filter(chat => {
         const chatIdStr = chat.id.toString();
@@ -66,8 +67,16 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
         displayTime = 'Novo';
     }
 
+    const handleItemClick = () => {
+        if (group.navigateTo) {
+            navigate(group.navigateTo);
+        } else {
+            onItemClick();
+        }
+    };
+
     return (
-        <div className="group-preview flex items-center p-3 border-b border-white/5 cursor-pointer transition-all relative" onClick={onItemClick}>
+        <div className="group-preview flex items-center p-3 border-b border-white/5 cursor-pointer transition-all relative" onClick={handleItemClick}>
             <div className="group-avatar w-[50px] h-[50px] rounded-full mr-4 border-2 border-[#00c2ff] bg-[#00c2ff33] flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
                 {group.coverImage ? (
                     <img src={group.coverImage} alt={group.name} className="w-full h-full object-cover" />

@@ -19,7 +19,7 @@ export const SessaoFinanceiro: React.FC = () => {
             <ItemConfiguracao 
                 icon="fa-building-columns"
                 label="Configurar provedor"
-                onClick={() => navigate('/provider-settings')}
+                onClick={() => navigate('/financial/providers')}
             />
         </div>
     );

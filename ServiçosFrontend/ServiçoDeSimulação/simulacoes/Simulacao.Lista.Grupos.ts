@@ -9,6 +9,7 @@ export const mockGroups = [
         memberCount: 150,
         avatar: 'https://i.pravatar.cc/150?u=frontend-devs',
         isPrivate: false,
+        navigateTo: '/groups/sales-platform/group-1', // Adicionado para simular navegação
     },
     {
         id: 'group-2',
@@ -17,6 +18,7 @@ export const mockGroups = [
         memberCount: 300,
         avatar: 'https://i.pravatar.cc/150?u=gamers',
         isPrivate: false,
+        navigateTo: '/groups/sales-platform/group-2', // Adicionado para simular navegação
     },
     {
         id: 'group-3',
@@ -25,6 +27,7 @@ export const mockGroups = [
         memberCount: 50,
         avatar: 'https://i.pravatar.cc/150?u=book-club',
         isPrivate: true,
+        navigateTo: '/groups/sales-platform/group-3', // Adicionado para simular navegação
     },
 ];
 
