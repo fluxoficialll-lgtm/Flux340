@@ -2,7 +2,7 @@
 import React, { useRef } from 'react';
 import { useEditGroup } from '../hooks/useEditGroup';
 import { CurrencySelectorModal } from '../Componentes/groups/CurrencySelectorModal';
-import { UploadProgressCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
+// import { UploadProgressCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
 
 export const EditGroup: React.FC = () => {
   const {
@@ -146,12 +146,12 @@ export const EditGroup: React.FC = () => {
             </button>
         </form>
 
-        <UploadProgressCard 
+        {/* <UploadProgressCard 
             progress={uploadProgress}
             current={uploadCurrent}
             total={uploadTotal}
             isVisible={isUploading}
-        />
+        /> */}
       </main>
 
       <div className={`modal-overlay ${isVipDoorModalOpen ? 'open' : ''}`} onClick={() => setIsVipDoorModalOpen(false)}>

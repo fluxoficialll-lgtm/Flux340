@@ -6,7 +6,7 @@ import { AccessTypeModal } from '../Componentes/groups/AccessTypeModal';
 import { CurrencySelectorModal } from '../Componentes/groups/CurrencySelectorModal';
 import { ModalPreviasProvedores } from '../Componentes/ComponentesDePaginasDeVendas/Modal.Previas.Provedores';
 import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
-import { UploadProgressCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
+// import { UploadProgressCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
 
 export const CreateVipGroup: React.FC = () => {
   const {
@@ -307,12 +307,12 @@ export const CreateVipGroup: React.FC = () => {
             </button>
         </form>
 
-        <UploadProgressCard 
+        {/* <UploadProgressCard 
             progress={uploadProgress}
             current={uploadCurrent}
             total={uploadTotal}
             isVisible={isUploading}
-        />
+        /> */}
       </main>
 
       <ModalPreviasProvedores 

@@ -35,20 +35,41 @@ export const useGroupPlatformData = () => {
             }
 
             setLoading(true);
-            try {
-                // Usando o endpoint de simulação para a plataforma de vendas
-                const response = await fetch(`/api/groups/platform/${id}`);
-                if (!response.ok) {
-                    throw new Error(`Falha ao buscar dados do grupo: ${response.statusText}`);
-                }
-                const data = await response.json();
-                setGroupData(data);
-            } catch (e: any) {
-                console.error("Erro ao buscar dados da plataforma do grupo:", e);
-                setError(e.message);
-            } finally {
-                setLoading(false);
-            }
+            // Mock de dados para desenvolvimento
+            const mockData: PlatformGroupContent = {
+                id: id,
+                name: "Nome do Grupo",
+                description: "Descrição do Grupo.",
+                coverImageUrl: "/path/to/default/cover.jpg",
+                createdBy: "user1",
+                createdAt: new Date(),
+                members: [],
+                tags: [],
+                sections: [
+                    {
+                        id: 'section1',
+                        title: 'Minha Seção de Exemplo',
+                        folders: [
+                            {
+                                id: 'folder1',
+                                name: 'Minha Pasta de Exemplo',
+                                channels: [
+                                    { id: 'chan1', name: 'Canal de Vídeo Exemplo', type: 'video' },
+                                    { id: 'chan2', name: 'Canal de Texto Exemplo', type: 'text' },
+                                ]
+                            },
+                            {
+                                id: 'folder2',
+                                name: 'Outra Pasta',
+                                channels: []
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            setGroupData(mockData);
+            setLoading(false);
         };
 
         fetchGroupData();
