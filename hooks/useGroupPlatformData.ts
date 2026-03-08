@@ -1,9 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Group } from '../tipos/types.Grupo'; // Reutilizando a tipagem de Grupo
+import { Group } from '../tipos/types.Grupo'; 
 
-// Definindo uma interface mais detalhada para o conteúdo da plataforma
 interface PlatformGroupContent extends Group {
     sections: Array<{
         id: string;
@@ -35,7 +34,7 @@ export const useGroupPlatformData = () => {
             }
 
             setLoading(true);
-            // Mock de dados para desenvolvimento
+            
             const mockData: PlatformGroupContent = {
                 id: id,
                 name: "Nome do Grupo",
@@ -75,5 +74,5 @@ export const useGroupPlatformData = () => {
         fetchGroupData();
     }, [id]);
 
-    return { groupData, loading, error, groupId: id };
+    return { groupData, loading, error, groupId: id, setGroupData };
 };

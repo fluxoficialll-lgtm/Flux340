@@ -22,7 +22,7 @@ const LoadingFallback = () => (
     </div>
 );
 
-const App: React.FC = () => {
+const SistemaNucleoApp: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
 
@@ -74,4 +74,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default SistemaNucleoApp;

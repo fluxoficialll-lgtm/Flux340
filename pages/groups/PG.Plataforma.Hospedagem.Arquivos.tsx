@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useGroupPlatformData } from '../../hooks/useGroupPlatformData';
 import { Footer } from '../../Componentes/layout/Footer';
-import { FaVideo, FaFileLines, FaFolder, FaArrowLeft } from 'react-icons/fa6';
+import { FaVideo, FaFileLines, FaFolder } from 'react-icons/fa6';
 import PastaCard from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Pasta';
 import BotaoAlternadorOrganizacao from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Botao.Alternador.Organizacao';
 import BotaoCriar from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Botao.Criar';
@@ -14,7 +14,7 @@ import CardSessaoTitulo from '../../Componentes/ComponentesDeGroups/Componentes/
 type TipoVisualizacao = 'lista' | 'grade';
 
 export const PGPlataformaHospedagemArquivos: React.FC = () => {
-    const { groupData, loading, error } = useGroupPlatformData();
+    const { groupData, loading, error, setGroupData } = useGroupPlatformData();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFolder, setSelectedFolder] = useState<any | null>(null);
     const [visualizacao, setVisualizacao] = useState<TipoVisualizacao>('grade');
@@ -28,19 +28,74 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
     };
 
     const handleCriarSessao = () => {
-        alert('Criar nova seção');
+        const title = prompt('Digite o nome da nova seção:');
+        if (title && groupData) {
+            const newSection = {
+                id: `section${Date.now()}`,
+                title,
+                folders: [],
+            };
+            setGroupData({
+                ...groupData,
+                sections: [...groupData.sections, newSection],
+            });
+        }
     };
 
     const handleCriarPasta = () => {
-        alert('Criar nova pasta');
+        if (!groupData || groupData.sections.length === 0) {
+            alert('Crie uma seção primeiro!');
+            return;
+        }
+
+        const sectionChoices = groupData.sections.map((s, i) => `${i + 1}: ${s.title}`).join('\n');
+        const sectionIndexStr = prompt(`Digite o número da seção para adicionar a pasta:\n${sectionChoices}`);
+        
+        if (!sectionIndexStr) return;
+
+        const sectionIndex = parseInt(sectionIndexStr, 10) - 1;
+
+        if (isNaN(sectionIndex) || sectionIndex < 0 || sectionIndex >= groupData.sections.length) {
+            alert('Seleção de seção inválida.');
+            return;
+        }
+
+        const name = prompt('Digite o nome da nova pasta:');
+        if (name) {
+            const newFolder = {
+                id: `folder${Date.now()}`,
+                name,
+                channels: [],
+            };
+
+            const updatedSections = groupData.sections.map((section, index) => {
+                if (index === sectionIndex) {
+                    return {
+                        ...section,
+                        folders: [...section.folders, newFolder],
+                    };
+                }
+                return section;
+            });
+
+            setGroupData({
+                ...groupData,
+                sections: updatedSections,
+            });
+        }
     };
 
-    const filteredSections = groupData?.sections?.map(section => {
-        const filteredFolders = section.folders.filter(folder =>
-            folder.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        return { ...section, folders: filteredFolders };
-    }).filter(section => section.folders.length > 0);
+    const allSections = groupData?.sections || [];
+    const filteredSections = !searchTerm
+        ? allSections
+        : allSections
+            .map(section => ({
+                ...section,
+                folders: section.folders.filter(folder =>
+                    folder.name.toLowerCase().includes(searchTerm.toLowerCase())
+                ),
+            }))
+            .filter(section => section.folders.length > 0);
 
     const renderChannelItem = (channel: any) => (
         <div key={channel.id} className={`bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-all duration-200 cursor-pointer flex items-center ${
@@ -57,7 +112,7 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
 
     const renderFoldersView = () => (
         <div>
-            {filteredSections?.map(section => (
+            {filteredSections.map(section => (
                 <div key={section.id} className="mb-10">
                     <CardSessaoTitulo titulo={section.title} />
                     <div className={`${visualizacao === 'grade' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : 'flex flex-col gap-2'}`}>

@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import App from './App';
+import SistemaNucleoApp from './Sistema.Nucleo.App';
 
 // I18N E VALIDAÇÃO DE AMBIENTE
 import './ServiçosFrontend/ServiçoDeSegurançaDeConteúdo/i18n.js';
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <QueryClientProvider client={queryClient}>
         <GoogleOAuthProvider clientId={googleClientId || ""}>
           <MonitorDeErrosDeInterface>
-            <App />
+            <SistemaNucleoApp />
           </MonitorDeErrosDeInterface>
         </GoogleOAuthProvider>
       </QueryClientProvider>

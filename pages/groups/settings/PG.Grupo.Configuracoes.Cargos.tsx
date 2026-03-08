@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { CabecalhoConfiguracaoCargos } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Cargos';
+import CardCargoPadrao from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/CriaçãoDeCard/Card.Cargo.Padrao';
 
 // Mock data for roles - replace with actual data from your backend
 const mockRoles = [
@@ -55,6 +56,12 @@ export const PGGrupoConfiguracoesCargos: React.FC = () => {
             <CabecalhoConfiguracaoCargos titulo="Criação de Cargos" onBack={() => navigate(-1)} />
 
             <main className="pt-[85px] pb-[120px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
+                <div className="mb-8">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Cargo Padrão de Entrada</h3>
+                    <CardCargoPadrao />
+                </div>
+
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Cargos Personalizados</h3>
                 <div className="space-y-4">
                     {roles.map(role => (
                         <div key={role.id} className="bg-black/20 border border-white/10 rounded-xl p-4 flex justify-between items-center">
