@@ -4,7 +4,6 @@ import { ProtectedRoute } from '../Componentes/ComponentesDeAuth/ProtectedRoute'
 
 const Groups = lazy(() => import('../pages/Groups').then(m => ({ default: m.Groups })));
 const GroupChat = lazy(() => import('../pages/GroupChat').then(m => ({ default: m.GroupChat })));
-const GroupLanding = lazy(() => import('../pages/GroupLanding').then(m => ({ default: m.GroupLanding })));
 const CreateGroup = lazy(() => import('../pages/CreateGroup').then(m => ({ default: m.CreateGroup })));
 const CreateVipGroup = lazy(() => import('../pages/CreateVipGroup').then(m => ({ default: m.CreateVipGroup })));
 const CreatePublicGroup = lazy(() => import('../pages/CreatePublicGroup').then(m => ({ default: m.CreatePublicGroup })));
@@ -47,7 +46,6 @@ export const groupRoutes = [
     { path: '/group-chat/:id', element: <ProtectedRoute><GroupChat /></ProtectedRoute> },
     { path: '/group-chat/:id/:channelId', element: <ProtectedRoute><GroupChat /></ProtectedRoute> },
     { path: '/pg-chat-grupo', element: <PG_Chat_Grupo /> },
-    { path: '/group-landing/:id', element: <GroupLanding /> },
     { path: '/vip-group-sales/:id', element: <VipGroupSales /> },
     { path: '/create-group', element: <ProtectedRoute><CreateGroup /></ProtectedRoute> },
     { path: '/create-group/vip', element: <ProtectedRoute><CreateVipGroup /></ProtectedRoute> },

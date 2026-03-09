@@ -10,7 +10,7 @@ import CabecalhoNavegacao from '../../Componentes/cabeçalhos/Cabecalho.Navegaca
 import CardContainerPesquisa from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Container.Pesquisa';
 import CardSessaoTitulo from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Sessao.Titulo';
 import ModalGestao from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Modal.Gestao';
-import IconeSeletor from '../../Componentes/Icones/Icone.Seletor';
+import CanalItem from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/CanalItem';
 
 type TipoVisualizacao = 'lista' | 'grade';
 
@@ -118,19 +118,6 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
             }))
             .filter(section => section.folders.length > 0);
 
-    const renderChannelItem = (channel: any) => (
-        <div key={channel.id} className={`bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-all duration-200 cursor-pointer flex items-center ${
-            visualizacao === 'lista' ? 'mb-2' : ''
-        }`}>
-            <div className="mr-4">
-                <IconeSeletor nomeArquivo={channel.name} />
-            </div>
-            <div className='flex flex-col'>
-                <span className='font-bold'>{channel.name}</span>
-            </div>
-        </div>
-    );
-
     const renderFoldersView = () => (
         <div>
             {filteredSections.map(section => (
@@ -159,7 +146,13 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
             <div className={`${visualizacao === 'grade' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'flex flex-col gap-2'}`}>
                 {selectedFolder.channels
                     .filter((channel: any) => !searchTerm || channel.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                    .map(renderChannelItem)}
+                    .map((channel: any) => (
+                        <CanalItem 
+                            key={channel.id} 
+                            channel={channel} 
+                            visualizacao={visualizacao} 
+                        />
+                    ))}
             </div>
         </div>
     );
