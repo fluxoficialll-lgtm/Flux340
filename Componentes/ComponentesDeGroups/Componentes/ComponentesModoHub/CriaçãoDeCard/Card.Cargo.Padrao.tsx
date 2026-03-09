@@ -1,41 +1,21 @@
 
 import React, { useState } from 'react';
-import { GroupRolePermissions } from '../../../../../tipos/types.Grupo';
-import { ModalPermissoes } from './Modal.Permissoes';
+import { EntidadePermissions, ModalPermissoesEntidade } from './Modal.Permissoes.Entidade'; // Importando o novo modal
 
-// Estado inicial para as permissões do cargo padrão
-const initialPermissions: GroupRolePermissions = {
-    isAdmin: false,
-    canEditGroupInfo: false,
-    canManageRoles: false,
-    canViewAuditLogs: false,
-    canViewRevenue: false,
-    canSendMessages: true,
-    canDeleteMessages: false,
-    canPinMessages: false,
-    canBypassSlowMode: false,
-    canKickMembers: false,
-    canBanMembers: false,
-    canApproveMembers: false,
-    canInviteMembers: true,
-    canManageFolders: false,
-    canManageFiles: false,
-    canPostScheduled: false,
-    canManageAds: false,
-    canToggleSlowMode: false,
-    canSetSlowModeInterval: false,
-    canCreateSubgroups: false,
-    canManagePolls: false,
-    canManageNotifications: false,
-    canMentionEveryone: false,
+// Estado inicial para as novas permissões da entidade
+const initialPermissions: EntidadePermissions = {
+    podeVer: true, // Por padrão, o cargo de entrada pode ver o conteúdo
+    podeEditar: false,
+    podeDeletar: false,
+    podeGerenciarConteudo: false,
 };
 
 // Componente Principal do Card
 const CardCargoPadrao: React.FC = () => {
-    const [permissions, setPermissions] = useState<GroupRolePermissions>(initialPermissions);
+    const [permissions, setPermissions] = useState<EntidadePermissions>(initialPermissions);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const updatePermission = (key: keyof GroupRolePermissions) => {
+    const updatePermission = (key: keyof EntidadePermissions) => {
         setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
@@ -59,13 +39,16 @@ const CardCargoPadrao: React.FC = () => {
                 </div>
             </div>
 
-            <ModalPermissoes 
+            {/* Usando o novo Modal de Permissões de Entidade */}
+            <ModalPermissoesEntidade 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 permissions={permissions}
                 onUpdatePermission={updatePermission}
+                nomeCargo="Cargo Padrão de Entrada"
+                nomeEntidade="Pasta/Seção Atual" // Este nome seria passado como prop dinamicamente
             />
-        </>
+        </> 
     );
 };
 

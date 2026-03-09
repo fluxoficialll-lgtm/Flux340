@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useGroupPlatformData } from '../../hooks/useGroupPlatformData';
 import { Footer } from '../../Componentes/layout/Footer';
-import { FaVideo, FaFileLines, FaFolder } from 'react-icons/fa6';
 import PastaCard from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Pasta';
 import BotaoAlternadorOrganizacao from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Botao.Alternador.Organizacao';
 import BotaoCriar from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Botao.Criar';
@@ -10,6 +9,8 @@ import CardGrupoInformacoes from '../../Componentes/ComponentesDeGroups/Componen
 import CabecalhoNavegacao from '../../Componentes/cabeçalhos/Cabecalho.Navegacao';
 import CardContainerPesquisa from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Container.Pesquisa';
 import CardSessaoTitulo from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Sessao.Titulo';
+import ModalGestao from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Modal.Gestao';
+import IconeSeletor from '../../Componentes/Icones/Icone.Seletor';
 
 type TipoVisualizacao = 'lista' | 'grade';
 
@@ -18,6 +19,7 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFolder, setSelectedFolder] = useState<any | null>(null);
     const [visualizacao, setVisualizacao] = useState<TipoVisualizacao>('grade');
+    const [modalOpenForFolder, setModalOpenForFolder] = useState<any | null>(null);
 
     const handleFolderClick = (folder: any) => {
         setSelectedFolder(folder);
@@ -85,6 +87,25 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
         }
     };
 
+    const handleEditFolder = () => {
+        if (modalOpenForFolder) {
+            console.log(`Editando a pasta: ${modalOpenForFolder.name}`);
+            setModalOpenForFolder(null);
+        }
+    };
+
+    const handleDeleteFolder = () => {
+        if (modalOpenForFolder) {
+            console.log(`Deletando a pasta: ${modalOpenForFolder.name}`);
+            setModalOpenForFolder(null);
+        }
+    };
+
+    const openFolderModal = (e: React.MouseEvent, folder: any) => {
+        e.stopPropagation();
+        setModalOpenForFolder(folder);
+    };
+
     const allSections = groupData?.sections || [];
     const filteredSections = !searchTerm
         ? allSections
@@ -101,9 +122,9 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
         <div key={channel.id} className={`bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-all duration-200 cursor-pointer flex items-center ${
             visualizacao === 'lista' ? 'mb-2' : ''
         }`}>
-            {channel.type === 'video' 
-                ? <FaVideo size={24} className="mr-4 text-red-500"/> 
-                : <FaFileLines size={24} className="mr-4 text-blue-500"/>}
+            <div className="mr-4">
+                <IconeSeletor nomeArquivo={channel.name} />
+            </div>
             <div className='flex flex-col'>
                 <span className='font-bold'>{channel.name}</span>
             </div>
@@ -115,21 +136,15 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
             {filteredSections.map(section => (
                 <div key={section.id} className="mb-10">
                     <CardSessaoTitulo titulo={section.title} />
-                    <div className={`${visualizacao === 'grade' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : 'flex flex-col gap-2'}`}>
-                        {section.folders.map(folder =>
-                            visualizacao === 'grade' ? (
-                                <PastaCard
-                                    key={folder.id}
-                                    nomePasta={folder.name}
-                                    onClick={() => handleFolderClick(folder)}
-                                />
-                            ) : (
-                                <div key={folder.id} onClick={() => handleFolderClick(folder)} className="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-all duration-200 cursor-pointer flex items-center">
-                                    <FaFolder size={24} className="mr-4 text-yellow-500"/>
-                                    <span className='font-bold'>{folder.name}</span>
-                                </div>
-                            )
-                        )}
+                    <div className={`${visualizacao === 'grade' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : 'flex flex-col gap-3'}`}>
+                        {section.folders.map(folder => (
+                            <PastaCard
+                                key={folder.id}
+                                nomePasta={folder.name}
+                                layout={visualizacao}
+                                onClick={() => handleFolderClick(folder)}
+                            />
+                        ))}
                     </div>
                 </div>
             ))}
@@ -181,6 +196,14 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
                 </main>
 
                 <BotaoCriar onCriarSessao={handleCriarSessao} onCriarPasta={handleCriarPasta} />
+
+                {modalOpenForFolder && (
+                    <ModalGestao 
+                        onClose={() => setModalOpenForFolder(null)}
+                        onEdit={handleEditFolder}
+                        onDelete={handleDeleteFolder}
+                    />
+                )}
             </div>
         );
     };

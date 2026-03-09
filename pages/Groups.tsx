@@ -5,7 +5,7 @@ import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSys
 import { Group } from '../types';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
-import { JoinViaLinkBtn } from '../Componentes/groups/list/JoinViaLinkBtn';
+import { CardPesquisarGrupo } from '../Componentes/groups/list/Card.Pesquisar.Grupo'; // Importando o novo componente
 import { ContêinerListaGrupos } from '../Componentes/groups/list/Contêiner.Lista.Grupos';
 import { CreateGroupFAB } from '../Componentes/groups/list/CreateGroupFAB';
 
@@ -13,7 +13,7 @@ const TrackingModal = lazy(() => import('../Componentes/groups/TrackingModal').t
 
 export const Groups: React.FC = () => {
   const { groups, loading, observerRef, currentUserEmail, navigate, navigateToGroup, joinGroupByCode, deleteGroup, getUnreadCount } = useGroups();
-  const { showAlert, showConfirm, showPrompt } = useModal();
+  const { showAlert, showConfirm } = useModal();
 
   const [uiVisible, setUiVisible] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
@@ -37,12 +37,15 @@ export const Groups: React.FC = () => {
     };
   }, []);
 
-  const handleJoinByLink = async () => {
-    const code = await showPrompt("Entrar via Link", "Cole o código do grupo:", "Ex: AF72B");
-    if (code) {
-      const result = joinGroupByCode(code);
-      if (result) showAlert(result.success ? "Sucesso!" : "Ops!", result.message);
-    }
+  // A função de pesquisa que será passada para o card
+  const handleSearch = (query: string) => {
+      // Por enquanto, vamos apenas navegar para uma página de resultados
+      // A lógica real de busca seria implementada aqui ou na página de destino
+      if (query.trim()) {
+          navigate(`/groups/search?q=${encodeURIComponent(query)}`);
+      } else {
+          showAlert("Busca", "Por favor, digite algo para pesquisar.");
+      }
   };
 
   const handleDeleteRequest = async (groupId: string, e: React.MouseEvent) => {
@@ -69,9 +72,11 @@ export const Groups: React.FC = () => {
       />
 
       <main className="flex-grow pt-[100px] pb-[100px] px-4">
-        <JoinViaLinkBtn onClick={handleJoinByLink} />
+        {/* Substituindo o botão de link pelo novo card de pesquisa */}
+        <CardPesquisarGrupo onSearch={handleSearch} />
 
         <div className="w-full">
+          <h2 className="text-xl font-bold text-white mb-4">Meus Grupos</h2>
           {groups.map(group => (
             <ContêinerListaGrupos 
               key={group.id}

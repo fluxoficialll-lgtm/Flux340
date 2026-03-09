@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMessages } from '../hooks/useMessages';
 import { MessagesMenuModal } from '../Componentes/ComponentesDeChats/MessagesMenuModal';
@@ -7,6 +7,7 @@ import { MainHeader } from '../Componentes/layout/MainHeader';
 import { MessageListItem } from '../Componentes/ComponentesDeChats/MessageListItem';
 import { MessagesEmptyState } from '../Componentes/ComponentesDeChats/MessagesEmptyState';
 import { MessagesFooter } from '../Componentes/ComponentesDeChats/MessagesFooter';
+import { CardPesquisarConversas } from '../Componentes/ComponentesDeChats/Card.Pesquisar.Conversas'; // 1. Importado
 
 export const Messages: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +27,14 @@ export const Messages: React.FC = () => {
     handleClearSelected,
     closeMenuAndEnterSelection
   } = useMessages();
+
+  // 2. Estado para a busca
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // 3. Filtragem dos contatos
+  const filteredContacts = contacts.filter(contact => 
+    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="h-[100dvh] bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
@@ -48,15 +57,19 @@ export const Messages: React.FC = () => {
             )}
         />
 
-        <main className="flex-grow pt-[80px] pb-[100px] overflow-y-auto no-scrollbar">
+        <main className="flex-grow pt-[80px] pb-[100px] flex flex-col overflow-y-auto no-scrollbar">
+            {/* 4. Barra de pesquisa renderizada */}
+            <CardPesquisarConversas onSearch={setSearchQuery} />
+
             {isSelectionMode && (
               <div className="w-full text-center py-2 bg-[#0f2b38] font-bold text-xs sticky top-0 z-10">
                 {selectedIds.length} selecionada(s)
               </div>
             )}
             
-            <div className="w-full">
-                {contacts.length > 0 ? contacts.map(contact => (
+            <div className="w-full flex-grow">
+                {/* 5. Lista renderiza contatos filtrados */}
+                {filteredContacts.length > 0 ? filteredContacts.map(contact => (
                     <MessageListItem 
                       key={contact.id}
                       contact={contact}
@@ -66,13 +79,13 @@ export const Messages: React.FC = () => {
                       onAvatarClick={(e) => handleProfileNavigate(e, contact.handle)}
                     />
                 )) : (
-                    <MessagesEmptyState />
+                    <MessagesEmptyState searchTerm={searchQuery} /> // Passa o termo para o empty state
                 )}
             </div>
         </main>
 
         <MessagesFooter 
-          uiVisible={true} // Simplified, can be managed by hook if needed
+          uiVisible={true}
           unreadMsgs={unreadMsgs}
           unreadNotifs={unreadNotifs}
         />
