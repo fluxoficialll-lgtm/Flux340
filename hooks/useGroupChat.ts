@@ -14,7 +14,6 @@ export const useGroupChat = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [groupInfo, setGroupInfo] = useState<Group | null>(null);
-    const [channelName, setChannelName] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [isBlocked, setIsBlocked] = useState(false);
     const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -22,7 +21,6 @@ export const useGroupChat = () => {
     const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
     useEffect(() => {
-        // Pega o e-mail do usuário logado assim que o hook é montado
         setCurrentUserEmail(authService.getCurrentUserEmail()?.toLowerCase() || null);
     }, []);
 
@@ -30,19 +28,14 @@ export const useGroupChat = () => {
         setLoading(true);
         setError(null);
         try {
-            // CORREÇÃO: Chama a função que busca TODOS os dados do chat (grupo, canal, mensagens)
             const data = await groupSystem.getGroupChatData(groupId);
-            
-            // A simulação agora retorna { group, channelName, messages }
             setGroupInfo(data.group);
-            setChannelName(data.channelName);
-            setMessages(data.messages || []); // Garante que messages seja sempre um array
-
+            setMessages(data.messages || []);
         } catch (err) {
             console.error("[useGroupChat] Falha ao carregar dados do chat:", err);
             setError("Não foi possível carregar as informações do grupo. Tente novamente mais tarde.");
             setGroupInfo(null);
-            setMessages([]); // Garante que messages seja um array em caso de erro
+            setMessages([]);
         } finally {
             setLoading(false);
         }
@@ -56,11 +49,10 @@ export const useGroupChat = () => {
 
     const handleSendMessage = (text: string, media?: any) => {
         console.log("Enviando mensagem:", { text, media });
-        // Lógica de envio de mensagem (simulada)
         const newMessage: Message = {
             id: `msg-${Date.now()}`,
             senderEmail: currentUserEmail || 'unknown@user.com',
-            senderName: 'Eu', // O nome real viria do perfil
+            senderName: 'Eu',
             senderAvatar: 'https://i.pravatar.cc/150?u=me',
             text,
             timestamp: Date.now(),
@@ -88,9 +80,8 @@ export const useGroupChat = () => {
         setSelectedIds([]);
     };
 
-
     return {
-        loading, error, group: groupInfo, channelName, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
+        loading, error, group: groupInfo, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
         handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate
     };
 };

@@ -3,17 +3,15 @@ import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { MemberMetrics } from '../../../Componentes/ComponentesDeGroups/logic/MemberMetrics';
-import { GroupRole } from '../../../tipos/index';
-
-interface Member {
-    id: string;
-    role: string;
-    roleId?: string;
-}
 
 export const PGGrupoConfiguracoesEstatisticas: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { group, loading } = useGroupSettings();
+
+    const metrics = useMemo(() => {
+        if (!group) return null;
+        return MemberMetrics.process(group.members, group.roles);
+    }, [group]);
 
     if (loading || !group || !id) {
         return (
@@ -22,11 +20,17 @@ export const PGGrupoConfiguracoesEstatisticas: React.FC = () => {
             </div>
         );
     }
-
-    const { members, roles, memberLimit } = group;
-
-    const metrics = useMemo(() => MemberMetrics.process(members, roles), [members, roles]);
     
+    if (!metrics) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
+                <p>Não foi possível processar as métricas do grupo.</p>
+            </div>
+        );
+    }
+
+    const { members = [], memberLimit } = group;
+
     const hasGlobalLimit = typeof memberLimit === 'number' && memberLimit > 0;
     const totalMembers = members.length;
     const occupancyPercentage = hasGlobalLimit ? (totalMembers / (memberLimit as number)) * 100 : 0;

@@ -1,15 +1,12 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// CORREÇÃO: A importação do groupService foi removida.
-// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
+import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-// --- Importando o novo serviço de transações ---
 import { ServicoDeTransacoes } from '../ServiçosFrontend/ServiçoDeTransacoes/ServiçoDeTransacoes.js';
 import { currencyService } from '../ServiçosFrontend/ServiçoDeMoeda/currencyService.js';
 import { Group, CurrencyCode } from '../types';
 
-// ... (interfaces UnifiedMetric e RevenueStats permanecem as mesmas)
 interface UnifiedMetric {
     provider: string;
     method: string;
@@ -41,19 +38,22 @@ export const useGroupRevenue = () => {
     const [conversionRate, setConversionRate] = useState(1);
 
     const loadData = useCallback(async () => {
+        setLoading(true);
         const user = authService.getCurrentUser();
         if (!user || !id) {
             setLoading(false);
             return;
         }
 
-        // CORREÇÃO: Lógica de busca de grupo removida.
-        // const foundGroup = groupService.getGroupById(id);
-        // if (foundGroup) setGroup(foundGroup);
-
         try {
-            // --- Utilizando o novo serviço de transações ---
-            // Ele buscará transações de todos os provedores para o grupo especificado.
+            const foundGroup = await groupSystem.getGroupDetails(id);
+            if (foundGroup) {
+                setGroup(foundGroup);
+            } else {
+                setLoading(false);
+                return;
+            }
+
             const groupTransactions = await ServicoDeTransacoes.obterTransacoes(id);
 
             const now = Date.now();
@@ -69,15 +69,12 @@ export const useGroupRevenue = () => {
             };
 
             groupTransactions.forEach(t => {
-                // Normaliza o campo de valor da transação
                 const amount = parseFloat(t.amount || t.valor || '0');
-                // Normaliza o campo de data da transação
                 const ts = new Date(t.created_at || t.createdAt || t.date_created || 0).getTime();
                 
-                // Filtra apenas transações pagas/completas
                 const isPaid = ['paid', 'completed', 'approved', 'settled'].includes((t.status || '').toLowerCase());
                 if (!isPaid) {
-                    result.totalSales -= 1; // Ajusta o total de vendas se a transação não for contada
+                    result.totalSales -= 1;
                     return;
                 }
 
@@ -91,7 +88,6 @@ export const useGroupRevenue = () => {
                 if (ts >= now - (90 * oneDay)) result.d90 += amount;
                 if (ts >= now - (180 * oneDay)) result.d180 += amount;
                 
-                // Normaliza os campos para as métricas unificadas
                 const prov = (t.provider || t.provedor || 'desconhecido').toLowerCase();
                 const meth = (t.method || t.metodo || 'não informado').split(' ')[0];
                 const country = (t.country || t.pais || 'BR').toUpperCase();
@@ -123,15 +119,18 @@ export const useGroupRevenue = () => {
 
     useEffect(() => { loadData(); }, [loadData]);
 
-    // Lógica de conversão de moeda (permanece a mesma)
     useEffect(() => {
         const updateRate = async () => {
             if (selectedCurrency === 'BRL') { setConversionRate(1); return; }
             setIsConverting(true);
             try {
+                // Esta função pode não existir, dependendo da implementação do currencyService
                 const rate = await currencyService.getRate('BRL', selectedCurrency);
                 setConversionRate(rate);
-            } catch (e) { console.error("Erro na conversão", e); }
+            } catch (e) { 
+                console.error("Erro na conversão", e); 
+                setConversionRate(1); // Fallback para taxa 1 em caso de erro
+            }
             finally { setIsConverting(false); }
         };
         updateRate();

@@ -11,7 +11,7 @@ import { ModalGradeDeAcoes } from '../Componentes/ComponentesDeChats/ModalGradeD
 
 export const GroupChat: React.FC = () => {
   const {
-    loading, group, channelName, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
+    loading, group, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
     handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate
   } = useGroupChat();
 
@@ -22,15 +22,12 @@ export const GroupChat: React.FC = () => {
     if (selectedIds.length === 0) return;
     const target = await showOptions("Excluir Mensagem", [
         { label: 'Excluir para mim', value: 'me', icon: 'fa-solid fa-user' },
-        // No futuro, podemos adicionar lógica para permitir "Excluir para todos" apenas para admins do grupo
-        // { label: 'Excluir para todos', value: 'all', icon: 'fa-solid fa-users', isDestructive: true }
     ]);
     if (target) {
         deleteSelectedMessages(target as 'me' | 'all');
     }
   };
 
-  // TODOs para futuras implementações
   const handleEdit = () => console.log('Editar', selectedIds);
   const handlePin = () => console.log('Fixar', selectedIds);
   const handleCopy = () => console.log('Copiar', selectedIds);
@@ -42,7 +39,7 @@ export const GroupChat: React.FC = () => {
       return (
           <div className="flex flex-col items-center justify-center h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white">
               <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff] mb-2"></i>
-              <p className="text-xs uppercase font-bold tracking-widest">Carregando canal...</p>
+              <p className="text-xs uppercase font-bold tracking-widest">Carregando chat...</p>
           </div>
       );
   }
@@ -51,15 +48,15 @@ export const GroupChat: React.FC = () => {
     <div className="messages-page h-[100dvh] flex flex-col overflow-hidden bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white">
       <ChatHeader
         title={group?.name || 'Comunidade'}
-        subtitle={`# ${channelName}`}
+        subtitle={group?.memberIds ? `${group.memberIds.length} membros` : ''}
         avatar={group?.avatarUrl}
-        onBack={() => navigate(`/groups/${group?.id}`)}
-        onInfoClick={() => navigate(`/group-settings/${group?.id}`)} // CORREÇÃO APLICADA AQUI
+        onBack={() => navigate(`/groups`)}
+        onInfoClick={() => navigate(`/group-settings/${group?.id}`)}
         isSelectionMode={isSelectionMode}
         selectedCount={selectedIds.length}
         onCancelSelection={() => { setIsSelectionMode(false); setSelectedIds([]); }}
         onDeleteSelection={handleDeleteRequest}
-        isSearchOpen={false} // TODO: Implementar busca
+        isSearchOpen={false}
         onToggleSearch={() => {}}
         searchTerm={null}
         onSearchChange={() => {}}
@@ -86,7 +83,7 @@ export const GroupChat: React.FC = () => {
                       key={msg.id}
                       msg={msg}
                       isMe={msg.senderEmail?.toLowerCase() === currentUserEmail}
-                      isGroup={true} // Indica que é um chat de grupo para mostrar nome/avatar do remetente
+                      isGroup={true}
                       isSelectionMode={isSelectionMode}
                       isSelected={selectedIds.includes(msg.id)}
                       onSelect={handleToggleSelection}
@@ -112,10 +109,10 @@ export const GroupChat: React.FC = () => {
         isOpen={isMenuModalOpen}
         onClose={() => setIsMenuModalOpen(false)}
         isBlocked={isBlocked}
-        onSearch={() => {}} // TODO
+        onSearch={() => {}}
         onSelect={() => setIsSelectionMode(true)}
-        onBlock={() => {}} // TODO: Lógica de bloquear/mutar grupo?
-        onClear={() => {}} // TODO: Lógica de limpar chat
+        onBlock={() => {}}
+        onClear={() => {}}
       />
 
       {zoomedMedia && (

@@ -5,7 +5,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // Importa os arrays de rotas dos módulos
 import { authRoutes } from './Rotas.Autenticacao';
 import { feedRoutes } from './Rotas.Feed';
+import { reelRoutes } from './Rotas.Reels';
 import { groupRoutes } from './Rotas.Grupos';
+import { groupSettingsRoutes } from './Rotas.Grupos.Configuracoes';
 import { marketplaceRoutes } from './Rotas.Marketplace';
 import { profileRoutes } from './Rotas.Perfil';
 import { settingsRoutes } from './Rotas.Configuracoes';
@@ -17,7 +19,9 @@ import { miscRoutes } from './Rotas.Diversos';
 const allRoutes = [
   ...authRoutes,
   ...feedRoutes,
+  ...reelRoutes,
   ...groupRoutes,
+  ...groupSettingsRoutes,
   ...marketplaceRoutes,
   ...profileRoutes,
   ...settingsRoutes,

@@ -2,6 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
+import CardGeracaoLinks from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Geracao.Links';
 
 export const PGGrupoConfiguracoesAcessoEConvites: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -26,7 +27,7 @@ export const PGGrupoConfiguracoesAcessoEConvites: React.FC = () => {
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
                 <div className="space-y-8">
-                   {/* Conteúdo da página de configurações de acesso e convites */}
+                    <CardGeracaoLinks />
                 </div>
             </main>
         </div>

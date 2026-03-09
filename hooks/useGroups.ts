@@ -70,22 +70,21 @@ export const useGroups = () => {
     const isCreator = group.creatorId === currentUserId;
     const isMember = (group.memberIds || []).includes(currentUserId || '');
     
-    // 1. PRIORIDADE MÁXIMA: Se for plataforma de vendas, vai direto para o conteúdo.
+    // 1. PRIORIDADE MÁXIMA: Se for plataforma de vendas, vai direto para o conteúdo da pasta principal.
     if (group.isSalesPlatformEnabled) {
-      navigate(`/groups/${group.id}/conteudo-pasta-vendas`);
+      navigate(`/group-folder/${group.id}/main`);
       return;
     }
 
     // 2. Se for modo Hub, vai para a página de vendas do Hub.
     if (group.isHubModeEnabled) {
-      navigate(`/group/${group.id}/sales-content`);
+      navigate(`/group-sales-content/${group.id}`);
       return;
     }
 
-    // 3. Se for membro ou criador, entra no chat ou nos canais.
+    // 3. Se for membro ou criador, entra no chat do grupo.
     if (isCreator || isMember) {
-      const hasMultipleChannels = group.channels && group.channels.length > 0;
-      navigate(hasMultipleChannels ? `/group/${group.id}/channels` : `/group-chat/${group.id}`);
+      navigate(`/group-chat/${group.id}`);
       return;
     }
     
@@ -95,8 +94,8 @@ export const useGroups = () => {
       return;
     }
 
-    // 5. Caso contrário (público e não-membro), vai para a landing page.
-    navigate(`/group-landing/${group.id}`);
+    // 5. Caso contrário (público e não-membro), vai para a landing page do grupo.
+    navigate(`/group-info-page/${group.id}`);
   };
 
   const joinGroupByCode = async (inputCode: string) => {
@@ -106,7 +105,7 @@ export const useGroups = () => {
   const deleteGroup = async (groupId: string) => {
     try {
         setGroups(prev => prev.filter(g => g.id !== groupId));
-    } catch (error) {
+    } catch (error) { 
       console.error(`Falha ao deletar o grupo ${groupId}:`, error);
     }
   };

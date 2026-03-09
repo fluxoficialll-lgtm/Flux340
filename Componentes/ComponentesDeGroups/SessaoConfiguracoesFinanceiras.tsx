@@ -14,7 +14,7 @@ export const SessaoConfiguracoesFinanceiras: React.FC<SessaoConfiguracoesFinance
             <ItemConfiguracao
                 icon="fa-chart-pie"
                 label="Faturamento Detalhado"
-                onClick={() => navigate(`/group-revenue/${id}`)}
+                onClick={() => navigate(`/group/${id}/revenue`)}
             />
         </div>
     );
