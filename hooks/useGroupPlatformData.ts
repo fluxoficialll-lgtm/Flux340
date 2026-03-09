@@ -30,15 +30,20 @@ export const useGroupPlatformData = () => {
                                     channels: [
                                         { id: 'canal01', name: 'Canal de Vídeo Exemplo' },
                                         { id: 'canal02', name: 'Canal de Texto Exemplo' },
-                                        { id: 'canal03', name: 'Canal de Imagens Diversas' }, // Adicionado para exibir o terceiro ícone
+                                        { id: 'canal03', name: 'Canal de Imagens Diversas' },
+                                        { id: 'canal07', name: 'Podcast sobre Novidades (MP3)' }, // Áudio
+                                        { id: 'canal08', name: 'Manual de Uso (PDF)' }, // Documento
                                     ]
                                 },
                                 {
                                     id: 'pasta02',
                                     name: 'Relatórios Mensais',
                                     channels: [
-                                        { id: 'canal03', name: 'Relatório de Vendas (MP4)' },
-                                        { id: 'canal04', name: 'Feedback de Clientes (TXT)' },
+                                        { id: 'canal04', name: 'Relatório de Vendas (MP4)' },
+                                        { id: 'canal05', name: 'Feedback de Clientes (TXT)' },
+                                        { id: 'canal06', name: 'Gráficos de Performance (JPG)' },
+                                        { id: 'canal09', name: 'Gravação da Reunião (MP3)' }, // Áudio
+                                        { id: 'canal10', name: 'Termos de Serviço (DOC)' }, // Documento
                                     ]
                                 },
                             ]
