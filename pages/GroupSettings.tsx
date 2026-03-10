@@ -11,26 +11,44 @@ import { SessaoConfiguracoesDeNotificacaoDoGrupo } from '../Componentes/Componen
 import { SessaoConfiguracoesDeMarketing } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeMarketing';
 import { SessaoConfiguracoesDeAuditoria } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeAuditoria';
 import { SessaoConfiguracoesDoModoHub } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDoModoHub';
+import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
 
 export const GroupSettings: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { group, loading, isOwner } = useGroupSettings();
+    const { group, loading, isOwner, refreshGroup } = useGroupSettings();
     
-    // Estado centralizado para o Modo Hub
-    const [isHubModeEnabled, setIsHubModeEnabled] = useState(false);
+    const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(false);
 
     useEffect(() => {
-        // Inicializa o estado com o valor do grupo quando carregado
         if (group) {
-            setIsHubModeEnabled(group.isHubModeEnabled || false);
+            setIsSalesPlatformEnabled(group.isSalesPlatformEnabled || false);
         }
     }, [group]);
 
-    const handleToggleHubMode = () => {
-        // Aqui, no futuro, você faria a chamada de API para salvar a alteração
-        setIsHubModeEnabled(previousState => !previousState);
-        console.log('Modo Hub alterado para:', !isHubModeEnabled);
+    const handleToggleSalesPlatform = async () => {
+        if (!id) return;
+
+        const originalState = isSalesPlatformEnabled;
+        const newState = !isSalesPlatformEnabled;
+
+        // Atualização Otimista da UI
+        setIsSalesPlatformEnabled(newState);
+
+        try {
+            // Chamada ao serviço para persistir a alteração
+            await groupSystem.updateGroupSettings(id, { isSalesPlatformEnabled: newState });
+            // Opcional: forçar a atualização dos dados do grupo para garantir consistência
+            if (refreshGroup) {
+                refreshGroup();
+            }
+        } catch (error) {
+            console.error("Falha ao atualizar o Modo Hub:", error);
+            // Reverte o estado da UI em caso de erro
+            setIsSalesPlatformEnabled(originalState);
+            // Opcional: Mostrar uma notificação de erro ao utilizador
+            alert("Não foi possível salvar a sua alteração. Tente novamente.");
+        }
     };
 
     if (loading || !group || !id) {
@@ -70,8 +88,8 @@ export const GroupSettings: React.FC = () => {
                 <SessaoConfiguracoesDeAuditoria navigate={navigate} id={id} />
                 <SessaoConfiguracoesDoModoHub 
                     id={id} 
-                    isHubModeEnabled={isHubModeEnabled} 
-                    onToggle={handleToggleHubMode} 
+                    isSalesPlatformEnabled={isSalesPlatformEnabled} 
+                    onToggleSalesPlatform={handleToggleSalesPlatform} 
                 />
                 <SessaoZonaCritica handleLeaveDelete={() => {}} isOwner={isOwner} />
 

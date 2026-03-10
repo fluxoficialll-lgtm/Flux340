@@ -21,8 +21,9 @@ const PGGrupoConfiguracoesPlataformasADS = lazy(() => import('../pages/groups/se
 const PGGrupoConfiguracoesCargos = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Cargos').then(m => ({ default: m.PGGrupoConfiguracoesCargos })));
 const PGGrupoConfiguracoesDiretrizes = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Diretrizes').then(m => ({ default: m.PGGrupoConfiguracoesDiretrizes })));
 const PGGrupoConfiguracoesDistribuiçaoDeCargos = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.DistribuiçaoDeCargos').then(m => ({ default: m.PGGrupoConfiguracoesDistribuiçaoDeCargos })));
-const PGGrupoConfiguracoesCheckout = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Checkout').then(m => ({ default: m.PGGrupoConfiguracoesCheckout })));
 const PGGrupoConfiguracoesNotificacoesGerais = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.NotificacoesGerais').then(m => ({ default: m.PGGrupoConfiguracoesNotificacoesGerais })));
+const PGEditarPaginasVendas = lazy(() => import('../pages/groups/settings/PG.Editar.Paginas.Vendas').then(m => ({ default: m.PGEditarPaginasVendas })));
+
 
 export const groupSettingsRoutes = [
     { path: '/group-settings/:id', element: <ProtectedRoute><GroupSettings /></ProtectedRoute> },
@@ -44,6 +45,6 @@ export const groupSettingsRoutes = [
     { path: '/group-settings/:id/schedule', element: <ProtectedRoute><PGGrupoConfiguracoesMensagensAgendadas /></ProtectedRoute> },
     { path: '/group-settings/:id/sales-platform', element: <ProtectedRoute><PGGrupoConfiguracoesPlataformaVendas /></ProtectedRoute> },
     { path: '/group-settings/:id/ads-platforms', element: <ProtectedRoute><PGGrupoConfiguracoesPlataformasADS /></ProtectedRoute> },
-    { path: '/group-settings/:id/checkout-config', element: <ProtectedRoute><PGGrupoConfiguracoesCheckout /></ProtectedRoute> },
+    { path: '/group-settings/:id/edit-sales-page', element: <ProtectedRoute><PGEditarPaginasVendas /></ProtectedRoute> },
     { path: '/group-settings/:id/general-notifications', element: <ProtectedRoute><PGGrupoConfiguracoesNotificacoesGerais /></ProtectedRoute> },
 ];

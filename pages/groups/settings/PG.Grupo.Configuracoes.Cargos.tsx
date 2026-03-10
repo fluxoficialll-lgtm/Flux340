@@ -1,26 +1,45 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
 import { CabecalhoConfiguracaoCargos } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Cargos';
 import CardCargoPadrao from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/CriaçãoDeCard/Card.Cargo.Padrao';
+import { CardCargoPersonalizado } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoes/Card.Cargo.Personalizados';
+import { GroupRole, GroupRolePermissions } from '../../../tipos/types.Grupo';
 
-// Mock data for roles - replace with actual data from your backend
-const mockRoles = [
-    { id: '1', name: 'Admin', color: '#ff0000' },
-    { id: '2', name: 'Moderator', color: '#00ff00' },
-    { id: '3', name: 'Member', color: '#0000ff' },
+// Permissões iniciais para novos cargos ou como base
+const initialPermissions: GroupRolePermissions = {
+    isAdmin: false, canEditGroupInfo: false, canManageRoles: false, canViewAuditLogs: false, canViewRevenue: false,
+    canSendMessages: true, canDeleteMessages: false, canPinMessages: false, canBypassSlowMode: false, canKickMembers: false,
+    canBanMembers: false, canApproveMembers: false, canInviteMembers: true, canManageFolders: false, canManageFiles: false,
+    canPostScheduled: false, canManageAds: false, canToggleSlowMode: false, canSetSlowModeInterval: false, 
+    canCreateSubgroups: false, canManagePolls: false, canManageNotifications: false, canMentionEveryone: false,
+};
+
+// Mock data atualizada para o tipo GroupRole
+const mockRoles: GroupRole[] = [
+    {
+        id: 'custom1',
+        name: '💎 VIP Member',
+        color: '#be185d',
+        priority: 10,
+        permissions: { ...initialPermissions, canViewRevenue: true, canBypassSlowMode: true }
+    },
+    {
+        id: 'custom2',
+        name: 'Estrategista',
+        color: '#0e7490',
+        priority: 20,
+        permissions: { ...initialPermissions, canManagePolls: true, canPinMessages: true }
+    },
 ];
 
 export const PGGrupoConfiguracoesCargos: React.FC = () => {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-    const { group, loading } = useGroupSettings();
-    const [roles, setRoles] = useState(mockRoles);
+    const [roles, setRoles] = useState<GroupRole[]>(mockRoles);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRole, setSelectedRole] = useState<{ id: string; name: string; color: string } | null>(null);
+    const [selectedRole, setSelectedRole] = useState<GroupRole | null>(null);
 
-    const handleOpenModal = (role: { id: string; name: string; color: string } | null) => {
+    const handleOpenModal = (role: GroupRole | null) => {
         setSelectedRole(role);
         setIsModalOpen(true);
     };
@@ -30,11 +49,18 @@ export const PGGrupoConfiguracoesCargos: React.FC = () => {
         setSelectedRole(null);
     };
 
-    const handleSaveRole = (role: { id: string; name: string; color: string }) => {
+    const handleSaveRole = (roleData: { name: string; color: string }) => {
         if (selectedRole) {
-            setRoles(roles.map(r => (r.id === role.id ? role : r)));
+            setRoles(roles.map(r => (r.id === selectedRole.id ? { ...r, ...roleData } : r)));
         } else {
-            setRoles([...roles, { ...role, id: `${roles.length + 1}` }]);
+            const newRole: GroupRole = {
+                id: `custom_${Date.now()}`,
+                name: roleData.name,
+                color: roleData.color,
+                priority: 1,
+                permissions: initialPermissions,
+            };
+            setRoles([...roles, newRole]);
         }
         handleCloseModal();
     };
@@ -43,42 +69,36 @@ export const PGGrupoConfiguracoesCargos: React.FC = () => {
         setRoles(roles.filter(r => r.id !== roleId));
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
-                <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
-            <CabecalhoConfiguracaoCargos titulo="Criação de Cargos" onBack={() => navigate(-1)} />
+            <CabecalhoConfiguracaoCargos titulo="Cargos do Grupo" onBack={() => navigate(-1)} />
 
             <main className="pt-[85px] pb-[120px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <div className="mb-8">
+                <div className="mb-10">
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Cargo Padrão de Entrada</h3>
                     <CardCargoPadrao />
                 </div>
 
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Cargos Personalizados</h3>
-                <div className="space-y-4">
-                    {roles.map(role => (
-                        <div key={role.id} className="bg-black/20 border border-white/10 rounded-xl p-4 flex justify-between items-center">
-                            <div className="flex items-center">
-                                <div className="w-4 h-4 rounded-full mr-4" style={{ backgroundColor: role.color }}></div>
-                                <span className="font-semibold">{role.name}</span>
+                <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Cargos Personalizados</h3>
+                    <div className="space-y-3">
+                        {roles.length > 0 ? (
+                            roles.map(role => (
+                                <CardCargoPersonalizado
+                                    key={role.id}
+                                    role={role}
+                                    onEdit={handleOpenModal}
+                                    onDelete={handleDeleteRole}
+                                />
+                            ))
+                        ) : (
+                            <div className="bg-black/20 border border-dashed border-white/10 rounded-2xl p-8 text-center text-gray-500">
+                                <i className="fa-solid fa-shield-halved text-3xl mb-3"></i>
+                                <p className="font-bold">Nenhum cargo personalizado.</p>
+                                <p className="text-sm mt-1">Crie cargos para organizar seus membros. <br/> Clique no botão abaixo para começar.</p>
                             </div>
-                            <div className="flex items-center space-x-4">
-                                <button onClick={() => handleOpenModal(role)} className="text-gray-400 hover:text-white">
-                                    <i className="fa-solid fa-pen"></i>
-                                </button>
-                                <button onClick={() => handleDeleteRole(role.id)} className="text-gray-400 hover:text-red-500">
-                                    <i className="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        )}
+                    </div>
                 </div>
             </main>
 
@@ -88,48 +108,48 @@ export const PGGrupoConfiguracoesCargos: React.FC = () => {
                         onClick={() => handleOpenModal(null)}
                         className="w-full bg-[#00c2ff] text-black font-bold py-3.5 px-4 rounded-xl hover:bg-white transition-all duration-300 shadow-[0_4px_20px_rgba(0,194,255,0.4)]"
                     >
+                        <i className="fa-solid fa-plus mr-2"></i>
                         Adicionar Novo Cargo
                     </button>
                 </div>
             </footer>
 
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-[#1a1f29] rounded-2xl p-6 w-full max-w-sm m-4">
-                        <h2 className="text-xl font-bold mb-4">{selectedRole ? 'Editar Cargo' : 'Adicionar Cargo'}</h2>
-                        {/* Add your form here */}
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#1a1f29] border border-white/10 rounded-2xl p-6 w-full max-w-sm">
+                        <h2 className="text-xl font-bold mb-6">{selectedRole ? 'Editar Cargo' : 'Adicionar Novo Cargo'}</h2>
                         <form onSubmit={e => {
                             e.preventDefault();
                             const form = e.target as HTMLFormElement;
                             const name = (form.elements.namedItem('name') as HTMLInputElement).value;
                             const color = (form.elements.namedItem('color') as HTMLInputElement).value;
-                            handleSaveRole({ id: selectedRole?.id || '', name, color });
+                            handleSaveRole({ name, color });
                         }}>
                             <div className="mb-4">
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-2">Nome do Cargo</label>
+                                <label htmlFor="role-name" className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Nome do Cargo</label>
                                 <input
                                     type="text"
-                                    id="name"
+                                    id="role-name"
                                     name="name"
                                     defaultValue={selectedRole?.name}
-                                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00c2ff] transition-all"
+                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00c2ff] transition-all"
                                     required
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label htmlFor="color" className="block text-sm font-medium text-gray-400 mb-2">Cor do Cargo</label>
+                            <div className="mb-8">
+                                <label htmlFor="role-color" className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Cor do Cargo</label>
                                 <input
                                     type="color"
-                                    id="color"
+                                    id="role-color"
                                     name="color"
-                                    defaultValue={selectedRole?.color}
-                                    className="w-full h-12 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00c2ff] transition-all"
+                                    defaultValue={selectedRole?.color || '#ffffff'}
+                                    className="w-full h-12 bg-black/20 border-none rounded-lg cursor-pointer"
                                     required
                                 />
                             </div>
-                            <div className="flex justify-end space-x-4">
-                                <button type="button" onClick={handleCloseModal} className="bg-gray-700 text-white font-bold py-2 px-4 rounded-xl">Cancelar</button>
-                                <button type="submit" className="bg-[#00c2ff] text-black font-bold py-2 px-4 rounded-xl">Salvar</button>
+                            <div className="flex justify-end space-x-3">
+                                <button type="button" onClick={handleCloseModal} className="bg-black/20 hover:bg-white/10 text-white font-bold py-2.5 px-5 rounded-lg transition-all">Cancelar</button>
+                                <button type="submit" className="bg-[#00c2ff] hover:bg-white text-black font-bold py-2.5 px-5 rounded-lg transition-all">Salvar</button>
                             </div>
                         </form>
                     </div>

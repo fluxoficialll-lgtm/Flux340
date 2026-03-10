@@ -2,23 +2,20 @@
 import React, { useState } from 'react';
 import { useGroupRevenue } from '../../hooks/useGroupRevenue';
 import { useParams } from 'react-router-dom';
-import { FaturamentoGrupoStripe } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Faturamento.Grupo.Stripe';
 import { CardGrupoHistoricoFinanceiro } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Card.Grupo.Historico.Financeiro';
 import { GraficoPizzaReceita } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Grafico.Pizza.Receita';
-import { FiltroGraficosReceita } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Filtro.Graficos.Receita';
 import { GraficoRadarReceita } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Grafico.Radar.Receita';
 import { GraficoBarraReceita } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Grafico.Barra.Receita';
-
-// Os componentes de Linha e Área ainda existem, mas não serão mais usados nesta página
-// import { GraficoLinhaReceita } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Grafico.Linha.Receita';
-// import { GraficoAreaReceita } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Grafico.Area.Receita';
+import CabecalhoNavegacao from '../../Componentes/cabeçalhos/Cabecalho.Navegacao';
+import { ModalFiltroDimensao } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Modal.Filtro.Dimensao';
 
 export const PGGrupoReceita: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { group, loading } = useGroupRevenue();
 
-    const [chartType, setChartType] = useState('bar'); // Alterado para 'bar' como padrão
+    const [chartType, setChartType] = useState('bar');
     const [dimension, setDimension] = useState('pais');
+    const [period, setPeriod] = useState('30d');
 
     // --- DADOS DE EXEMPLO ---
     const revenueByCountryData = [
@@ -49,6 +46,7 @@ export const PGGrupoReceita: React.FC = () => {
     ];
 
     const getChartData = () => {
+        // A lógica de busca de dados precisará ser atualizada para usar o `period`
         switch (dimension) {
             case 'pais': return { data: revenueByCountryData, title: 'Receita por País' };
             case 'metodo': return { data: revenueByMethodData, title: 'Receita por Método de Pagamento' };
@@ -64,11 +62,6 @@ export const PGGrupoReceita: React.FC = () => {
         ? `Radar Comparativo: ${dimensionTitle.replace('Receita por ', '')}`
         : dimensionTitle;
 
-    const stripeSalesData = {
-        totalSales: 1240, approvedSales: 1180, pendingSales: 60,
-        salesUSD: 25000.00, salesBRL: 50000.00, salesEUR: 15000.00,
-    };
-
     const financialHistoryTransactions:any = [];
 
     if (loading || !group) {
@@ -77,23 +70,25 @@ export const PGGrupoReceita: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
-            <header> {/* ... */}</header>
+            <CabecalhoNavegacao titulo="Receita do Grupo" />
 
             <main className="pt-[85px] pb-[100px] w-full max-w-4xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <FiltroGraficosReceita 
-                        onChartTypeChange={setChartType}
+                    <ModalFiltroDimensao 
                         onDimensionChange={setDimension}
+                        currentDimension={dimension}
+                        onChartTypeChange={setChartType}
                         chartType={chartType}
-                        dimension={dimension}
+                        onPeriodChange={setPeriod}
+                        currentPeriod={period}
                     />
 
-                    {/* Renderização condicional corrigida */}
-                    {chartType === 'pie' && <GraficoPizzaReceita data={chartData} loading={loading} title={chartTitle} />}
-                    {chartType === 'bar' && <GraficoBarraReceita data={chartData} loading={loading} title={chartTitle} />}
-                    {chartType === 'radar' && <GraficoRadarReceita data={chartData} loading={loading} title={chartTitle} />}
+                    <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {chartType === 'pie' && <GraficoPizzaReceita data={chartData} loading={loading} title={chartTitle} />}
+                        {chartType === 'bar' && <GraficoBarraReceita data={chartData} loading={loading} title={chartTitle} />}
+                        {chartType === 'radar' && <GraficoRadarReceita data={chartData} loading={loading} title={chartTitle} />}
+                    </div>
                     
-                    <FaturamentoGrupoStripe salesData={stripeSalesData} loading={loading} />
                     <CardGrupoHistoricoFinanceiro transactions={financialHistoryTransactions} loading={loading} />
                 </div>
             </main>

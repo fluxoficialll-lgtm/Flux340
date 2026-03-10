@@ -20,7 +20,7 @@ export const SessaoConfiguracoesDeMarketing: React.FC<SessaoConfiguracoesDeMarke
             <ItemConfiguracao
                 icon="fa-store"
                 label="Editar Página de vendas"
-                onClick={() => navigate(`/group-settings/${id}/checkout-config`)}
+                onClick={() => navigate(`/group-settings/${id}/edit-sales-page`)}
                 rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
             <ItemConfiguracao

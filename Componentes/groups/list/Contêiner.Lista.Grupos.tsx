@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Group, ChatMessage } from '../../../types';
 import { GroupMenuDropdown } from './GroupMenuDropdown';
 import { simulationData } from '@/ServiçosFrontend/ServiçoDeSimulação';
+import { useConfiguracaoGrupo } from '../../../hooks/Hook.Configuracao.Grupo';
 
 interface GroupListItemProps {
-    group: Group & { navigateTo?: string };
+    group: Group & { navigateTo?: string; isSalesPlatformEnabled?: boolean };
     currentUserEmail: string | null;
     unreadCount: number;
     isMenuActive: boolean;
@@ -22,11 +23,11 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     unreadCount,
     isMenuActive,
     onToggleMenu,
-    onItemClick,
     onTracking,
     onDelete
 }) => {
     const navigate = useNavigate();
+    const { resolverAcaoDoClique } = useConfiguracaoGrupo(); // Usando o nosso novo hook
     const isCreator = group.creatorEmail === currentUserEmail;
 
     const allChats = simulationData.chats;
@@ -68,13 +69,17 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     }
 
     const handleItemClick = () => {
-        if (group.isSalesPlatformEnabled) {
-            navigate(`/group-platform/${group.id}`);
-        } else if (group.navigateTo) {
+        // Primeiro, verificamos se há uma navegação especial pré-definida.
+        if (group.navigateTo) {
             navigate(group.navigateTo);
-        } else {
-            onItemClick();
+            return;
         }
+        
+        // Se não houver, usamos a lógica centralizada do nosso hook.
+        resolverAcaoDoClique({
+            id: group.id,
+            modoHubAtivo: !!group.isSalesPlatformEnabled
+        });
     };
 
     return (

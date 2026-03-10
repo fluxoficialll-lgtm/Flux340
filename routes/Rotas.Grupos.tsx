@@ -30,7 +30,7 @@ export const groupRoutes = [
     { path: '/create-group/private', element: <ProtectedRoute><CreatePrivateGroup /></ProtectedRoute> },
     { path: '/edit-group/:id', element: <ProtectedRoute><EditGroup /></ProtectedRoute> },
     { path: '/payment-success-bridge/:id', element: <ProtectedRoute><SuccessBridge /></ProtectedRoute> },
-    { path: '/group-platform/:id', element: <ProtectedRoute><PGPlataformaHospedagemArquivos /></ProtectedRoute> },
+    { path: '/group/:id/files', element: <ProtectedRoute><PGPlataformaHospedagemArquivos /></ProtectedRoute> },
     { path: '/group-folder/:groupId/:folderId', element: <ProtectedRoute><PGGrupoConteudoPastaVendas /></ProtectedRoute> },
     { path: '/group-limits/:id', element: <ProtectedRoute><GroupLimits /></ProtectedRoute> },
     { path: '/group-links/:id', element: <ProtectedRoute><ManageGroupLinks /></ProtectedRoute> },

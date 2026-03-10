@@ -65,6 +65,33 @@ class GroupSystem {
             return []; // Retorna uma lista vazia em caso de erro para não quebrar a UI.
         }    
     }
+
+    /**
+     * NOVO: Atualiza as configurações de um grupo.
+     * @param {string} groupId O ID do grupo a ser atualizado.
+     * @param {object} settings O objeto com as configurações a serem atualizadas.
+     * @returns {Promise<object>} A resposta da API.
+     */
+    async updateGroupSettings(groupId, settings) {
+        console.log(`[groupSystem] Atualizando configurações do grupo ${groupId}`);
+        try {
+            const response = await fetch(`/api/groups/${groupId}/settings`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(settings),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`Falha ao atualizar as configurações do grupo ${groupId}:`, error);
+            throw error;
+        }
+    }
 }
 
 // Exporta uma instância única do serviço para ser usada em toda a aplicação.
