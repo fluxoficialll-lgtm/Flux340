@@ -1,49 +1,71 @@
 
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CabecalhoConfiguracaoInformacao } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Informacao';
+import CardAuditoriaMensagens from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Auditoria.Mensagens';
 
-// Mock data for messages
-const mockMessages = [
-    { id: '1', user: 'Alice', content: 'Olá a todos!', timestamp: '2024-07-22 10:00' },
-    { id: '2', user: 'Bob', content: 'Bem-vindo ao grupo.', timestamp: '2024-07-22 10:05' },
-    { id: '3', user: 'Charlie', content: 'Alguma novidade?', timestamp: '2024-07-22 10:10' },
-];
+// --- Tipagens (devem ser consistentes com o card) ---
+interface Message {
+    id: string;
+    author: {
+        id: string;
+        name: string;
+        role: string;
+        avatarUrl?: string;
+    };
+    content: string;
+    timestamp: Date;
+    isReported?: boolean;
+}
 
+// --- Mock Data Atualizado e Mais Realista ---
+const mockAuthors = {
+    '1': { id: '1', name: 'Ana de Almeida', role: 'Admin', avatarUrl: 'https://randomuser.me/api/portraits/women/1.jpg' },
+    '2': { id: '2', name: 'Beto Malfacini', role: 'Membro', avatarUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
+    '3': { id: '3', name: 'Carla Zambelli', role: 'Membro', avatarUrl: 'https://randomuser.me/api/portraits/women/3.jpg' },
+    '4': { id: '4', name: 'David Luis', role: 'Moderador', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
+};
+
+const initialMessages: Message[] = [
+    { id: 'msg1', author: mockAuthors['1'], content: 'Pessoal, lembrem-se das diretrizes da comunidade. Sem spam, por favor.', timestamp: new Date('2024-07-23T10:00:00Z') },
+    { id: 'msg2', author: mockAuthors['2'], content: 'Alguém pode me ajudar com o exercício 3 da aula de ontem?', timestamp: new Date('2024-07-23T11:30:00Z') },
+    { id: 'msg3', author: mockAuthors['3'], content: 'VENDO CURSO DE MARKETING DIGITAL PELA METADE DO PREÇO CHAMAR PRIVADO', timestamp: new Date('2024-07-23T14:00:00Z'), isReported: true },
+    { id: 'msg4', author: mockAuthors['4'], content: '@Carla Zambelli, este tipo de mensagem não é permitido aqui. Por favor, reveja as regras.', timestamp: new Date('2024-07-23T14:05:00Z') },
+    { id: 'msg5', author: mockAuthors['2'], content: 'Obrigado pela ajuda, @David Luis!', timestamp: new Date('2024-07-23T15:00:00Z') },
+    { id: 'msg6', author: mockAuthors['3'], content: 'Foi mal, não sabia.', timestamp: new Date('2024-07-23T14:10:00Z') },
+].sort((a,b) => b.timestamp.getTime() - a.timestamp.getTime()); // Ordenar do mais recente para o mais antigo
+
+
+// --- Página Principal ---
 export const PGGrupoConfiguracoesAuditoriaDeMensagens: React.FC = () => {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-    const [messages, setMessages] = useState(mockMessages);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [messages, setMessages] = useState<Message[]>(initialMessages);
 
-    const filteredMessages = messages.filter(msg =>
-        msg.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        msg.user.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleDeleteMessage = (messageId: string) => {
+        console.log(`Apagando mensagem: ${messageId}`);
+        setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        // Adicionar lógica de API para apagar
+    };
+
+    const handleWarnAuthor = (authorId: string) => {
+        console.log(`Advertindo autor: ${authorId}`);
+        // Adicionar lógica para abrir modal de punição ou advertir diretamente via API
+        alert(`O autor ${mockAuthors[authorId as keyof typeof mockAuthors]?.name} foi advertido (simulação).`);
+    };
+
+    const memberListForFilter = Object.values(mockAuthors).map(({ id, name }) => ({ id, name }));
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
             <CabecalhoConfiguracaoInformacao titulo="Auditoria de Mensagens" onBack={() => navigate(-1)} />
 
-            <main className="pt-[85px] pb-[40px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <input
-                    type="text"
-                    placeholder="Buscar por usuário ou conteúdo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <main className="pt-[85px] pb-[40px] w-full max-w-4xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
+                <CardAuditoriaMensagens
+                    messages={messages}
+                    members={memberListForFilter}
+                    onDelete={handleDeleteMessage}
+                    onWarn={handleWarnAuthor}
                 />
-                <div className="space-y-4">
-                    {filteredMessages.map(message => (
-                        <div key={message.id} className="bg-black/20 border border-white/10 rounded-xl p-4">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="font-semibold">{message.user}</span>
-                                <span className="text-xs text-gray-400">{message.timestamp}</span>
-                            </div>
-                            <p>{message.content}</p>
-                        </div>
-                    ))}
-                </div>
             </main>
         </div>
     );

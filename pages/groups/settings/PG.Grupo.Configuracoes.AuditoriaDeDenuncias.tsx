@@ -1,53 +1,94 @@
 
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CabecalhoConfiguracaoInformacao } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Informacao';
+import CardAuditoriaDenuncias from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Auditoria.Denuncias';
 
-// Mock data for reports
-const mockReports = [
-    { id: '1', reporter: 'Alice', reportedUser: 'Bob', reason: 'Spam', status: 'Pendente' },
-    { id: '2', reporter: 'Charlie', reportedUser: 'David', reason: 'Comportamento abusivo', status: 'Resolvido' },
-    { id: '3', reporter: 'Eve', reportedUser: 'Frank', reason: 'Conteúdo impróprio', status: 'Pendente' },
-];
+// --- Tipagens Consistentes ---
+type ReportStatus = 'pending' | 'resolved' | 'ignored';
 
+interface Member {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+}
+
+interface Report {
+    id: string;
+    reporter: Member;
+    reported: Member;
+    content: string;
+    reason: string;
+    timestamp: Date;
+    status: ReportStatus;
+}
+
+// --- Mock Data Atualizado ---
+const mockMembers = {
+    '1': { id: '1', name: 'Ana de Almeida', avatarUrl: 'https://randomuser.me/api/portraits/women/1.jpg' },
+    '2': { id: '2', name: 'Beto Malfacini', avatarUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
+    '3': { id: '3', name: 'Carla Zambelli', avatarUrl: 'https://randomuser.me/api/portraits/women/3.jpg' },
+    '4': { id: '4', name: 'David Luis', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
+};
+
+const initialReports: Report[] = [
+    {
+        id: 'rep1',
+        reporter: mockMembers['1'],
+        reported: mockMembers['3'],
+        content: 'VENDO CURSO DE MARKETING DIGITAL PELA METADE DO PREÇO CHAMAR PRIVADO',
+        reason: 'Spam / Propaganda',
+        timestamp: new Date('2024-07-23T14:01:00Z'),
+        status: 'pending',
+    },
+    {
+        id: 'rep2',
+        reporter: mockMembers['2'],
+        reported: mockMembers['4'],
+        content: 'Isso não faz o menor sentido, você é burro?',
+        reason: 'Comportamento Ofensivo / Assédio',
+        timestamp: new Date('2024-07-22T18:30:00Z'),
+        status: 'resolved',
+    },
+    {
+        id: 'rep3',
+        reporter: mockMembers['4'],
+        reported: mockMembers['2'],
+        content: 'Alguém pode me ajudar com o exercício 3 da aula de ontem?',
+        reason: 'Denúncia Falsa / Abuso da Ferramenta',
+        timestamp: new Date('2024-07-22T19:00:00Z'),
+        status: 'ignored',
+    },
+].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+// --- Página Principal ---
 export const PGGrupoConfiguracoesAuditoriaDeDenuncias: React.FC = () => {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-    const [reports, setReports] = useState(mockReports);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [reports, setReports] = useState<Report[]>(initialReports);
 
-    const filteredReports = reports.filter(report =>
-        report.reporter.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.reportedUser.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.reason.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleStatusChange = (reportId: string, newStatus: ReportStatus) => {
+        console.log(`Alterando status da denúncia ${reportId} para ${newStatus}`);
+        setReports(prev => prev.map(r => r.id === reportId ? { ...r, status: newStatus } : r));
+        // Lógica de API para atualizar o status
+    };
+
+    const handlePunish = (memberId: string) => {
+        const memberName = mockMembers[memberId as keyof typeof mockMembers]?.name || 'desconhecido';
+        console.log(`Iniciando processo de punição para o membro: ${memberId} (${memberName})`);
+        alert(`Ações de punição para ${memberName} foram iniciadas (simulação).`);
+        // Lógica para abrir modal de punição, etc.
+    };
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
             <CabecalhoConfiguracaoInformacao titulo="Auditoria de Denúncias" onBack={() => navigate(-1)} />
 
-            <main className="pt-[85px] pb-[40px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <input
-                    type="text"
-                    placeholder="Buscar por denunciante, denunciado ou motivo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <main className="pt-[85px] pb-[40px] w-full max-w-4xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
+                <CardAuditoriaDenuncias
+                    reports={reports}
+                    onStatusChange={handleStatusChange}
+                    onPunish={handlePunish}
                 />
-                <div className="space-y-4">
-                    {filteredReports.map(report => (
-                        <div key={report.id} className="bg-black/20 border border-white/10 rounded-xl p-4">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="font-semibold">{report.reportedUser}</span>
-                                <span className={`text-xs px-2 py-1 rounded-full ${report.status === 'Pendente' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'}`}>
-                                    {report.status}
-                                </span>
-                            </div>
-                            <p className="text-sm text-gray-400">Denunciado por: {report.reporter}</p>
-                            <p className="mt-1">Motivo: {report.reason}</p>
-                        </div>
-                    ))}
-                </div>
             </main>
         </div>
     );

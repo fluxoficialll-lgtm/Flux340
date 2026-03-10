@@ -1,78 +1,82 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CabecalhoConfiguracaoInformacao } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Informacao';
+import CardDistribuicaoCargos from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Distribuicao.Cargos';
+import { GroupRole } from '../../../tipos/types.Grupo';
 
-// Mock data for members and roles
-const mockMembers = [
-    { id: '1', name: 'Alice', roleId: '3' },
-    { id: '2', name: 'Bob', roleId: '3' },
-    { id: '3', name: 'Charlie', roleId: '2' },
-    { id: '4', name: 'David', roleId: '1' },
+// Tipagem para um membro (deve corresponder à do card)
+interface Member {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+    roleId: string | null;
+}
+
+// -- Mock Data Atualizada --
+const mockMembers: Member[] = [
+    { id: '1', name: 'Alice de Sousa', roleId: 'dev', avatarUrl: 'https://randomuser.me/api/portraits/women/1.jpg' },
+    { id: '2', name: 'Bruno Martins', roleId: 'vip', avatarUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
+    { id: '3', name: 'Carla Dias', roleId: 'mod', avatarUrl: 'https://randomuser.me/api/portraits/women/3.jpg' },
+    { id: '4', name: 'David Teixeira', roleId: null, avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
+    { id: '5', name: 'Helena Costa', roleId: 'vip', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg' },
 ];
 
-const mockRoles = [
-    { id: '1', name: 'Admin', color: '#ff0000' },
-    { id: '2', name: 'Moderator', color: '#00ff00' },
-    { id: '3', name: 'Member', color: '#0000ff' },
+// Usando a tipagem GroupRole completa
+const mockRoles: GroupRole[] = [
+    {
+        id: 'dev',
+        name: 'Desenvolvedor',
+        color: '#00c2ff',
+        priority: 100,
+        permissions: { isAdmin: true, canManageRoles: true } as any, // Simplificado
+    },
+    {
+        id: 'mod',
+        name: 'Moderador',
+        color: '#22c55e',
+        priority: 50,
+        permissions: { canKickMembers: true, canDeleteMessages: true } as any,
+    },
+    {
+        id: 'vip',
+        name: '💎 VIP Member',
+        color: '#be185d',
+        priority: 20,
+        permissions: { canBypassSlowMode: true } as any,
+    },
 ];
 
+// --- Página Principal ---
 export const PGGrupoConfiguracoesDistribuiçaoDeCargos: React.FC = () => {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-    const { group, loading } = useGroupSettings();
-    const [memberRoles, setMemberRoles] = useState<{[key: string]: string}>({});
+    const [members, setMembers] = useState<Member[]>(mockMembers);
 
-    useEffect(() => {
-        // Initialize member roles state
-        const initialRoles = mockMembers.reduce((acc, member) => {
-            acc[member.id] = member.roleId;
-            return acc;
-        }, {} as {[key: string]: string});
-        setMemberRoles(initialRoles);
-    }, []);
-
-    const handleRoleChange = (memberId: string, roleId: string) => {
-        setMemberRoles(prev => ({ ...prev, [memberId]: roleId }));
+    const handleUpdateMemberRole = (memberId: string, roleId: string | null) => {
+        setMembers(prevMembers =>
+            prevMembers.map(member =>
+                member.id === memberId ? { ...member, roleId: roleId } : member
+            )
+        );
     };
 
     const handleSaveChanges = () => {
-        console.log('Saving role distribution:', memberRoles);
+        console.log('Salvando distribuição de cargos:', members);
+        // Aqui você faria a chamada à API para salvar os dados
         alert('Distribuição de cargos salva com sucesso! (Simulação)');
     };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
-                <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
             <CabecalhoConfiguracaoInformacao titulo="Distribuição de Cargos" onBack={() => navigate(-1)} />
 
             <main className="pt-[85px] pb-[120px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <div className="space-y-4">
-                    {mockMembers.map(member => (
-                        <div key={member.id} className="bg-black/20 border border-white/10 rounded-xl p-4 flex justify-between items-center">
-                            <span className="font-semibold">{member.name}</span>
-                            <select
-                                value={memberRoles[member.id] || ''}
-                                onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                                className="bg-black/20 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#00c2ff]"
-                            >
-                                {mockRoles.map(role => (
-                                    <option key={role.id} value={role.id} style={{ color: 'black' }}>
-                                        {role.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    ))}
-                </div>
+                {/* O novo card substitui a lista antiga */}
+                <CardDistribuicaoCargos 
+                    members={members}
+                    roles={mockRoles}
+                    onUpdateMemberRole={handleUpdateMemberRole}
+                />
             </main>
 
             <footer className="fixed bottom-0 left-0 right-0 bg-[#0c0f14]/80 backdrop-blur-sm z-30">
