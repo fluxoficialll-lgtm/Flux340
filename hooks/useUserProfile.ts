@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import profileService from '../ServiçosFrontend/ServiçoDeAutenticação/Criação.Perfil.Flux.js';
 import { MetricasListaSeguidores } from '../ServiçosFrontend/SistemaDeMétricas/Métricas.Lista.Seguidores.js';
 import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
 
 export interface UserProfileWithStats {
     id: string;
@@ -17,7 +18,8 @@ export interface UserProfileWithStats {
         following: number;
     };
     isFollowing?: boolean;
-    posts?: any[]; // Adicionado para armazenar os posts
+    posts?: any[];
+    products?: any[];
 }
 
 interface UseUserProfileData {
@@ -42,16 +44,17 @@ export const useUserProfile = (userId: string | undefined): UseUserProfileData =
         setError(null);
 
         try {
-            // Busca os dados do perfil e os posts em paralelo
-            const [userProfileData, userPosts] = await Promise.all([
+            const [userProfileData, userPosts, userProducts] = await Promise.all([
                 profileService.getUserProfile(userId),
-                ServiçoPublicaçãoFeed.getFeed('user', { userId }) 
+                ServiçoPublicaçãoFeed.getFeed('user', { userId }),
+                marketplaceService.getItemsByUserId(userId)
             ]);
             
             const profileWithData = {
                 ...userProfileData,
                 isFollowing: Math.random() > 0.5, // Mock
-                posts: userPosts, // Adiciona os posts ao perfil
+                posts: userPosts,
+                products: userProducts
             };
 
             setProfile(profileWithData);

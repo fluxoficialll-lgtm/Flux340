@@ -1,29 +1,41 @@
 
 import React from 'react';
-import { ProductCard } from '../ComponentesDeMarketplace/ProductCard';
+import { ProductCard, PromotionalContainer } from '../ComponentesDeMarketplace/Container.Marketplace.Produto';
+import { MarketplaceItem, Product, User } from '../../../types';
 
-// A interface agora espera um array do tipo que o ProductCard usa (usando 'any')
-// e uma função onProductClick.
 interface ProfileProductsGridProps {
-    products: any[];
+    user: User; // Alterado para receber o objeto de usuário inteiro
     onProductClick: (product: any) => void;
 }
 
-export const GradeDeProdutos: React.FC<ProfileProductsGridProps> = ({ products, onProductClick }) => {
+export const GradeDeProdutos: React.FC<ProfileProductsGridProps> = ({ user, onProductClick }) => {
+    // Extrai a lista de produtos diretamente do objeto de usuário
+    const products = user?.products;
+
     if (!products || products.length === 0) {
         return <div className="no-content">Sem produtos para exibir.</div>;
     }
 
     return (
         <div className="grid grid-cols-2 gap-3 p-2">
-            {products.map(product => (
-                <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    // A função onClick do card agora chama a prop onProductClick
-                    onClick={() => onProductClick(product)} 
-                />
-            ))}
+            {products.map(product => {
+                if (product.type === 'container') {
+                    return (
+                        <PromotionalContainer 
+                            key={product.id}
+                            product={product as Product}
+                            onProductClick={onProductClick}
+                        />
+                    );
+                }
+                return (
+                    <ProductCard 
+                        key={product.id} 
+                        product={product as MarketplaceItem} 
+                        onClick={() => onProductClick(product)} 
+                    />
+                );
+            })}
         </div>
     );
 };

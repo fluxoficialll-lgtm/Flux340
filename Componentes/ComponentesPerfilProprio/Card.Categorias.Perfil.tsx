@@ -14,7 +14,7 @@ export const CardCategoriasPerfil: React.FC<CardCategoriasPerfilProps> = ({ acti
     ];
 
     if (hasProducts) {
-        tabs.splice(1, 0, { id: 'products', label: 'Produtos', icon: 'fa-solid fa-tag' });
+        tabs.splice(1, 0, { id: 'products', label: 'Loja', icon: 'fa-solid fa-store' });
     }
 
     return (

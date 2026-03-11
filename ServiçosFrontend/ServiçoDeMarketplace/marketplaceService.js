@@ -44,6 +44,17 @@ class MarketplaceService {
     trackView(item, userEmail) {
         console.log(`[Marketplace] Rastreando visualização do item "${item.title}" por ${userEmail}.`);
     }
+
+    /**
+     * Busca itens do marketplace por ID de usuário.
+     * @param {string} userId O ID do usuário.
+     * @returns {object[]}
+     */
+    getItemsByUserId(userId) {
+        console.log(`[Marketplace] Buscando itens para o usuário com ID: ${userId}`);
+        const items = simulationData.marketplace || [];
+        return items.filter(item => item.userId === userId);
+    }
 }
 
 export const marketplaceService = new MarketplaceService();

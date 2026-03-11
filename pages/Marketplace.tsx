@@ -18,7 +18,9 @@ export const Marketplace: React.FC = () => {
     setIsMenuOpen,
     isLoading,
     filteredProducts,
-    handleProductClick
+    handleProductClick,
+    handleShare,      // Nova função
+    handleReport      // Nova função
   } = useMarketplace();
 
   return (
@@ -40,6 +42,8 @@ export const Marketplace: React.FC = () => {
             items={filteredProducts}
             isLoading={isLoading}
             onItemClick={handleProductClick}
+            onShare={handleShare} // Passando a função
+            onReport={handleReport} // Passando a função
         />
       </main>
 

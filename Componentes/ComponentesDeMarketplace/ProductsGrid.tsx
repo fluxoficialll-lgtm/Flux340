@@ -1,15 +1,17 @@
 
 import React from 'react';
 import { MarketplaceItem } from '../../types';
-import { ProductCard } from './ProductCard';
+import { ProductCard } from './Container.Marketplace.Produto';
 
 interface ProductsGridProps {
     items: MarketplaceItem[];
     isLoading: boolean;
     onItemClick: (item: MarketplaceItem) => void;
+    onShare: (item: MarketplaceItem) => void; // Adicionado para compartilhar
+    onReport: (itemId: string) => void;    // Adicionado para denunciar
 }
 
-export const ProductsGrid: React.FC<ProductsGridProps> = ({ items, isLoading, onItemClick }) => {
+export const ProductsGrid: React.FC<ProductsGridProps> = ({ items, isLoading, onItemClick, onShare, onReport }) => {
     return (
         <div className="products-grid grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 w-full max-w-[1200px] mx-auto relative z-1 items-start content-start">
             {isLoading ? (
@@ -23,6 +25,8 @@ export const ProductsGrid: React.FC<ProductsGridProps> = ({ items, isLoading, on
                         key={prod.id} 
                         product={prod} 
                         onClick={onItemClick} 
+                        onShare={onShare}      // Passando a função
+                        onReport={onReport}    // Passando a função
                     />
                 ))
             ) : (

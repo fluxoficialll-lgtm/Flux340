@@ -1,7 +1,7 @@
 
 // --- AGREGADOR DE HANDLERS E SERVIÇO DE SIMULAÇÃO ---
 
-import { authHandlers } from './simulacoes/SimulacaoDeAuth';
+import { authHandlers, ServicoAutenticacaoMock } from './simulacoes/SimulacaoDeAuth';
 import { feedHandlers } from './simulacoes/SimulacaoDeFeed';
 import { marketplaceHandlers, mockMarketplaceItems } from './simulacoes/SimulacaoDeMarketplace';
 import { profileHandlers } from './simulacoes/Simulacao.Perfil.Flux';
@@ -16,49 +16,46 @@ import { groupMembersHandlers } from './simulacoes/Simulacao.Grupo.Membros';
 import { groupChatHandlers } from './simulacoes/Simulacao.Chat.Grupo';
 import { groupDetailsHandlers } from './simulacoes/Simulacao.Grupo.Detalhes';
 import { modoHubHandlers } from './simulacoes/Simulacao.ModoHub';
-import { groupSalesPlatformHandlers } from './simulacoes/Simulacao.Grupo.Plataforma'; // <-- ARQUIVO NOVO
+import { groupSalesPlatformHandlers } from './simulacoes/Simulacao.Grupo.Plataforma';
 
-// Re-exporta o serviço de controle da simulação com o nome esperado.
 export { controleDeSimulacao as servicoDeSimulacao } from './ControleDeSimulacao';
 
-// --- TRATAMENTO DE ROTAS DINÂMICAS ---
+// --- TRATAMENTO DE ROTAS DINÂMICAS E CONFLITOS ---
 
-const allGroupIds = [
-    ...mockGroups.map(g => g.id),
-    ...myMockGroups.map(g => g.id),
-];
+// Pega o ID do usuário simulado para criar rotas estáticas
+const mockUserId = ServicoAutenticacaoMock.login().id;
 
-// 1. Tratamento para /api/groups/:id, PRIORIZANDO O MODO HUB
-const groupDetailHandler = modoHubHandlers['/api/groups/:id']; 
-const staticGroupDetailsHandlers = {};
+// --- GRUPOS ---
+const allGroupIds = [...mockGroups.map(g => g.id), ...myMockGroups.map(g => g.id)];
+const staticGroupHandlers = {};
 allGroupIds.forEach(id => {
-    // @ts-ignore
-    staticGroupDetailsHandlers[`/api/groups/${id}`] = groupDetailHandler;
+    Object.assign(staticGroupHandlers, {
+        [`/api/groups/${id}`]: modoHubHandlers['/api/groups/:id'],
+        [`/api/group-chat/${id}`]: groupChatHandlers['/api/group-chat/:groupId'],
+        [`/api/groups/platform/${id}`]: groupSalesPlatformHandlers['/api/groups/platform/:id'],
+    });
 });
 
-// 2. Tratamento para /api/group-chat/:groupId
-const dynamicGroupChatRoute = Object.keys(groupChatHandlers)[0];
-const groupChatDetailHandler = groupChatHandlers[dynamicGroupChatRoute];
-const staticGroupChatHandlers = {};
-allGroupIds.forEach(id => {
-    // @ts-ignore
-    staticGroupChatHandlers[`/api/group-chat/${id}`] = groupChatDetailHandler;
-});
+// --- PERFIS (A CORREÇÃO) ---
 
-// 3. Tratamento para /api/groups/platform/:id
-const salesPlatformHandler = groupSalesPlatformHandlers['/api/groups/platform/:id'];
-const staticSalesPlatformHandlers = {};
-allGroupIds.forEach(id => {
-    // @ts-ignore
-    staticSalesPlatformHandlers[`/api/groups/platform/${id}`] = salesPlatformHandler;
-});
+// 1. Pega o handler que queremos usar para o perfil do usuário simulado.
+const userProfileHandler = profileHandlers['/api/profiles/:id'];
+
+// 2. Remove o handler dinâmico problemático do objeto original.
+const { '/api/profiles/:id': _, ...safeProfileHandlers } = profileHandlers;
+
+// 3. Cria o handler estático e específico que vai resolver o problema.
+const staticProfileHandlers = {
+    [`/api/profiles/${mockUserId}`]: userProfileHandler,
+};
+
 
 // --- CONSOLIDAÇÃO DE TODOS OS HANDLERS ---
 const allSimulationHandlers = {
     ...authHandlers,
     ...feedHandlers,
     ...marketplaceHandlers,
-    ...profileHandlers,
+    ...safeProfileHandlers,      // Usa a versão segura dos handlers de perfil (sem a rota dinâmica)
     ...metricsHandlers,
     ...conversationsHandlers,
     ...notificationsHandlers,
@@ -68,19 +65,15 @@ const allSimulationHandlers = {
     ...myGroupsHandlers,
     ...groupMembersHandlers,
     ...groupDetailsHandlers,
-    ...staticGroupChatHandlers,
-    ...staticGroupDetailsHandlers,
-    ...staticSalesPlatformHandlers, // <-- NOVO HANDLER REGISTRADO
+    ...staticGroupHandlers,      // Adiciona todos os handlers estáticos de grupo
+    ...staticProfileHandlers,   // Adiciona o handler estático do perfil que faltava
 };
 
-/**
- * Retorna o objeto consolidado com todos os handlers de rota de simulação.
- */
+
 export const getSimulationHandlers = () => {
     return allSimulationHandlers;
 };
 
-// Exporta os dados de simulação para serem usados diretamente pelos serviços
 export const simulationData = {
     marketplace: mockMarketplaceItems,
     chats: mockChats,

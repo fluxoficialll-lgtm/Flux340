@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { AdCampaign, Post, MarketplaceItem } from '../../types';
 import { ContainerFeedPadrao } from '../ComponentesDeFeed/Container.Feed.Padrao';
-import { ProductCard } from '../ComponentesDeMarketplace/ProductCard';
+import { ProductCard } from '../ComponentesDeMarketplace/Container.Marketplace.Produto';
 
 interface AdPreviewProps {
     campaign: Partial<AdCampaign>;
