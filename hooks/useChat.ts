@@ -28,12 +28,13 @@ export const useChat = () => {
     
     const virtuosoRef = useRef<VirtuosoHandle>(null);
     const [isSelectionMode, setIsSelectionMode] = useState(false);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]); // CORREÇÃO: IDs podem ser strings
+    const [selectedIds, setSelectedIds] = useState<string[]>([]); 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
 
     const currentUserEmail = useMemo(() => authService.getCurrentUserEmail()?.toLowerCase(), []);
 
@@ -57,14 +58,13 @@ export const useChat = () => {
                 setContactName(otherParticipant?.name || 'Usuário');
                 setContactAvatar(otherParticipant?.avatar);
                 setContactHandle(otherParticipant?.handle || '');
-                setContactStatus('Online'); // Simulação simples
+                setContactStatus('Online'); 
 
             } else {
                 const token = authService.getToken();
                 if (!token) { navigate('/'); return; }
                 chatData = await chatService.getChat(token, chatId);
                 
-                // Lógica para encontrar o outro usuário em um chat real
                 const otherParticipant = chatData.participants.find((p: any) => p.email.toLowerCase() !== currentUserEmail);
                 if (otherParticipant) {
                     const userDetails: User = await authService.fetchUserByHandle(otherParticipant.email.split('@')[0]);
@@ -97,7 +97,7 @@ export const useChat = () => {
 
     useEffect(() => {
         loadChatData();
-        const intervalId = setInterval(() => loadChatData(true), 5000); // Polling para atualizações
+        const intervalId = setInterval(() => loadChatData(true), 5000); 
         return () => clearInterval(intervalId);
     }, [loadChatData]);
 
@@ -108,9 +108,7 @@ export const useChat = () => {
             id: Date.now().toString(), text, contentType: 'text',
             senderEmail: userInfo?.email, 
         };
-        // No modo real, isso enviaria para o backend e atualizaria via polling/socket
         console.log("Enviando mensagem (simulado):", newMessage);
-        // Adiciona a mensagem otimisticamente à UI
         setMessages(prev => [...prev, { 
             ...newMessage, 
             type: 'sent', 
@@ -136,7 +134,6 @@ export const useChat = () => {
 
     const deleteSelectedMessages = async (target: 'me' | 'all') => {
         if (selectedIds.length === 0 || !chatId) return;
-        // No modo real, chamaria o serviço
         console.log(`Deletando ${selectedIds.length} mensagens para ${target}`);
         setMessages(prev => prev.filter(m => !selectedIds.includes(m.id)));
         setIsSelectionMode(false);
@@ -149,8 +146,46 @@ export const useChat = () => {
 
     const handleEdit = () => console.log('Editar', selectedIds);
     const handlePin = () => console.log('Fixar', selectedIds);
-    const handleCopy = () => navigator.clipboard.writeText(messages.find(m => m.id === selectedIds[0])?.text || '');
-    const handleForward = () => console.log('Encaminhar', selectedIds);
+    const handleCopy = () => {
+        const selectedMessage = messages.find(m => m.id === selectedIds[0]);
+        if (selectedMessage?.text) {
+            navigator.clipboard.writeText(selectedMessage.text)
+                .then(() => alert('Mensagem copiada!'))
+                .catch(err => console.error('Erro ao copiar', err));
+        }
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
+    const handleForward = () => {
+        if (selectedIds.length === 0) return;
+        setIsForwardModalOpen(true);
+    };
+
+    const handleConfirmForward = async (targetChatIds: string[]) => {
+        const token = authService.getToken();
+        if (!token) {
+            alert('Autenticação necessária.');
+            return;
+        }
+
+        try {
+            // Loop through target chats and forward messages
+            for (const targetId of targetChatIds) {
+                await chatService.forwardMessages(token, selectedIds, targetId);
+            }
+            alert('Mensagens encaminhadas com sucesso!');
+        } catch (error) {
+            console.error("Erro ao encaminhar mensagens:", error);
+            alert('Falha ao encaminhar mensagens.');
+        }
+
+        // Cleanup
+        setIsForwardModalOpen(false);
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
     const handleReply = () => console.log('Responder', selectedIds);
 
     return {
@@ -158,6 +193,7 @@ export const useChat = () => {
         isSelectionMode, setIsSelectionMode, selectedIds, setSelectedIds, isSearchOpen, setIsSearchOpen, 
         searchTerm, setSearchTerm, zoomedMedia, setZoomedMedia, isMenuModalOpen, setIsMenuModalOpen, 
         isUploading, currentUserEmail, navigate, handleSendMessage, handleToggleSelection, handleStartSelection,
-        deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply
+        deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply, 
+        isForwardModalOpen, setIsForwardModalOpen, handleConfirmForward
     };
 };

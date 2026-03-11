@@ -2,7 +2,7 @@
 // --- SIMULAÇÃO DO SERVIÇO DE NOTIFICAÇÕES ---
 
 // Definição de tipos de notificação para clareza
-export type NotificationType = 'new_follower' | 'like' | 'comment' | 'mention' | 'group_invite' | 'system_update' | 'venda_realizada' | 'venda_pendente' | 'cobranca' | 'compartilhamento' | 'comment_reply' | 'friend_request';
+export type NotificationType = 'new_follower' | 'like' | 'comment' | 'mention' | 'group_invite' | 'system_update' | 'venda_realizada' | 'venda_pendente' | 'cobranca' | 'compartilhamento' | 'comment_reply' | 'friend_request' | 'login' | 'compra_sucesso';
 
 export interface MockNotification {
     id: string;
@@ -25,12 +25,35 @@ export interface MockNotification {
 
 // --- DADOS SIMULADOS ---
 const mockNotifications: MockNotification[] = [
+     {
+        id: 'notif-14',
+        type: 'compra_sucesso',
+        actor: { name: 'Loja da Comunidade', avatar: 'https://i.pravatar.cc/150?u=loja_comunidade', handle: 'loja_comunidade' },
+        entity: { type: 'post', text: 'Acesso VIP ao Grupo' },
+        createdAt: new Date(Date.now() - 1000 * 15).toISOString(), // 15 segundos atrás
+        read: false,
+    },
+    {
+        id: 'notif-13',
+        type: 'login',
+        actor: { name: 'Sistema', avatar: 'https://i.pravatar.cc/150?u=sistema', handle: 'sistema' },
+        createdAt: new Date(Date.now() - 1000 * 30).toISOString(), // 30 segundos atrás
+        read: false,
+    },
     {
         id: 'notif-12',
         type: 'friend_request',
         actor: { name: 'Fernanda Costa', avatar: 'https://i.pravatar.cc/150?u=fernanda', handle: 'fer_costa' },
         createdAt: new Date(Date.now() - 1000 * 60 * 1).toISOString(), // 1 minuto atrás
         read: false,
+    },
+    {
+        id: 'notif-5',
+        type: 'group_invite',
+        actor: { name: 'Equipe Flux', avatar: 'https://i.pravatar.cc/150?u=flux_team', handle: 'flux' },
+        entity: { id: 'group-abc', type: 'group', text: 'Grupo de Beta Testers' },
+        createdAt: new Date(Date.now() - 1000 * 60 * 1.5).toISOString(), // 1.5 minutos atrás
+        read: false, // Alterado para false para testar o card
     },
     {
         id: 'notif-1',
@@ -64,14 +87,6 @@ const mockNotifications: MockNotification[] = [
         relatedPostId: 'post-456',
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
         read: false,
-    },
-    {
-        id: 'notif-5',
-        type: 'group_invite',
-        actor: { name: 'Equipe Flux', avatar: 'https://i.pravatar.cc/150?u=flux_team', handle: 'flux' },
-        entity: { id: 'group-abc', type: 'group', text: 'Grupo de Beta Testers' },
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-        read: true,
     },
     {
         id: 'notif-11',

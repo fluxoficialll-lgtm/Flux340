@@ -99,7 +99,21 @@ export const chatService = {
         });
         return handleResponse(res);
     },
-    
+
+    /**
+     * Encaminha mensagens para um chat diferente.
+     * @param {string} token - O token de autenticação.
+     * @param {string[]} messageIds - Os IDs das mensagens a serem encaminhadas.
+     * @param {string} targetChatId - O ID do chat de destino.
+     * @returns {Promise<any>} O resultado da operação.
+     */
+    async forwardMessages(token, messageIds, targetChatId) {
+        console.log(`[chatService] Encaminhando mensagens ${messageIds.join(', ')} para o chat ${targetChatId}`);
+        // Simulação: Em um app real, faria uma chamada de API, ex: POST /api/messages/forward
+        // O backend então duplicaria as mensagens para o novo chat.
+        return Promise.resolve({ success: true, message: `Mensagens encaminhadas para ${targetChatId}` });
+    },
+
     /**
      * Simula a contagem de mensagens não lidas.
      * @returns {Promise<number>}

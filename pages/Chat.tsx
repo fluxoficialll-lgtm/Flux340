@@ -8,6 +8,7 @@ import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';
 import { MessageItem } from '../Componentes/ComponentesDeChats/MessageItem';
 import { ChatMenuModal } from '../Componentes/ComponentesDeChats/ChatMenuModal';
 import { ModalGradeDeAcoes } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
+import { ModalEncaminharMensagem } from '../Componentes/ComponentesDeChats/Modal.Encaminhar.Mensagem';
 
 export const Chat: React.FC = () => {
   const {
@@ -15,7 +16,8 @@ export const Chat: React.FC = () => {
     isSelectionMode, setIsSelectionMode, selectedIds, setSelectedIds, isSearchOpen, setIsSearchOpen,
     searchTerm, setSearchTerm, zoomedMedia, setZoomedMedia, isMenuModalOpen, setIsMenuModalOpen,
     isUploading, currentUserEmail, navigate, handleSendMessage, handleToggleSelection, handleStartSelection,
-    deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply
+    deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply,
+    isForwardModalOpen, setIsForwardModalOpen, handleConfirmForward
   } = useChat();
 
   const { showOptions } = useModal();
@@ -100,6 +102,12 @@ export const Chat: React.FC = () => {
         onSelect={() => setIsSelectionMode(true)}
         onBlock={() => {}}
         onClear={() => {}}
+      />
+
+      <ModalEncaminharMensagem
+        isOpen={isForwardModalOpen}
+        onClose={() => setIsForwardModalOpen(false)}
+        onConfirm={handleConfirmForward}
       />
 
       {zoomedMedia && (

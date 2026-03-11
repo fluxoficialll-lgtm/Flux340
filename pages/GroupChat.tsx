@@ -8,15 +8,19 @@ import { ChatInput } from '../Componentes/ComponentesDeChats/ChatInput';
 import { MessageItem } from '../Componentes/ComponentesDeChats/MessageItem';
 import { ChatMenuModal } from '../Componentes/ComponentesDeChats/ChatMenuModal';
 import { ModalGradeDeAcoes } from '../Componentes/ComponentesDeChats/ModalGradeDeAcoes';
+import { ModalEncaminharMensagem } from '../Componentes/ComponentesDeChats/Modal.Encaminhar.Mensagem';
 
 export const GroupChat: React.FC = () => {
   const {
     loading, group, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
-    handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate
+    handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate,
+    handleEdit, handlePin, handleCopy, handleForward, handleReply,
+    isForwardModalOpen, setIsForwardModalOpen, handleConfirmForward
   } = useGroupChat();
 
   const { showOptions } = useModal();
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
 
   const handleDeleteRequest = async () => {
     if (selectedIds.length === 0) return;
@@ -27,13 +31,6 @@ export const GroupChat: React.FC = () => {
         deleteSelectedMessages(target as 'me' | 'all');
     }
   };
-
-  const handleEdit = () => console.log('Editar', selectedIds);
-  const handlePin = () => console.log('Fixar', selectedIds);
-  const handleCopy = () => console.log('Copiar', selectedIds);
-  const handleForward = () => console.log('Encaminhar', selectedIds);
-  const handleReply = () => console.log('Responder', selectedIds);
-  const [zoomedMedia, setZoomedMedia] = useState<{ url: string, type: 'image' | 'video' } | null>(null);
 
   if (loading) {
       return (
@@ -98,10 +95,10 @@ export const GroupChat: React.FC = () => {
       {!isSelectionMode && (
         <ChatInput
             onSendMessage={handleSendMessage}
-            onSendAudio={() => {}} // TODO: Implementar áudio
-            onFileSelect={() => {}} // TODO: Implementar envio de arquivo
+            onSendAudio={() => {}} 
+            onFileSelect={() => {}} 
             isBlocked={isBlocked}
-            isUploading={false} // TODO: Implementar estado de upload
+            isUploading={false} 
         />
       )}
 
@@ -113,6 +110,12 @@ export const GroupChat: React.FC = () => {
         onSelect={() => setIsSelectionMode(true)}
         onBlock={() => {}}
         onClear={() => {}}
+      />
+
+      <ModalEncaminharMensagem
+        isOpen={isForwardModalOpen}
+        onClose={() => setIsForwardModalOpen(false)}
+        onConfirm={handleConfirmForward}
       />
 
       {zoomedMedia && (

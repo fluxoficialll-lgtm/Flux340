@@ -5,6 +5,7 @@ import { VirtuosoHandle } from 'react-virtuoso';
 import { Group, Message } from '../tipos'; 
 import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos';
+import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 
 export const useGroupChat = () => {
     const { id } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ export const useGroupChat = () => {
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+    const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
 
     useEffect(() => {
         setCurrentUserEmail(authService.getCurrentUserEmail()?.toLowerCase() || null);
@@ -80,8 +82,67 @@ export const useGroupChat = () => {
         setSelectedIds([]);
     };
 
+    const handleEdit = () => {
+        console.log('Editar mensagens de grupo:', selectedIds);
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
+    const handlePin = () => {
+        console.log('Fixar mensagens de grupo:', selectedIds);
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
+    const handleCopy = () => {
+        if (selectedIds.length === 0) return;
+        const selectedMessage = messages.find(m => m.id === selectedIds[0]);
+        if (selectedMessage?.text) {
+            navigator.clipboard.writeText(selectedMessage.text)
+                .then(() => alert('Mensagem copiada!'))
+                .catch(err => console.error('Erro ao copiar', err));
+        }
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
+    const handleForward = () => {
+        if (selectedIds.length === 0) return;
+        setIsForwardModalOpen(true);
+    };
+
+    const handleConfirmForward = async (targetChatIds: string[]) => {
+        const token = authService.getToken();
+        if (!token) {
+            alert('Autenticação necessária.');
+            return;
+        }
+
+        try {
+            for (const targetId of targetChatIds) {
+                await chatService.forwardMessages(token, selectedIds, targetId);
+            }
+            alert('Mensagens encaminhadas com sucesso!');
+        } catch (error) {
+            console.error("Erro ao encaminhar mensagens:", error);
+            alert('Falha ao encaminhar mensagens.');
+        }
+
+        setIsForwardModalOpen(false);
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
+    const handleReply = () => {
+        console.log('Responder em grupo:', selectedIds);
+        setIsSelectionMode(false);
+        setSelectedIds([]);
+    };
+
     return {
         loading, error, group: groupInfo, messages, isBlocked, virtuosoRef, isSelectionMode, selectedIds, currentUserEmail,
-        handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate
+        handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate,
+        handleEdit, handlePin, handleCopy, handleForward, handleReply,
+        isForwardModalOpen, setIsForwardModalOpen, handleConfirmForward
     };
 };

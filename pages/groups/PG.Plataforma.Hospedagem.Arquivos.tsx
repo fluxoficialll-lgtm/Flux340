@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useGroupPlatformData } from '../../hooks/useGroupPlatformData';
 import { Footer } from '../../Componentes/layout/Footer';
 import PastaCard from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Pasta';
@@ -11,6 +11,7 @@ import CardContainerPesquisa from '../../Componentes/ComponentesDeGroups/Compone
 import CardSessaoTitulo from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Sessao.Titulo';
 import ModalGestao from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Modal.Gestao';
 import CanalItem from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/CanalItem';
+import { fileService } from '../../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 
 type TipoVisualizacao = 'lista' | 'grade';
 
@@ -20,6 +21,7 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
     const [selectedFolder, setSelectedFolder] = useState<any | null>(null);
     const [visualizacao, setVisualizacao] = useState<TipoVisualizacao>('grade');
     const [modalOpenForFolder, setModalOpenForFolder] = useState<any | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFolderClick = (folder: any) => {
         setSelectedFolder(folder);
@@ -27,6 +29,46 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
 
     const handleBackToFolders = () => {
         setSelectedFolder(null);
+    };
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0] && selectedFolder && groupData) {
+            const file = event.target.files[0];
+            try {
+                const fileUrl = await fileService.uploadFile(file);
+                const newFile = {
+                    id: `file-${Date.now()}`,
+                    name: file.name,
+                    url: fileUrl,
+                    type: file.type,
+                };
+
+                const updatedSections = groupData.sections.map(section => ({
+                    ...section,
+                    folders: section.folders.map(folder => {
+                        if (folder.id === selectedFolder.id) {
+                            return {
+                                ...folder,
+                                channels: [...folder.channels, newFile],
+                            };
+                        }
+                        return folder;
+                    }),
+                }));
+
+                setGroupData({
+                    ...groupData,
+                    sections: updatedSections,
+                });
+            } catch (uploadError) {
+                console.error("Erro no upload do arquivo:", uploadError);
+                alert("Falha ao enviar o arquivo. Por favor, tente novamente.");
+            } finally {
+                if (event.target) {
+                    event.target.value = "";
+                }
+            }
+        }
     };
 
     const handleCriarSessao = () => {
@@ -140,8 +182,23 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
 
     const renderChannelsView = () => (
         <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-6">
                 <h3 className="text-3xl font-bold">{selectedFolder.name}</h3>
+                <div>
+                     <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        accept="video/*,image/*,audio/*,.doc,.docx,.pdf,.txt"
+                    />
+                    <button 
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        Adicionar Arquivo
+                    </button>
+                </div>
             </div>
             <div className={`${visualizacao === 'grade' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'flex flex-col gap-2'}`}>
                 {selectedFolder.channels
@@ -187,8 +244,8 @@ export const PGPlataformaHospedagemArquivos: React.FC = () => {
                 <main>
                     {selectedFolder ? renderChannelsView() : renderFoldersView()}
                 </main>
-
-                <BotaoCriar onCriarSessao={handleCriarSessao} onCriarPasta={handleCriarPasta} />
+                
+                {!selectedFolder && <BotaoCriar onCriarSessao={handleCriarSessao} onCriarPasta={handleCriarPasta} />}
 
                 {modalOpenForFolder && (
                     <ModalGestao 

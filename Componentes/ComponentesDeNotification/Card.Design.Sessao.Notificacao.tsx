@@ -12,6 +12,9 @@ import { CardNotificacaoMencao } from './cards/Card.Notificacao.Mencao';
 import { CardNotificacaoCompartilhamento } from './cards/Card.Notificacao.Compartilhamento';
 import { CardNotificacaoComentarioResposta } from './cards/Card.Notificacao.Comentario.Resposta';
 import { CardNotificacaoPedidoAmizade } from './cards/Card.Notificacao.Pedido.Amizade';
+import { CardNotificacaoConviteGrupo } from './cards/Card.Notificacao.Convite.Grupo';
+import { CardNotificacaoLogin } from './cards/Card.Notificacao.Login';
+import { CardNotificacaoCompraSucesso } from './cards/Card.Notificacao.Compra.Sucesso';
 
 interface CardDesignSessaoProps {
   title: string;
@@ -88,8 +91,18 @@ export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
                   onAccept={(id, username) => props.onPendingAction('accept', notif)}
                   onDecline={(id, username) => props.onPendingAction('reject', notif)}
                 />
+              ) : notif.type === 'group_invite' ? (
+                <CardNotificacaoConviteGrupo
+                  notif={notif}
+                  onAccept={(notificationId, groupId) => props.onPendingAction('accept', notif)}
+                  onDecline={(notificationId, groupId) => props.onPendingAction('reject', notif)}
+                />
+               ) : notif.type === 'login' ? (
+                <CardNotificacaoLogin notif={notif} />
               ) : notif.type === 'venda_realizada' ? (
                 <CardNotificacaoVendaRealizada notif={notif} />
+              ) : notif.type === 'compra_sucesso' ? (
+                <CardNotificacaoCompraSucesso notif={notif} />
               ) : notif.type === 'venda_pendente' ? (
                 <CardNotificacaoVendaPendente notif={notif} />
               ) : notif.type === 'cobranca' ? (
