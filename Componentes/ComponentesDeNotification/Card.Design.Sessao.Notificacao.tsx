@@ -1,8 +1,16 @@
 
 import React from 'react';
 import { Notification } from '../../tipos';
-import { NotificationCard } from './NotificationCard';
 import { ExpiringVipNotificationCard } from '../ComponentesDeNotifications/Componentes/ExpiringVipNotificationCard';
+import { CardNotificacaoCurtidas } from './cards/Card.Notificacao.Curtidas';
+import { CardNotificacaoComentario } from './cards/Card.Notificacao.Comentario';
+import { CardNotificacaoSeguidor } from './cards/Card.Notificacao.Seguidor';
+import { CardNotificacaoVendaRealizada } from './cards/Card.Notificacao.Venda.Realizada';
+import { CardNotificacaoVendaPendente } from './cards/Card.Notificacao.Venda.Pendente'; 
+import { CardNotificacaoCobranca } from './cards/Card.Notificacao.Cobranca';
+import { CardNotificacaoMencao } from './cards/Card.Notificacao.Mencao';
+import { CardNotificacaoCompartilhamento } from './cards/Card.Notificacao.Compartilhamento';
+import { CardNotificacaoComentarioResposta } from './cards/Card.Notificacao.Comentario.Resposta';
 
 interface CardDesignSessaoProps {
   title: string;
@@ -14,11 +22,6 @@ interface CardDesignSessaoProps {
   navigate: (path: string) => void;
 }
 
-/**
- * Componente autônomo que renderiza uma seção de notificações com um design
- * sofisticado, replicando o padrão visual da página de Configurações.
- * Cada card de notificação é tratado como um item individual e elegante.
- */
 export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
   title,
   notifications,
@@ -30,7 +33,6 @@ export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
 
   return (
     <>
-      {/* CSS que replica o estilo da página de Configurações. */}
       <style>{`
         .notification-section { margin-bottom: 20px; }
         .notification-section h2 {
@@ -38,8 +40,6 @@ export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
           margin-bottom: 8px; text-transform: uppercase; 
           font-weight: 800; letter-spacing: 1px;
         }
-
-        /* Estilo aplicado a cada card individual para parecer um 'setting-item' */
         .notification-section .notification-item,
         .notification-section .notification-item-vip {
           display: flex !important;
@@ -51,24 +51,18 @@ export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
           transition: background-color 0.2s, border-color 0.2s !important;
           border-radius: 14px !important;
           margin-bottom: 8px !important;
-          border-bottom: none !important; /* Remove a linha separadora antiga */
-          border-left: none !important; /* Remove a borda colorida antiga */
+          border-bottom: none !important;
+          border-left: none !important;
         }
-
-        /* Remove a margem inferior do último item para alinhamento perfeito */
         .notification-section > .notification-cards-wrapper > div:last-child > .notification-item,
         .notification-section > .notification-cards-wrapper > div:last-child > .notification-item-vip {
             margin-bottom: 0 !important;
         }
-
-        /* Efeito de hover consistente com a página de Configurações */
         .notification-section .notification-item:hover,
         .notification-section .notification-item-vip:hover {
           background-color: rgba(255, 255, 255, 0.06) !important;
           border-color: rgba(0, 194, 255, 0.2) !important;
         }
-
-        /* Mantém um diferencial sutil para tipos especiais, mas dentro do novo design */
         .notification-section .notification-sale { background-color: rgba(0, 255, 130, 0.06) !important; }
         .notification-section .notification-pending { background-color: rgba(255, 170, 0, 0.06) !important; }
         .notification-section .notification-item-vip { background: rgba(255, 215, 0, 0.06) !important; }
@@ -78,22 +72,32 @@ export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
         <h2>{title}</h2>
         <div className="notification-cards-wrapper">
           {notifications.map(notif => (
-            // A key é essencial para o React identificar cada elemento na lista
             <div key={notif.id}>
-              {notif.type === 'expiring_vip' ? (
+              {notif.type === 'like' ? (
+                <CardNotificacaoCurtidas notif={notif} />
+              ) : notif.type === 'comment' ? (
+                <CardNotificacaoComentario notif={notif} />
+              ) : notif.type === 'comment_reply' ? (
+                <CardNotificacaoComentarioResposta notif={notif} navigate={props.navigate} />
+              ) : notif.type === 'follow' ? (
+                <CardNotificacaoSeguidor notif={notif} onFollowToggle={props.onFollowToggle} />
+              ) : notif.type === 'venda_realizada' ? (
+                <CardNotificacaoVendaRealizada notif={notif} />
+              ) : notif.type === 'venda_pendente' ? (
+                <CardNotificacaoVendaPendente notif={notif} />
+              ) : notif.type === 'cobranca' ? (
+                <CardNotificacaoCobranca notif={notif} onPay={props.onPay} />
+              ) : notif.type === 'mention' ? (
+                <CardNotificacaoMencao notif={notif} navigate={props.navigate} />
+              ) : notif.type === 'compartilhamento' ? (
+                <CardNotificacaoCompartilhamento notif={notif} navigate={props.navigate} />
+              ) : notif.type === 'expiring_vip' ? (
                 <ExpiringVipNotificationCard
                   notif={notif}
                   onIgnore={props.onIgnoreExpiring}
                   onPay={props.onPay}
                 />
-              ) : (
-                <NotificationCard
-                  notif={notif}
-                  onFollowToggle={props.onFollowToggle}
-                  onPendingAction={props.onPendingAction}
-                  onNavigate={props.navigate}
-                />
-              )}
+              ) : null}
             </div>
           ))}
         </div>

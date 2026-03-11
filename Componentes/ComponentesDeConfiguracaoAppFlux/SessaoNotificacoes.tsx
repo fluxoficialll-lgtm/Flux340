@@ -12,7 +12,7 @@ export const SessaoNotificacoes: React.FC = () => {
             <ItemConfiguracao 
                 icon="fa-bell" 
                 label="Configurações de Notificação" 
-                onClick={() => navigate('/notification-settings')} 
+                onClick={() => navigate('/pg-configuracao-notificacao')} 
             />
         </div>
     );

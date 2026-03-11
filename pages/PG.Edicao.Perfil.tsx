@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CardEdicaoPerfil } from '../Componentes/ComponentesPerfilProprio/Card.Edicao.Perfil';
 
 export const PG_Edicao_Perfil: React.FC = () => {
   const navigate = useNavigate();
@@ -13,10 +14,7 @@ export const PG_Edicao_Perfil: React.FC = () => {
       </header>
 
       <main className="pt-[85px] pb-[100px] w-full max-w-[600px] mx-auto px-5 overflow-y-auto flex-grow">
-        <div className="text-center py-20">
-          <h2 className="text-2xl font-bold mb-4">Página de Edição de Perfil</h2>
-          <p className="text-gray-400">Esta página está em construção.</p>
-        </div>
+        <CardEdicaoPerfil />
       </main>
     </div>
   );

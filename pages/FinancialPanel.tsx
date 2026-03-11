@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useFinancialPanel } from '../hooks/useFinancialPanel';
-import { CashFlowCard } from '../Componentes/financial/CashFlowCard';
 import { TransactionsCard } from '../Componentes/financial/TransactionsCard';
 import { CardSaldoStripe, CardSaldoPayPal, CardSaldoSyncPay } from '../Componentes/ComponentesDeProvedores/CardsSaldo';
 
@@ -72,14 +71,12 @@ export const FinancialPanel: React.FC = () => {
         {loading ? (
           <>
             <SkeletonCard height="h-64" />
-            <SkeletonCard height="h-40" />
+            <SkeletonCard height="h-96" />
             <SkeletonCard height="h-56" />
           </>
         ) : (
           <>
             {renderBalanceCard()}
-            
-            <CashFlowCard />
 
             <TransactionsCard />
           </>
