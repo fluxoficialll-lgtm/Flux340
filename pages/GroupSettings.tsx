@@ -69,6 +69,9 @@ export const GroupSettings: React.FC = () => {
                 .setting-info{display:flex;align-items:center;}
                 .setting-info i{font-size:18px;width:30px;text-align:center;margin-right:12px;color:#00c2ff;}
                 .setting-item p{font-size:15px;font-weight:500;}
+                .logout-container{margin-top:30px;}
+                .logout-btn{width:100%;margin-bottom:10px;padding:16px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);color:#ff4d4d;border-radius:16px;font-weight:700;font-size:15px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:10px;}
+                .logout-btn:hover{background:#ff4d4d;color:#fff;box-shadow:0 4px 20px rgba(255,77,77,0.2);}
             `}</style>
 
             <header className="flex items-center p-4 bg-[#0c0f14] fixed w-full top-0 z-40 border-b border-white/10 h-[65px]">

@@ -13,5 +13,5 @@ export const profileRoutes = [
   { path: '/user/:username', element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
   { path: '/complete-profile', element: <ProtectedRoute><CompleteProfile /></ProtectedRoute> },
   { path: '/ranking-followers', element: <ProtectedRoute><Leaderboard /></ProtectedRoute> },
-  { path: '/pg-edicao-perfil', element: <ProtectedRoute><PG_Edicao_Perfil /></ProtectedRoute> }
+  { path: '/profile/edit', element: <ProtectedRoute><PG_Edicao_Perfil /></ProtectedRoute> }
 ];

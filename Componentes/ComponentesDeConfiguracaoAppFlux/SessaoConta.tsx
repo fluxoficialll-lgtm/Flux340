@@ -42,7 +42,7 @@ export const SessaoConta: React.FC<SessaoContaProps> = ({ isPrivate, onTogglePri
                 <ItemConfiguracao 
                     icon="fa-user-edit" 
                     label="Editar Perfil" 
-                    onClick={() => navigate('/edit-profile')} 
+                    onClick={() => navigate('/profile/edit')} 
                 />
                 <ItemConfiguracao 
                     icon="fa-lock" 

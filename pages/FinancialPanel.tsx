@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useFinancialPanel } from '../hooks/useFinancialPanel';
-import { AffiliateCard } from '../Componentes/financial/AffiliateCard';
 import { CashFlowCard } from '../Componentes/financial/CashFlowCard';
 import { TransactionsCard } from '../Componentes/financial/TransactionsCard';
 import { CardSaldoStripe, CardSaldoPayPal, CardSaldoSyncPay } from '../Componentes/ComponentesDeProvedores/CardsSaldo';
@@ -21,8 +20,7 @@ const SkeletonCard = ({ height = 'h-48' }) => (
 export const FinancialPanel: React.FC = () => {
   const {
     selectedFilter, setSelectedFilter, activeProviderName, loading, preferredProvider, currencyStats,
-    affiliateStats, pixelId, setPixelId, pixelToken, setPixelToken, isSavingMarketing, 
-    isCopyingLink, filters, loadData, handleBack, navigate
+    filters, loadData, handleBack, navigate
   } = useFinancialPanel();
 
   const renderBalanceCard = () => {
@@ -84,21 +82,6 @@ export const FinancialPanel: React.FC = () => {
             <CashFlowCard />
 
             <TransactionsCard />
-
-            {activeProviderName && 
-              <AffiliateCard 
-                affiliateStats={affiliateStats}
-                pixelId={pixelId}
-                setPixelId={setPixelId}
-                pixelToken={pixelToken}
-                setPixelToken={setPixelToken}
-                isSavingMarketing={isSavingMarketing}
-                onSaveMarketing={() => {}}
-                onCopyAffiliateLink={() => {}}
-                isCopyingLink={isCopyingLink}
-                onOpenTracking={() => {}}
-              />
-            }
           </>
         )}
       </main>
