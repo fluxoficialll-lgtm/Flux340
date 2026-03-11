@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Post } from '../../../types';
-import { ContainerFeed } from '../../ComponentesDeFeed/Container.Feed';
+import { ContainerFeedPadrao } from '../../ComponentesDeFeed/Container.Feed.Padrao';
 
 interface PostSelectionCardProps {
     post: Post;
@@ -23,15 +23,13 @@ export const PostSelectionCard: React.FC<PostSelectionCardProps> = ({ post, onSe
 
             {/* Componente Real do Feed */}
             <div className="pointer-events-none">
-                <ContainerFeed 
+                <ContainerFeedPadrao 
                     post={post}
                     onLike={() => {}}
                     onDelete={() => {}}
                     onUserClick={() => {}}
                     onCommentClick={() => {}}
                     onShare={() => {}}
-                    onVote={() => {}}
-                    onCtaClick={() => {}}
                 />
             </div>
         </div>

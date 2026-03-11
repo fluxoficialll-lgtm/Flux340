@@ -2,7 +2,7 @@
 // --- SIMULAÇÃO DO SERVIÇO DE NOTIFICAÇÕES ---
 
 // Definição de tipos de notificação para clareza
-export type NotificationType = 'new_follower' | 'like' | 'comment' | 'mention' | 'group_invite' | 'system_update' | 'venda_realizada' | 'venda_pendente' | 'cobranca' | 'compartilhamento' | 'comment_reply';
+export type NotificationType = 'new_follower' | 'like' | 'comment' | 'mention' | 'group_invite' | 'system_update' | 'venda_realizada' | 'venda_pendente' | 'cobranca' | 'compartilhamento' | 'comment_reply' | 'friend_request';
 
 export interface MockNotification {
     id: string;
@@ -25,6 +25,13 @@ export interface MockNotification {
 
 // --- DADOS SIMULADOS ---
 const mockNotifications: MockNotification[] = [
+    {
+        id: 'notif-12',
+        type: 'friend_request',
+        actor: { name: 'Fernanda Costa', avatar: 'https://i.pravatar.cc/150?u=fernanda', handle: 'fer_costa' },
+        createdAt: new Date(Date.now() - 1000 * 60 * 1).toISOString(), // 1 minuto atrás
+        read: false,
+    },
     {
         id: 'notif-1',
         type: 'new_follower',

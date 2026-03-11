@@ -1,10 +1,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
-// Caminho corrigido e importação ajustada para o serviço unificado
 import profileService from '../ServiçosFrontend/ServiçoDeAutenticação/Criação.Perfil.Flux.js';
 import { MetricasListaSeguidores } from '../ServiçosFrontend/SistemaDeMétricas/Métricas.Lista.Seguidores.js';
+import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
-// A interface que o nosso backend realmente retorna
 export interface UserProfileWithStats {
     id: string;
     username: string;
@@ -17,7 +16,8 @@ export interface UserProfileWithStats {
         followers: number;
         following: number;
     };
-    isFollowing?: boolean; // Adicionado para controlar o estado de "seguir"
+    isFollowing?: boolean;
+    posts?: any[]; // Adicionado para armazenar os posts
 }
 
 interface UseUserProfileData {
@@ -42,19 +42,22 @@ export const useUserProfile = (userId: string | undefined): UseUserProfileData =
         setError(null);
 
         try {
-            // Agora usando o serviço unificado e real
-            const userProfileData = await profileService.getUserProfile(userId);
+            // Busca os dados do perfil e os posts em paralelo
+            const [userProfileData, userPosts] = await Promise.all([
+                profileService.getUserProfile(userId),
+                ServiçoPublicaçãoFeed.getFeed('user', { userId }) 
+            ]);
             
-            // Simular o "isFollowing" por enquanto, idealmente isso viria do backend
-            const profileWithMockedFollow = {
+            const profileWithData = {
                 ...userProfileData,
                 isFollowing: Math.random() > 0.5, // Mock
+                posts: userPosts, // Adiciona os posts ao perfil
             };
 
-            setProfile(profileWithMockedFollow);
+            setProfile(profileWithData);
 
         } catch (err: any) {
-            console.error("Erro ao buscar perfil do usuário:", err);
+            console.error("Erro ao buscar dados do perfil do usuário:", err);
             setError(err.message || 'Falha ao carregar o perfil.');
             setProfile(null);
         } finally {
@@ -70,7 +73,6 @@ export const useUserProfile = (userId: string | undefined): UseUserProfileData =
         if (!profile) return;
 
         try {
-            // Otimisticamente atualiza a UI
             setProfile(prevProfile => {
                 if (!prevProfile) return null;
                 const isNowFollowing = !prevProfile.isFollowing;
@@ -85,12 +87,10 @@ export const useUserProfile = (userId: string | undefined): UseUserProfileData =
                 };
             });
 
-            // Chama a API para persistir a mudança
             await MetricasListaSeguidores.toggleFollow(profile.id);
             
         } catch (error) {
             console.error("Erro ao seguir/deixar de seguir usuário:", error);
-            // Reverte a UI em caso de erro
             fetchUserData(); 
         }
     }, [profile, fetchUserData]);

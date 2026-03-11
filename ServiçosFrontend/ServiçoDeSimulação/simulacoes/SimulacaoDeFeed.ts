@@ -1,33 +1,67 @@
 
 // --- SIMULAÇÃO DO SERVIÇO DE FEED ---
+import { Post } from "../../../types";
 
 // Mock de dados para o feed
-const mockFeedPosts = [
+const mockFeedPosts: Post[] = [
     {
         id: 'post-1',
         author: {
             id: 'user-2',
-            name: 'Influenciadora Digital',
-            nickname: 'influencer',
-            photoUrl: 'https://i.pravatar.cc/150?u=influencer',
+            username: 'influencer',
+            nickname: 'Influenciadora Digital',
+            avatar: 'https://i.pravatar.cc/150?u=influencer',
         },
-        content: 'Adorei o novo recurso de Grupos VIP! Já criei o meu, venham conferir! 🚀 #novidade #flux',
+        text: 'Este é um post de texto simples. Bem-vindo ao meu feed!',
         likes: 152,
-        comments: 12,
-        timestamp: '2024-07-29T10:00:00.000Z',
+        commentsCount: 12,
+        createdAt: '2024-07-29T10:00:00.000Z',
+        type: 'text',
+        likedBy: [],
     },
     {
         id: 'post-2',
         author: {
             id: 'user-3',
-            name: 'Gamer Profissional',
-            nickname: 'pro_gamer',
-            photoUrl: 'https://i.pravatar.cc/150?u=gamer',
+            username: 'pro_gamer',
+            nickname: 'Gamer Profissional',
+            avatar: 'https://i.pravatar.cc/150?u=gamer',
         },
-        content: 'Live hoje à noite, pessoal! Vamos jogar juntos e conversar. Não percam! 🎮',
+        text: 'Qual deve ser o próximo jogo da live?',
+        type: 'poll',
+        poll: {
+            options: [
+                { text: 'Aventura Épica', votes: 120, voters: [] },
+                { text: 'Corrida Alucinante', votes: 85, voters: [] },
+                { text: 'Terror Assustador', votes: 45, voters: [] },
+            ],
+        },
         likes: 320,
-        comments: 45,
-        timestamp: '2024-07-29T11:30:00.000Z',
+        commentsCount: 45,
+        createdAt: '2024-07-29T11:30:00.000Z',
+        likedBy: [],
+    },
+    {
+        id: 'post-3',
+        author: {
+            id: 'user-4',
+            username: 'dev_master',
+            nickname: 'Mestre do Código',
+            avatar: 'https://i.pravatar.cc/150?u=dev',
+        },
+        text: 'Novo grupo para desenvolvedores! Participe e compartilhe seu conhecimento.',
+        type: 'group',
+        group: { // OBJETO ADICIONADO AQUI
+            id: 'group-1',
+            name: 'Devs do Futuro',
+            isPublic: true,
+            memberCount: 250,
+            bannerUrl: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop',
+        },
+        likes: 50,
+        commentsCount: 5,
+        createdAt: '2024-07-29T12:00:00.000Z',
+        likedBy: [],
     },
 ];
 
@@ -42,7 +76,6 @@ const handleGetFeed = async (url: URL, config?: RequestInit): Promise<Response> 
     });
 };
 
-// AQUI ESTÁ A CORREÇÃO: Adicionando a palavra-chave `export`
 export const feedHandlers = {
     '/api/feed': handleGetFeed,
 };

@@ -1,7 +1,6 @@
 import React from 'react';
 import './CartaoDeInformacoesDoPerfil.css';
 import { UserAvatar } from '../ComponenteDeInterfaceDeUsuario/user/UserAvatar';
-import { UserName } from '../ComponenteDeInterfaceDeUsuario/user/UserName';
 import { Stat } from './Stat';
 
 interface Props {
@@ -37,8 +36,8 @@ export const CartaoDeInformacoesDoPerfil: React.FC<Props> = ({
             </div>
 
             <div className="user-details">
-                <UserName username={nickname} isVerified={true} />
-                <p className="handle">@{username}</p>
+                <p className="nickname">{nickname}</p>
+                <p className="handle">{username}</p>
                 <p className="bio">{bio}</p>
                 <a href={website} target="_blank" rel="noopener noreferrer" className="website-link">{website}</a>
             </div>

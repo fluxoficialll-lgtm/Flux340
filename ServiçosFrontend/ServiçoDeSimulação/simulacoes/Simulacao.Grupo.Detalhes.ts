@@ -1,3 +1,4 @@
+
 // --- SIMULAÇÃO DO SERVIÇO DE DETALHES DE GRUPOS ---
 
 // --- DADOS SIMULADOS ---
@@ -5,19 +6,20 @@ const mockGroupDetails: { [key: string]: any } = {
     'group-1': {
         id: 'group-1',
         creatorId: 'user-1',
-        name: 'Desenvolvedores Frontend BR',
-        description: 'Grupo para desenvolvedores frontend discutirem as últimas tecnologias.',
-        memberCount: 150,
-        avatar: 'https://i.pravatar.cc/150?u=frontend-devs',
+        name: 'Devs do Futuro', // Nome corrigido
+        description: 'Um grupo para entusiastas de tecnologia e desenvolvimento. Compartilhe seu conhecimento, tire dúvidas e conecte-se com outros desenvolvedores.', // Descrição corrigida
+        memberCount: 250,
+        bannerUrl: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop', // Propriedade de imagem corrigida
+        isPublic: true, // Propriedade adicionada para a página de entrada
         isPrivate: false,
-        isHubModeEnabled: true, // Habilitado para corresponder à lista
+        isHubModeEnabled: true,
         isVip: false,
         isSalesPlatformEnabled: false,
         ownerId: 'user-1',
         creatorEmail: 'dev@email.com',
         isOwner: true,
         memberIds: ['user-1', 'user-2'],
-        salesPlatformSections: [] // Estrutura básica
+        salesPlatformSections: [] 
     },
     'group-2': {
         id: 'group-2',
@@ -25,7 +27,8 @@ const mockGroupDetails: { [key: string]: any } = {
         name: 'Gamers de Plantão',
         description: 'Comunidade para todos os tipos de gamers.',
         memberCount: 300,
-        avatar: 'https://i.pravatar.cc/150?u=gamers',
+        bannerUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=2070&auto=format&fit=crop',
+        isPublic: true,
         isPrivate: false,
         isHubModeEnabled: false,
         isVip: false,
@@ -42,7 +45,8 @@ const mockGroupDetails: { [key: string]: any } = {
         name: 'Clube do Livro',
         description: 'Discussões mensais sobre livros de ficção e não-ficção.',
         memberCount: 50,
-        avatar: 'https://i.pravatar.cc/150?u=book-club',
+        bannerUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=1887&auto=format&fit=crop',
+        isPublic: false,
         isPrivate: true,
         isHubModeEnabled: false,
         isVip: true,

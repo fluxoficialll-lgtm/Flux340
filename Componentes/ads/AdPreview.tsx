@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { AdCampaign, Post, MarketplaceItem } from '../../types';
-import { ContainerFeed } from '../ComponentesDeFeed/Container.Feed';
+import { ContainerFeedPadrao } from '../ComponentesDeFeed/Container.Feed.Padrao';
 import { ProductCard } from '../ComponentesDeMarketplace/ProductCard';
 
 interface AdPreviewProps {
@@ -112,7 +112,14 @@ export const AdPreview: React.FC<AdPreviewProps> = ({ campaign, previewTab, setP
                 )}
                 
                 <div className="p-2">
-                    {previewTab === 'feed' && <ContainerFeed post={mockPost} onLike={()=>{}} onDelete={()=>{}} onUserClick={()=>{}} onCommentClick={()=>{}} onShare={()=>{}} onVote={()=>{}} onCtaClick={()=>{}} />}
+                    {previewTab === 'feed' && <ContainerFeedPadrao 
+                                                post={mockPost as any}
+                                                onLike={() => {}}
+                                                onDelete={() => {}}
+                                                onUserClick={() => {}}
+                                                onCommentClick={() => {}}
+                                                onShare={() => {}}
+                                            />}
                     {previewTab === 'marketplace' && <div className="p-4"><ProductCard product={mockProduct} onClick={()=>{}} /></div>}
                     {previewTab === 'reels' && (
                         <div className="h-[480px] bg-black rounded-2xl relative overflow-hidden flex items-center justify-center">

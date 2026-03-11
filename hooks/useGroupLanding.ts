@@ -1,12 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// CORREÇÃO: A importação do groupService foi removida.
-// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Group } from '../types';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
-import { CapacityValidator } from '../Componentes/ComponentesDeGroups/logic/CapacityValidator';
 
 export const useGroupLanding = () => {
   const navigate = useNavigate();
@@ -14,41 +9,55 @@ export const useGroupLanding = () => {
 
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isMember, setIsMember] = useState(false);
-  const [requestSent, setRequestSent] = useState(false);
-  const [isBanned, setIsBanned] = useState(false);
-  const [creatorName, setCreatorName] = useState('');
-  const [creatorAvatar, setCreatorAvatar] = useState<string | undefined>(undefined);
-  const [onlineCount, setOnlineCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // CORREÇÃO: A lógica que dependia do groupService foi removida.
-    // O hook agora não busca mais dados de grupo, resultando em uma página em branco.
-    setLoading(false);
-  }, [id, navigate]);
+    if (!id) {
+      setLoading(false);
+      setError("ID do grupo não fornecido.");
+      return;
+    }
+
+    const fetchGroupDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/groups/${id}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Grupo não encontrado ou erro na resposta da API' }));
+          throw new Error(errorData.message);
+        }
+
+        const data: Group = await response.json();
+        setGroup(data);
+
+      } catch (e: any) {
+        setError(e.message || 'Ocorreu um erro ao buscar os detalhes do grupo.');
+        setGroup(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGroupDetails();
+  }, [id]);
 
   const handleJoinAction = () => {
-    // CORREÇÃO: A ação de entrar no grupo foi desativada.
-    alert("A funcionalidade de grupos foi desativada.");
+    alert(`Lógica para entrar no grupo ${group?.name} a ser implementada.`);
   };
 
   const handleBack = () => {
-      // A rota /groups pode não existir mais, o que pode causar um erro de navegação.
-      navigate('/groups');
+      navigate(-1); // Volta para a página anterior (o feed)
   };
 
-  const isFull = group ? CapacityValidator.isFull(group) : false;
+  const isFull = group ? (group.memberCount || 0) >= (group.capacity || Infinity) : false;
 
   return {
     group,
     loading,
-    isMember,
-    requestSent,
-    isBanned,
+    error,
     isFull,
-    creatorName,
-    creatorAvatar,
-    onlineCount,
     handleJoinAction,
     handleBack
   };

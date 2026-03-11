@@ -19,8 +19,13 @@ const PGGrupoReceita = lazy(() => import('../pages/groups/PG.Grupo.Receita').the
 const VipSalesHistory = lazy(() => import('../pages/VipSalesHistory').then(m => ({ default: m.VipSalesHistory })));
 const PG_Chat_Grupo = lazy(() => import('../pages/PG.Chat.Grupo').then(m => ({ default: m.PG_Chat_Grupo })));
 
+// Importando a nova página de entrada do grupo
+const PG_Grupo_Entrada = lazy(() => import('../pages/PG.Grupo.Entrada').then(m => ({ default: m.PG_Grupo_Entrada })));
+
 export const groupRoutes = [
     { path: '/groups', element: <ProtectedRoute><Groups /></ProtectedRoute> },
+    // Adicionando a nova rota para a página de entrada
+    { path: '/group/:id', element: <ProtectedRoute><PG_Grupo_Entrada /></ProtectedRoute> }, 
     { path: '/group-chat/:id', element: <ProtectedRoute><GroupChat /></ProtectedRoute> },
     { path: '/pg-chat-grupo', element: <PG_Chat_Grupo /> },
     { path: '/vip-group-sales/:id', element: <VipGroupSales /> },

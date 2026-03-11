@@ -1,0 +1,113 @@
+
+import React, { useState } from 'react';
+import { Post } from '../../types';
+import { AvatarPreviewModal } from '../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
+import { UserBadge } from '../ComponenteDeInterfaceDeUsuario/user/UserBadge';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { LazyMedia } from '../ComponenteDeInterfaceDeUsuario/LazyMedia';
+
+interface ContainerFeedPadraoProps {
+    post: Post;
+    currentUserId?: string;
+    onLike: (postId: string) => void;
+    onDelete: (postId: string, e: React.MouseEvent) => void;
+    onUserClick: (username: string) => void;
+    onCommentClick: (postId: string) => void;
+    onShare: (post: Post) => void;
+}
+
+export const ContainerFeedPadrao: React.FC<ContainerFeedPadraoProps> = React.memo(({ 
+    post, currentUserId, onLike, onDelete, onUserClick, onCommentClick, onShare 
+}) => {
+
+    const [showMenu, setShowMenu] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const { profile: userData, isLoading } = useUserProfile(post.author.username, post.author.id);
+
+    const isOwner = post.authorId === currentUserId;
+    const userHasLiked = post.likedBy?.includes(currentUserId || '') || false;
+
+    const handleAvatarClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (userData?.profile?.photoUrl) {
+            setIsPreviewOpen(true);
+        }
+    };
+
+    const timeAgo = post.createdAt 
+        ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: ptBR })
+        : 'agora mesmo';
+        
+    const displayName = userData?.profile?.nickname || userData?.profile?.name || post.author.username;
+
+    return (
+        <div className="feed-item bg-[#1a1e26] rounded-xl shadow-lg mb-4 overflow-hidden" id={`post-${post.id}`}>
+            {/* Cabeçalho */}
+            <div className="flex items-center justify-between mb-3 relative px-4 pt-4">
+                 <div className="flex items-center gap-3">
+                    <UserBadge 
+                        avatarUrl={userData?.profile?.photoUrl || post.author.avatar}
+                        nickname={displayName}
+                        handle={post.author.username}
+                        isVetoed={userData?.flags?.isVetoed ?? false}
+                        isVip={userData?.flags?.isVip ?? false}
+                        isLoading={isLoading}
+                        avatarSize="md"
+                        showHandle={false}
+                        onAvatarClick={handleAvatarClick}
+                        onNameClick={() => onUserClick(post.author.username)}
+                    />
+                    <div className="flex flex-col ml-[-8px]">
+                        <span className="text-[11px] text-[#aaa] font-medium">{timeAgo}</span>
+                    </div>
+                </div>
+                <div className="relative">
+                    <button onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }} className="text-gray-400 p-2 hover:text-white transition-colors">
+                        <i className="fa-solid fa-ellipsis"></i>
+                    </button>
+                    {showMenu && (
+                        <>
+                            <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}></div>
+                            <div className="absolute right-0 top-8 bg-[#282c34] border border-white/10 rounded-lg shadow-xl z-20 overflow-hidden w-40" onClick={e => e.stopPropagation()}>
+                                {isOwner && <button onClick={(e) => { onDelete(post.id, e); setShowMenu(false); }} className="w-full text-left px-4 py-3 text-red-400 hover:bg-white/5 text-sm font-semibold flex items-center gap-2"><i className="fa-solid fa-trash-can"></i> Excluir</button>}
+                                <button onClick={() => setShowMenu(false)} className="w-full text-left px-4 py-3 text-gray-300 hover:bg-white/5 text-sm font-semibold flex items-center gap-2"><i className="fa-solid fa-flag"></i> Denunciar</button>
+                            </div>
+                        </>
+                    )}
+                </div>
+                <AvatarPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} imageSrc={userData?.profile?.photoUrl || post.author.avatar || ''} username={displayName} />
+            </div>
+
+            {/* Conteúdo Padrão (Texto e Mídia) */}
+            <div className="post-content px-4" onClick={() => onCommentClick(post.id)}>
+                {post.text && <p className="text-white text-sm mb-3 cursor-pointer">{post.text}</p>}
+                {post.mediaUrl && (
+                    <div className="media-container cursor-pointer -mx-4">
+                        <LazyMedia src={post.mediaUrl} alt="Post media" mediaType={post.mediaType} />
+                    </div>
+                )}
+            </div>
+
+            {/* Rodapé de Ações */}
+            <div className="flex justify-around items-center p-2 text-sm text-gray-400 border-t border-white/10 mt-2">
+                <button onClick={() => onLike(post.id)} className={`flex items-center gap-2 transition-colors duration-200 ${userHasLiked ? 'text-red-500' : 'hover:text-white'}`}>
+                    <i className="fa-solid fa-heart"></i>
+                    <span>{post.likes > 0 ? post.likes : ''}</span>
+                </button>
+                <button onClick={() => onCommentClick(post.id)} className="flex items-center gap-2 hover:text-white transition-colors duration-200">
+                    <i className="fa-solid fa-comment"></i>
+                    <span>{post.commentsCount > 0 ? post.commentsCount : ''}</span>
+                </button>
+                <button onClick={() => onShare(post)} className="flex items-center gap-2 hover:text-white transition-colors duration-200">
+                    <i className="fa-solid fa-share"></i>
+                </button>
+                <div className="flex items-center gap-2">
+                    <i className="fa-solid fa-eye"></i>
+                    <span>{post.views || 0}</span>
+                </div>
+            </div>
+        </div>
+    );
+});

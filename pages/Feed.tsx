@@ -2,9 +2,14 @@
 import React from 'react';
 import { useFeed } from '../hooks/useFeed';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
-import { ContainerFeed } from '../Componentes/ComponentesDeFeed/Container.Feed';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
+import { Post } from '../types';
+
+// Importando os novos containers independentes
+import { ContainerFeedPadrao } from '../Componentes/ComponentesDeFeed/Container.Feed.Padrao';
+import { ContainerFeedEnquete } from '../Componentes/ComponentesDeFeed/Container.Feed.Enquete';
+import { ContainerFeedGrupo } from '../Componentes/ComponentesDeFeed/Container.Feed.Grupo';
 
 export const Feed: React.FC = () => {
   const {
@@ -15,11 +20,34 @@ export const Feed: React.FC = () => {
   } = useFeed();
   const { showConfirm } = useModal();
 
-  const handleDeleteRequest = async (e: React.MouseEvent, id: string) => {
+  const handleDeleteRequest = async (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
       if (await showConfirm("Excluir Post", "Deseja excluir permanentemente?", "Excluir", "Cancelar")) {
           handlePostDelete(id);
       }
+  };
+
+  // Função que decide qual componente de post renderizar
+  const renderPost = (post: Post) => {
+    const commonProps = {
+        key: post.id,
+        post: post,
+        currentUserId: currentUserId,
+        onLike: () => handlePostLike(post.id),
+        onDelete: (postId: string, e: React.MouseEvent) => handleDeleteRequest(postId, e),
+        onUserClick: (username: string) => navigate(`/user/${username.replace('@','')}`),
+        onCommentClick: (postId: string) => navigate(`/post/${postId}`),
+        onShare: () => handlePostShare(post),
+    };
+
+    switch (post.type) {
+        case 'group':
+            return <ContainerFeedGrupo {...commonProps} />;
+        case 'poll':
+            return <ContainerFeedEnquete {...commonProps} onVote={(postId, index) => handlePostVote(postId, index)} />;
+        default:
+            return <ContainerFeedPadrao {...commonProps} />;
+    }
   };
 
   return (
@@ -50,20 +78,7 @@ export const Feed: React.FC = () => {
       <main ref={scrollContainerRef} onScroll={handleContainerScroll} className="flex-grow w-full overflow-y-auto overflow-x-hidden relative pt-[140px] no-scrollbar">
         <div className="w-full max-w-[500px] mx-auto pb-[100px] px-3">
             {posts.length > 0 ? (
-                posts.filter(Boolean).map((post) => (
-                    <ContainerFeed 
-                        key={post.id} 
-                        post={post}
-                        currentUserId={currentUserId}
-                        onLike={() => handlePostLike(post.id)}
-                        onDelete={(e) => handleDeleteRequest(e, post.id)}
-                        onUserClick={(u) => navigate(`/user/${u.replace('@','')}`)}
-                        onCommentClick={(id) => navigate(`/post/${id}`)}
-                        onShare={() => handlePostShare(post)}
-                        onVote={(postId, index) => handlePostVote(postId, index)}
-                        onCtaClick={() => handleCtaClick(post.ctaLink)}
-                    />
-                ))
+                posts.filter(Boolean).map(renderPost)
             ) : !loading && (
                 <div className="text-center text-gray-500 mt-20 animate-fade-in">
                     <i className="fa-solid fa-ghost text-4xl opacity-30 mb-3"></i>

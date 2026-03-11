@@ -7,7 +7,7 @@ import { MainHeader } from '../Componentes/layout/MainHeader';
 import { MessageListItem } from '../Componentes/ComponentesDeChats/MessageListItem';
 import { MessagesEmptyState } from '../Componentes/ComponentesDeChats/MessagesEmptyState';
 import { MessagesFooter } from '../Componentes/ComponentesDeChats/MessagesFooter';
-import { CardPesquisarConversas } from '../Componentes/ComponentesDeChats/Card.Pesquisar.Conversas'; // 1. Importado
+import { CardPesquisarConversas } from '../Componentes/ComponentesDeChats/Card.Pesquisar.Conversas';
 
 export const Messages: React.FC = () => {
   const navigate = useNavigate();
@@ -28,10 +28,8 @@ export const Messages: React.FC = () => {
     closeMenuAndEnterSelection
   } = useMessages();
 
-  // 2. Estado para a busca
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 3. Filtragem dos contatos
   const filteredContacts = contacts.filter(contact => 
     contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -58,8 +56,12 @@ export const Messages: React.FC = () => {
         />
 
         <main className="flex-grow pt-[80px] pb-[100px] flex flex-col overflow-y-auto no-scrollbar">
-            {/* 4. Barra de pesquisa renderizada */}
             <CardPesquisarConversas onSearch={setSearchQuery} />
+
+            {/* TÍTULO DA SEÇÃO ADICIONADO */}
+            <div className="px-4 pt-4 pb-2">
+                <h2 className="text-xl font-bold text-white">Meus bate-papos</h2>
+            </div>
 
             {isSelectionMode && (
               <div className="w-full text-center py-2 bg-[#0f2b38] font-bold text-xs sticky top-0 z-10">
@@ -68,7 +70,6 @@ export const Messages: React.FC = () => {
             )}
             
             <div className="w-full flex-grow">
-                {/* 5. Lista renderiza contatos filtrados */}
                 {filteredContacts.length > 0 ? filteredContacts.map(contact => (
                     <MessageListItem 
                       key={contact.id}
@@ -79,7 +80,7 @@ export const Messages: React.FC = () => {
                       onAvatarClick={(e) => handleProfileNavigate(e, contact.handle)}
                     />
                 )) : (
-                    <MessagesEmptyState searchTerm={searchQuery} /> // Passa o termo para o empty state
+                    <MessagesEmptyState searchTerm={searchQuery} />
                 )}
             </div>
         </main>

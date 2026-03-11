@@ -115,7 +115,7 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
             {isCreator && (
                 <>
                     <button className="group-menu-btn absolute right-1 top-1 text-gray-500 p-2 cursor-pointer z-[5]" onClick={onToggleMenu}>
-                        <i className="fa-solid fa-ellipsis-vertical"></i>
+                        <i className="fa-solid fa-ellipsis"></i>
                     </button>
                     <GroupMenuDropdown 
                         group={group} 

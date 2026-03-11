@@ -2,11 +2,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Post, User } from '../../../types';
-import { ContainerFeed } from '../Container.Feed';
+import { ContainerFeedPadrao } from '../Container.Feed.Padrao';
 import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { SearchTab } from '../../../pages/FeedSearch';
 import { UserBadge } from '../../ComponenteDeInterfaceDeUsuario/user/UserBadge';
-// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
 import ServiçoPublicaçãoFeed from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
 interface FeedSearchResultsProps {
@@ -29,10 +28,8 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
     const navigate = useNavigate();
     const { showConfirm } = useModal();
 
-    // Função de Like refatorada para usar o serviço real
     const handleLike = async (postId: string) => {
         try {
-            // CORREÇÃO: A função foi renomeada de 'getPostById' para 'getById' para corresponder ao serviço.
             const post = await ServiçoPublicaçãoFeed.getById(postId);
             if (!post) return;
             
@@ -42,22 +39,17 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
                 likes: post.likes + (!post.liked ? 1 : -1) 
             };
             
-            // CORREÇÃO: A função foi renomeada de 'updatePost' para 'update' para corresponder ao serviço.
             await ServiçoPublicaçãoFeed.update(postId, updatedPost);
-            // Idealmente, o estado local seria atualizado aqui para refletir a mudança instantaneamente
         } catch (error) {
             console.error("Falha ao processar o like:", error);
         }
     };
 
-    // Função de Delete refatorada para usar o serviço real
     const handleDelete = async (postId: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if (await showConfirm("Excluir Post", "Deseja apagar permanentemente?", "Excluir", "Cancelar")) {
             try {
-                // CORREÇÃO: A função foi renomeada de 'deletePost' para 'delete' para corresponder ao serviço.
                 await ServiçoPublicaçãoFeed.delete(postId);
-                // Idealmente, o estado local seria atualizado para remover o post da UI
             } catch (error) {
                 console.error("Falha ao deletar o post:", error);
             }
@@ -75,35 +67,19 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
         );
     }
 
-    // Render Posts
     if (activeTab === 'posts' && postResults.length > 0) {
         return (
             <div className="max-w-[500px] mx-auto w-full px-3 pb-32 animate-fade-in">
                 {postResults.map(post => (
-                    <ContainerFeed 
+                    <ContainerFeedPadrao 
                         key={post.id}
                         post={post}
-                        currentUserId={currentUser?.id}
-                        onLike={handleLike}
-                        onDelete={(id, e) => handleDelete(id, e)}
-                        onUserClick={(u) => navigate(`/user/${u.replace('@', '')}`)}
-                        onCommentClick={(id) => navigate(`/post/${id}`)}
-                        onShare={(p) => {
-                            const url = `${window.location.origin}/#/post/${p.id}`;
-                            if (navigator.share) navigator.share({ url });
-                            else { navigator.clipboard.writeText(url); alert("Link copiado!"); }
-                        }}
-                        onVote={() => {}}
-                        onCtaClick={(l) => l?.startsWith('http') ? window.open(l, '_blank') : navigate(l || '')}
                     />
                 ))}
             </div>
         );
     }
 
-    // O restante do componente permanece o mesmo...
-
-    // Render Users
     if (activeTab === 'users' && userResults.length > 0) {
         return (
             <div className="max-w-[500px] mx-auto w-full px-6 pb-32 animate-fade-in grid gap-3 mt-4">
@@ -127,7 +103,6 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
         );
     }
 
-    // No results state
     if (searchTerm.trim().length > 0 && !loading) {
         return (
             <div className="flex flex-col items-center justify-center py-40 opacity-30 text-center animate-fade-in px-12">
@@ -142,7 +117,6 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
         );
     }
 
-    // Initial empty state
     return (
         <div className="flex flex-col items-center justify-center py-40 text-center animate-fade-in px-12">
             <div className="relative mb-10">

@@ -11,6 +11,7 @@ import { CardNotificacaoCobranca } from './cards/Card.Notificacao.Cobranca';
 import { CardNotificacaoMencao } from './cards/Card.Notificacao.Mencao';
 import { CardNotificacaoCompartilhamento } from './cards/Card.Notificacao.Compartilhamento';
 import { CardNotificacaoComentarioResposta } from './cards/Card.Notificacao.Comentario.Resposta';
+import { CardNotificacaoPedidoAmizade } from './cards/Card.Notificacao.Pedido.Amizade';
 
 interface CardDesignSessaoProps {
   title: string;
@@ -81,6 +82,12 @@ export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
                 <CardNotificacaoComentarioResposta notif={notif} navigate={props.navigate} />
               ) : notif.type === 'follow' ? (
                 <CardNotificacaoSeguidor notif={notif} onFollowToggle={props.onFollowToggle} />
+              ) : notif.type === 'friend_request' ? (
+                <CardNotificacaoPedidoAmizade
+                  notif={notif}
+                  onAccept={(id, username) => props.onPendingAction('accept', notif)}
+                  onDecline={(id, username) => props.onPendingAction('reject', notif)}
+                />
               ) : notif.type === 'venda_realizada' ? (
                 <CardNotificacaoVendaRealizada notif={notif} />
               ) : notif.type === 'venda_pendente' ? (
