@@ -25,6 +25,6 @@ router.delete('/me', authMiddleware, ControlesCriacaoPerfilFlux.deletarPerfil);
 
 // As rotas públicas, se existirem, não precisam de autenticação.
 // Exemplo: buscar perfil público de outro usuário.
-// router.get('/:userId', ControlesCriacaoPerfilFlux.buscarPerfilPublico);
+router.get('/:userId', ControlesCriacaoPerfilFlux.buscarPerfilPublico);
 
 export default router;

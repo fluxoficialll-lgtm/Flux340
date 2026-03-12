@@ -18,6 +18,12 @@ const obterTodos = async ({ limit = 10, cursor, locationFilter, allowAdultConten
     const params = [];
     const whereClauses = ['p.parent_post_id IS NULL'];
 
+    // Validação e sanitização do cursor
+    const numericCursor = cursor ? parseInt(cursor, 10) : null;
+    if (numericCursor !== null && isNaN(numericCursor)) {
+        throw new Error('O cursor fornecido é inválido.');
+    }
+
     if (locationFilter && locationFilter !== 'Global') {
         params.push(locationFilter);
         whereClauses.push(`up.location = $${params.length}`);
@@ -27,8 +33,8 @@ const obterTodos = async ({ limit = 10, cursor, locationFilter, allowAdultConten
         whereClauses.push('p.is_adult_content = false');
     }
 
-    if (cursor) {
-        params.push(parseInt(cursor, 10));
+    if (numericCursor) {
+        params.push(numericCursor);
         whereClauses.push(`p.id < $${params.length}`);
     }
 

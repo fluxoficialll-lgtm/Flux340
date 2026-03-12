@@ -15,10 +15,20 @@ const buscarPerfil = async (req, res, next) => {
     }
 };
 
+const buscarPerfilPublico = async (req, res, next) => {
+    try {
+        const perfil = await servicoCriacaoPerfil.PossibilidadeBuscarPerfil(req.params.userId);
+        if (!perfil) {
+            return res.status(404).json({ message: 'Perfil público não encontrado.' });
+        }
+        res.json(perfil);
+    } catch (error) {
+        next(error);
+    }
+};
+
 const atualizarPerfil = async (req, res, next) => {
     try {
-        // A lógica de upsert (atualizar ou criar) agora está no repositório,
-        // então não precisamos mais verificar se o perfil existe aqui.
         const perfilAtualizado = await servicoCriacaoPerfil.PossibilidadeAtualizarPerfil(req.user.id, req.body, req.user);
         res.json(perfilAtualizado);
     } catch (error) {
@@ -42,4 +52,5 @@ export default {
     buscarPerfil,
     atualizarPerfil,
     deletarPerfil,
+    buscarPerfilPublico,
 };
