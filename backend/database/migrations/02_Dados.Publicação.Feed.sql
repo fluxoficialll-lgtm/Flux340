@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS posts (
     poll_options JSONB, -- { "option1": 0, "option2": 0 }
     cta_link TEXT,
     cta_text TEXT,
+    is_adult_content BOOLEAN NOT NULL DEFAULT FALSE, -- Adicionado para filtro de conteúdo
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

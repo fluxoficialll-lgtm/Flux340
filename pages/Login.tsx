@@ -62,7 +62,6 @@ export const Login: React.FC = () => {
                     onError={() => console.error('Login com Google falhou')}
                     shape="rectangular"
                     size="large"
-                    width="400px"
                     theme="filled_black"
                 />
             </div>

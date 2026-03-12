@@ -40,7 +40,7 @@ router.use('/profiles', rotasCriacaoPerfilFlux);
 // --- Canais Principais ---
 
 // Feed
-router.use('/posts', rotasPublicacaoFeed); // Rota principal para posts e comentários aninhados
+router.use('/feed', rotasPublicacaoFeed); // Rota principal para posts e comentários aninhados
 router.use('/comments', rotasComentariosFeed); // Rota para editar/deletar comentários
 
 // Marketplace
