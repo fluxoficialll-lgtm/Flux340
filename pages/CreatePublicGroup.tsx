@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useCreatePublicGroup } from '../hooks/useCreatePublicGroup';
+import { useCreatePublicGroup } from '../hooks/Hook.Criacao.Grupo.Publico';
 import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
 
 export const CreatePublicGroup: React.FC = () => {

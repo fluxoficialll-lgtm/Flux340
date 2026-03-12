@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { useCompleteProfile } from '../hooks/useCompleteProfile';
+import { useCompleteProfile } from '../hooks/Hook.Perfil.Completar';
 import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
 import { Switch } from '../Componentes/ComponenteDeInterfaceDeUsuario/Switch';
 

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { useCreatePrivateGroup } from '../hooks/useCreatePrivateGroup';
+import { useCreatePrivateGroup } from '../hooks/Hook.Criacao.Grupo.Privado';
 import { ImageCropModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ImageCropModal';
 
 export const CreatePrivateGroup: React.FC = () => {
