@@ -21,7 +21,9 @@ class ControleDeSimulacao {
     constructor() {
         console.log("Controle de Simulação inicializado.");
         this.applySimulationWrapper();
-        this.iniciarSimulacao();
+        if (import.meta.env.MODE !== 'production') {
+            this.iniciarSimulacao();
+        }
     }
 
     private applySimulationWrapper() {
