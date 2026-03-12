@@ -1,24 +1,21 @@
 
 import React from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useRegister } from '../hooks/useRegister';
+import { HookAutenticacao } from '../hooks/Hook.Autenticacao';
+import { useHookCriacaoPerfilFlux } from '../hooks/Hook.Criacao.Perfil.Flux';
 import { RegisterCard } from '../Componentes/ComponentesDeAuth/Componentes/RegisterCard';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = HookAutenticacao();
   const {
-    email, setEmail,
-    password, setPassword,
-    confirmPassword, setConfirmPassword,
-    termsAccepted, setTermsAccepted,
+    dados,
+    updateField,
     errors,
     loading,
     isValid,
-    referredBy,
     handleSubmit,
-  } = useRegister();
+  } = useHookCriacaoPerfilFlux();
 
   if (authLoading) {
     return (
@@ -44,11 +41,18 @@ export const Register: React.FC = () => {
         </header>
 
         <RegisterCard 
-            email={email} setEmail={setEmail}
-            password={password} setPassword={setPassword}
-            confirmPassword={confirmPassword} setConfirmPassword={setConfirmPassword}
-            termsAccepted={termsAccepted} setTermsAccepted={setTermsAccepted}
-            errors={errors} loading={loading} isValid={isValid} referredBy={referredBy}
+            email={dados.email}
+            setEmail={(value) => updateField('email', value)}
+            password={dados.senha}
+            setPassword={(value) => updateField('senha', value)}
+            confirmPassword={dados.confirmacaoSenha}
+            setConfirmPassword={(value) => updateField('confirmacaoSenha', value)}
+            termsAccepted={dados.termosAceitos}
+            setTermsAccepted={(value) => updateField('termosAceitos', value)}
+            errors={errors} 
+            loading={loading} 
+            isValid={isValid} 
+            referredBy={dados.indicadoPor}
             onSubmit={handleSubmit}
         />
     </div>

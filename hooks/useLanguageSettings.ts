@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { preferenceService } from '../ServiçosFrontend/ServiçoDePreferências/preferenceService.js';
 
 export const LANGUAGES = [

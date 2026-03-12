@@ -3,14 +3,13 @@ import React, { lazy } from 'react';
 import { ProtectedRoute } from '../Componentes/ComponentesDeAuth/ProtectedRoute';
 
 const Profile = lazy(() => import('../pages/Profile').then(m => ({ default: m.Profile })));
-const UserProfile = lazy(() => import('../pages/UserProfile').then(m => ({ default: m.UserProfile })));
 const CompleteProfile = lazy(() => import('../pages/CompleteProfile').then(m => ({ default: m.CompleteProfile })));
 const Leaderboard = lazy(() => import('../pages/Leaderboard').then(m => ({ default: m.Leaderboard })));
 const PG_Edicao_Perfil = lazy(() => import('../pages/PG.Edicao.Perfil').then(m => ({ default: m.PG_Edicao_Perfil })));
 
 export const profileRoutes = [
   { path: '/profile', element: <ProtectedRoute><Profile /></ProtectedRoute> },
-  { path: '/user/:username', element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
+  { path: '/user/:id', element: <ProtectedRoute><Profile /></ProtectedRoute> },
   { path: '/complete-profile', element: <ProtectedRoute><CompleteProfile /></ProtectedRoute> },
   { path: '/ranking-followers', element: <ProtectedRoute><Leaderboard /></ProtectedRoute> },
   { path: '/profile/edit', element: <ProtectedRoute><PG_Edicao_Perfil /></ProtectedRoute> }

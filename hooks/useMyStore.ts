@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
 import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { screenService } from '../ServiçosFrontend/ServiçoDeTelas/screenService.js';
 import { BusinessDashboardData } from '../types';
 

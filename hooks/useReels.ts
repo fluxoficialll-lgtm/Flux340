@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Reel, Comment, User } from '../types';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 
 const IS_SIMULATING = localStorage.getItem('isSimulating') === 'true';
 

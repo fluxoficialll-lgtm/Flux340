@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // CORREÇÃO: A importação foi alterada para usar a sintaxe de importação padrão.
 import ServiçoPublicacaoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { contentSafetyService } from '../ServiçosFrontend/ServiçoDeSegurançaDeConteúdo/contentSafetyService.js';
 import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import { DadosCriacaoPost, ErrosCriacaoPost } from '../tipos/types.Post';

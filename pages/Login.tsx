@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import { useAuth } from '../hooks/useAuth';
+import { HookAutenticacao } from '../hooks/Hook.Autenticacao';
 import { useLogin } from '../hooks/useLogin';
 import { LoginInitialCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginInitialCard';
 import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginEmailCard';
@@ -10,7 +10,7 @@ import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/Log
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export const Login: React.FC = () => {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading } = HookAutenticacao();
     const {
         carregando,
         processando,

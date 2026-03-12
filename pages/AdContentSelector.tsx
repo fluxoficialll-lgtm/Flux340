@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAdContentSelector } from '../hooks/useAdContentSelector';
+import { HookCampanhaSeletor } from '../hooks/Hook.Campanha.Seletor';
 import { AdSelectionHeader } from '../Componentes/ads/selection/AdSelectionHeader';
 import { AdContentTabs } from '../Componentes/ads/selection/AdContentTabs';
 import { PostSelectionCard } from '../Componentes/ads/selection/PostSelectionCard';
@@ -13,7 +13,7 @@ export const AdContentSelector: React.FC = () => {
         filteredContent,
         handleSelect,
         navigate
-    } = useAdContentSelector();
+    } = HookCampanhaSeletor();
 
     return (
         <div className="min-h-screen bg-[#0a0c10] text-white font-['Inter'] flex flex-col">

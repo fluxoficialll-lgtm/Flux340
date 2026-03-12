@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth'; // Importa o hook de autenticação
-import { useUserProfile } from '../hooks/useUserProfile';
+import { HookAutenticacao } from '../hooks/Hook.Autenticacao';
+import { HookPerfilProprio } from '../hooks/Hook.Perfil.Proprio';
+import { HookPerfilTerceiro } from '../hooks/Hook.Perfil.Terceiro';
 
 import { CabecalhoPerfil } from '../Componentes/ComponentesPerfilProprio/CabecalhoPerfil';
 import { CartaoDeInformacoesDoPerfil } from '../Componentes/ComponentesPerfilProprio/CartaoDeInformacoesDoPerfil';
@@ -12,90 +13,53 @@ import { ModalListaDeSeguidores } from '../Componentes/ComponentesPerfilProprio/
 import { AvatarPreviewModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 import { LoadingScreen } from '../Componentes/ComponenteDeInterfaceDeUsuario/LoadingScreen';
 
-// Importando as grades
 import { GradeDePostagens } from '../Componentes/ComponentesPerfilProprio/Grade.Postagens';
 import { GradeDeProdutos } from '../Componentes/ComponentesPerfilProprio/Grade.Produtos';
 import { GradeDeFotos } from '../Componentes/ComponentesPerfilProprio/Grade.Fotos';
 import { GradeDeReels } from '../Componentes/ComponentesPerfilProprio/Grade.Reels';
 
-export const Profile = () => {
-    const { id: paramId } = useParams<{ id: string }>(); // Pega o ID do usuário da URL
-    const { user: loggedInUser } = useAuth(); // Pega o usuário logado
-
-    // Se não houver ID na URL, usa o ID do usuário logado
-    const userId = paramId || loggedInUser?.id;
-
-    const { profile, isLoading, error, handleFollow } = useUserProfile(userId);
+const ProfilePageContent = ({ isOwnProfile, userId }) => {
+    const hookResult = isOwnProfile ? HookPerfilProprio() : HookPerfilTerceiro(userId);
+    const { profile, isLoading, error, handleFollow } = hookResult as any;
 
     const [activeTab, setActiveTab] = useState('posts');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
-    const [modalUsers, setModalUsers] = useState([]);
-
-    // Dados mock para as grades
-    const mockPosts = [{ id: '1', type: 'photo', src: 'https://source.unsplash.com/random/500x500?sig=1' }];
-    const mockProducts = [{ id: '1', name: 'Produto', price: 'R$ 99', image: 'https://source.unsplash.com/random/400x400?sig=10' }];
-    const mockPhotos = [{ id: '1', src: 'https://source.unsplash.com/random/500x500?sig=20' }];
-    const mockReels = [{ id: '1', thumbnail: 'https://source.unsplash.com/random/270x480?sig=30' }];
+    const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
 
     const handleFollowersClick = () => {
         setModalTitle('Seguidores');
-        setModalUsers([]);
         setIsModalOpen(true);
     };
 
     const handleFollowingClick = () => {
         setModalTitle('Seguindo');
-        setModalUsers([]);
         setIsModalOpen(true);
     };
 
-    if (isLoading || !userId) {
-        return <LoadingScreen />;
-    }
-
-    if (error) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-black text-white">
-                <p>Erro ao carregar o perfil: {error}</p>
-            </div>
-        );
-    }
-
-    if (!profile) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-black text-white">
-                <p>Perfil não encontrado.</p>
-            </div>
-        );
-    }
-
-    // Determina se o perfil sendo visto é o do próprio usuário logado
-    const isOwnProfile = loggedInUser?.id === profile.id;
+    if (isLoading) return <LoadingScreen />;
+    if (error) return <div className="flex items-center justify-center h-screen bg-black text-white"><p>Erro: {error}</p></div>;
+    if (!profile) return <div className="flex items-center justify-center h-screen bg-black text-white"><p>Perfil não encontrado.</p></div>;
 
     return (
         <div className="h-[100dvh] bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
-            <style>{`
-                main { flex-grow: 1; overflow-y: auto; padding-top: 80px; padding-bottom: 100px; }
-            `}</style>
+            <CabecalhoPerfil username={profile.nickname || profile.name} isOwnProfile={isOwnProfile} />
 
-            <CabecalhoPerfil username={profile.nickname} isOwnProfile={isOwnProfile} />
-
-            <main className="flex-grow w-full overflow-y-auto no-scrollbar">
-                <div style={{width:'100%', maxWidth:'500px', margin:'0 auto', paddingTop:'10px'}}>
+            <main className="flex-grow w-full overflow-y-auto no-scrollbar pt-[80px] pb-[100px]">
+                <div className="w-full max-w-[500px] mx-auto pt-2.5">
                     <CartaoDeInformacoesDoPerfil 
-                        avatar={profile.avatar}
+                        avatar={profile.photo_url}
                         nickname={profile.nickname}
-                        username={`@${profile.username}`}
+                        username={`@${profile.name}`}
                         bio={profile.bio}
                         website={profile.website}
-                        stats={profile.stats}
+                        stats={{ posts: profile.posts_count, followers: profile.followers_count, following: profile.following_count }}
                         isFollowing={profile.isFollowing}
-                        onFollowClick={handleFollow}
+                        onFollowClick={isOwnProfile ? undefined : handleFollow}
                         onFollowersClick={handleFollowersClick}
                         onFollowingClick={handleFollowingClick}
-                        onAvatarClick={() => {}}
-                        isOwnProfile={isOwnProfile} // Passa a informação se é o perfil próprio
+                        onAvatarClick={() => setAvatarPreviewOpen(true)}
+                        isOwnProfile={isOwnProfile}
                     />
                 </div>
 
@@ -103,11 +67,11 @@ export const Profile = () => {
                     <CardCategoriasPerfil 
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
-                        hasProducts={mockProducts.length > 0} // Usando mock data por enquanto
+                        hasProducts={(profile.products || []).length > 0}
                     />
                 </div>
 
-                <div style={{width:'100%', maxWidth:'500px', margin:'0 auto', paddingBottom: '100px'}}>
+                <div className="w-full max-w-[500px] mx-auto pb-[100px]">
                     <div className="tab-content mt-4">
                         {activeTab === 'posts' && <GradeDePostagens posts={profile.posts || []} />}
                         {activeTab === 'products' && <GradeDeProdutos products={profile.products || []} />}
@@ -122,11 +86,34 @@ export const Profile = () => {
             <ModalListaDeSeguidores 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
-                users={modalUsers} 
+                users={[] /* TODO: Fetch users */} 
                 title={modalTitle} 
             />
 
-            <AvatarPreviewModal isOpen={false} imageSrc="" username="" />
+            <AvatarPreviewModal 
+                isOpen={avatarPreviewOpen} 
+                onClose={() => setAvatarPreviewOpen(false)} 
+                imageSrc={profile.photo_url} 
+                username={profile.nickname}
+            />
         </div>
     );
-};
+}
+
+export const Profile = () => {
+    const { id: paramId } = useParams<{ id: string }>();
+    const { user: loggedInUser } = HookAutenticacao();
+    
+    // If there is no paramId, it's the user's own profile.
+    // If paramId is present, we check if it matches the logged-in user's id.
+    const isOwnProfile = !paramId || (loggedInUser && paramId === loggedInUser.id);
+    const userId = isOwnProfile ? loggedInUser?.id : paramId;
+
+    if (!userId) {
+        // This can happen if the profile is own but the user is not logged in.
+        // Or if there is no paramId.
+        return <LoadingScreen /> // Or a login prompt
+    }
+
+    return <ProfilePageContent isOwnProfile={isOwnProfile} userId={userId} />;
+}; 

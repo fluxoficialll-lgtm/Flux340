@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { groupSystem } from '../../../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
-import { authService } from '../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 // O serviço de simulação é importado, mas não possui o método subscribe.
 import { servicoDeSimulacao } from '@/ServiçosFrontend/ServiçoDeSimulação';
 import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';

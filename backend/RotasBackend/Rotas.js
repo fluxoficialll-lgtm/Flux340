@@ -19,6 +19,9 @@ import rotasComentariosMarketplace from './Rotas.Publicacao.Comentarios.Marketpl
 import rotasPublicacaoReels from './Rotas.Publicacao.Reels.js';
 import rotasComentariosReels from './Rotas.Publicacao.Comentarios.Reels.js'; // Nome corrigido
 
+//Conversas
+import rotasConversas from './Rotas.Conversas.js';
+
 // --- Rotas de Grupos (Legado ou Futuro) ---
 import rotasCriacaoGrupoPublico from './Rotas.Criacao.Grupo.Publico.js';
 import rotasCriacaoGrupoPrivado from './Rotas.Criacao.Grupo.Privado.js';
@@ -50,6 +53,9 @@ router.use('/marketplace/comments', rotasComentariosMarketplace); // Rota para e
 // Reels
 router.use('/reels', rotasPublicacaoReels); // Rota principal para reels e comentários aninhados
 router.use('/reels/comments', rotasComentariosReels); // Rota para editar/deletar comentários
+
+//Conversas
+router.use('/conversas', rotasConversas);
 
 // --- Rotas Adicionais ---
 router.use('/groups/public', rotasCriacaoGrupoPublico);

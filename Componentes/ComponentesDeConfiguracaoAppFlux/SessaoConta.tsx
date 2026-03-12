@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ItemConfiguracao } from './ItemConfiguracao';
-import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { ModalDeSelecaoDeIdioma, IDIOMAS } from './ModalDeSelecaoDeIdioma';
 import { preferenceService } from '../../ServiçosFrontend/ServiçoDePreferências/preferenceService.js';
 

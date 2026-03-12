@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { systemaRelacaoUsuarios } from '../ServiçosFrontend/ServiçoDeRelacionamento/Sistema.Relação.Usuários.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 import { User } from '../types';
 

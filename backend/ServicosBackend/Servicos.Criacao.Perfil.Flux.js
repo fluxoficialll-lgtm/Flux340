@@ -1,62 +1,64 @@
 
-// backend/ServicosBackend/Servicos.Criação.Perfil.Flux.js
+// backend/ServicosBackend/Servicos.Criacao.Perfil.Flux.js
 
-import repositorioCriacaoPerfil from '../Repositorios/Repositorio.Criacao.Perfil.Flux.js';
-import ServicoAuditoriaCriarPerfil from './Servico.Auditoria.Criar.Perfil.js';
+import repositorio from '../Repositorios/Repositorio.Criacao.Perfil.Flux.js';
+import servicoAuditoria from './Servico.Auditoria.Criar.Perfil.js';
+
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+}
 
 const PossibilidadeBuscarPerfil = async (userId) => {
-    // Esta função permanece, caso seja necessária em outro lugar
-    return await repositorioCriacaoPerfil.PossibilidadeBuscarUsuarioPorId(userId);
+    if (!userId) {
+        throw new AppError('ID do usuário não fornecido.', 400);
+    }
+    const perfil = await repositorio.PossibilidadeBuscarUsuarioPorId(userId);
+    if (!perfil) {
+        throw new AppError('Perfil não encontrado.', 404);
+    }
+    return perfil;
 };
 
-const PossibilidadeAtualizarPerfil = async (userId, profileData, requestingUser) => {
-    const auditoria = ServicoAuditoriaCriarPerfil;
-    auditoria.iniciarProcesso(userId, requestingUser);
-
-    const temPermissao = userId === requestingUser.id;
-    auditoria.validacaoDePermissao(userId, requestingUser.id, temPermissao);
-    
-    if (!temPermissao) {
-        const erro = new Error('Acesso negado. Você não tem permissão para atualizar este perfil.');
-        auditoria.falhaNaGravacao(userId, erro, profileData);
-        throw erro;
+const PossibilidadeAtualizarPerfil = async (userId, profileData, user) => {
+    if (!user || user.id !== userId) {
+        throw new AppError('Não autorizado a atualizar este perfil.', 403);
     }
 
-    const { name, nickname } = profileData;
-    const isProfileCompleted = !!(name && name.trim() && nickname && nickname.trim());
-    
-    const dataToUpdate = {
-        ...profileData,
-        profile_completed: isProfileCompleted
-    };
-
-    try {
-        auditoria.tentativaDeGravacao(userId, dataToUpdate);
-        
-        // CORREÇÃO: Chamando a função de upsert correta no repositório
-        const perfilAtualizado = await repositorioCriacaoPerfil.PossibilidadeAtualizarPerfil(userId, dataToUpdate);
-        
-        auditoria.sucessoNaGravacao(userId, perfilAtualizado);
-
-        return perfilAtualizado;
-
-    } catch (error) {
-        auditoria.falhaNaGravacao(userId, error, dataToUpdate);
-        throw error; 
+    const perfilAtual = await repositorio.PossibilidadeBuscarUsuarioPorId(userId);
+    if (!perfilAtual) {
+        // Se não houver perfil, cria um novo em vez de lançar um erro.
+        console.log(`[Serviço] Nenhum perfil existente para o usuário ${userId}. Um novo será criado.`);
     }
+
+    const perfilAtualizado = await repositorio.PossibilidadeAtualizarPerfil(userId, profileData);
+
+    // Auditoria da atualização do perfil
+    servicoAuditoria.registrar('UPDATE', user.id, 'user_profiles', perfilAtualizado.id, perfilAtual, perfilAtualizado);
+
+    return perfilAtualizado;
 };
 
-const PossibilidadeDeletarPerfil = async (userId, requestingUser) => {
-    const temPermissao = userId === requestingUser.id;
-    if (!temPermissao) {
-        throw new Error('Acesso negado. Você não tem permissão para deletar este perfil.');
+const PossibilidadeDeletarPerfil = async (userId, user) => {
+    if (!user || user.id !== userId) {
+        throw new AppError('Não autorizado a deletar este perfil.', 403);
     }
-    // A função de deletar pode continuar como está, se existir no repositório
-    return await repositorioCriacaoPerfil.PossibilidadeDeletarPerfilPorIdUsuario(userId);
+
+    const perfilDeletado = await repositorio.PossibilidadeDeletarPerfil(userId);
+    if (!perfilDeletado) {
+        throw new AppError('Perfil a ser deletado não encontrado.', 404);
+    }
+
+    // Auditoria da deleção do perfil
+    servicoAuditoria.registrar('DELETE', user.id, 'user_profiles', perfilDeletado.id, perfilDeletado, null);
+
+    return perfilDeletado;
 };
 
 export default {
     PossibilidadeBuscarPerfil,
     PossibilidadeAtualizarPerfil,
-    PossibilidadeDeletarPerfil,
+    PossibilidadeDeletarPerfil
 };

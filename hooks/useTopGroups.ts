@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
 export const useTopGroups = () => {
   // CORREÇÃO: O método correto é `getCurrentUser`, que retorna um objeto.

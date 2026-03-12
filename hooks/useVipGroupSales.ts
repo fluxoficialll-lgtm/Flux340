@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 // CORREÇÃO: A importação do groupService foi removida.
 // import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 // import { vipSalesTracker } from '../ServiçosFrontend/pixel/trackers/VipSalesTracker';
 // import { VipPlaybackController } from '../ServiçosFrontend/real/vip/VipPlaybackController';
 import { useVipPricing } from './useVipPricing';

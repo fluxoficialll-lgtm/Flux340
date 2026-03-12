@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 // CORREÇÃO: A importação do groupService foi removida.
 // import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
 import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
@@ -10,7 +10,7 @@ import { Group } from '../tipos/types.Criacao.Grupo.Publico';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { AdFlowStep } from '../Componentes/ads/constants/AdConstants';
 
-export const useAdCampaignFlow = () => {
+export const HookCampanha = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { showAlert } = useModal();

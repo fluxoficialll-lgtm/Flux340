@@ -1,15 +1,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
-// CORREÇÃO: A importação foi atualizada para usar o serviço de autenticação real.
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { User } from '../tipos/types.Usuario'; // Caminho corrigido para o tipo User
 
-export const useAuth = () => {
+export const HookAutenticacao = () => {
   const [user, setUser] = useState<User | null>(() => authService.getCurrentUser());
   const [loading, setLoading] = useState(true);
 
   const handleAuthChange = useCallback(() => {
-    console.log('[useAuth] Detectada mudança de autenticação. Atualizando o usuário.');
+    console.log('[HookAutenticacao] Detectada mudança de autenticação. Atualizando o usuário.');
     setUser(authService.getCurrentUser());
   }, []);
 

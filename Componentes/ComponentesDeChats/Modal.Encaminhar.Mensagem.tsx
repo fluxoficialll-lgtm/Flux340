@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { groupSystem } from '../../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos';
 import { chatService } from '../../ServiçosFrontend/ServiçoDeChat/chatService';
-import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../../ServiçosFrontend/ServiçoDeAutenticação/authService';
 
 interface Conversation {
   id: string;

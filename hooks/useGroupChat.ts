@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VirtuosoHandle } from 'react-virtuoso';
 import { Group, Message } from '../tipos'; 
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 

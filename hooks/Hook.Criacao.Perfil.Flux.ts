@@ -1,15 +1,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { DadosEntradaRegistro, ErrosRegistro } from '../tipos';
 import { ErroSenha } from '../tipos';
 
-export const useRegister = () => {
+export const useHookCriacaoPerfilFlux = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Estado unificado para o formulário
     const [dados, setDados] = useState<DadosEntradaRegistro>({
         email: '',
         senha: '',
@@ -18,12 +17,10 @@ export const useRegister = () => {
         indicadoPor: undefined,
     });
 
-    // Estado da interface do usuário
     const [errors, setErrors] = useState<ErrosRegistro>({});
     const [loading, setLoading] = useState(false);
     const [isValid, setIsValid] = useState(false);
 
-    // Função genérica para atualizar campos do formulário
     const updateField = (key: keyof DadosEntradaRegistro, value: string | boolean) => {
         setDados((prev) => ({ ...prev, [key]: value }));
     };

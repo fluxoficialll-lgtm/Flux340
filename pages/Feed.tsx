@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useFeed } from '../hooks/useFeed';
+import { HookFeed } from '../hooks/Hook.Feed';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
@@ -13,11 +13,10 @@ import { ContainerFeedGrupo } from '../Componentes/ComponentesDeFeed/Container.F
 
 export const Feed: React.FC = () => {
   const {
-    scrollContainerRef, loaderRef, posts, loading, hasMore, currentUserId, uiVisible,
-    activeLocationFilter, isMenuOpen, setIsMenuOpen, handleContainerScroll,
-    handlePostLike, handlePostDelete, handlePostVote, handlePostShare, handleCtaClick,
-    navigate
-  } = useFeed();
+    posts, loading, hasMore, lastPostElementRef, scrollContainerRef, currentUserId, 
+    uiVisible, activeLocationFilter, isMenuOpen, setIsMenuOpen, handleContainerScroll,
+    handlePostLike, handlePostDelete, handlePostVote, handlePostShare, handleCtaClick, navigate
+  } = HookFeed();
   const { showConfirm } = useModal();
 
   const handleDeleteRequest = async (id: string, e: React.MouseEvent) => {
@@ -86,7 +85,7 @@ export const Feed: React.FC = () => {
                 </div>
             )}
 
-            <div ref={loaderRef} className="w-full h-24 flex items-center justify-center py-6">
+            <div ref={lastPostElementRef} className="w-full h-24 flex items-center justify-center py-6">
                 {loading && <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>}
                 {!loading && !hasMore && posts.length > 0 && (
                     <div className="text-gray-500 text-sm font-medium opacity-60">• Fim do Feed •</div>

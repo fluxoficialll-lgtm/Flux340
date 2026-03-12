@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAdCampaignFlow } from '../hooks/useAdCampaignFlow';
+import { HookCampanha } from '../hooks/Hook.Campanha';
 import { CTA_OPTIONS_CONFIG } from '../Componentes/ads/constants/AdConstants';
 
 // Layout e Cabeçalho
@@ -25,7 +25,7 @@ export const AdPlacementSelector: React.FC = () => {
     setDestinationMode,
     interestInput,
     setInterestInput,
-    fileInputRef,
+    fileInputref,
     isPlacementLocked,
     handleInputChange,
     handlePlacementToggle,
@@ -35,7 +35,7 @@ export const AdPlacementSelector: React.FC = () => {
     nextStep,
     prevStep,
     submitCampaign
-  } = useAdCampaignFlow();
+  } = HookCampanha();
 
   return (
     <div className="min-h-screen bg-[#0a0c10] text-white font-['Inter'] flex flex-col overflow-hidden">
@@ -255,7 +255,7 @@ export const AdPlacementSelector: React.FC = () => {
                     setDestinationMode={setDestinationMode}
                     onInputChange={handleInputChange}
                     onNestedChange={(p, f, v) => handleInputChange(p, { ...campaign[p] as any, [f]: v })}
-                    onPlacementCreativeChange={(p, u, t) => handleInputChange('placementCreatives', { ...campaign.placementCreatives, [p]: { mediaUrl: u, mediaType: t } })}
+                    onPlacementCreativeChange={(p, u, t) => handleInputChange('placementCreativas', { ...campaign.placementCreatives, [p]: { mediaUrl: u, mediaType: t } })}
                     myGroups={myGroups}
                     selectedContent={selectedContent}
                     fileInputRef={fileInputRef}

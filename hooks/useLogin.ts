@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // CORREÇÃO: A importação foi atualizada para usar o serviço de autenticação real.
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js'; 
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js'; 
 import { trackingService } from '../ServiçosFrontend/ServiçoDeRastreamento/ServiçoDeRastreamento.js';
 
 export const useLogin = () => {

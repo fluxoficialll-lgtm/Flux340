@@ -1,7 +1,7 @@
 // ServiçosFrontend/ServicoLogs/Servico.Auditoria.Criar.Perfil.js
 
 import ServicoDeLog from './ServicoDeLog.js';
-import { authService } from '../ServiçoDeAutenticação/authService';
+import authService from '../ServiçoDeAutenticação/authService';
 
 const CONTEXTO = "CriarPerfil";
 

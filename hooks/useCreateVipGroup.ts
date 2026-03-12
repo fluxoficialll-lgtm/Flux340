@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import ServiçoCriaçãoGrupoPago from '../ServiçosFrontend/ServiçoDeGrupos/Criação.Grupo.Pago.js';
 import { CurrencyType, DadosGrupoVip, TipoMidiaVip, ErrosCriacaoGrupoVip, ConfiguracaoAcesso } from '../tipos';
 

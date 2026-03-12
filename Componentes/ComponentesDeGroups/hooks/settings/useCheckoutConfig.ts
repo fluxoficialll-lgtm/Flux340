@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 // CORREÇÃO: A importação do groupService foi removida.
 // import { groupService } from '../../../../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
-import { authService } from '../../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { useModal } from '../../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Group, CheckoutConfig } from '../../../../types';
 import { PROVIDER_METHODS } from '../../Componentes/ComponentesDeConfiguracoesDeGrupo/ComponentesDeConfiguracoesDeCheckout/CheckoutMethodData';

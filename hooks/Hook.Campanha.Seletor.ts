@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
 import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post } from '../types';
 
-export const useAdContentSelector = () => {
+export const HookCampanhaSeletor = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'posts' | 'reels'>('posts');
     const [content, setContent] = useState<Post[]>([]);

@@ -4,7 +4,7 @@
  * Unifica a lógica de criação, busca e atualização de perfis, usando endpoints seguros (/me).
  */
 
-import { authService } from './authService.js';
+import authService from './authService.js';
 
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profiles`;
 

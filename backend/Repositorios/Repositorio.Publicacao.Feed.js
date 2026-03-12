@@ -14,38 +14,42 @@ const criar = async (postData) => {
     return rows[0];
 };
 
-const obterTodos = async ({ limit = 10, cursor, locationFilter, allowAdultContent = false }) => {
-    const params = [];
-    const whereClauses = ['p.parent_post_id IS NULL'];
+const obterTodos = async ({ limit = 10, cursor, locationFilter, allowAdultContent = 'false' }) => {
+    let params = [];
+    let whereClauses = ['p.parent_post_id IS NULL'];
 
-    // Validação e sanitização do cursor
-    const numericCursor = cursor ? parseInt(cursor, 10) : null;
-    if (numericCursor !== null && isNaN(numericCursor)) {
-        throw new Error('O cursor fornecido é inválido.');
+    if (cursor) {
+        const numericCursor = parseInt(cursor, 10);
+        if (isNaN(numericCursor)) {
+            throw new Error('Cursor inválido.');
+        }
+        params.push(numericCursor);
+        whereClauses.push(`p.id < $${params.length}`);
     }
 
     if (locationFilter && locationFilter !== 'Global') {
         params.push(locationFilter);
-        whereClauses.push(`up.location = $${params.length}`);
+        whereClauses.push(`up.country = $${params.length}`);
     }
-
-    if (allowAdultContent === 'false' || allowAdultContent === false) {
+    
+    if (allowAdultContent === 'false') {
         whereClauses.push('p.is_adult_content = false');
-    }
-
-    if (numericCursor) {
-        params.push(numericCursor);
-        whereClauses.push(`p.id < $${params.length}`);
     }
 
     params.push(parseInt(limit, 10) || 10);
     const limitParamIndex = params.length;
 
     const query = `
-        SELECT p.*, u.username, u.avatar_url, up.location
+        SELECT 
+            p.*, 
+            u.username, 
+            u.avatar_url, 
+            up.name, 
+            up.nickname, 
+            up.country
         FROM posts p
         JOIN users u ON p.author_id = u.id
-        LEFT JOIN user_profiles up ON u.id = up.user_id
+        LEFT JOIN user_profiles up ON p.author_id = up.user_id
         WHERE ${whereClauses.join(' AND ')}
         ORDER BY p.id DESC
         LIMIT $${limitParamIndex};
@@ -63,10 +67,10 @@ const obterTodos = async ({ limit = 10, cursor, locationFilter, allowAdultConten
 
 const obterPorId = async (postId) => {
     const query = `
-        SELECT p.*, u.username, u.avatar_url, up.location 
+        SELECT p.*, u.username, u.avatar_url, up.name, up.nickname
         FROM posts p
         JOIN users u ON p.author_id = u.id
-        LEFT JOIN user_profiles up ON u.id = up.user_id
+        LEFT JOIN user_profiles up ON p.author_id = up.user_id
         WHERE p.id = $1;
     `;
     const { rows } = await pool.query(query, [postId]);

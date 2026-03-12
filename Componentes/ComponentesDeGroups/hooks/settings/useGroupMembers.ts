@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Group, User, GroupRole } from '../../../../types';
 import { groupSystem } from '../../../../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
-import { authService } from '../../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../../../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { servicoDeSimulacao } from '@/ServiçosFrontend/ServiçoDeSimulação';
 
 export const useGroupMembers = (group: Group | null) => {

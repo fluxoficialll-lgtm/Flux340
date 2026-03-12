@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
 import { ModalPreviaSyncPay } from './Modal.Previa.SyncPay';
 import { ModalPreviaStripe } from './Modal.Previa.Stripe';

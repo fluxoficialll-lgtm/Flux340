@@ -5,7 +5,7 @@ import { ModalProvider } from './Componentes/ComponenteDeInterfaceDeUsuario/Moda
 import { GlobalTracker } from './Componentes/layout/GlobalTracker';
 import { DeepLinkHandler } from './Componentes/layout/DeepLinkHandler';
 import AppRoutes from './routes/AppRoutes';
-import { useAuthSync } from './hooks/useAuthSync';
+import { HookAutenticacaoSincronizacao } from './hooks/Hook.Autenticacao.Sincronizacao';
 // A importação do ControleDeSimulacao foi removida para garantir o isolamento total.
 import MonitorDeErrosDeInterface from './Componentes/ComponentesDePrevençãoDeErros/MonitorDeErrosDeInterface.jsx';
 
@@ -26,7 +26,7 @@ const SistemaNucleoApp: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
 
-  useAuthSync();
+  HookAutenticacaoSincronizacao();
 
   useEffect(() => {
     const initializeApp = async () => {

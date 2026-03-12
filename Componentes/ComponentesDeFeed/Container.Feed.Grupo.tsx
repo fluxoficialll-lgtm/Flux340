@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Post } from '../../types/Post';
 import { AvatarPreviewModal } from '../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 import { UserBadge } from '../ComponenteDeInterfaceDeUsuario/user/UserBadge';
-import { useUserProfile } from '../../hooks/useUserProfile';
+import { HookPerfilTerceiro } from '../../hooks/Hook.Perfil.Terceiro';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -25,14 +25,14 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
     
     const [showMenu, setShowMenu] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const { profile: userData, isLoading } = useUserProfile(post.author.username, post.author.id);
+    const { profile: userData, isLoading } = HookPerfilTerceiro(post.author.id);
 
     const isOwner = post.authorId === currentUserId;
     const userHasLiked = post.likedBy?.includes(currentUserId || '') || false;
 
     const handleAvatarClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (userData?.profile?.photoUrl) {
+        if (userData?.photo_url) {
             setIsPreviewOpen(true);
         }
     };
@@ -41,7 +41,7 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
         ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: ptBR })
         : 'agora mesmo';
         
-    const displayName = userData?.profile?.nickname || userData?.profile?.name || post.author.username;
+    const displayName = userData?.nickname || userData?.name || post.author.username;
 
     const handleJoinClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -60,7 +60,7 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
             <div className="flex items-center justify-between mb-3 relative px-4 pt-4">
                 <div className="flex items-center gap-3">
                     <UserBadge 
-                        avatarUrl={userData?.profile?.photoUrl || post.author.avatar}
+                        avatarUrl={userData?.photo_url || post.author.avatar}
                         nickname={displayName}
                         handle={post.author.username}
                         isVetoed={userData?.flags?.isVetoed ?? false}
@@ -98,7 +98,7 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
                         </>
                     )}
                 </div>
-                <AvatarPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} imageSrc={userData?.profile?.photoUrl || post.author.avatar || ''} username={displayName} />
+                <AvatarPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} imageSrc={userData?.photo_url || post.author.avatar || ''} username={displayName} />
             </div>
 
             {/* Conteúdo do Grupo */}

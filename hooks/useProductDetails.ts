@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 import { MarketplaceItem, Comment as CommentType } from '../types';
 import { useMarketplaceItemActions } from './useMarketplaceItemActions';

@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 // CORREÇÃO: A importação foi atualizada para usar o serviço de autenticação real.
 // A lógica de simulação agora é tratada globalmente via interceptação de fetch,
 // então os componentes não precisam mais saber sobre mocks ou factories.
-import { authService } from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Comentario, DadosCriacaoComentario, ErrosComentario } from '../tipos';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 // Presumindo a existência de um serviço para comentários, seguindo o padrão do projeto
 import ServiçoComentarios from '../ServiçosFrontend/ServiçoDeComentários/index.js';
 

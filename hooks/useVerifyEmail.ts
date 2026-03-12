@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
 export const useVerifyEmail = () => {
   const navigate = useNavigate();
@@ -12,7 +12,8 @@ export const useVerifyEmail = () => {
   const [canResend, setCanResend] = useState(false);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
-  const email = authService.getCurrentUserEmail();
+  const user = authService.getCurrentUser();
+  const email = user?.email;
 
   useEffect(() => {
     if (!email) {
@@ -47,8 +48,8 @@ export const useVerifyEmail = () => {
       navigate('/complete-profile');
     } catch (err: any) {
       setError(err.message || 'Código inválido ou expirado.');
-      setCode(Array(6).fill('')); // Limpa o código em caso de erro
-      inputsRef.current[0]?.focus(); // Foca no primeiro campo novamente
+      setCode(Array(6).fill(''));
+      inputsRef.current[0]?.focus();
     } finally {
       setLoading(false);
     }
@@ -63,10 +64,9 @@ export const useVerifyEmail = () => {
 
     try {
       await authService.sendVerificationCode(email);
-      // Opcional: Adicionar uma mensagem de sucesso para o reenvio
     } catch (err: any) {
       setError(err.message || 'Falha ao reenviar o código.');
-      setCanResend(true); // Permite tentar novamente se falhar
+      setCanResend(true);
     }
   }, [canResend, email]);
 
