@@ -24,6 +24,10 @@ const criarPost = async (postData, user) => {
 };
 
 const obterTodosOsPosts = async (options) => {
+    // Validação para o cursor, que deve ser um número
+    if (options.cursor && isNaN(parseInt(options.cursor, 10))) {
+        throw new AppError('O cursor fornecido é inválido.', 400);
+    }
     return await repositorioPublicacaoFeed.obterTodos(options);
 };
 
