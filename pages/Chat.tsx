@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useChat } from '../hooks/useChat';
+import { HookConversa } from '../hooks/Hook.Conversa';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Virtuoso } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
@@ -18,7 +18,7 @@ export const Chat: React.FC = () => {
     isUploading, currentUserEmail, navigate, handleSendMessage, handleToggleSelection, handleStartSelection,
     deleteSelectedMessages, handleEdit, handlePin, handleCopy, handleForward, handleReply,
     isForwardModalOpen, setIsForwardModalOpen, handleConfirmForward
-  } = useChat();
+  } = HookConversa();
 
   const { showOptions } = useModal();
 

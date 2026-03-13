@@ -7,7 +7,7 @@ import { usePostActions } from './usePostActions';
 // CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
 import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
-export const usePostDetails = () => {
+export const HookDetalhesPost = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   

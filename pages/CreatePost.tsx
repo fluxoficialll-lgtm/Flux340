@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useCreatePost } from '../hooks/useCreatePost';
+import { HookCriarPost } from '../hooks/Hook.Criar.Post';
 
 export const CreatePost: React.FC = () => {
   // A desestruturação foi completamente atualizada para corresponder ao hook refatorado.
@@ -29,7 +29,7 @@ export const CreatePost: React.FC = () => {
     states,
     cities,
     navigate
-  } = useCreatePost();
+  } = HookCriarPost();
 
   // Variáveis relacionadas a grupos foram removidas.
 

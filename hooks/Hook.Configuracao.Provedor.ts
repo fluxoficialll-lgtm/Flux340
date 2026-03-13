@@ -14,7 +14,7 @@ import { Group } from '../types';
  * NOTA: A funcionalidade de grupo foi removida. Este hook foi mantido mas neutralizado
  * para preservar a lógica de integração com os provedores de pagamento.
  */
-export const useProviderConfig = () => {
+export const HookConfiguracaoProvedor = () => {
     const { groupId } = useParams<{ groupId: string }>(); // Mantido para referência, pode ser alterado para userId
     const [group, setGroup] = useState<Group | null>(null);
     const [activeProviderId, setActiveProviderId] = useState<string | null>(null);

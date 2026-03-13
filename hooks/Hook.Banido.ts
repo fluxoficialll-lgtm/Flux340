@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
-export const useBanned = () => {
+export const HookBanido = () => {
     const navigate = useNavigate();
     const [reason, setReason] = useState('Violação das diretrizes da comunidade.');
     const user = authService.getCurrentUser();

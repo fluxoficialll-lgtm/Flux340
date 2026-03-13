@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useLeaderboard } from '../hooks/useLeaderboard';
+import { HookQuadroDeLideres } from '../hooks/Hook.Quadro.De.Lideres';
 import { PodiumItem } from '../Componentes/ComponentesDeLeaderboard/Componentes/PodiumItem';
 import { LeaderboardListItem } from '../Componentes/ComponentesDeLeaderboard/Componentes/LeaderboardListItem';
 
@@ -12,7 +12,7 @@ export const Leaderboard: React.FC = () => {
     handleBack,
     topThree,
     leaderboardList
-  } = useLeaderboard();
+  } = HookQuadroDeLideres();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-x-hidden">

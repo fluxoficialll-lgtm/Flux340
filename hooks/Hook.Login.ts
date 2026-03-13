@@ -1,14 +1,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// CORREÇÃO: A importação foi atualizada para usar o serviço de autenticação real.
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js'; 
 import { trackingService } from '../ServiçosFrontend/ServiçoDeRastreamento/ServiçoDeRastreamento.js';
 
-export const useLogin = () => {
+export const HookLogin = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [carregando, setCarregando] = useState(true); // Começa como true
+    const [carregando, setCarregando] = useState(true);
     const [processando, setProcessando] = useState(false);
     const [erro, setErro] = useState('');
     const [mostrarFormEmail, setMostrarFormEmail] = useState(false);
@@ -39,18 +38,16 @@ export const useLogin = () => {
         }
     }, [navigate, location]);
 
-    // Efeito APENAS para o lado do cliente
     useEffect(() => {
-        // Só executa no navegador
         if (typeof window !== 'undefined') {
             const user = authService.getCurrentUser();
             if (user && authService.isAuthenticated()) {
                 handleRedirect(user);
             } else {
-                setCarregando(false); // Para de carregar se não estiver autenticado
+                setCarregando(false);
             }
         }
-    }, [handleRedirect]); // handleRedirect é estável
+    }, [handleRedirect]);
 
     const submeterLoginGoogle = useCallback(async (credentialResponse: any) => {
         setProcessando(true);

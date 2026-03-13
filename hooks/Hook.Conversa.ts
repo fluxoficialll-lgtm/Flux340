@@ -15,7 +15,7 @@ const formatLastSeen = (timestamp?: number) => {
     return "Offline";
 };
 
-export const useChat = () => {
+export const HookConversa = () => {
     const navigate = useNavigate();
     const { id: chatId } = useParams<{ id: string }>();
 

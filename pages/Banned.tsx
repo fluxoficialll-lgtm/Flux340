@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { useBanned } from '../hooks/useBanned';
+import { HookBanido } from '../hooks/Hook.Banido';
 
 export const Banned: React.FC = () => {
-    const { reason, handleLogout } = useBanned();
+    const { reason, handleLogout } = HookBanido();
 
     return (
         <div className="h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-white font-['Inter'] p-6 relative overflow-hidden">

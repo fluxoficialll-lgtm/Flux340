@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useCreatePoll } from '../hooks/useCreatePoll';
+import { HookCriarEnquete } from '../hooks/Hook.Criar.Enquete';
 
 export const CreatePoll: React.FC = () => {
   const {
@@ -15,7 +15,7 @@ export const CreatePoll: React.FC = () => {
     handleDurationClick,
     handleCreatePoll,
     handleNavigateBack
-  } = useCreatePoll();
+  } = HookCriarEnquete();
 
   return (
     <div className="h-screen flex flex-col overflow-y-auto overflow-x-hidden font-['Inter']" style={{ background: 'radial-gradient(circle at 5% 5%, #0c0f14, #0a0c10)', color: '#fff' }}>

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
-export const useVerifyEmail = () => {
+export const HookVerificarEmail = () => {
   const navigate = useNavigate();
   const [code, setCode] = useState<string[]>(Array(6).fill(''));
   const [error, setError] = useState('');

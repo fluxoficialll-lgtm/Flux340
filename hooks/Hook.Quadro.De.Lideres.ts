@@ -9,7 +9,7 @@ export interface RankedUser extends User {
     followerCount: number;
 }
 
-export const useLeaderboard = () => {
+export const HookQuadroDeLideres = () => {
   const navigate = useNavigate();
   const [rankedUsers, setRankedUsers] = useState<RankedUser[]>([]);
   const [loading, setLoading] = useState(true);

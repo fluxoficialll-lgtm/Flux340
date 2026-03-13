@@ -5,7 +5,7 @@ import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/m
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { MarketplaceItem } from '../types';
 
-export const useMarketplace = () => {
+export const HookMarketplace = () => {
     const navigate = useNavigate();
     const [activeCategory, setActiveCategory] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');

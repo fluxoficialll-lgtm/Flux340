@@ -3,7 +3,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { HookAutenticacao } from '../hooks/Hook.Autenticacao';
-import { useLogin } from '../hooks/useLogin';
+import { HookLogin } from '../hooks/Hook.Login';
 import { LoginInitialCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginInitialCard';
 import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginEmailCard';
 
@@ -23,7 +23,7 @@ export const Login: React.FC = () => {
         definirSenha,
         submeterLoginEmail,
         submeterLoginGoogle,
-    } = useLogin();
+    } = HookLogin();
 
     if (authLoading) {
         return (

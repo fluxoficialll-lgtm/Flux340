@@ -3,7 +3,7 @@ import React from 'react';
 import { AuthLayout } from '../Componentes/ComponentesDeAuth/AuthLayout';
 import { Input } from '../Componentes/ComponenteDeInterfaceDeUsuario/Input';
 import { Button } from '../Componentes/ComponenteDeInterfaceDeUsuario/Button';
-import { useResetPassword } from '../hooks/useResetPassword';
+import { HookRedefinirSenha } from '../hooks/Hook.Redefinir.Senha';
 
 export const ResetPassword: React.FC = () => {
   const {
@@ -15,7 +15,7 @@ export const ResetPassword: React.FC = () => {
     loading,
     handleSubmit,
     isValid
-  } = useResetPassword();
+  } = HookRedefinirSenha();
 
   return (
     <AuthLayout title="Redefinir Senha" subtitle="Crie uma nova senha">

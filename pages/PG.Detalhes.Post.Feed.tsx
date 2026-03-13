@@ -1,7 +1,7 @@
 
 import { ContainerFeedPadrao } from "../Componentes/ComponentesDeFeed/Container.Feed.Padrao";
 import CabecalhoNavegacao from "../Componentes/cabeçalhos/Cabecalho.Navegacao";
-import { usePostDetails } from "../hooks/usePostDetails";
+import { HookDetalhesPost } from "../hooks/Hook.Detalhes.Post";
 import { ComentarioItem } from "../Componentes/ComponenteDeInterfaceDeUsuario/comments/Card.Comentario.Feed";
 
 // Estrutura do comentário adaptada para o componente ComentarioItem
@@ -29,7 +29,7 @@ const mockComments = [
 ];
 
 export const PG_Detalhes_Post_Feed = () => {
-    const { post, loading, error } = usePostDetails();
+    const { post, loading, error } = HookDetalhesPost();
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen bg-black text-white">Carregando post...</div>;

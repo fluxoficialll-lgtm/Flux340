@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { ErroSenha } from '@/tipos';
 
-export const useResetPassword = () => {
+export const HookRedefinirSenha = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');

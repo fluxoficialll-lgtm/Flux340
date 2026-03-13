@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForgotPassword } from '../hooks/useForgotPassword';
+import { HookEsqueciSenha } from '../hooks/Hook.Esqueci.Senha';
 import { RecoveryEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/RecoveryEmailCard';
 import { CodeVerificationCard } from '../Componentes/ComponentesDeAuth/Componentes/CodeVerificationCard';
 
@@ -23,7 +23,7 @@ export const ForgotPassword: React.FC = () => {
     handleKeyDown,
     handlePaste,
     goBackToEmail,
-  } = useForgotPassword();
+  } = HookEsqueciSenha();
 
   return (
     <div className="h-screen w-full bg-[#0c0f14] text-white font-['Inter'] flex items-center justify-center p-5 relative">

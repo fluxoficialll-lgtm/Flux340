@@ -1,8 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
-export const useSettings = () => {
+export const HookConfiguracoes = () => {
     const [isPrivate, setIsPrivate] = useState(false);
     const [isAdultContent, setIsAdultContent] = useState(() => localStorage.getItem('settings_18_plus') === 'true');
 

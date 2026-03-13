@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useVerifyEmail } from '../hooks/useVerifyEmail';
+import { HookVerificarEmail } from '../hooks/Hook.Verificar.Email';
 import { CodeVerificationCard } from '../Componentes/ComponentesDeAuth/Componentes/CodeVerificationCard';
 
 export const VerifyEmail: React.FC = () => {
@@ -16,7 +16,7 @@ export const VerifyEmail: React.FC = () => {
     handleVerify,
     handleResend,
     handleBack,
-  } = useVerifyEmail();
+  } = HookVerificarEmail();
 
   // Funções de manipulação de input que interagem com o estado do hook
   const handleInputChange = (index: number, value: string) => {

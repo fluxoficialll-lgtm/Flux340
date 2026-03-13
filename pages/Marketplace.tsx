@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useMarketplace } from '../hooks/useMarketplace';
+import { HookMarketplace } from '../hooks/Hook.Marketplace';
 import { MarketplaceHeader } from '../Componentes/ComponentesDeMarketplace/MarketplaceHeader';
 import { MarketplaceSearchBar } from '../Componentes/ComponentesDeMarketplace/MarketplaceSearchBar';
 import { CategoryBar } from '../Componentes/ComponentesDeMarketplace/CategoryBar';
@@ -21,7 +21,7 @@ export const Marketplace: React.FC = () => {
     handleProductClick,
     handleShare,      // Nova função
     handleReport      // Nova função
-  } = useMarketplace();
+  } = HookMarketplace();
 
   return (
     <div className="h-screen flex flex-col font-['Inter'] overflow-hidden bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white">

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 import { Post } from '../types';
 
-export const useReelsSearch = () => {
+export const HookPesquisaReels = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Post[]>([]);

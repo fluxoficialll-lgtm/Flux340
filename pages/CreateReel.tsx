@@ -1,7 +1,7 @@
 
 import React, { useRef } from 'react';
 // O hook agora retorna 'dadosReel' e 'updateField' em vez de estados individuais
-import { useCreateReel } from '../hooks/useCreateReel'; 
+import { HookCriarReel } from '../hooks/Hook.Criar.Reel'; 
 
 export const CreateReel: React.FC = () => {
   // A desestruturação foi atualizada para corresponder ao hook refatorado
@@ -14,7 +14,7 @@ export const CreateReel: React.FC = () => {
     handleFileChange,
     handleSubmit,
     navigate
-  } = useCreateReel();
+  } = HookCriarReel();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 

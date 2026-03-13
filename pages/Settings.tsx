@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
-import { useSettings } from '../hooks/useSettings';
+import { HookConfiguracoes } from '../hooks/Hook.Configuracoes';
 import { Footer } from '../Componentes/layout/Footer';
 import { SessaoConta } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoConta';
 import { SessaoSegurancaEPrivacidade } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoSegurancaEPrivacidade';
@@ -18,7 +18,7 @@ export const Settings: React.FC = () => {
     togglePrivacy, 
     toggleAdultContent, 
     logout 
-  } = useSettings();
+  } = HookConfiguracoes();
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();

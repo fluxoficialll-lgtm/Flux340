@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
-export const useForgotPassword = () => {
+export const HookEsqueciSenha = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);

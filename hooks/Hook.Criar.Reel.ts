@@ -8,7 +8,7 @@ import { DadosCriacaoReel, ErrosCriacaoReel } from '../tipos';
 
 // A referência a 'Group' e 'groupService' foi completamente removida.
 
-export const useCreateReel = () => {
+export const HookCriarReel = () => {
   const navigate = useNavigate();
 
   // O estado não inclui mais o 'groupId'.

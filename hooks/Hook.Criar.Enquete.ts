@@ -6,7 +6,7 @@ import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicaç�
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, PollOption } from '../types';
 
-export const useCreatePoll = (editingPost: Post | null) => {
+export const HookCriarEnquete = (editingPost: Post | null) => {
     const navigate = useNavigate();
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState<PollOption[]>([{ id: '1', text: '' }, { id: '2', text: '' }]);

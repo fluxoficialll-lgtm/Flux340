@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useFeedSearch } from '../hooks/useFeedSearch';
+import { HookPesquisaFeed } from '../hooks/Hook.Pesquisa.Feed';
 import { FeedSearchHeader } from '../Componentes/ComponentesDeFeed/search/FeedSearchHeader';
 import { FeedSearchFilters } from '../Componentes/ComponentesDeFeed/search/FeedSearchFilters';
 import { FeedSearchResults } from '../Componentes/ComponentesDeFeed/search/FeedSearchResults';
@@ -18,7 +18,7 @@ export const FeedSearch: React.FC = () => {
         loading,
         currentUser,
         handleBack,
-    } = useFeedSearch();
+    } = HookPesquisaFeed();
 
     return (
         <div className="h-screen bg-[#0a0c10] text-white font-['Inter'] flex flex-col overflow-hidden">

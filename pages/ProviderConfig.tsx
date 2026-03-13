@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProviderConfig } from '../hooks/useProviderConfig';
+import { HookConfiguracaoProvedor } from '../hooks/Hook.Configuracao.Provedor';
 import { SyncPayCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/SyncPayCard';
 import { StripeCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/StripeCard';
 import { PayPalCard } from '../Componentes/ComponentesDeProvedores/CardsDeConexao/PayPalCard';
@@ -15,7 +15,7 @@ export const ProviderConfig: React.FC = () => {
         handleCredentialsSubmit,
         handleDisconnect,
         handleSelectProvider
-    } = useProviderConfig();
+    } = HookConfiguracaoProvedor();
 
     const handleBack = () => navigate(-1);
 

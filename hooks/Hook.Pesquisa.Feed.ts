@@ -9,7 +9,7 @@ import { Post, User } from '../types';
 export type FeedSearchFilter = 'relevant' | 'recent';
 export type SearchTab = 'posts' | 'users';
 
-export const useFeedSearch = () => {
+export const HookPesquisaFeed = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState<SearchTab>('posts');

@@ -1,7 +1,7 @@
 
 import { useNavigate } from 'react-router-dom';
 
-export const useCreateGroup = () => {
+export const HookCriarGrupo = () => {
   const navigate = useNavigate();
 
   const navigateToPublic = () => navigate('/create-group/public');
