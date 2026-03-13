@@ -14,7 +14,7 @@ interface ErrosComentario {
  * Hook customizado para gerenciar a lógica de comentários para itens do Marketplace.
  * @param itemId O ID do item do marketplace.
  */
-export const useComentariosMarketplace = (itemId: string) => {
+export const HookComentariosMarketplace = (itemId: string) => {
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrosComentario | null>(null);

@@ -6,7 +6,7 @@ import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authServi
 // import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { ServicoDeTransacoes } from '../ServiçosFrontend/ServiçoDeTransacoes/ServiçoDeTransacoes.js';
 
-export const useVipSalesHistory = () => {
+export const HookHistoricoVendasVip = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   

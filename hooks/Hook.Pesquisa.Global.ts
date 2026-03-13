@@ -6,7 +6,7 @@ import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authServi
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 import { User } from '../types';
 
-export const useGlobalSearch = () => {
+export const HookPesquisaGlobal = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState<User[]>([]);

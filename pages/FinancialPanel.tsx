@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useFinancialPanel } from '../hooks/useFinancialPanel';
+import { HookPainelFinanceiro } from '../hooks/Hook.Painel.Financeiro';
 import { TransactionsCard } from '../Componentes/financial/TransactionsCard';
 import { CardSaldoStripe, CardSaldoPayPal, CardSaldoSyncPay } from '../Componentes/ComponentesDeProvedores/CardsSaldo';
 
@@ -20,7 +20,7 @@ export const FinancialPanel: React.FC = () => {
   const {
     selectedFilter, setSelectedFilter, activeProviderName, loading, preferredProvider, currencyStats,
     filters, loadData, handleBack, navigate
-  } = useFinancialPanel();
+  } = HookPainelFinanceiro();
 
   const renderBalanceCard = () => {
     switch (activeProviderName) {

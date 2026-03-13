@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTopGroupsPrivate } from '../hooks/useTopGroupsPrivate';
+import { HookTopGruposPrivados } from '../hooks/Hook.Top.Grupos.Privados';
 import { Group } from '../types';
 
 const PodiumItem: React.FC<{ group: Group, rank: number, onClick: (group: Group) => void }> = ({ group, rank, onClick }) => {
@@ -37,7 +37,7 @@ export const TopGroupsPrivate: React.FC = () => {
     handleGroupAction,
     handleTabNavigation,
     handleBack,
-  } = useTopGroupsPrivate();
+  } = HookTopGruposPrivados();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-x-hidden">

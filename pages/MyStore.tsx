@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useMyStore } from '../hooks/useMyStore';
+import { HookMinhaLoja } from '../hooks/Hook.Minha.Loja';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { ProductStoreList } from '../Componentes/store/ProductStoreList';
 import { CampaignStoreList } from '../Componentes/store/CampaignStoreList';
@@ -16,7 +16,7 @@ export const MyStore: React.FC = () => {
     resumeCampaign,
     deleteCampaign,
     handleBack
-  } = useMyStore();
+  } = HookMinhaLoja();
   const { showConfirm } = useModal();
 
   const handleDeleteProduct = async (id: string, e: React.MouseEvent) => {

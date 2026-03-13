@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import { AdCampaign } from '../types';
 
-export const useCampaignPerformance = () => {
+export const HookDesempenhoCampanha = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     

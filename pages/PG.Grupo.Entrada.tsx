@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useGroupLanding } from '../hooks/useGroupLanding';
+import { HookPaginaGrupo } from '../hooks/Hook.Pagina.Grupo';
 import CabecalhoNavegacao from '../Componentes/cabeçalhos/Cabecalho.Navegacao';
 
 const GroupCardSkeleton = () => (
@@ -33,7 +33,7 @@ const ErrorDisplay = ({ message, onRetry }: { message: string, onRetry: () => vo
 );
 
 export const PG_Grupo_Entrada = () => {
-    const { group, loading, error, handleJoinAction, handleBack } = useGroupLanding();
+    const { group, loading, error, handleJoinAction, handleBack } = HookPaginaGrupo();
 
     const reload = () => window.location.reload();
 

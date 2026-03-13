@@ -12,8 +12,6 @@ const EditGroup = lazy(() => import('../pages/EditGroup').then(m => ({ default: 
 const VipGroupSales = lazy(() => import('../pages/VipGroupSales').then(m => ({ default: m.VipGroupSales })));
 const SuccessBridge = lazy(() => import('../pages/SuccessBridge').then(m => ({ default: m.SuccessBridge })));
 const PGPlataformaHospedagemArquivos = lazy(() => import('../pages/groups/PG.Plataforma.Hospedagem.Arquivos').then(m => ({ default: m.PGPlataformaHospedagemArquivos })));
-const PGGrupoConteudoPastaVendas = lazy(() => import('../pages/groups/PG.Grupo.ConteudoPastaVendas').then(m => ({ default: m.PGGrupoConteudoPastaVendas })));
-const GroupLimits = lazy(() => import('../pages/LimitAndControl').then(m => ({ default: m.GroupLimits })));
 const ManageGroupLinks = lazy(() => import('../pages/ManageGroupLinks').then(m => ({ default: m.ManageGroupLinks })));
 const PGGrupoReceita = lazy(() => import('../pages/groups/PG.Grupo.Receita').then(m => ({ default: m.PGGrupoReceita })));
 const VipSalesHistory = lazy(() => import('../pages/VipSalesHistory').then(m => ({ default: m.VipSalesHistory })));
@@ -36,8 +34,6 @@ export const groupRoutes = [
     { path: '/edit-group/:id', element: <ProtectedRoute><EditGroup /></ProtectedRoute> },
     { path: '/payment-success-bridge/:id', element: <ProtectedRoute><SuccessBridge /></ProtectedRoute> },
     { path: '/group/:id/files', element: <ProtectedRoute><PGPlataformaHospedagemArquivos /></ProtectedRoute> },
-    { path: '/group-folder/:groupId/:folderId', element: <ProtectedRoute><PGGrupoConteudoPastaVendas /></ProtectedRoute> },
-    { path: '/group-limits/:id', element: <ProtectedRoute><GroupLimits /></ProtectedRoute> },
     { path: '/group-links/:id', element: <ProtectedRoute><ManageGroupLinks /></ProtectedRoute> },
     { path: '/group/:id/revenue', element: <ProtectedRoute><PGGrupoReceita /></ProtectedRoute> },
     { path: '/vip-sales-history/:id', element: <ProtectedRoute><VipSalesHistory /></ProtectedRoute> }

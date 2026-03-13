@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 // import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import { Group, GroupLink } from '../types';
 
-export const useManageGroupLinks = () => {
+export const HookGerenciarLinksGrupo = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [group, setGroup] = useState<Group | undefined>(undefined);

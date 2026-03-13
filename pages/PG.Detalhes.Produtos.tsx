@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CardDescricaoMarkplace } from '../Componentes/ComponentesDeMarketplace/Card.Descricao.Markplace';
-import { useComentariosMarketplace } from '../hooks/useComentariosMarketplace';
+import { HookComentariosMarketplace } from '../hooks/Hook.ComentariosMarketplace';
 import { CardComentarioMarketplace } from '../Componentes/ComponenteDeInterfaceDeUsuario/comments/Card.Comentario.Marketplace';
 import { CardMarketplacePrevia } from '../Componentes/ComponentesDeMarketplace/Card.Marketplace.Previa';
 import { CardMarketplaceDetalhes } from '../Componentes/ComponentesDeMarketplace/Card.Marketplace.Detalhes';
@@ -30,7 +30,7 @@ const mockProduct = {
 export const PGDetalhesProdutos: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { comentarios, isLoading, error, carregarComentarios, postarComentario } = useComentariosMarketplace(id || 'prod123');
+  const { comentarios, isLoading, error, carregarComentarios, postarComentario } = HookComentariosMarketplace(id || 'prod123');
   const [novoComentario, setNovoComentario] = useState('');
   const [zoomState, setZoomState] = useState<{ images: string[], startIndex: number } | null>(null);
 

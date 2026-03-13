@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 import { Contact } from '../types';
 
-export const useMessages = () => {
+export const HookMensagens = () => {
     const navigate = useNavigate();
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);

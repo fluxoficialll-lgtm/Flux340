@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { useGroups } from '../hooks/useGroups';
+import { HookGrupos } from '../hooks/Hook.Grupos';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Group } from '../types';
 import { Footer } from '../Componentes/layout/Footer';
@@ -12,7 +12,7 @@ import { CreateGroupFAB } from '../Componentes/groups/list/CreateGroupFAB';
 const TrackingModal = lazy(() => import('../Componentes/groups/TrackingModal').then(m => ({ default: m.TrackingModal })));
 
 export const Groups: React.FC = () => {
-  const { groups, loading, observerRef, currentUserEmail, navigate, navigateToGroup, joinGroupByCode, deleteGroup, getUnreadCount } = useGroups();
+  const { groups, loading, observerRef, currentUserEmail, navigate, navigateToGroup, joinGroupByCode, deleteGroup, getUnreadCount } = HookGrupos();
   const { showAlert, showConfirm } = useModal();
 
   const [uiVisible, setUiVisible] = useState(true);

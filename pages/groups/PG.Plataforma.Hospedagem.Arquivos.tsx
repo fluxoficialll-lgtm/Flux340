@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { useGroupPlatformData } from '../../hooks/useGroupPlatformData';
+import { useGroupPlatformData } from '../../hooks/Hook.Dados.Plataforma.Grupo';
 import { Footer } from '../../Componentes/layout/Footer';
 import PastaCard from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Pasta';
 import BotaoAlternadorOrganizacao from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Botao.Alternador.Organizacao';

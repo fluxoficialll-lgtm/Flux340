@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useGroupRevenue } from '../../hooks/useGroupRevenue';
+import { useGroupRevenue } from '../../hooks/Hook.Receita.Grupo';
 import { useParams } from 'react-router-dom';
 import { CardGrupoHistoricoFinanceiro } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Card.Grupo.Historico.Financeiro';
 import { GraficoPizzaReceita } from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeReceitaDoGrupo/Grafico.Pizza.Receita';

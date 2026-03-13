@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { useCreateMarketplaceItem } from '../hooks/useCreateMarketplaceItem';
+import { HookCriarItemMarketplace } from '../hooks/Hook.Criar.Item.Marketplace';
 
 const SELECTABLE_CATEGORIES = [
     { id: 'Eletrônicos', icon: 'fa-mobile-screen', label: 'Eletrônicos' },
@@ -19,7 +19,7 @@ export const CreateMarketplaceItem: React.FC = () => {
     isPaid, title, setTitle, price, handlePriceChange, category, setCategory, locationVal, setLocationVal,
     description, setDescription, coverImage, additionalMedia, isSubmitting, handleCoverChange, handleGalleryChange,
     removeGalleryItem, handleBack, handleSubmit
-  } = useCreateMarketplaceItem();
+  } = HookCriarItemMarketplace();
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);

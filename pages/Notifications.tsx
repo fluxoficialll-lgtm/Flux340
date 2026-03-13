@@ -1,6 +1,6 @@
 
 import React, { Suspense, lazy } from 'react';
-import { useNotifications } from '../hooks/useNotifications';
+import { HookNotificacoes } from '../hooks/Hook.Notificacoes';
 import { Footer } from '../Componentes/layout/Footer';
 import { FilterBar } from '../Componentes/ComponentesDeNotification/FilterBar';
 import { MainHeader } from '../Componentes/layout/MainHeader';
@@ -52,14 +52,13 @@ export const Notifications: React.FC = () => {
     isPaymentModalOpen,
     setIsPaymentModalOpen,
     selectedGroup,
-    geoData,
-    displayPriceInfo,
+    displayInfo,
     handleFollowToggle,
     handlePendingAction,
     handleIgnoreExpiring,
     handlePayClick,
     navigate
-  } = useNotifications();
+  } = HookNotificacoes();
 
   // 1. As notificações são agrupadas dinamicamente aqui.
   const groupedNotifications = groupNotificationsByDate(filteredNotifications);
@@ -110,9 +109,9 @@ export const Notifications: React.FC = () => {
                 isOpen={isPaymentModalOpen}
                 onClose={() => setIsPaymentModalOpen(false)}
                 group={selectedGroup}
-                provider={geoData?.countryCode === 'BR' ? 'syncpay' : 'stripe'}
-                convertedPriceInfo={displayPriceInfo}
-                geo={geoData}
+                provider={'stripe'}
+                convertedPriceInfo={displayInfo}
+                geo={null}
               />
           )}
       </Suspense>

@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useGroupChat } from '../hooks/useGroupChat';
+import { HookConversaEmGrupo } from '../hooks/Hook.Conversa.Em.Grupo';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Virtuoso } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
@@ -16,7 +15,7 @@ export const GroupChat: React.FC = () => {
     handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate,
     handleEdit, handlePin, handleCopy, handleForward, handleReply,
     isForwardModalOpen, setIsForwardModalOpen, handleConfirmForward
-  } = useGroupChat();
+  } = HookConversaEmGrupo();
 
   const { showOptions } = useModal();
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useManageGroupLinks } from '../hooks/useManageGroupLinks';
+import { HookGerenciarLinksGrupo } from '../hooks/Hook.Gerenciar.Links.Grupo';
 
 export const ManageGroupLinks: React.FC = () => {
   const {
@@ -15,7 +15,7 @@ export const ManageGroupLinks: React.FC = () => {
     handleCopyLink,
     handleBack,
     formatDate
-  } = useManageGroupLinks();
+  } = HookGerenciarLinksGrupo();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-x-hidden">

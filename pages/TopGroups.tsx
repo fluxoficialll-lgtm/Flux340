@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTopGroups } from '../hooks/useTopGroups';
+import { HookTopGrupos } from '../hooks/Hook.Top.Grupos';
 
 // Subcomponentes Modulares de UI
 import { RankingTabs } from '../Componentes/ComponentesDeRanking/Componentes/RankingTabs';
@@ -16,7 +16,7 @@ export const TopGroups: React.FC = () => {
     handleTabChange,
     handleGroupAction,
     handleBack
-  } = useTopGroups();
+  } = HookTopGrupos();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-x-hidden">

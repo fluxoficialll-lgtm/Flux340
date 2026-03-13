@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { useEditProfile } from '../../hooks/useEditProfile';
+import { useEditProfile } from '../../hooks/Hook.Editar.Perfil';
 import { ImageCropModal } from '../ComponenteDeInterfaceDeUsuario/ImageCropModal';
 import { LoadingScreen } from '../ComponenteDeInterfaceDeUsuario/LoadingScreen';
 

@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { useSuccessBridge } from '../hooks/useSuccessBridge';
+import { HookPonteSucesso } from '../hooks/Hook.Ponte.Sucesso';
 
 export const SuccessBridge: React.FC = () => {
-    const { status, message, handleEnter } = useSuccessBridge();
+    const { status, message, handleEnter } = HookPonteSucesso();
 
     return (
         <div className="min-h-screen bg-[#0c0f14] text-white font-['Inter'] flex flex-col items-center justify-center p-8 text-center overflow-hidden">

@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { useEditGroup } from '../hooks/useEditGroup';
+import { HookEditarGrupo } from '../hooks/Hook.Editar.Grupo';
 import { CurrencySelectorModal } from '../Componentes/groups/CurrencySelectorModal';
 // import { UploadProgressCard } from '../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/UploadProgressCard';
 
@@ -26,7 +26,7 @@ export const EditGroup: React.FC = () => {
     uploadProgress,
     uploadCurrent,
     uploadTotal
-  } = useEditGroup();
+  } = HookEditarGrupo();
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const vipDoorMediaInputRef = useRef<HTMLInputElement>(null);

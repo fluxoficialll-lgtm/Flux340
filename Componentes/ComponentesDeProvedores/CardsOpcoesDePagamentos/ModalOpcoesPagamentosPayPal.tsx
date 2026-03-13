@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useFluxoDePagamentoPayPal, ConversionResult } from '../../../hooks/HooksComponentes/useFluxoDePagamentoPayPal';
+import { useFluxoDePagamentoPayPal, ConversionResult } from '../../../hooks/HooksComponentes/Hook.Fluxo.De.Pagamento.PayPal';
 import { Group } from '../../../types';
 import { CardRedirecionamentoPaypal } from './Card.Redirecionamento.Paypal';
 import { PAYPAL_REGIONAL_MATRIX } from './PaísesMapeadosPayPal'; // Importando a configuração visual

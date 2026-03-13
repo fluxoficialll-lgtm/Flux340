@@ -5,7 +5,7 @@ import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authServi
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService.js';
 import { Group } from '../tipos/types.Grupo';
 
-export const useGroups = () => {
+export const HookGrupos = () => {
   const navigate = useNavigate();
   const location = useLocation();
   

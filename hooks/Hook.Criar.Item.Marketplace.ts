@@ -11,7 +11,7 @@ interface MediaItem {
     file: File;
 }
 
-export const useCreateMarketplaceItem = () => {
+export const HookCriarItemMarketplace = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const state = location.state as { type?: 'paid' | 'organic' } | null;

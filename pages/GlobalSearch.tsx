@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useGlobalSearch } from '../hooks/useGlobalSearch';
+import { HookPesquisaGlobal } from '../hooks/Hook.Pesquisa.Global';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { User } from '../types';
 
@@ -24,7 +24,7 @@ export const GlobalSearch: React.FC = () => {
     handleProfileClick,
     handleMessageClick,
     handleBack
-  } = useGlobalSearch();
+  } = HookPesquisaGlobal();
 
   const { showAlert } = useModal();
 

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMessages } from '../hooks/useMessages';
+import { HookMensagens } from '../hooks/Hook.Mensagens';
 import { MessagesMenuModal } from '../Componentes/ComponentesDeChats/MessagesMenuModal';
 import { MainHeader } from '../Componentes/layout/MainHeader';
 import { MessageListItem } from '../Componentes/ComponentesDeChats/MessageListItem';
@@ -26,7 +26,7 @@ export const Messages: React.FC = () => {
     handleProfileNavigate,
     handleClearSelected,
     closeMenuAndEnterSelection
-  } = useMessages();
+  } = HookMensagens();
 
   const [searchQuery, setSearchQuery] = useState('');
 

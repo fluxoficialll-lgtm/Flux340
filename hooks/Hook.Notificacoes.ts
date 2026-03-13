@@ -6,7 +6,7 @@ import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authServi
 import { Notification as NotificationItem, Group, PriceInfo } from '../tipos';
 import { MockNotification } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Notificacoes';
 
-export const useNotifications = () => {
+export const HookNotificacoes = () => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState('all');

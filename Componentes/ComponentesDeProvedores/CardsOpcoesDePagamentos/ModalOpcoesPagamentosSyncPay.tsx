@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useFluxoDePagamentoSyncPay } from '../../../hooks/HooksComponentes/useFluxoDePagamentoSyncPay';
+import { useFluxoDePagamentoSyncPay } from '../../../hooks/HooksComponentes/Hook.Fluxo.De.Pagamento.SyncPay';
 import { Group } from '../../../types';
 import { SyncPayPixView } from '../CardsMétodosDePagamentos/SyncPayPixView';
 import { SyncPayBoletoView } from '../CardsMétodosDePagamentos/SyncPayBoletoView';

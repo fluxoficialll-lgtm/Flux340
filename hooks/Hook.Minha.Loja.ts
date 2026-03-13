@@ -7,7 +7,7 @@ import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authServi
 import { screenService } from '../ServiçosFrontend/ServiçoDeTelas/screenService.js';
 import { BusinessDashboardData } from '../types';
 
-export const useMyStore = () => {
+export const HookMinhaLoja = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'products' | 'campaigns'>('products');
     const [dashboardData, setDashboardData] = useState<BusinessDashboardData | null>(null);

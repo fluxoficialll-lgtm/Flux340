@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { Post, Comment } from '../types';
-import { usePostActions } from './usePostActions';
+import { HookAcoesPost } from './Hook.Acoes.Post';
 // CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
 import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
 
@@ -44,7 +44,7 @@ export const HookDetalhesPost = () => {
 
   // O dummy post permanece útil para evitar erros de renderização antes do post carregar
   const dummyPost: Post = { id: '', likes: 0, comments: 0, liked: false, username: '', avatar: '', time: '', text: '' };
-  const { handleCommentSubmit, isCommenting, commentError, handleLike, handleDelete } = usePostActions(post || dummyPost);
+  const { handleCommentSubmit, isCommenting, commentError, handleLike, handleDelete } = HookAcoesPost(post || dummyPost);
 
   const handleSendComment = async () => {
     if (!commentText.trim() || !post || !currentUser) return;

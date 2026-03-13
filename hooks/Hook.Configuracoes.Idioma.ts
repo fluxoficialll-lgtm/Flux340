@@ -10,7 +10,7 @@ export const LANGUAGES = [
     { id: 'es', label: 'Español', flag: '🇪🇸', nativeName: 'España' }
 ];
 
-export const useLanguageSettings = () => {
+export const HookConfiguracoesIdioma = () => {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
     

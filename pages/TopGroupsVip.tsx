@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTopGroupsVip } from '../hooks/useTopGroupsVip';
+import { HookTopGruposVip } from '../hooks/Hook.Top.Grupos.Vip';
 import { Group } from '../types';
 
 // Componentes de UI reutilizáveis podem ser criados para o Pódio e a Lista
@@ -38,7 +38,7 @@ export const TopGroupsVip: React.FC = () => {
     handleGroupAction,
     handleTabNavigation,
     handleBack,
-  } = useTopGroupsVip();
+  } = HookTopGruposVip();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-x-hidden">
@@ -46,7 +46,7 @@ export const TopGroupsVip: React.FC = () => {
         header { display:flex; align-items:center; padding:16px; background: #0c0f14; position:fixed; width:100%; z-index:10; border-bottom:1px solid rgba(255,255,255,0.1); top: 0; height: 65px; }
         header button { background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding-right: 15px; }
         header h1 { font-size:20px; font-weight:700; color: #FFD700; text-transform: uppercase; letter-spacing: 1px; }
-        main { padding-top: 80px; padding-bottom: 40px; width: 100%; max-width: 600px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
+        main { padding-top: 80px; padding-bottom: 40px; width: 100%; max-w: 600px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
         .tabs-container { display: flex; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 4px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); }
         .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: #aaa; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: 0.3s; }
         .tab-btn.active { background: linear-gradient(145deg, #FFD700, #B8860B); color: #000; box-shadow: 0 2px 10px rgba(255,215,0,0.3); }

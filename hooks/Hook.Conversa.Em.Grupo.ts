@@ -7,7 +7,7 @@ import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authServi
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 
-export const useGroupChat = () => {
+export const HookConversaEmGrupo = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const virtuosoRef = useRef<VirtuosoHandle>(null);

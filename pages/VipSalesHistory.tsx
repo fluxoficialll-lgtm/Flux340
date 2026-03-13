@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useVipSalesHistory } from '../hooks/useVipSalesHistory';
+import { HookHistoricoVendasVip } from '../hooks/Hook.Historico.Vendas.Vip';
 
 export const VipSalesHistory: React.FC = () => {
   const {
@@ -13,7 +13,7 @@ export const VipSalesHistory: React.FC = () => {
     getStatusClass,
     getPayerName,
     handleBack
-  } = useVipSalesHistory();
+  } = HookHistoricoVendasVip();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-x-hidden">

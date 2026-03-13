@@ -7,7 +7,7 @@ import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authServi
 import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 import { Group } from '../types';
 
-export const useTopGroupsPrivate = () => {
+export const HookTopGruposPrivados = () => {
   const navigate = useNavigate();
   const [rankedGroups, setRankedGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);

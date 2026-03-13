@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { Group, VipMediaItem } from '../types';
 
-export const useEditGroup = () => {
+export const HookEditarGrupo = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   

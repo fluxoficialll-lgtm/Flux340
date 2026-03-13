@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Group } from '../types';
 
-export const useGroupLanding = () => {
+export const HookPaginaGrupo = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 

@@ -4,7 +4,7 @@ import { Post } from '../types';
 // Importando o serviço correto para comentários do feed
 import { ServiçoPublicacaoComentariosFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
 
-export const usePostActions = (post: Post) => {
+export const HookAcoesPost = (post: Post) => {
     // Estados existentes para Like
     const [isLiked, setIsLiked] = useState(post.liked);
     const [likesCount, setLikesCount] = useState(post.likes);

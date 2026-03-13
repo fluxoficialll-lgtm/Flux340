@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ServicoDeSincronizacaoDeSessao } from '../ServiçosFrontend/ServiçoDeSincronização/ServicoDeSincronizacaoDeSessao.js';
 // import { PurchaseIntention } from '../ServiçosFrontend/ServiçoDeSincronização/PurchaseIntention';
 
-export const useSuccessBridge = () => {
+export const HookPonteSucesso = () => {
     const navigate = useNavigate();
     const location = useLocation();
 

@@ -5,10 +5,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 // import { vipSalesTracker } from '../ServiçosFrontend/pixel/trackers/VipSalesTracker';
 // import { VipPlaybackController } from '../ServiçosFrontend/real/vip/VipPlaybackController';
-import { useVipPricing } from './useVipPricing';
+import { useVipPricing } from './Hook.Precos.Vip';
 import { Group } from '../types';
 
-export const useVipGroupSales = (groupId: string | undefined) => {
+export const HookVendasGrupoVip = (groupId: string | undefined) => {
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

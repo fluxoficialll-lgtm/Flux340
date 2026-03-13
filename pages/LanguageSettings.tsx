@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useLanguageSettings } from '../hooks/useLanguageSettings';
+import { HookConfiguracoesIdioma } from '../hooks/Hook.Configuracoes.Idioma';
 
 export const LanguageSettings: React.FC = () => {
     const {
@@ -8,7 +8,7 @@ export const LanguageSettings: React.FC = () => {
         handleLanguageSelect,
         handleBack,
         languages
-    } = useLanguageSettings();
+    } = HookConfiguracoesIdioma();
 
     return (
         <div className="h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">

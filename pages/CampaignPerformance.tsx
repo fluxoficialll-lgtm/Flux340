@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useCampaignPerformance } from '../hooks/useCampaignPerformance';
+import { HookDesempenhoCampanha } from '../hooks/Hook.Desempenho.Campanha';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { CampaignInfoCard } from '../Componentes/ads/performance/CampaignInfoCard';
 import { DeliveryMetrics } from '../Componentes/ads/performance/DeliveryMetrics';
@@ -15,7 +15,7 @@ export const CampaignPerformance: React.FC = () => {
         loading, updating, campaign, metrics, error, navigate, formatCurrency,
         previewTab, setPreviewTab, editCopy, setEditCopy, editCta, setEditCta,
         editMediaUrl, editMediaType, handleFileChange, hasChanges, updateCampaign
-    } = useCampaignPerformance();
+    } = HookDesempenhoCampanha();
 
     const { showAlert, showOptions } = useModal();
 

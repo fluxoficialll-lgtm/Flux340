@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useVipGroupSales } from '../hooks/useVipGroupSales';
-import { useAutoLanguage } from '../hooks/useAutoLanguage';
+import { HookVendasGrupoVip } from '../hooks/Hook.Vendas.Grupo.Vip';
+import { useAutoLanguage } from '../hooks/Hook.Idioma.Automatico';
 
 // Dados e componentes de UI
 import { mockVipGroupSalesData } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Pagina.Vendas';
@@ -132,7 +132,7 @@ export const VipGroupSales: React.FC = () => {
   // ... (código de produção inalterado)
   const [isSimulated, setIsSimulated] = useState(false);
   const [forcedProvider, setForcedProvider] = useState<'syncpay' | 'stripe' | 'paypal' | null>(null);
-  const { group, loading, error, isCreator, isPurchaseEnabled, modals, currentSlide, playingIndex, carouselRef, displayPriceInfo, geoData, setGeoData, handleScroll, handleToggleVideo, handlePurchaseClick, openSimulator, closeModals, setZoom, onEmailSuccess } = useVipGroupSales(id);
+  const { group, loading, error, isCreator, isPurchaseEnabled, modals, currentSlide, playingIndex, carouselRef, displayPriceInfo, geoData, setGeoData, handleScroll, handleToggleVideo, handlePurchaseClick, openSimulator, closeModals, setZoom, onEmailSuccess } = HookVendasGrupoVip(id);
   const { lang, isTranslating, translatedData, t } = useAutoLanguage(group);
   const normalizedMedia = useMemo(() => {
     if (!group?.vipDoor) return [];

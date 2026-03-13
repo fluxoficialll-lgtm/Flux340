@@ -23,7 +23,7 @@ interface CurrencyStats {
  * Este hook fornece dados e funções mockadas para permitir que o componente
  * FinancialPanel seja renderizado sem erros.
  */
-export const useFinancialPanel = () => {
+export const HookPainelFinanceiro = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   

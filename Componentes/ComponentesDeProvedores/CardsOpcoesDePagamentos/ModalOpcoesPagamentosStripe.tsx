@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { useFluxoDePagamentoStripe, StripeView, GeoData, ConversionResult } from '../../../hooks/HooksComponentes/useFluxoDePagamentoStripe';
+import { useFluxoDePagamentoStripe, StripeView, GeoData, ConversionResult } from '../../../hooks/HooksComponentes/Hook.Fluxo.De.Pagamento.Stripe';
 import { Group } from '../../../types';
 
 // Importando os componentes de UI para cada método de pagamento
