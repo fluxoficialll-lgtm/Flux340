@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -10,7 +11,7 @@ interface RegisterCardProps {
     setConfirmPassword: (v: string) => void;
     termsAccepted: boolean;
     setTermsAccepted: (v: boolean) => void;
-    errors: { email?: string; password?: string; confirm?: string; form?: string };
+    errors: { email?: string; senha?: string; confirmacao?: string; formulario?: string };
     loading: boolean;
     isValid: boolean;
     referredBy: string | null;
@@ -64,7 +65,7 @@ export const RegisterCard: React.FC<RegisterCardProps> = ({
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full p-3.5 pl-11 bg-black/20 border border-white/10 rounded-xl text-white outline-none focus:border-[#00c2ff] transition-all placeholder-gray-600"
                     />
-                    {errors.password && <span className="text-[10px] text-red-400 font-bold mt-1 block ml-1 uppercase">{errors.password}</span>}
+                    {errors.senha && <span className="text-[10px] text-red-400 font-bold mt-1 block ml-1 uppercase">{errors.senha}</span>}
                 </div>
 
                 <div className="relative">
@@ -77,7 +78,7 @@ export const RegisterCard: React.FC<RegisterCardProps> = ({
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className="w-full p-3.5 pl-11 bg-black/20 border border-white/10 rounded-xl text-white outline-none focus:border-[#00c2ff] transition-all placeholder-gray-600"
                     />
-                    {errors.confirm && <span className="text-[10px] text-red-400 font-bold mt-1 block ml-1 uppercase">{errors.confirm}</span>}
+                    {errors.confirmacao && <span className="text-[10px] text-red-400 font-bold mt-1 block ml-1 uppercase">{errors.confirmacao}</span>}
                 </div>
 
                 <div className="flex items-center px-1 mb-2">
@@ -94,9 +95,9 @@ export const RegisterCard: React.FC<RegisterCardProps> = ({
                     </label>
                 </div>
 
-                {errors.form && (
+                {errors.formulario && (
                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-[11px] text-center font-bold">
-                        {errors.form}
+                        {errors.formulario}
                     </div>
                 )}
 

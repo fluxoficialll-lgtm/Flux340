@@ -33,8 +33,31 @@ const authService = {
     },
 
     loginWithGoogle: async (credential, referredBy) => {
-        console.error("A função loginWithGoogle não está implementada.");
-        throw new Error("Login com Google não está disponível no momento.");
+        if (!credential) {
+            throw new Error('Credencial do Google não fornecida.');
+        }
+
+        const response = await fetch(`${VariaveisFrontend.apiBaseUrl}/auth/google`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: credential,
+                referredBy: referredBy,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Se a resposta não for OK, lança um erro com a mensagem do backend.
+            throw new Error(data.message || 'Falha na autenticação com o Google.');
+        }
+
+        // Salva o token e os dados do usuário após o login bem-sucedido
+        salvarSessao(data);
+        return data;
     },
 
     logout: () => {
@@ -43,11 +66,16 @@ const authService = {
         window.dispatchEvent(new Event('authChange'));
     },
 
-    register: async (email, password, username) => {
+    register: async (email, password, username, referredBy) => {
+        const body = { email, password, username };
+        if (referredBy) {
+            body.referredBy = referredBy;
+        }
+
         const response = await fetch(`${VariaveisFrontend.apiBaseUrl}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, username }),
+            body: JSON.stringify(body),
         });
 
         const data = await response.json();

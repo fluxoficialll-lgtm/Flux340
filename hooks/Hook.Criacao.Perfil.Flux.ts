@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { DadosEntradaRegistro, ErrosRegistro } from '../tipos';
-import { ErroSenha } from '../tipos';
 
 export const useHookCriacaoPerfilFlux = () => {
     const navigate = useNavigate();
@@ -38,13 +37,15 @@ export const useHookCriacaoPerfilFlux = () => {
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
         if (dados.email && !emailRegex.test(dados.email)) {
-            newErrors.email = ErroSenha.FORMATO_INVALIDO;
+            newErrors.email = "Formato de e-mail inválido.";
         }
+
         if (dados.senha && dados.senha.length < 6) {
-            newErrors.senha = ErroSenha.SENHA_MUITO_CURTA;
+            newErrors.senha = "A senha deve ter pelo menos 6 caracteres.";
         }
+
         if (dados.confirmacaoSenha && dados.senha !== dados.confirmacaoSenha) {
-            newErrors.confirmacao = ErroSenha.SENHAS_NAO_CONFEREM;
+            newErrors.confirmacao = "As senhas não correspondem.";
         }
 
         setErrors(newErrors);
@@ -62,11 +63,12 @@ export const useHookCriacaoPerfilFlux = () => {
         setErrors({});
 
         try {
-            await authService.register({
-                email: dados.email,
-                password: dados.senha,
-                referredBy: dados.indicadoPor,
-            });
+            await authService.register(
+                dados.email,
+                dados.senha,
+                undefined, // O nome de usuário não é coletado neste formulário
+                dados.indicadoPor
+            );
             
             navigate('/verify-email');
 
