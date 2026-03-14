@@ -36,7 +36,7 @@ export const HookConversa = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
 
-    const currentUserEmail = useMemo(() => authService.getCurrentUserEmail()?.toLowerCase(), []);
+    const currentUserEmail = useMemo(() => authService.getCurrentUser()?.email?.toLowerCase(), []);
 
     const loadChatData = useCallback(async (isSilent = false) => {
         if (!chatId) {

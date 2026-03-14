@@ -40,8 +40,8 @@ export const HookMarketplace = () => {
     }, []);
 
     useEffect(() => {
-        const email = authService.getCurrentUserEmail() || undefined;
-        setCurrentUserEmail(email);
+        const user = authService.getCurrentUser();
+        setCurrentUserEmail(user?.email);
         
         fetchMarketplaceItems();
 
