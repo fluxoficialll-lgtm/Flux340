@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ServicoGestaoCredencialPayPal as paypalService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialPayPal.js';
 import authService from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { metaPixelService } from '../../ServiçosFrontend/ServiçoDeMetaPixel/MetaPixelService.js';
+// import { metaPixelService } from '../../ServiçosFrontend/ServiçoDeMetaPixel/MetaPixelService.js';
 import { Group } from '../../types';
 
 export interface ConversionResult {
@@ -61,12 +61,12 @@ export const useFluxoDePagamentoPayPal = ({ group, onSuccess, onError, onTransac
             const finalValue = convertedPriceInfo?.amount || parseFloat(group.price || '0');
             const finalCurrency = convertedPriceInfo?.currency || group.currency || 'BRL';
 
-            if (group.pixelId) {
+            /* if (group.pixelId) {
                 metaPixelService.trackInitiateCheckout(group.pixelId, {
                     content_ids: [group.id], content_type: 'product_group', content_name: group.name,
                     value: finalValue, currency: finalCurrency
                 }, { email });
-            }
+            } */
 
             const order = await paypalService.createOrder({ ...group, price: finalValue.toString(), currency: finalCurrency as any }, group.creatorEmail!);
             
