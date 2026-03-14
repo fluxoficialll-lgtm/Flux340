@@ -19,11 +19,8 @@ class ControleDeSimulacao {
     private isSimulationActive: boolean = false;
 
     constructor() {
-        console.log("Controle de Simulação inicializado.");
+        console.log("Controle de Simulação inicializado e pronto para ser ativado.");
         this.applySimulationWrapper();
-        if (import.meta.env.MODE !== 'production') {
-            this.iniciarSimulacao();
-        }
     }
 
     private applySimulationWrapper() {
@@ -55,35 +52,8 @@ class ControleDeSimulacao {
             this.isSimulationActive = false;
             localStorage.removeItem('isSimulating');
             console.log("--- MODO DE SIMULAÇÃO DESATIVADO ---");
-            this.reiniciarSimulacaoNoNavegador(); // Garante que o worker seja desativado
+            window.location.reload();
         }
-    }
-
-    /**
-     * Força o service worker de simulação (msw) a ser desregistrado e recarrega a página
-     * para garantir que as novas configurações de simulação sejam carregadas.
-     */
-    async reiniciarSimulacaoNoNavegador() {
-        console.log("[CONTROLE DE SIMULAÇÃO] Tentando reiniciar o worker de simulação...");
-        try {
-            if ('serviceWorker' in navigator) {
-                const registration = await navigator.serviceWorker.getRegistration();
-                if (registration) {
-                    await registration.unregister();
-                    console.log("[CONTROLE DE SIMULAÇÃO] ✅ Worker de simulação desregistrado com sucesso.");
-                } else {
-                    console.log("[CONTROLE DE SIMULAÇÃO] Nenhum worker de simulação ativo encontrado para desregistrar.");
-                }
-            } else {
-                console.warn("[CONTROLE DE SIMULAÇÃO] navigator.serviceWorker não está disponível.");
-            }
-        } catch (error) {
-            console.error("[CONTROLE DE SIMULAÇÃO] ❌ Erro ao desregistrar o worker de simulação:", error);
-        }
-        
-        // Força o recarregamento da página para que o novo worker seja registrado
-        console.log("[CONTROLE DE SIMULAÇÃO] 🚀 Recarregando a página para aplicar as alterações...");
-        window.location.reload();
     }
 
     estaAtivo(): boolean {

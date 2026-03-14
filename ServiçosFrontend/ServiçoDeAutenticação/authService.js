@@ -1,4 +1,16 @@
+
 import VariaveisFrontend from '../Config/Variaveis.Frontend.js';
+
+// Função auxiliar para salvar os dados da sessão
+const salvarSessao = (dados) => {
+    if (!dados.token || !dados.user) return;
+
+    localStorage.setItem('userToken', dados.token);
+    // Salva o usuário como string JSON
+    localStorage.setItem('user', JSON.stringify(dados.user));
+    // Dispara um evento global para notificar outras partes da aplicação (ex: cabeçalho)
+    window.dispatchEvent(new Event('authChange'));
+};
 
 const authService = {
     login: async (email, password) => {
@@ -7,10 +19,17 @@ const authService = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         });
+
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error('Falha no login');
+            // Mesmo em caso de erro, a API pode retornar uma mensagem útil
+            throw new Error(data.message || 'Falha no login');
         }
-        return response.json();
+        
+        // CORREÇÃO: Salva o token e os dados do usuário no localStorage
+        salvarSessao(data);
+        return data;
     },
 
     loginWithGoogle: async (credential, referredBy) => {
@@ -30,10 +49,16 @@ const authService = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, username }),
         });
+
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error('Falha no registro');
+            throw new Error(data.message || 'Falha no registro');
         }
-        return response.json();
+
+        // CORREÇÃO: Salva o token e os dados do usuário após o registro bem-sucedido
+        salvarSessao(data);
+        return data;
     },
 
     getProfile: async (userId) => {
@@ -68,15 +93,20 @@ const authService = {
     },
 
     isAuthenticated: () => {
+        // A verificação de autenticação DEVE depender do token.
         return !!localStorage.getItem('userToken');
     },
 
     getCurrentUser: () => {
         const user = localStorage.getItem('user');
         try {
+            // Garante que o parse seja seguro
             return user ? JSON.parse(user) : null;
         } catch (error) {
             console.error("Erro ao parsear dados do usuário do localStorage:", error);
+            // Limpa dados inválidos para evitar loops de erro
+            localStorage.removeItem('user');
+            localStorage.removeItem('userToken');
             return null;
         }
     },
