@@ -11,7 +11,6 @@ const PGGrupoConfiguracoesAuditoriaDeMensagens = lazy(() => import('../pages/gro
 const PGGrupoConfiguracoesAuditoriaDeDenuncias = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.AuditoriaDeDenuncias').then(m => ({ default: m.PGGrupoConfiguracoesAuditoriaDeDenuncias })));
 const PGGrupoConfiguracoesAuditoriaDeEntradaESaida = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.AuditoriaDeEntradaESaida').then(m => ({ default: m.PGGrupoConfiguracoesAuditoriaDeEntradaESaida })));
 const PGGrupoConfiguracoesAuditoriaDeAjustes = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.AuditoriaDeAjustes').then(m => ({ default: m.PGGrupoConfiguracoesAuditoriaDeAjustes })));
-const PGGrupoConfiguracoesMembros = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Membros').then(m => ({ default: m.PGGrupoConfiguracoesMembros })));
 const PGGrupoConfiguracoesVip = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Vip').then(m => ({ default: m.PGGrupoConfiguracoesVip })));
 const PGGrupoConfiguracoesEstatisticas = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Estatisticas').then(m => ({ default: m.PGGrupoConfiguracoesEstatisticas })));
 const PGGrupoConfiguracoesAuditoria = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Auditoria').then(m => ({ default: m.PGGrupoConfiguracoesAuditoria })));
@@ -35,7 +34,6 @@ export const groupSettingsRoutes = [
     { path: '/group-settings/:id/report-audit', element: <ProtectedRoute><PGGrupoConfiguracoesAuditoriaDeDenuncias /></ProtectedRoute> },
     { path: '/group-settings/:id/entry-exit-audit', element: <ProtectedRoute><PGGrupoConfiguracoesAuditoriaDeEntradaESaida /></ProtectedRoute> },
     { path: '/group-settings/:id/settings-audit', element: <ProtectedRoute><PGGrupoConfiguracoesAuditoriaDeAjustes /></ProtectedRoute> },
-    { path: '/group-settings/:id/members', element: <ProtectedRoute><PGGrupoConfiguracoesMembros /></ProtectedRoute> },
     { path: '/group-settings/:id/roles', element: <ProtectedRoute><PGGrupoConfiguracoesCargos /></ProtectedRoute> },
     { path: '/group-settings/:id/guidelines', element: <ProtectedRoute><PGGrupoConfiguracoesDiretrizes /></ProtectedRoute> },
     { path: '/group-settings/:id/role-distribution', element: <ProtectedRoute><PGGrupoConfiguracoesDistribuiçaoDeCargos /></ProtectedRoute> },

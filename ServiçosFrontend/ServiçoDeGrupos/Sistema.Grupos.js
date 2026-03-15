@@ -13,7 +13,12 @@
 import * as roleService from './Servico.Sistema.Cargos.js';
 import * as inviteService from './Servico.Sistema.Convites.js';
 import * as memberService from './Servico.Sistema.Membros.js';
-import * as settingsService from './Servico.Sistema.Configuracoes.js';
+import * as generalService from './Servico.Sistema.Geral.js';
+import * as auditAdjustService from './Servico.Sistema.Auditoria.Ajuste.js';
+import * as auditReportService from './Servico.Sistema.Auditoria.Denuncias.js';
+import * as auditEntryExitService from './Servico.Sistema.Auditoria.Entrada.Saida.js';
+import * as auditMessageService from './Servico.Sistema.Auditoria.Mensagens.js';
+import * as hubModeService from './Servico.Sistema.Modo.Hub.js'; // <-- ADICIONADO
 
 /**
  * Objeto de serviço unificado que combina todos os submódulos de grupo.
@@ -29,6 +34,22 @@ export const groupSystem = {
     // Funções do serviço de membros
     ...memberService,
 
-    // Funções do serviço de configurações e estatísticas
-    ...settingsService,
+    // Funções do serviço de configurações gerais e estatísticas
+    ...generalService,
+
+    // Funções do serviço de auditoria de ajustes
+    ...auditAdjustService,
+
+    // Funções do serviço de auditoria de denúncias
+    ...auditReportService,
+
+    // Funções do serviço de auditoria de entrada e saída
+    ...auditEntryExitService,
+
+    // Funções do serviço de auditoria de mensagens
+    ...auditMessageService,
+
+    // Funções do serviço de modo hub
+    ...hubModeService, // <-- ADICIONADO
+
 };

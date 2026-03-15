@@ -1,11 +1,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  getNotificationSettings,
-  updateNotificationSettings,
-} from '../ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Notificacoes.js';
+  getModerationSettings,
+  updateModerationSettings,
+} from '../../ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Grupo.Moderacao.js';
 
-export const useGroupNotificationSettings = (groupId) => {
+export const useGroupModeration = (groupId) => {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -16,7 +16,7 @@ export const useGroupNotificationSettings = (groupId) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getNotificationSettings(groupId);
+      const data = await getModerationSettings(groupId);
       setSettings(data);
     } catch (err) {
       setError(err.message || 'Erro ao buscar configurações.');
@@ -29,29 +29,32 @@ export const useGroupNotificationSettings = (groupId) => {
     fetchSettings();
   }, [fetchSettings]);
 
-  const updateSettings = useCallback(async (updatedSettings) => {
-    if (!groupId || !updatedSettings) return;
+  const updateSetting = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const saveChanges = useCallback(async () => {
+    if (!groupId || !settings) return;
 
     setIsSaving(true);
     setError(null);
 
     try {
-      const newSettings = await updateNotificationSettings(groupId, updatedSettings);
-      setSettings(prev => ({ ...prev, ...newSettings }));
+      await updateModerationSettings(groupId, settings);
     } catch (err) {
       setError(err.message || 'Erro ao salvar as alterações.');
-      throw err;
     } finally {
       setIsSaving(false);
     }
-  }, [groupId]);
+  }, [groupId, settings]);
 
   return {
     settings,
     loading,
     isSaving,
     error,
-    refetchSettings: fetchSettings,
-    updateSettings,
+    updateSetting,
+    saveChanges,
+    retryFetch: fetchSettings,
   };
 };
