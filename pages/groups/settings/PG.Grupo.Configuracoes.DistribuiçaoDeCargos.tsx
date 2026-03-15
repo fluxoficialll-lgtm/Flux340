@@ -1,91 +1,85 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { CabecalhoConfiguracaoInformacao } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Informacao';
 import CardDistribuicaoCargos from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Distribuicao.Cargos';
-import { GroupRole } from '../../../tipos/types.Grupo';
+import { useGrupoConfigCargosDistribuicao } from '../../../hooks/Hook.Grupo.Config.Cargos.Distribuicao';
 
-// Tipagem para um membro (deve corresponder à do card)
-interface Member {
-    id: string;
-    name: string;
-    avatarUrl?: string;
-    roleId: string | null;
-}
-
-// -- Mock Data Atualizada --
-const mockMembers: Member[] = [
-    { id: '1', name: 'Alice de Sousa', roleId: 'dev', avatarUrl: 'https://randomuser.me/api/portraits/women/1.jpg' },
-    { id: '2', name: 'Bruno Martins', roleId: 'vip', avatarUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    { id: '3', name: 'Carla Dias', roleId: 'mod', avatarUrl: 'https://randomuser.me/api/portraits/women/3.jpg' },
-    { id: '4', name: 'David Teixeira', roleId: null, avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
-    { id: '5', name: 'Helena Costa', roleId: 'vip', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg' },
-];
-
-// Usando a tipagem GroupRole completa
-const mockRoles: GroupRole[] = [
-    {
-        id: 'dev',
-        name: 'Desenvolvedor',
-        color: '#00c2ff',
-        priority: 100,
-        permissions: { isAdmin: true, canManageRoles: true } as any, // Simplificado
-    },
-    {
-        id: 'mod',
-        name: 'Moderador',
-        color: '#22c55e',
-        priority: 50,
-        permissions: { canKickMembers: true, canDeleteMessages: true } as any,
-    },
-    {
-        id: 'vip',
-        name: '💎 VIP Member',
-        color: '#be185d',
-        priority: 20,
-        permissions: { canBypassSlowMode: true } as any,
-    },
-];
-
-// --- Página Principal ---
 export const PGGrupoConfiguracoesDistribuiçaoDeCargos: React.FC = () => {
     const navigate = useNavigate();
-    const [members, setMembers] = useState<Member[]>(mockMembers);
+    const { id } = useParams<{ id: string }>();
+    const { 
+        members, 
+        roles, 
+        loading, 
+        error, 
+        isSaving, 
+        updateMemberRole, 
+        saveChanges 
+    } = useGrupoConfigCargosDistribuicao(id);
 
-    const handleUpdateMemberRole = (memberId: string, roleId: string | null) => {
-        setMembers(prevMembers =>
-            prevMembers.map(member =>
-                member.id === memberId ? { ...member, roleId: roleId } : member
-            )
+    const handleSaveChanges = async () => {
+        try {
+            await saveChanges();
+            alert('Distribuição de cargos salva com sucesso!');
+        } catch (e) {
+            alert('Ocorreu um erro ao salvar as alterações. Tente novamente.');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
+                <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>
+            </div>
         );
-    };
+    }
 
-    const handleSaveChanges = () => {
-        console.log('Salvando distribuição de cargos:', members);
-        // Aqui você faria a chamada à API para salvar os dados
-        alert('Distribuição de cargos salva com sucesso! (Simulação)');
-    };
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex flex-col items-center justify-center text-white">
+                <h1 className="font-bold text-lg text-red-500 mb-4">Erro ao Carregar</h1>
+                <p className="text-center mb-6">{error}</p>
+                <button onClick={() => navigate(-1)} className="bg-white/10 px-4 py-2 rounded-lg font-bold">Voltar</button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
             <CabecalhoConfiguracaoInformacao titulo="Distribuição de Cargos" onBack={() => navigate(-1)} />
 
             <main className="pt-[85px] pb-[120px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                {/* O novo card substitui a lista antiga */}
-                <CardDistribuicaoCargos 
-                    members={members}
-                    roles={mockRoles}
-                    onUpdateMemberRole={handleUpdateMemberRole}
-                />
+                {members.length > 0 ? (
+                    <CardDistribuicaoCargos 
+                        members={members}
+                        roles={roles}
+                        onUpdateMemberRole={updateMemberRole}
+                    />
+                ) : (
+                    <div className="bg-black/20 border border-dashed border-white/10 rounded-2xl p-8 mt-8 text-center text-gray-500">
+                        <i className="fa-solid fa-users-slash text-3xl mb-3"></i>
+                        <p className="font-bold">Nenhum membro encontrado.</p>
+                        <p className="text-sm mt-1">Não há membros neste grupo para distribuir cargos.</p>
+                    </div>
+                )}
             </main>
 
             <footer className="fixed bottom-0 left-0 right-0 bg-[#0c0f14]/80 backdrop-blur-sm z-30">
                 <div className="max-w-2xl mx-auto p-4">
                     <button
                         onClick={handleSaveChanges}
-                        className="w-full bg-[#00c2ff] text-black font-bold py-3.5 px-4 rounded-xl hover:bg-white transition-all duration-300 shadow-[0_4px_20px_rgba(0,194,255,0.4)]"
+                        disabled={isSaving}
+                        className="w-full bg-[#00c2ff] text-black font-bold py-3.5 px-4 rounded-xl hover:bg-white transition-all duration-300 shadow-[0_4px_20px_rgba(0,194,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Salvar Alterações
+                        {isSaving ? (
+                            <>
+                                <i className="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                                Salvando...
+                            </>
+                        ) : (
+                            'Salvar Alterações'
+                        )}
                     </button>
                 </div>
             </footer>

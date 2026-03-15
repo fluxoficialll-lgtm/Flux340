@@ -17,6 +17,9 @@ import { groupChatHandlers } from './simulacoes/Simulacao.Chat.Grupo';
 import { groupDetailsHandlers } from './simulacoes/Simulacao.Grupo.Detalhes';
 import { modoHubHandlers } from './simulacoes/Simulacao.ModoHub';
 import { groupSalesPlatformHandlers } from './simulacoes/Simulacao.Grupo.Plataforma';
+import { groupRolesConfigHandlers } from './simulacoes/Simulacao.Grupo.Config.Cargos';
+import { groupInvitesConfigHandlers } from './simulacoes/Simulacao.Grupo.Config.Convites';
+import { groupGeneralConfigHandlers } from './simulacoes/Simulacao.Grupo.Config.Geral';
 
 export { controleDeSimulacao as servicoDeSimulacao } from './ControleDeSimulacao';
 
@@ -65,6 +68,9 @@ const allSimulationHandlers = {
     ...myGroupsHandlers,
     ...groupMembersHandlers,
     ...groupDetailsHandlers,
+    ...groupRolesConfigHandlers,
+    ...groupInvitesConfigHandlers,
+    ...groupGeneralConfigHandlers, // <-- ADICIONADO
     ...staticGroupHandlers,      // Adiciona todos os handlers estáticos de grupo
     ...staticProfileHandlers,   // Adiciona o handler estático do perfil que faltava
 };

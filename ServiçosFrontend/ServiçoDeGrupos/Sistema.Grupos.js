@@ -1,98 +1,34 @@
 
-// --- SISTEMA DE GRUPOS ---
+// Arquivo: ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js
 
 /**
- * Define um serviço para interagir com a API de grupos.
+ * @file Agregador de serviços relacionados a grupos.
+ * 
+ * Este arquivo importa todos os serviços modulares de grupo (cargos, membros, convites, etc.)
+ * e os exporta como um único objeto `groupSystem`. Isso mantém uma API consistente
+ * para o resto da aplicação, permitindo que a lógica interna seja dividida em arquivos menores
+ * e mais fáceis de gerenciar, sem quebrar o código que consome esses serviços.
  */
-class GroupSystem {
-    /**
-     * Busca os detalhes de um grupo específico, incluindo nome, participantes e mensagens.
-     * @param {string} groupId O ID do grupo a ser buscado.
-     * @returns {Promise<object>} Uma promessa que resolve com os dados do grupo.
-     */
-    async getGroupDetails(groupId) {
-        try {
-            const response = await fetch(`/api/group-chat/${groupId}`);
-            if (!response.ok) {
-                console.error(`Erro ao buscar o chat do grupo ${groupId}. Status: ${response.status}`);
-                throw new Error('Grupo não encontrado');
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Falha na requisição de detalhes do chat do grupo:', error);
-            throw error;
-        }
-    }
 
-    /**
-     * Busca a lista de membros e solicitações pendentes de um grupo.
-     * @param {string} groupId O ID do grupo.
-     * @returns {Promise<{members: Array, pending: Array}>} Os membros e as solicitações.
-     */
-    async getGroupMembers(groupId) {
-        console.log(`[groupSystem] Buscando membros para o grupo: ${groupId}`);
-        try {
-            const response = await fetch(`/api/groups/${groupId}/members`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Falha ao buscar membros do grupo:", error);
-            return { members: [], pending: [] }; // Retorna um estado seguro em caso de falha.
-        }
-    }
+import * as roleService from './Servico.Sistema.Cargos.js';
+import * as inviteService from './Servico.Sistema.Convites.js';
+import * as memberService from './Servico.Sistema.Membros.js';
+import * as settingsService from './Servico.Sistema.Configuracoes.js';
 
-    /**
-     * CORREÇÃO: Adiciona a função `getTopGroups` que estava faltando.
-     * Esta função é necessária para o hook `useTopGroups` e busca os grupos
-     * mais relevantes para o usuário logado.
-     * @param {string} userId O ID do usuário para personalizar os resultados.
-     * @returns {Promise<Array>} Uma promessa que resolve com a lista dos principais grupos.
-     */
-    async getTopGroups(userId) {
-        console.log(`[groupSystem] Buscando os principais grupos para o usuário: ${userId}`);
-        try {
-            // A URL assume um endpoint que filtra os top groups por usuário.
-            const response = await fetch(`/api/groups/top?userId=${userId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Falha ao buscar os principais grupos:", error);
-            return []; // Retorna uma lista vazia em caso de erro para não quebrar a UI.
-        }    
-    }
+/**
+ * Objeto de serviço unificado que combina todos os submódulos de grupo.
+ * Mantém uma interface consistente para o resto da aplicação.
+ */
+export const groupSystem = {
+    // Funções do serviço de cargos
+    ...roleService,
 
-    /**
-     * NOVO: Atualiza as configurações de um grupo.
-     * @param {string} groupId O ID do grupo a ser atualizado.
-     * @param {object} settings O objeto com as configurações a serem atualizadas.
-     * @returns {Promise<object>} A resposta da API.
-     */
-    async updateGroupSettings(groupId, settings) {
-        console.log(`[groupSystem] Atualizando configurações do grupo ${groupId}`);
-        try {
-            const response = await fetch(`/api/groups/${groupId}/settings`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(settings),
-            });
+    // Funções do serviço de convites
+    ...inviteService,
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error(`Falha ao atualizar as configurações do grupo ${groupId}:`, error);
-            throw error;
-        }
-    }
-}
+    // Funções do serviço de membros
+    ...memberService,
 
-// Exporta uma instância única do serviço para ser usada em toda a aplicação.
-export const groupSystem = new GroupSystem();
+    // Funções do serviço de configurações e estatísticas
+    ...settingsService,
+};

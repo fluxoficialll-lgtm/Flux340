@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CabecalhoConfiguracaoInformacao } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Informacao';
 import CardAuditoriaDenuncias from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Auditoria.Denuncias';
+import { useGroupReportLog } from '../../../hooks/Hook.Grupo.Config.Auditoria.Denuncias';
 
-// --- Tipagens Consistentes ---
+// --- Tipagens que o CardAuditoriaDenuncias espera ---
 type ReportStatus = 'pending' | 'resolved' | 'ignored';
 
 interface Member {
@@ -23,69 +24,84 @@ interface Report {
     status: ReportStatus;
 }
 
-// --- Mock Data Atualizado ---
-const mockMembers = {
-    '1': { id: '1', name: 'Ana de Almeida', avatarUrl: 'https://randomuser.me/api/portraits/women/1.jpg' },
-    '2': { id: '2', name: 'Beto Malfacini', avatarUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    '3': { id: '3', name: 'Carla Zambelli', avatarUrl: 'https://randomuser.me/api/portraits/women/3.jpg' },
-    '4': { id: '4', name: 'David Luis', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
-};
-
-const initialReports: Report[] = [
-    {
-        id: 'rep1',
-        reporter: mockMembers['1'],
-        reported: mockMembers['3'],
-        content: 'VENDO CURSO DE MARKETING DIGITAL PELA METADE DO PREÇO CHAMAR PRIVADO',
-        reason: 'Spam / Propaganda',
-        timestamp: new Date('2024-07-23T14:01:00Z'),
-        status: 'pending',
-    },
-    {
-        id: 'rep2',
-        reporter: mockMembers['2'],
-        reported: mockMembers['4'],
-        content: 'Isso não faz o menor sentido, você é burro?',
-        reason: 'Comportamento Ofensivo / Assédio',
-        timestamp: new Date('2024-07-22T18:30:00Z'),
-        status: 'resolved',
-    },
-    {
-        id: 'rep3',
-        reporter: mockMembers['4'],
-        reported: mockMembers['2'],
-        content: 'Alguém pode me ajudar com o exercício 3 da aula de ontem?',
-        reason: 'Denúncia Falsa / Abuso da Ferramenta',
-        timestamp: new Date('2024-07-22T19:00:00Z'),
-        status: 'ignored',
-    },
-].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
 // --- Página Principal ---
 export const PGGrupoConfiguracoesAuditoriaDeDenuncias: React.FC = () => {
     const navigate = useNavigate();
-    const [reports, setReports] = useState<Report[]>(initialReports);
+    const { 
+        logs: apiLogs, 
+        loading, 
+        error, 
+        updateReportStatus, 
+        punishUser, 
+        setStatusFilter 
+    } = useGroupReportLog();
 
-    const handleStatusChange = (reportId: string, newStatus: ReportStatus) => {
-        console.log(`Alterando status da denúncia ${reportId} para ${newStatus}`);
-        setReports(prev => prev.map(r => r.id === reportId ? { ...r, status: newStatus } : r));
-        // Lógica de API para atualizar o status
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
+                <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white text-center">
+                <p className="text-red-500 font-semibold">{error}</p>
+            </div>
+        );
+    }
+
+    // Transformar os dados do hook para o formato esperado pelo componente do Card.
+    const transformedReports: Report[] = apiLogs.map(log => ({
+        id: log.id,
+        reporter: {
+            id: log.reporterId,
+            name: log.reporterName,
+            // O avatar não está no hook, então o deixamos indefinido.
+        },
+        reported: {
+            id: log.reportedUserId,
+            name: log.reportedUserName,
+        },
+        content: log.content || 'Conteúdo não disponível',
+        reason: log.reason,
+        timestamp: new Date(log.timestamp),
+        // A API retorna 'Pendente', mas o card espera 'pending'.
+        status: log.status.toLowerCase() as ReportStatus,
+    })).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    const handleStatusChange = async (reportId: string, newStatus: ReportStatus) => {
+        // O card usa 'pending', a API espera 'Pendente'.
+        const apiStatus = newStatus.charAt(0).toUpperCase() + newStatus.slice(1) as any;
+        try {
+            await updateReportStatus(reportId, apiStatus);
+        } catch (updateError) {
+            alert("Não foi possível atualizar o status da denúncia. Tente novamente.");
+        }
     };
 
-    const handlePunish = (memberId: string) => {
-        const memberName = mockMembers[memberId as keyof typeof mockMembers]?.name || 'desconhecido';
-        console.log(`Iniciando processo de punição para o membro: ${memberId} (${memberName})`);
-        alert(`Ações de punição para ${memberName} foram iniciadas (simulação).`);
-        // Lógica para abrir modal de punição, etc.
+    const handlePunish = async (memberId: string) => {
+        try {
+            // O motivo poderia vir de um modal no futuro.
+            await punishUser(memberId, "Violação das diretrizes reportada.");
+            alert(`Processo de punição para o membro iniciado.`);
+        } catch (punishError) {
+            alert("Não foi possível iniciar a punição. Tente novamente.");
+        }
     };
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
-            <CabecalhoConfiguracaoInformacao titulo="Auditoria de Denúncias" onBack={() => navigate(-1)} />
+            <CabecalhoConfiguracaoInformacao 
+                titulo="Auditoria de Denúncias" 
+                onBack={() => navigate(-1)} 
+            />
 
             <main className="pt-[85px] pb-[40px] w-full max-w-4xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
+                {/* O Card agora é alimentado com dados e funções reais do hook */}
                 <CardAuditoriaDenuncias
-                    reports={reports}
+                    reports={transformedReports}
                     onStatusChange={handleStatusChange}
                     onPunish={handlePunish}
                 />

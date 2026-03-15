@@ -1,17 +1,37 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { HookConfiguracaoGrupoPrincipal } from '../../../hooks/Hook.Configuracao.Grupo.Principal';
+import { useGroupAccessAndInvites } from '../../../hooks/Hook.Grupo.Config.Acesso.Convites';
 import CardGeracaoLinks from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Geracao.Links';
 
 export const PGGrupoConfiguracoesAcessoEConvites: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const { group, loading } = HookConfiguracaoGrupoPrincipal(id);
+    // Usando o novo hook para gerenciar a lógica de acesso e convites
+    const { 
+        inviteLinks, 
+        loading, 
+        error, 
+        createInvite, 
+        revokeInvite 
+    } = useGroupAccessAndInvites();
 
-    if (loading || !group || !id) {
+    // Estado de carregamento centralizado
+    if (loading) {
         return (
             <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
                 <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>
+            </div>
+        );
+    }
+
+    // Tratamento de erro
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white text-center">
+                <div>
+                    <p className="text-red-500 font-semibold">{error}</p>
+                    <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-[#00c2ff] rounded-md">
+                        Tentar Novamente
+                    </button>
+                </div>
             </div>
         );
     }
@@ -27,7 +47,12 @@ export const PGGrupoConfiguracoesAcessoEConvites: React.FC = () => {
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
                 <div className="space-y-8">
-                    <CardGeracaoLinks />
+                    {/* Passando os dados e funções do hook para o componente card */}
+                    <CardGeracaoLinks 
+                        inviteLinks={inviteLinks}
+                        createInvite={createInvite}
+                        revokeInvite={revokeInvite}
+                    />
                 </div>
             </main>
         </div>

@@ -4,38 +4,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CabecalhoConfiguracaoCargos } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Cargos';
 import CardCargoPadrao from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/CriaçãoDeCard/Card.Cargo.Padrao';
 import { CardCargoPersonalizado } from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoes/Card.Cargo.Personalizados';
-import { GroupRole, GroupRolePermissions } from '../../../tipos/types.Grupo';
-
-// Permissões iniciais para novos cargos ou como base
-const initialPermissions: GroupRolePermissions = {
-    isAdmin: false, canEditGroupInfo: false, canManageRoles: false, canViewAuditLogs: false, canViewRevenue: false,
-    canSendMessages: true, canDeleteMessages: false, canPinMessages: false, canBypassSlowMode: false, canKickMembers: false,
-    canBanMembers: false, canApproveMembers: false, canInviteMembers: true, canManageFolders: false, canManageFiles: false,
-    canPostScheduled: false, canManageAds: false, canToggleSlowMode: false, canSetSlowModeInterval: false, 
-    canCreateSubgroups: false, canManagePolls: false, canManageNotifications: false, canMentionEveryone: false,
-};
-
-// Mock data atualizada para o tipo GroupRole
-const mockRoles: GroupRole[] = [
-    {
-        id: 'custom1',
-        name: '💎 VIP Member',
-        color: '#be185d',
-        priority: 10,
-        permissions: { ...initialPermissions, canViewRevenue: true, canBypassSlowMode: true }
-    },
-    {
-        id: 'custom2',
-        name: 'Estrategista',
-        color: '#0e7490',
-        priority: 20,
-        permissions: { ...initialPermissions, canManagePolls: true, canPinMessages: true }
-    },
-];
+import { GroupRole } from '../../../tipos/types.Grupo';
+import { useGrupoConfigCargosCriacao } from '../../../hooks/Hook.Grupo.Config.Cargos.Criacao';
 
 export const PGGrupoConfiguracoesCargos: React.FC = () => {
     const navigate = useNavigate();
-    const [roles, setRoles] = useState<GroupRole[]>(mockRoles);
+    const { id } = useParams<{ id: string }>();
+    const { roles, loading, error, addRole, updateRole, deleteRole } = useGrupoConfigCargosCriacao(id);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<GroupRole | null>(null);
 
@@ -49,25 +25,46 @@ export const PGGrupoConfiguracoesCargos: React.FC = () => {
         setSelectedRole(null);
     };
 
-    const handleSaveRole = (roleData: { name: string; color: string }) => {
-        if (selectedRole) {
-            setRoles(roles.map(r => (r.id === selectedRole.id ? { ...r, ...roleData } : r)));
-        } else {
-            const newRole: GroupRole = {
-                id: `custom_${Date.now()}`,
-                name: roleData.name,
-                color: roleData.color,
-                priority: 1,
-                permissions: initialPermissions,
-            };
-            setRoles([...roles, newRole]);
+    const handleSaveRole = async (roleData: { name: string; color: string }) => {
+        try {
+            if (selectedRole) {
+                await updateRole(selectedRole.id, roleData);
+            } else {
+                await addRole(roleData);
+            }
+            handleCloseModal();
+        } catch (e) {
+            alert('Ocorreu um erro ao salvar o cargo. Tente novamente.');
         }
-        handleCloseModal();
     };
 
-    const handleDeleteRole = (roleId: string) => {
-        setRoles(roles.filter(r => r.id !== roleId));
+    const handleDeleteRole = async (roleId: string) => {
+        if (window.confirm('Tem certeza que deseja excluir este cargo?')) {
+            try {
+                await deleteRole(roleId);
+            } catch (e) {
+                alert('Ocorreu um erro ao excluir o cargo. Tente novamente.');
+            }
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
+                <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex flex-col items-center justify-center text-white">
+                <h1 className="font-bold text-lg text-red-500 mb-4">Erro ao Carregar</h1>
+                <p className="text-center mb-6">{error}</p>
+                <button onClick={() => navigate(-1)} className="bg-white/10 px-4 py-2 rounded-lg font-bold">Voltar</button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col">
@@ -118,12 +115,12 @@ export const PGGrupoConfiguracoesCargos: React.FC = () => {
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-[#1a1f29] border border-white/10 rounded-2xl p-6 w-full max-w-sm">
                         <h2 className="text-xl font-bold mb-6">{selectedRole ? 'Editar Cargo' : 'Adicionar Novo Cargo'}</h2>
-                        <form onSubmit={e => {
+                        <form onSubmit={async e => {
                             e.preventDefault();
                             const form = e.target as HTMLFormElement;
                             const name = (form.elements.namedItem('name') as HTMLInputElement).value;
                             const color = (form.elements.namedItem('color') as HTMLInputElement).value;
-                            handleSaveRole({ name, color });
+                            await handleSaveRole({ name, color });
                         }}>
                             <div className="mb-4">
                                 <label htmlFor="role-name" className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Nome do Cargo</label>

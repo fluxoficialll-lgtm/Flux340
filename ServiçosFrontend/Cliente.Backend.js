@@ -1,7 +1,7 @@
 // Arquivo: ServiçosFrontend/Cliente.Backend.js
 
 import axios from 'axios';
-import { VariaveisFrontend } from './Config/Variaveis.Frontend.js';
+import VariaveisFrontend from './Config/Variaveis.Frontend.js';
 
 /**
  * Cliente HTTP centralizado para comunicação com o Backend.

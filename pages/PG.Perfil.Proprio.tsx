@@ -1,9 +1,7 @@
 
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao';
 import { HookPerfilProprio } from '../hooks/Hook.Perfil.Proprio';
-import { HookPerfilTerceiro } from '../hooks/Hook.Perfil.Terceiro';
 
 import { CabecalhoPerfil } from '../Componentes/ComponentesPerfilProprio/CabecalhoPerfil';
 import { CartaoDeInformacoesDoPerfil } from '../Componentes/ComponentesPerfilProprio/CartaoDeInformacoesDoPerfil';
@@ -18,9 +16,8 @@ import { GradeDeProdutos } from '../Componentes/ComponentesPerfilProprio/Grade.P
 import { GradeDeFotos } from '../Componentes/ComponentesPerfilProprio/Grade.Fotos';
 import { GradeDeReels } from '../Componentes/ComponentesPerfilProprio/Grade.Reels';
 
-const ProfilePageContent = ({ isOwnProfile, userId }) => {
-    const hookResult = isOwnProfile ? HookPerfilProprio() : HookPerfilTerceiro(userId);
-    const { profile, isLoading, error, handleFollow } = hookResult as any;
+const ProfilePageContent = () => {
+    const { profile, isLoading, error } = HookPerfilProprio();
 
     const [activeTab, setActiveTab] = useState('posts');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,7 +40,7 @@ const ProfilePageContent = ({ isOwnProfile, userId }) => {
 
     return (
         <div className="h-[100dvh] bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
-            <CabecalhoPerfil username={profile.nickname || profile.name} isOwnProfile={isOwnProfile} />
+            <CabecalhoPerfil username={profile.nickname || profile.name} isOwnProfile={true} />
 
             <main className="flex-grow w-full overflow-y-auto no-scrollbar pt-[80px] pb-[100px]">
                 <div className="w-full max-w-[500px] mx-auto pt-2.5">
@@ -54,12 +51,11 @@ const ProfilePageContent = ({ isOwnProfile, userId }) => {
                         bio={profile.bio}
                         website={profile.website}
                         stats={{ posts: profile.posts_count, followers: profile.followers_count, following: profile.following_count }}
-                        isFollowing={profile.isFollowing}
-                        onFollowClick={isOwnProfile ? undefined : handleFollow}
+                        isFollowing={false}
                         onFollowersClick={handleFollowersClick}
                         onFollowingClick={handleFollowingClick}
                         onAvatarClick={() => setAvatarPreviewOpen(true)}
-                        isOwnProfile={isOwnProfile}
+                        isOwnProfile={true}
                     />
                 </div>
 
@@ -100,20 +96,12 @@ const ProfilePageContent = ({ isOwnProfile, userId }) => {
     );
 }
 
-export const Profile = () => {
-    const { id: paramId } = useParams<{ id: string }>();
+export const PG_Perfil_Proprio = () => {
     const { user: loggedInUser } = useUsuarioSessao();
-    
-    // If there is no paramId, it's the user's own profile.
-    // If paramId is present, we check if it matches the logged-in user's id.
-    const isOwnProfile = !paramId || (loggedInUser && paramId === loggedInUser.id);
-    const userId = isOwnProfile ? loggedInUser?.id : paramId;
 
-    if (!userId) {
-        // This can happen if the profile is own but the user is not logged in.
-        // Or if there is no paramId.
-        return <LoadingScreen /> // Or a login prompt
+    if (!loggedInUser) {
+        return <LoadingScreen /> // Ou um prompt de login
     }
 
-    return <ProfilePageContent isOwnProfile={isOwnProfile} userId={userId} />;
+    return <ProfilePageContent />;
 }; 
