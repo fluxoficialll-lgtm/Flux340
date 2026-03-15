@@ -1,14 +1,19 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { HookConfiguracaoGrupoPrincipal } from '../../../hooks/Hook.Configuracao.Grupo.Principal';
 import CardMensagensAgendadas from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Mensagens.Agendadas';
+import { useGrupoConfigMensagensAgendadas } from '../../../hooks/Hook.Grupo.Config.Mensagens.Agendadas';
 
 export const PGGrupoConfiguracoesMensagensAgendadas: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const { group, loading } = HookConfiguracaoGrupoPrincipal(id);
+    const { mensagens, loading, error, agendarMensagem, cancelarMensagem } = useGrupoConfigMensagensAgendadas();
 
-    if (loading || !group || !id) {
+    const handleNewMessage = () => {
+        console.log("Agendar nova mensagem");
+        // A implementação real abriria um modal para o usuário inserir os detalhes da mensagem
+        // e então chamaria algo como:
+        // agendarMensagem("Conteúdo da nova mensagem", novaData);
+    };
+
+    if (loading) {
         return (
             <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
                 <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i>
@@ -16,18 +21,13 @@ export const PGGrupoConfiguracoesMensagensAgendadas: React.FC = () => {
         );
     }
 
-    const handleCancelMessage = (id: string) => {
-        console.log("Cancelar mensagem com id:", id);
-    };
-
-    const handleNewMessage = () => {
-        console.log("Agendar nova mensagem");
-    };
-
-    const scheduledMessages = [
-        { id: '1', content: 'Lembrete da reunião de equipe', sendAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
-        { id: '2', content: 'Feliz aniversário para todos os membros!', sendAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) },
-    ];
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
+                <p>Erro ao carregar mensagens: {error}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
@@ -41,8 +41,8 @@ export const PGGrupoConfiguracoesMensagensAgendadas: React.FC = () => {
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
                 <div className="space-y-8">
                    <CardMensagensAgendadas 
-                        messages={scheduledMessages} 
-                        onCancelMessage={handleCancelMessage} 
+                        messages={mensagens} 
+                        onCancelMessage={cancelarMensagem} 
                         onNewMessage={handleNewMessage} 
                     />
                 </div>

@@ -1,5 +1,5 @@
 
-import { apiClient } from '../Cliente.Backend.js';
+import ClienteBackend from '../Cliente.Backend.js';
 
 /**
  * @typedef {'all' | 'admins_only' | 'off'} MentionNotificationSetting
@@ -23,7 +23,7 @@ export const getNotificationSettings = async (groupId) => {
 
   try {
     // Simulação de chamada de API
-    // Em um cenário real: const response = await apiClient.get(`/groups/${groupId}/notifications`);
+    // Em um cenário real: const response = await ClienteBackend.get(`/groups/${groupId}/notifications`);
     // return response.data;
 
     console.log(`[MOCK API] Buscando configurações de notificação para o grupo ${groupId}`);
@@ -55,7 +55,7 @@ export const updateNotificationSettings = async (groupId, settings) => {
 
   try {
     // Simulação de chamada de API
-    // Em um cenário real: const response = await apiClient.put(`/groups/${groupId}/notifications`, settings);
+    // Em um cenário real: const response = await ClienteBackend.put(`/groups/${groupId}/notifications`, settings);
     // return response.data;
 
     console.log(`[MOCK API] Atualizando configurações de notificação para o grupo ${groupId}:`, settings);

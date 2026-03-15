@@ -11,9 +11,7 @@ const PGGrupoConfiguracoesAuditoriaDeMensagens = lazy(() => import('../pages/gro
 const PGGrupoConfiguracoesAuditoriaDeDenuncias = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.AuditoriaDeDenuncias').then(m => ({ default: m.PGGrupoConfiguracoesAuditoriaDeDenuncias })));
 const PGGrupoConfiguracoesAuditoriaDeEntradaESaida = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.AuditoriaDeEntradaESaida').then(m => ({ default: m.PGGrupoConfiguracoesAuditoriaDeEntradaESaida })));
 const PGGrupoConfiguracoesAuditoriaDeAjustes = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.AuditoriaDeAjustes').then(m => ({ default: m.PGGrupoConfiguracoesAuditoriaDeAjustes })));
-const PGGrupoConfiguracoesVip = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Vip').then(m => ({ default: m.PGGrupoConfiguracoesVip })));
 const PGGrupoConfiguracoesEstatisticas = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Estatisticas').then(m => ({ default: m.PGGrupoConfiguracoesEstatisticas })));
-const PGGrupoConfiguracoesAuditoria = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Auditoria').then(m => ({ default: m.PGGrupoConfiguracoesAuditoria })));
 const PGGrupoConfiguracoesMensagensAgendadas = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.MensagensAgendadas').then(m => ({ default: m.PGGrupoConfiguracoesMensagensAgendadas })));
 const PGGrupoConfiguracoesPlataformaVendas = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.PlataformaVendas').then(m => ({ default: m.PGGrupoConfiguracoesPlataformaVendas })));
 const PGGrupoConfiguracoesPlataformasADS = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.PlataformasADS').then(m => ({ default: m.PGGrupoConfiguracoesPlataformasADS })));
@@ -37,9 +35,7 @@ export const groupSettingsRoutes = [
     { path: '/group-settings/:id/roles', element: <ProtectedRoute><PGGrupoConfiguracoesCargos /></ProtectedRoute> },
     { path: '/group-settings/:id/guidelines', element: <ProtectedRoute><PGGrupoConfiguracoesDiretrizes /></ProtectedRoute> },
     { path: '/group-settings/:id/role-distribution', element: <ProtectedRoute><PGGrupoConfiguracoesDistribuiçaoDeCargos /></ProtectedRoute> },
-    { path: '/group-settings/:id/vip', element: <ProtectedRoute><PGGrupoConfiguracoesVip /></ProtectedRoute> },
     { path: '/group-settings/:id/stats', element: <ProtectedRoute><PGGrupoConfiguracoesEstatisticas /></ProtectedRoute> },
-    { path: '/group-settings/:id/audit', element: <ProtectedRoute><PGGrupoConfiguracoesAuditoria /></ProtectedRoute> },
     { path: '/group-settings/:id/schedule', element: <ProtectedRoute><PGGrupoConfiguracoesMensagensAgendadas /></ProtectedRoute> },
     { path: '/group-settings/:id/sales-platform', element: <ProtectedRoute><PGGrupoConfiguracoesPlataformaVendas /></ProtectedRoute> },
     { path: '/group-settings/:id/ads-platforms', element: <ProtectedRoute><PGGrupoConfiguracoesPlataformasADS /></ProtectedRoute> },
