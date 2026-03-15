@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HookCriarPost } from '../hooks/Hook.Criar.Post';
+import { HookCriarPost } from '../hooks/Hook.Criacao.Feed.Padrao';
 
 export const CreatePost: React.FC = () => {
   // A desestruturação foi completamente atualizada para corresponder ao hook refatorado.

@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { HookCriarItemMarketplace } from '../hooks/Hook.Criar.Item.Marketplace';
+import { HookCriarItemMarketplace } from '../hooks/Hook.Criacao.Marketplace';
 
 const SELECTABLE_CATEGORIES = [
     { id: 'Eletrônicos', icon: 'fa-mobile-screen', label: 'Eletrônicos' },

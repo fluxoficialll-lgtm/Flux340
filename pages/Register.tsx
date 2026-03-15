@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { HookAutenticacao } from '../hooks/Hook.Autenticacao';
+import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao';
 import { useHookCriacaoPerfilFlux } from '../hooks/Hook.Criacao.Perfil.Flux';
 import { RegisterCard } from '../Componentes/ComponentesDeAuth/Componentes/RegisterCard';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = HookAutenticacao();
+  const { user, loading: authLoading } = useUsuarioSessao();
   const {
     dados,
     updateField,

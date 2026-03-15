@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { HookAutenticacao } from '../hooks/Hook.Autenticacao';
+import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao';
 import { HookPerfilProprio } from '../hooks/Hook.Perfil.Proprio';
 import { HookPerfilTerceiro } from '../hooks/Hook.Perfil.Terceiro';
 
@@ -102,7 +102,7 @@ const ProfilePageContent = ({ isOwnProfile, userId }) => {
 
 export const Profile = () => {
     const { id: paramId } = useParams<{ id: string }>();
-    const { user: loggedInUser } = HookAutenticacao();
+    const { user: loggedInUser } = useUsuarioSessao();
     
     // If there is no paramId, it's the user's own profile.
     // If paramId is present, we check if it matches the logged-in user's id.

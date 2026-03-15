@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import { HookAutenticacao } from '../hooks/Hook.Autenticacao';
+import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao';
 import { useLoginEmailSenha } from '../hooks/Hook.Login.Email.Senha'; // Hook para email/senha
 import { useGoogleLogin } from '../hooks/Hook.Login.Google'; // Hook para Google Login
 import { LoginInitialCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginInitialCard';
@@ -12,7 +12,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export const Login: React.FC = () => {
     // Hook de autenticação geral (verifica se o usuário já está logado)
-    const { user, loading: authLoading } = HookAutenticacao();
+    const { user, loading: authLoading } = useUsuarioSessao();
 
     // Hook específico para o fluxo de login com email e senha
     const {

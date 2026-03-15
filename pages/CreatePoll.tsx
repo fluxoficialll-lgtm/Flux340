@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HookCriarEnquete } from '../hooks/Hook.Criar.Enquete';
+import { HookCriarEnquete } from '../hooks/Hook.Criacao.Feed.Enquete';
 
 export const CreatePoll: React.FC = () => {
   const {
