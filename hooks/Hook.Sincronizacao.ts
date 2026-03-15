@@ -6,7 +6,7 @@ import { SyncState } from '../ServiçosFrontend/ServiçoDeSincronização/Estado
 import { socketService } from '../ServiçosFrontend/ServiçoDeSoquete/ServiçoDeSoquete.js';
 import { RealtimePaymentHandler } from '../ServiçosFrontend/ServiçoDeTempoReal/Notificações/ManipuladorDePagamentoEmTempoReal.js';
 
-export const HookAutenticacaoSincronizacao = () => {
+export const useSincronizacao = () => {
   useEffect(() => {
     const user = authService.getCurrentUser();
     const email = user?.email; // Acesso seguro ao email

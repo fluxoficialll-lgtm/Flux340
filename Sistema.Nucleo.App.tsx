@@ -5,13 +5,12 @@ import { ModalProvider } from './Componentes/ComponenteDeInterfaceDeUsuario/Moda
 import { GlobalTracker } from './Componentes/layout/GlobalTracker';
 import { DeepLinkHandler } from './Componentes/layout/DeepLinkHandler';
 import AppRoutes from './routes/AppRoutes';
-import { HookAutenticacaoSincronizacao } from './hooks/Hook.Autenticacao.Sincronizacao';
-// A importação do ControleDeSimulacao foi removida para garantir o isolamento total.
+import { useSincronizacao } from './hooks/Hook.Sincronizacao';
+import { inicializarBoot } from './Sistema.Flux.Boot';
+import { configurarAmbiente } from './Sistema.Flux.Ambiente';
 import MonitorDeErrosDeInterface from './Componentes/ComponentesDePrevençãoDeErros/MonitorDeErrosDeInterface.jsx';
 
 const Maintenance = lazy(() => import('./pages/Maintenance'));
-
-// O componente DemoModeBadge foi removido pois dependia do sistema de simulação.
 
 const LoadingFallback = () => (
     <div className="h-screen w-full bg-[#0c0f14] flex flex-col items-center justify-center gap-4">
@@ -26,12 +25,14 @@ const SistemaNucleoApp: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
 
-  HookAutenticacaoSincronizacao();
+  useSincronizacao();
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Lógica de inicialização original, sem qualquer referência à simulação.
+        inicializarBoot();
+        configurarAmbiente();
+        
         const config = { maintenanceMode: false }; 
         setIsMaintenance(config.maintenanceMode);
 
@@ -64,7 +65,6 @@ const SistemaNucleoApp: React.FC = () => {
         <HashRouter>
           <GlobalTracker />
           <DeepLinkHandler />
-          {/* O DemoModeBadge foi removido da renderização. */}
           <Suspense fallback={<LoadingFallback />}>
             <AppRoutes />
           </Suspense>
