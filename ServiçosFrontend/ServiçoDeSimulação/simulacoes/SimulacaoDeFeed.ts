@@ -1,6 +1,6 @@
 
 // --- SIMULAÇÃO DO SERVIÇO DE FEED ---
-import { Post } from "../../../types";
+import { Post } from "../../../tipos";
 
 // Mock de dados para o feed
 const mockFeedPosts: Post[] = [

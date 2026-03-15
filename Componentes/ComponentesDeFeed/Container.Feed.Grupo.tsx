@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Post } from '../../types/Post';
+import { Post } from '../../tipos';
 import { AvatarPreviewModal } from '../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 import { UserBadge } from '../ComponenteDeInterfaceDeUsuario/user/UserBadge';
 import { HookPerfilTerceiro } from '../../hooks/Hook.Perfil.Terceiro';
@@ -25,10 +25,14 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
     
     const [showMenu, setShowMenu] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const { profile: userData, isLoading } = HookPerfilTerceiro(post.author.id);
+    const { profile: userData, isLoading } = HookPerfilTerceiro(post.author?.id);
 
-    const isOwner = post.authorId === currentUserId;
+    const isOwner = post.author?.id === currentUserId;
     const userHasLiked = post.likedBy?.includes(currentUserId || '') || false;
+
+    // CORRIGIDO: Pré-calcula os valores de flags para segurança
+    const isVetoed = userData?.flags?.isVetoed ?? false;
+    const isVip = userData?.flags?.isVip ?? false;
 
     const handleAvatarClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -41,7 +45,7 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
         ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: ptBR })
         : 'agora mesmo';
         
-    const displayName = userData?.nickname || userData?.name || post.author.username;
+    const displayName = userData?.nickname || userData?.name || post.author?.username;
 
     const handleJoinClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -50,7 +54,7 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
         }
     };
     
-    if (!post.group) {
+    if (!post || !post.author || !post.group) {
         return null;
     }
 
@@ -63,8 +67,8 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
                         avatarUrl={userData?.photo_url || post.author.avatar}
                         nickname={displayName}
                         handle={post.author.username}
-                        isVetoed={userData?.flags?.isVetoed ?? false}
-                        isVip={userData?.flags?.isVip ?? false}
+                        isVetoed={isVetoed} // CORRIGIDO
+                        isVip={isVip}       // CORRIGIDO
                         isLoading={isLoading}
                         avatarSize="md"
                         showHandle={false}
@@ -107,7 +111,7 @@ export const ContainerFeedGrupo: React.FC<ContainerFeedGrupoProps> = React.memo(
                 
                 <div className="bg-[#2a2f38] rounded-lg mt-3 p-3 flex items-center gap-4 cursor-pointer hover:bg-[#3a3f48] transition-colors" onClick={handleJoinClick}>
                     <img 
-                        src={post.group.bannerUrl} // Corrigido de thumbnailUrl para bannerUrl
+                        src={post.group.bannerUrl} 
                         alt={`Thumbnail do grupo ${post.group.name}`} 
                         className="w-16 h-16 rounded-md object-cover flex-shrink-0"
                     />

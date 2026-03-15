@@ -4,7 +4,7 @@ import { HookFeed } from '../hooks/Hook.Feed';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
-import { Post } from '../types';
+import { Post } from '../tipos';
 
 // Importando os novos containers independentes
 import { ContainerFeedPadrao } from '../Componentes/ComponentesDeFeed/Container.Feed.Padrao';

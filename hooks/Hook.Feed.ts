@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import ServiçoPublicacaoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
-import { Post } from '../types'; // Assuming Post type is defined in types.ts
+import { Post } from '../tipos';
 
 export const HookFeed = (initialCategory: string = 'all') => {
   const [posts, setPosts] = useState<Post[]>([]);

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Post } from '../../types';
+import { Post } from '../../tipos';
 import { AvatarPreviewModal } from '../ComponenteDeInterfaceDeUsuario/AvatarPreviewModal';
 import { UserBadge } from '../ComponenteDeInterfaceDeUsuario/user/UserBadge';
 import { HookPerfilTerceiro } from '../../hooks/Hook.Perfil.Terceiro';
@@ -24,10 +24,14 @@ export const ContainerFeedPadrao: React.FC<ContainerFeedPadraoProps> = React.mem
 
     const [showMenu, setShowMenu] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const { profile: userData, isLoading } = HookPerfilTerceiro(post.author.id);
+    const { profile: userData, isLoading } = HookPerfilTerceiro(post.author?.id);
 
-    const isOwner = post.authorId === currentUserId;
+    const isOwner = post.author?.id === currentUserId;
     const userHasLiked = post.likedBy?.includes(currentUserId || '') || false;
+
+    // CORRIGIDO: Pré-calcula os valores de flags para segurança
+    const isVetoed = userData?.flags?.isVetoed ?? false;
+    const isVip = userData?.flags?.isVip ?? false;
 
     const handleAvatarClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -40,7 +44,11 @@ export const ContainerFeedPadrao: React.FC<ContainerFeedPadraoProps> = React.mem
         ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: ptBR })
         : 'agora mesmo';
         
-    const displayName = userData?.nickname || userData?.name || post.author.username;
+    const displayName = userData?.nickname || userData?.name || post.author?.username;
+
+    if (!post || !post.author) {
+        return <div className="w-full h-24 flex items-center justify-center"><i className="fa-solid fa-triangle-exclamation text-yellow-500"></i> Post inválido</div>;
+    }
 
     return (
         <div className="feed-item bg-[#1a1e26] rounded-xl shadow-lg mb-4 overflow-hidden" id={`post-${post.id}`}>
@@ -51,8 +59,8 @@ export const ContainerFeedPadrao: React.FC<ContainerFeedPadraoProps> = React.mem
                         avatarUrl={userData?.photo_url || post.author.avatar}
                         nickname={displayName}
                         handle={post.author.username}
-                        isVetoed={userData?.flags?.isVetoed ?? false}
-                        isVip={userData?.flags?.isVip ?? false}
+                        isVetoed={isVetoed} // CORRIGIDO
+                        isVip={isVip}       // CORRIGIDO
                         isLoading={isLoading}
                         avatarSize="md"
                         showHandle={false}

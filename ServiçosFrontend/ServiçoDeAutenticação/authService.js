@@ -1,5 +1,6 @@
 
 import VariaveisFrontend from '../Config/Variaveis.Frontend.js';
+import { controleDeSimulacao } from '../ServiçoDeSimulação/ControleDeSimulacao.js';
 
 // Função auxiliar para salvar os dados da sessão
 const salvarSessao = (dados) => {
@@ -90,6 +91,43 @@ const authService = {
     },
 
     getProfile: async (userId) => {
+        if (controleDeSimulacao.estaAtivo()) {
+            console.log(`(Simulado) Buscando perfil para userId: ${userId}`);
+            const currentUser = authService.getCurrentUser();
+
+            const isOwnProfile = currentUser && currentUser.id === userId;
+
+            return Promise.resolve({
+                id: userId,
+                name: isOwnProfile ? (currentUser.name || "Usuário Simulado") : "Outro Usuário",
+                nickname: isOwnProfile ? (currentUser.nickname || "simulado_user") : "outro_user",
+                email: isOwnProfile ? (currentUser.email || "simulado@example.com") : "outro@example.com",
+                photo_url: "https://i.pravatar.cc/150?u=" + userId,
+                bio: "Este é um perfil de usuário simulado para fins de desenvolvimento e teste.",
+                website: "https://simulado.flux.com",
+                posts_count: 42,
+                followers_count: 1337,
+                following_count: 300,
+                isFollowing: !isOwnProfile,
+                posts: [
+                    { id: 1, type: 'image', url: 'https://picsum.photos/seed/post1/500' },
+                    { id: 2, type: 'video', url: 'https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4' },
+                    { id: 3, type: 'image', url: 'https://picsum.photos/seed/post2/500' },
+                ],
+                products: [
+                    { id: 1, name: "Produto Simulado 1", price: "R$ 99,90", image: "https://picsum.photos/seed/prod1/300" },
+                    { id: 2, name: "Produto Simulado 2", price: "R$ 49,90", image: "https://picsum.photos/seed/prod2/300" },
+                ],
+                photos: [
+                     { id: 1, url: 'https://picsum.photos/seed/photo1/500' },
+                     { id: 2, url: 'https://picsum.photos/seed/photo2/500' },
+                ],
+                reels: [
+                    { id: 1, url: 'https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4' },
+                ]
+            });
+        }
+
         const token = localStorage.getItem('userToken');
         const response = await fetch(`${VariaveisFrontend.apiBaseUrl}/profile/${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` },
