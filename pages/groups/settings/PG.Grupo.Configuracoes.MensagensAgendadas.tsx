@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
+import { HookConfiguracaoGrupoPrincipal } from '../../../hooks/Hook.Configuracao.Grupo.Principal';
 import CardMensagensAgendadas from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Mensagens.Agendadas';
 
 export const PGGrupoConfiguracoesMensagensAgendadas: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { group, loading } = useGroupSettings();
+    const { group, loading } = HookConfiguracaoGrupoPrincipal(id);
 
     if (loading || !group || !id) {
         return (

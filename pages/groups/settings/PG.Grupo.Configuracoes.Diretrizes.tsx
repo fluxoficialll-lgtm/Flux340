@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
+import { HookConfiguracaoGrupoPrincipal } from '../../../hooks/Hook.Configuracao.Grupo.Principal';
 import { CabecalhoConfiguracaoInformacao } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Informacao';
 import CardModoLentoMensagens from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Modo.Lento.Mensagens';
 import CardModoLentoEntrada from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Modo.Lento.Entrada';
@@ -19,7 +19,7 @@ interface SlowModeEntrySettings {
 export const PGGrupoConfiguracoesDiretrizes: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { group, loading } = useGroupSettings();
+    const { group, loading } = HookConfiguracaoGrupoPrincipal(id);
 
     const [guidelines, setGuidelines] = useState('');
     const [slowMode, setSlowMode] = useState<SlowModeSettings>({ enabled: false, interval: 5 });

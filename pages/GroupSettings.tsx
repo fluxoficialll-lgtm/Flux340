@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGroupSettings } from '../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
+import { HookConfiguracaoGrupoPrincipal } from '../hooks/Hook.Configuracao.Grupo.Principal';
 import { SessaoConfiguracoesDeInformacoesDoGrupo } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeInformacoesDoGrupo';
 import { SessaoConfiguracoesDeCargos } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeCargos';
 import { SessaoConfiguracoesDeModeracao } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeModeracao';
@@ -16,7 +16,7 @@ import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupo
 export const GroupSettings: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { group, loading, isOwner, refreshGroup } = useGroupSettings();
+    const { group, loading, isOwner, refreshGroup } = HookConfiguracaoGrupoPrincipal(id);
     
     const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(false);
 

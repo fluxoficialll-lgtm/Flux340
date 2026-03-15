@@ -1,17 +1,13 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
-import { MemberMetrics } from '../../../Componentes/ComponentesDeGroups/logic/MemberMetrics';
+import { HookConfiguracaoGrupoPrincipal } from '../../../hooks/Hook.Configuracao.Grupo.Principal';
 
 export const PGGrupoConfiguracoesEstatisticas: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { group, loading } = useGroupSettings();
+    const { group, loading } = HookConfiguracaoGrupoPrincipal(id);
 
-    const metrics = useMemo(() => {
-        if (!group) return null;
-        return MemberMetrics.process(group.members, group.roles);
-    }, [group]);
+    const metrics = null;
 
     if (loading || !group || !id) {
         return (

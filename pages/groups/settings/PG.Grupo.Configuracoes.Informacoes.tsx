@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
+import { HookConfiguracaoGrupoPrincipal } from '../../../hooks/Hook.Configuracao.Grupo.Principal';
 import { CabecalhoConfiguracaoInformacao } from '../../../Componentes/cabeçalhos/Cabecalho.Configuracao.Informacao';
 
 export const PGGrupoConfiguracoesInformacoes: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { group, loading } = useGroupSettings();
+    const { group, loading } = HookConfiguracaoGrupoPrincipal(id);
 
     const [avatar, setAvatar] = useState<string | undefined>(undefined);
     const [name, setName] = useState('');

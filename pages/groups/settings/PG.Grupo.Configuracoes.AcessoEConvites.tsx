@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useGroupSettings } from '../../../Componentes/ComponentesDeGroups/hooks/useGroupSettings';
+import { HookConfiguracaoGrupoPrincipal } from '../../../hooks/Hook.Configuracao.Grupo.Principal';
 import CardGeracaoLinks from '../../../Componentes/ComponentesDeGroups/Componentes/ComponentesDeConfiguracoesDeGrupo/Card.Geracao.Links';
 
 export const PGGrupoConfiguracoesAcessoEConvites: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { group, loading } = useGroupSettings();
+    const { group, loading } = HookConfiguracaoGrupoPrincipal(id);
 
     if (loading || !group || !id) {
         return (
