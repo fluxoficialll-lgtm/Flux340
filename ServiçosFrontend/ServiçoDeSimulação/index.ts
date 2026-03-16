@@ -10,8 +10,8 @@ import { conversationsHandlers } from './simulacoes/Simulacao.Lista.Conversas';
 import { notificationsHandlers } from './simulacoes/Simulacao.Notificacoes';
 import { chatDetailsHandlers, mockChats } from './simulacoes/Simulacao.Chat';
 import { reelsHandlers } from './simulacoes/Simulacao.Reels';
-import { groupsHandlers, mockGroups } from './simulacoes/Simulacao.Lista.Grupos';
-import { myGroupsHandlers, myMockGroups } from './simulacoes/Simulacao.Grupo.Proprio';
+import { groupsHandlers, mockGroups } from './simulacoes/Simulacao.Lista.Grupo.Terceiro';
+import { myGroupsHandlers, myMockGroups } from './simulacoes/Simulacao.Lista.Grupo.Proprio';
 import { groupMembersHandlers } from './simulacoes/Simulacao.Grupo.Membros';
 import { groupChatHandlers } from './simulacoes/Simulacao.Chat.Grupo';
 import { groupDetailsHandlers } from './simulacoes/Simulacao.Grupo.Detalhes';
@@ -33,7 +33,7 @@ const allGroupIds = [...mockGroups.map(g => g.id), ...myMockGroups.map(g => g.id
 const staticGroupHandlers = {};
 allGroupIds.forEach(id => {
     Object.assign(staticGroupHandlers, {
-        [`/api/groups/${id}`]: modoHubHandlers['/api/groups/:id'],
+        [`/api/groups/${id}`]: groupDetailsHandlers['/api/groups/:groupId'], // CORRIGIDO
         [`/api/group-chat/${id}`]: groupChatHandlers['/api/group-chat/:groupId'],
         [`/api/groups/platform/${id}`]: groupSalesPlatformHandlers['/api/groups/platform/:id'],
     });
@@ -67,10 +67,9 @@ const allSimulationHandlers = {
     ...groupsHandlers,
     ...myGroupsHandlers,
     ...groupMembersHandlers,
-    ...groupDetailsHandlers,
     ...groupRolesConfigHandlers,
     ...groupInvitesConfigHandlers,
-    ...groupGeneralConfigHandlers, // <-- ADICIONADO
+    ...groupGeneralConfigHandlers, 
     ...staticGroupHandlers,      // Adiciona todos os handlers estáticos de grupo
     ...staticProfileHandlers,   // Adiciona o handler estático do perfil que faltava
 };

@@ -1,5 +1,5 @@
 
-// Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Configuracoes.js
+// Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Geral.js
 
 import ClienteBackend from '../Cliente.Backend.js';
 
@@ -9,6 +9,11 @@ import ClienteBackend from '../Cliente.Backend.js';
  */
 
 // --- Configurações Gerais e Estatísticas ---
+
+export const getGroupDetails = (groupId) => {
+    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
+    return ClienteBackend.get(`/api/groups/${groupId}`);
+};
 
 export const updateGroupSettings = (groupId, settings) => {
     if (!groupId) return Promise.reject('ID do grupo não fornecido.');
