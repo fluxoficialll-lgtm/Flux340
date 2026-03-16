@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { useGroupPlatformData } from '../../hooks/Hook.Dados.Plataforma.Grupo';
+import { useGroupPlatformData } from '../../hooks/Hook.Grupo.Plataforma.Hub';
 import { Footer } from '../../Componentes/layout/Footer';
 import PastaCard from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Card.Pasta';
 import BotaoAlternadorOrganizacao from '../../Componentes/ComponentesDeGroups/Componentes/ComponentesModoHub/Botao.Alternador.Organizacao';
@@ -15,7 +15,7 @@ import { fileService } from '../../ServiçosFrontend/ServiçoDeArquivos/fileServ
 
 type TipoVisualizacao = 'lista' | 'grade';
 
-export const PGPlataformaHospedagemArquivos: React.FC = () => {
+export const PG_Grupo_Plataforma_Hub: React.FC = () => {
     const { groupData, loading, error, setGroupData } = useGroupPlatformData();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFolder, setSelectedFolder] = useState<any | null>(null);
