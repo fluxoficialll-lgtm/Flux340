@@ -23,7 +23,7 @@ export const HookConversaEmGrupo = () => {
     const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
 
     useEffect(() => {
-        setCurrentUserEmail(authService.getCurrentUserEmail()?.toLowerCase() || null);
+        setCurrentUserEmail(authService.getCurrentUser()?.email?.toLowerCase() || null);
     }, []);
 
     const loadChatData = useCallback(async (groupId: string) => {

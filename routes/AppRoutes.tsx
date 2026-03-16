@@ -13,6 +13,7 @@ import { profileRoutes } from './Rotas.Perfil';
 import { settingsRoutes } from './Rotas.Configuracoes';
 import { financialRoutes } from './Rotas.Financeiro';
 import { notificationRoutes } from './Rotas.Notificacoes';
+import { messageRoutes } from './Rotas.Mensagens'; // Importa as rotas de mensagens
 import { miscRoutes } from './Rotas.Diversos';
 
 // Combina todos os módulos em um único array
@@ -27,6 +28,7 @@ const allRoutes = [
   ...settingsRoutes,
   ...financialRoutes,
   ...notificationRoutes,
+  ...messageRoutes, // Adiciona as rotas de mensagens
   ...miscRoutes,
 ];
 

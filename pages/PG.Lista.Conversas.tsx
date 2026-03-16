@@ -9,7 +9,7 @@ import { MessagesEmptyState } from '../Componentes/ComponentesDeChats/MessagesEm
 import { MessagesFooter } from '../Componentes/ComponentesDeChats/MessagesFooter';
 import { CardPesquisarConversas } from '../Componentes/ComponentesDeChats/Card.Pesquisar.Conversas';
 
-export const Messages: React.FC = () => {
+export const PG_Lista_Conversas: React.FC = () => {
   const navigate = useNavigate();
   const {
     contacts,

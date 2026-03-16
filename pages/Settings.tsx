@@ -6,7 +6,6 @@ import { HookConfiguracoes } from '../hooks/Hook.Configuracoes';
 import { Footer } from '../Componentes/layout/Footer';
 import { SessaoConta } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoConta';
 import { SessaoSegurancaEPrivacidade } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoSegurancaEPrivacidade';
-import { SessaoNotificacoes } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoNotificacoes';
 import { SessaoFinanceiro } from '../Componentes/ComponentesDeConfiguracaoAppFlux/SessaoFinanceiro';
 
 export const Settings: React.FC = () => {
@@ -68,7 +67,6 @@ export const Settings: React.FC = () => {
             onTogglePrivacy={handleTogglePrivacy}
         />
         <SessaoFinanceiro />
-        <SessaoNotificacoes />
         <SessaoSegurancaEPrivacidade 
             isAdultContent={isAdultContent}
             onToggleAdult={toggleAdultContent}

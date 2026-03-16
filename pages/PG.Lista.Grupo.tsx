@@ -11,7 +11,7 @@ import { CreateGroupFAB } from '../Componentes/groups/list/CreateGroupFAB';
 
 const TrackingModal = lazy(() => import('../Componentes/groups/TrackingModal').then(m => ({ default: m.TrackingModal })));
 
-export const Groups: React.FC = () => {
+export const PG_Lista_Grupo: React.FC = () => {
   const { groups, loading, observerRef, currentUserEmail, navigate, navigateToGroup, joinGroupByCode, deleteGroup, getUnreadCount } = HookGrupos();
   const { showAlert, showConfirm } = useModal();
 

@@ -61,6 +61,11 @@ export const SessaoConta: React.FC<SessaoContaProps> = ({ isPrivate, onTogglePri
                         </div>
                     }
                 />
+                <ItemConfiguracao 
+                    icon="fa-bell" 
+                    label="Configurações de Notificação" 
+                    onClick={() => navigate('/pg-configuracao-notificacao')} 
+                />
             </div>
 
             <ModalDeSelecaoDeIdioma
