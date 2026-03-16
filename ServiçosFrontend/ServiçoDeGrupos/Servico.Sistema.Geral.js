@@ -4,12 +4,17 @@
 import ClienteBackend from '../Cliente.Backend.js';
 
 /**
- * Serviço para gerenciar as configurações gerais, estatísticas, diretrizes e 
+ * Serviço para gerenciar as configurações gerais, estatísticas, diretrizes e
  * notificações de um grupo.
  */
 
 // --- Configurações Gerais e Estatísticas ---
 
+/**
+ * Busca os detalhes de um grupo.
+ * @param {string} groupId - O ID do grupo.
+ * @returns {Promise<object>} Os detalhes do grupo.
+ */
 export const getGroupDetails = (groupId) => {
     if (!groupId) return Promise.reject('ID do grupo não fornecido.');
     return ClienteBackend.get(`/api/groups/${groupId}`);
