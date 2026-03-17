@@ -74,7 +74,12 @@ const googleAuth = async (req, res) => {
         const jwtToken = jwt.sign({ id: user.id, email: user.email }, config.jwtSecret, { expiresIn: '7d' });
 
         // Retorna o token JWT, os dados do usuário e se é um novo usuário
-        res.status(200).json({ token: jwtToken, user, isNewUser });
+        res.status(200).json({ 
+            message: "Autenticação com Google bem-sucedida!",
+            token: jwtToken, 
+            user, 
+            isNewUser 
+        });
 
     } catch (error) {
         console.error('Erro na autenticação com Google:', error);
