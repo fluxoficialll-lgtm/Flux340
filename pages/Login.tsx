@@ -10,6 +10,7 @@ import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/Log
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+// Forçando um novo build para aplicar a correção do redirecionamento
 export const Login: React.FC = () => {
     const navigate = useNavigate();
     const { user, loading: authLoading } = useUsuarioSessao();
