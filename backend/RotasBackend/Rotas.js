@@ -6,9 +6,6 @@ import rotasGestaoVariaveis from './Rotas.Gestao.Variaveis.js';
 import rotasCriacaoConta from './Rotas.Criacao.Conta.Flux.js';
 import rotasCriacaoPerfilFlux from './Rotas.Criacao.Perfil.Flux.js';
 
-// --- Rota de Geolocalização ---
-import rotasGeolocalizacao from './Rotas.Geolocalizacao.js';
-
 // --- Rotas de Canais de Conteúdo ---
 // Feed (Posts)
 import rotasPublicacaoFeed from './Rotas.Publicacao.Feed.js';
@@ -42,9 +39,6 @@ const router = express.Router();
 router.use('/v1/config', rotasGestaoVariaveis);
 router.use('/auth', rotasCriacaoConta);
 router.use('/profiles', rotasCriacaoPerfilFlux);
-
-// --- Geolocalização ---
-router.use(rotasGeolocalizacao); // Usado diretamente na raiz da API
 
 // --- Canais Principais ---
 
