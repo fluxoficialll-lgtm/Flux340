@@ -66,7 +66,7 @@ export const HookFeed = (initialCategory: string = 'all') => {
     setPage(1);
     setHasMore(true);
     fetchPosts(true);
-  }, [category, fetchPosts]);
+  }, [category]);
 
   const lastPostElementRef = useCallback(node => {
     if (loading) return;
