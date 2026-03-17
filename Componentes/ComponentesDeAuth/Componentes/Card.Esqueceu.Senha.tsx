@@ -1,17 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-interface RecoveryEmailCardProps {
+interface CardEsqueceuSenhaProps {
     email: string;
     setEmail: (v: string) => void;
     onSubmit: (e: React.FormEvent) => void;
     loading: boolean;
     btnText: string;
     btnColorClass: string;
+    error: string | null; // Added error prop
 }
 
-export const RecoveryEmailCard: React.FC<RecoveryEmailCardProps> = ({
-    email, setEmail, onSubmit, loading, btnText, btnColorClass
+export const CardEsqueceuSenha: React.FC<CardEsqueceuSenhaProps> = ({
+    email, setEmail, onSubmit, loading, btnText, btnColorClass, error
 }) => {
     return (
         <div className="w-full max-w-[400px] bg-white/5 backdrop-blur-2xl rounded-[32px] p-10 border border-white/10 shadow-2xl flex flex-col items-center animate-fade-in mx-auto">
@@ -39,10 +40,16 @@ export const RecoveryEmailCard: React.FC<RecoveryEmailCardProps> = ({
                     />
                 </div>
 
+                {error && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-[11px] text-center font-bold">
+                        {error}
+                    </div>
+                )}
+
                 <button 
                     type="submit" 
                     disabled={!email || loading}
-                    className={`w-full py-4 bg-[#00c2ff] text-black font-black rounded-xl hover:bg-[#00aaff] transition-all shadow-lg shadow-[#00c2ff]/20 disabled:opacity-50 active:scale-[0.98] uppercase tracking-widest text-sm`}
+                    className={`w-full py-4 ${btnColorClass} text-black font-black rounded-xl hover:bg-[#00aaff] transition-all shadow-lg shadow-[#00c2ff]/20 disabled:opacity-50 active:scale-[0.98] uppercase tracking-widest text-sm`}
                 >
                     {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : btnText}
                 </button>

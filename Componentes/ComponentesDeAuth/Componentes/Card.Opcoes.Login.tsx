@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { LoginDadosIniciaisProps } from '../../../tipos';
 
-export const LoginInitialCard: React.FC<LoginDadosIniciaisProps> = ({ 
+export const CardOpcoesLogin: React.FC<LoginDadosIniciaisProps> = ({ 
     onSelecionarEmail, 
     slotBotaoGoogle, 
 }) => {

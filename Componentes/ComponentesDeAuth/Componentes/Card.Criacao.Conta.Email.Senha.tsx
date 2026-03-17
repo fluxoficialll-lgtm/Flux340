@@ -18,7 +18,7 @@ interface RegisterCardProps {
     onSubmit: (e: React.FormEvent) => void;
 }
 
-export const RegisterCard: React.FC<RegisterCardProps> = ({
+export const CardCriacaoContaEmailSenha: React.FC<RegisterCardProps> = ({
     email, setEmail, password, setPassword, confirmPassword, setConfirmPassword,
     termsAccepted, setTermsAccepted, errors, loading, isValid, referredBy, onSubmit
 }) => {

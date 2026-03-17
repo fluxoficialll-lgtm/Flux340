@@ -2,8 +2,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HookEsqueciSenha } from '../hooks/Hook.Esqueci.Senha';
-import { RecoveryEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/RecoveryEmailCard';
-import { CodeVerificationCard } from '../Componentes/ComponentesDeAuth/Componentes/CodeVerificationCard';
+import { CardEsqueceuSenha } from '../Componentes/ComponentesDeAuth/Componentes/Card.Esqueceu.Senha';
+import { CardVerificacaoCodigo } from '../Componentes/ComponentesDeAuth/Componentes/Card.Verificacao.Codigo';
 
 export const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export const ForgotPassword: React.FC = () => {
         </header>
 
         {stage === 'email' ? (
-            <RecoveryEmailCard 
+            <CardEsqueceuSenha 
                 email={email} 
                 setEmail={setEmail} 
                 loading={loading}
@@ -47,7 +47,7 @@ export const ForgotPassword: React.FC = () => {
                 error={error}
             />
         ) : (
-            <CodeVerificationCard 
+            <CardVerificacaoCodigo 
                 email={email} 
                 code={code} 
                 onInput={handleInput} 

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { HookVerificarEmail } from '../hooks/Hook.Verificar.Email';
-import { CodeVerificationCard } from '../Componentes/ComponentesDeAuth/Componentes/CodeVerificationCard';
+import { CardVerificacaoCodigo } from '../Componentes/ComponentesDeAuth/Componentes/Card.Verificacao.Codigo';
 
 export const VerifyEmail: React.FC = () => {
   const {
@@ -57,7 +57,7 @@ export const VerifyEmail: React.FC = () => {
         </button>
       </header>
 
-      <CodeVerificationCard 
+      <CardVerificacaoCodigo 
         email={email || ''}
         code={code}
         onInput={handleInputChange}

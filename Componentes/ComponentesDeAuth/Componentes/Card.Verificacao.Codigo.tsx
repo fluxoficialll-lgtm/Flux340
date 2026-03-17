@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface CodeVerificationCardProps {
+interface CardVerificacaoCodigoProps {
     email: string;
     code: string[];
     setCode: (code: string[]) => void;
@@ -18,7 +18,7 @@ interface CodeVerificationCardProps {
     inputsRef: React.MutableRefObject<(HTMLInputElement | null)[]>;
 }
 
-export const CodeVerificationCard: React.FC<CodeVerificationCardProps> = ({
+export const CardVerificacaoCodigo: React.FC<CardVerificacaoCodigoProps> = ({
     email, code, onInput, onKeyDown, onPaste, onSubmit, onResend, 
     timer, canResend, loading, error, title, subtitle, inputsRef
 }) => {

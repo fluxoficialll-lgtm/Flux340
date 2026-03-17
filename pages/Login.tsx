@@ -5,8 +5,8 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao';
 import { useLoginEmailSenha } from '../hooks/Hook.Login.Email.Senha'; 
 import { useGoogleLogin } from '../hooks/Hook.Login.Google'; 
-import { LoginInitialCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginInitialCard';
-import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginEmailCard';
+import { CardOpcoesLogin } from '../Componentes/ComponentesDeAuth/Componentes/Card.Opcoes.Login';
+import { CardLoginEmailSenha } from '../Componentes/ComponentesDeAuth/Componentes/Card.Login.Email.Senha';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -91,7 +91,7 @@ export const Login: React.FC = () => {
 
             <div className="w-full max-w-[400px] mx-4 bg-white/5 backdrop-blur-2xl rounded-[32px] p-10 border border-white/10 shadow-2xl relative z-10 flex flex-col items-center">
                 {mostrarFormEmail ? (
-                    <LoginEmailCard 
+                    <CardLoginEmailSenha 
                         email={email}
                         definirEmail={definirEmail}
                         senha={senha}
@@ -102,7 +102,7 @@ export const Login: React.FC = () => {
                         erro={erroEmail || erroGoogle}
                     />
                 ) : (
-                    <LoginInitialCard 
+                    <CardOpcoesLogin 
                         onSelecionarEmail={() => setMostrarFormEmail(true)}
                         slotBotaoGoogle={<BotaoGoogle />}
                     />

@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao';
 import { useHookCriacaoPerfilFlux } from '../hooks/Hook.Criacao.Perfil.Flux';
-import { RegisterCard } from '../Componentes/ComponentesDeAuth/Componentes/RegisterCard';
+import { CardCriacaoContaEmailSenha } from '../Componentes/ComponentesDeAuth/Componentes/Card.Criacao.Conta.Email.Senha';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export const Register: React.FC = () => {
             </button>
         </header>
 
-        <RegisterCard 
+        <CardCriacaoContaEmailSenha 
             email={dados.email}
             setEmail={(value) => updateField('email', value)}
             password={dados.senha}
