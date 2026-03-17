@@ -93,8 +93,8 @@ export const ModalOpcoesPagamentosStripe: React.FC<ModalOpcoesPagamentosStripePr
                             <span className="text-[10px] font-black text-[#00c2ff] uppercase tracking-widest">{props.geo?.countryName || 'Global'} Gateway</span>
                         </div>
                         {filteredMethods.map((m: any) => (
-                            <div key={m.id} onClick={() => handleMethodSelection(m.id as StripeView)} className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all active:scale-[0.98] ${m.primary ? 'bg-[#00c2ff]/10 border-2 border-[#00c2ff]' : 'bg-white/5 border border-white/10 hover:bg-white/10'}`}>
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${m.primary ? 'bg-[#00c2ff] text-black' : 'bg-black/20 text-[#00c2ff]'}`}><i className={`fa-solid ${m.icon} text-lg`}></i></div>
+                            <div key={m.id} onClick={() => handleMethodSelection(m.id as StripeView)} className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all active:scale-[0.98] bg-white/5 border border-[#00c2ff]/50 hover:bg-white/10">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-black/20 text-[#00c2ff]"><i className={`fa-solid ${m.icon} text-lg`}></i></div>
                                 <div className="text-left flex-1">
                                     <span className="font-bold text-sm text-white block">{m.title}</span>
                                     <span className="text-[10px] text-gray-500 uppercase font-black tracking-tighter">{m.sub}</span>

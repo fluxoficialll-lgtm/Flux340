@@ -51,7 +51,7 @@ export const ModalOpcoesPagamentosSyncPay: React.FC<ModalOpcoesPagamentosSyncPay
                             <button 
                                 key={method.id}
                                 onClick={() => generatePayment(method.id)}
-                                className="w-full p-4 bg-white/5 border border-white/10 rounded-xl flex items-center gap-4 hover:bg-white/10 transition-all"
+                                className="w-full p-4 bg-white/5 border border-[#00c2ff]/50 rounded-xl flex items-center gap-4 hover:bg-white/10 transition-all"
                             >
                                 <div style={{ backgroundColor: `${method.color}1a`, color: method.color }} className="w-10 h-10 rounded-lg flex items-center justify-center">
                                     <i className={`${method.icon} text-xl`}></i>
