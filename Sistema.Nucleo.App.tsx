@@ -5,10 +5,15 @@ import { ModalProvider } from './Componentes/ComponenteDeInterfaceDeUsuario/Moda
 import { GlobalTracker } from './Componentes/layout/GlobalTracker';
 import { DeepLinkHandler } from './Componentes/layout/DeepLinkHandler';
 import AppRoutes from './routes/AppRoutes';
-import { useSincronizacao } from './hooks/Hook.Sincronizacao';
 import { inicializarBoot } from './Sistema.Flux.Boot';
 import { configurarAmbiente } from './Sistema.Flux.Ambiente';
 import MonitorDeErrosDeInterface from './Componentes/ComponentesDePrevençãoDeErros/MonitorDeErrosDeInterface.jsx';
+
+// Importações da lógica de sincronização
+import authService from './ServiçosFrontend/ServiçoDeAutenticação/authService.js';
+import { servicoDeSincronizacaoDeSessao } from './ServiçosFrontend/ServiçoDeSincronização/ServicoDeSincronizacaoDeSessao.js';
+import { SyncState } from './ServiçosFrontend/ServiçoDeSincronização/EstadoDeSincronizacao.js';
+import { socketService } from './ServiçosFrontend/ServiçoDeSincronização/Servico.Sincronizacao.Tempo.Real.js';
 
 const Maintenance = lazy(() => import('./pages/Maintenance'));
 
@@ -25,8 +30,6 @@ const SistemaNucleoApp: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
 
-  useSincronizacao();
-
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -35,6 +38,21 @@ const SistemaNucleoApp: React.FC = () => {
         
         const config = { maintenanceMode: false }; 
         setIsMaintenance(config.maintenanceMode);
+
+        // Lógica de sincronização integrada aqui para garantir a ordem de execução correta
+        const user = authService.getCurrentUser();
+        if (user?.email) {
+            socketService.connect();
+            if (SyncState.shouldDoFullSync()) {
+                await servicoDeSincronizacaoDeSessao.performFullSync();
+            } else {
+                await servicoDeSincronizacaoDeSessao.performBackgroundSync();
+            }
+        } else {
+            // Se não houver usuário, ainda podemos fazer uma sincronização de fundo 
+            // para obter dados públicos, se aplicável.
+            await servicoDeSincronizacaoDeSessao.performBackgroundSync();
+        }
 
       } catch (e) {
         console.error("Erro crítico no boot do sistema:", e);
@@ -45,6 +63,17 @@ const SistemaNucleoApp: React.FC = () => {
     };
     
     initializeApp();
+
+    const backgroundSyncInterval = setInterval(() => {
+      if (authService.getCurrentUser()) {
+        servicoDeSincronizacaoDeSessao.performBackgroundSync();
+      }
+    }, 300000); // A cada 5 minutos
+
+    return () => {
+      clearInterval(backgroundSyncInterval);
+      socketService.disconnect();
+    };
   }, []);
 
   if (!isReady) {
