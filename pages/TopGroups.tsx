@@ -2,10 +2,59 @@
 import React from 'react';
 import { HookTopGrupos } from '../hooks/Hook.Top.Grupos';
 
-// Subcomponentes Modulares de UI
-import { RankingTabs } from '../Componentes/ComponentesDeRanking/Componentes/RankingTabs';
-import { RankingPodium } from '../Componentes/ComponentesDeRanking/Componentes/RankingPodium';
-import { RankingListItem } from '../Componentes/ComponentesDeRanking/Componentes/RankingListItem';
+// Subcomponentes Modulares de UI - Substituídos
+
+const RankingTabs = ({ activeTab, onTabChange }: { activeTab: string, onTabChange: (tab: string) => void }) => (
+    <div className="tabs-container">
+      <button className={`tab-btn ${activeTab === 'geral' ? 'active' : ''}`} onClick={() => onTabChange('geral')}>Geral</button>
+      <button className={`tab-btn ${activeTab === 'publicos' ? 'active' : ''}`} onClick={() => onTabChange('publicos')}>Públicos</button>
+      <button className={`tab-btn ${activeTab === 'privados' ? 'active' : ''}`} onClick={() => onTabChange('privados')}>Privados</button>
+      <button className={`tab-btn ${activeTab === 'vip' ? 'active' : ''}`} onClick={() => onTabChange('vip')}>VIP</button>
+    </div>
+  );
+
+const RankingPodium = ({ groups, onGroupClick }: { groups: any[], onGroupClick: (group: any) => void }) => {
+    const topThree = groups.slice(0, 3);
+    // Reorder for podium display: 2nd, 1st, 3rd
+    const podiumOrder = topThree.length === 3 ? [topThree[1], topThree[0], topThree[2]] : topThree;
+    const placeClasses = ['second-place', 'first-place', 'third-place'];
+    const originalIndex = [1, 0, 2];
+
+    return (
+        <div className="top-three-container">
+        {podiumOrder.map((group, index) => (
+            <div key={group.id} className={`podium-item ${placeClasses[index]}`} onClick={() => onGroupClick(group)}>
+                <div className="podium-cover-wrapper">
+                    {index === 1 && <i className="fas fa-crown crown-icon"></i>}
+                    <div className="podium-cover">
+                        {group.cover_pic ? <img src={group.cover_pic} alt={group.name} /> : <i className="fa-solid fa-users"></i>}
+                    </div>
+                    <div className="rank-badge">{originalIndex[index] + 1}</div>
+                </div>
+                <p className="podium-name">{group.name}</p>
+                <p className="podium-count">{group.members_count || 0} membros</p>
+            </div>
+        ))}
+        </div>
+    );
+};
+
+const RankingListItem = ({ group, rank, onClick, isMember }: { group: any, rank: number, onClick: (group: any) => void, isMember: boolean }) => (
+    <div className="rank-item" onClick={() => onClick(group)}>
+      <span className="rank-number">{rank}</span>
+      <div className="list-cover">
+          {group.cover_pic ? <img src={group.cover_pic} alt={group.name} /> : <i className="fa-solid fa-users"></i>}
+      </div>
+      <div className="list-info">
+        <p className="list-name">{group.name}</p>
+        <p className="list-desc">{group.description}</p>
+      </div>
+      <button className={isMember ? "open-btn action-btn" : "join-btn action-btn"} onClick={(e) => { e.stopPropagation(); onClick(group); }}>
+        {isMember ? 'Abrir' : 'Entrar'}
+      </button>
+    </div>
+  );
+
 
 export const TopGroups: React.FC = () => {
   const {
@@ -29,12 +78,11 @@ export const TopGroups: React.FC = () => {
         .tabs-container { display: flex; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 4px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); }
         .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: #aaa; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: 0.3s; }
         .tab-btn.active { background: #00c2ff; color: #000; box-shadow: 0 2px 10px rgba(0,194,255,0.3); }
-        .top-three-container { display: flex; justify-content: center; align-items: flex-end; margin-bottom: 40px; gap: 10px; }
+        .top-three-container { display: flex; justify-content: center; align-items: flex-end; margin-bottom: 40px; min-height: 180px; }
         .podium-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s; position: relative; width: 33%; }
         .podium-item:hover { transform: translateY(-5px); }
         .podium-cover-wrapper { position: relative; margin-bottom: 10px; }
         .podium-cover { border-radius: 16px; object-fit: cover; background: #333; display: flex; align-items: center; justify-content: center; color: #555; overflow: hidden; }
-        .podium-cover i { font-size: 24px; }
         .podium-cover img { width: 100%; height: 100%; object-fit: cover; }
         .crown-icon { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 24px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.8)); }
         .rank-badge { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; border-radius: 50%; color: #000; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; border: 2px solid #0c0f14; }
@@ -59,7 +107,7 @@ export const TopGroups: React.FC = () => {
         .list-cover { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; margin-right: 15px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; background: #222; color: #555; flex-shrink: 0; overflow: hidden; }
         .list-info { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
         .list-name { font-weight: 600; font-size: 15px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .list-desc { font-size: 12px; color: #888; }
+        .list-desc { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .action-btn { border: none; border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; white-space: nowrap; margin-left: 10px; }
         .open-btn { background: rgba(0,194,255,0.1); color: #00c2ff; border: 1px solid #00c2ff; }
         .open-btn:hover { background: #00c2ff; color: #000; }
@@ -85,24 +133,23 @@ export const TopGroups: React.FC = () => {
             </div>
         ) : (
             <>
-                <RankingPodium 
-                    groups={groups} 
-                    onGroupClick={handleGroupAction} 
+                <RankingPodium
+                    groups={groups}
+                    onGroupClick={handleGroupAction}
                 />
 
                 <div className="rank-list">
-                    {groups.length > 0 ? groups.map((group, index) => {
-                        if (index < 3) return null;
+                    {groups.length > 3 ? groups.slice(3).map((group, index) => {
                         return (
-                            <RankingListItem 
+                            <RankingListItem
                                 key={group.id}
                                 group={group}
-                                rank={index + 1}
+                                rank={index + 4}
                                 onClick={handleGroupAction}
                                 isMember={!!group.memberIds?.includes(currentUserId || '')}
                             />
                         );
-                    }) : !loading && (
+                    }) : !loading && groups.length === 0 && (
                         <div className="empty-state">
                             <i className="fa-solid fa-ghost text-4xl mb-2 opacity-30"></i>
                             <p>Nenhum grupo nesta categoria ainda.</p>

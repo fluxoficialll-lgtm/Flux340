@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Notification } from '../../tipos';
-import { ExpiringVipNotificationCard } from '../ComponentesDeNotifications/Componentes/ExpiringVipNotificationCard';
+// import { ExpiringVipNotificationCard } from '../ComponentesDeNotifications/Componentes/ExpiringVipNotificationCard';
 import { CardNotificacaoCurtidas } from './cards/Card.Notificacao.Curtidas';
 import { CardNotificacaoComentario } from './cards/Card.Notificacao.Comentario';
 import { CardNotificacaoSeguidor } from './cards/Card.Notificacao.Seguidor';
@@ -25,6 +25,20 @@ interface CardDesignSessaoProps {
   onPay: (groupId: string) => void;
   navigate: (path: string) => void;
 }
+
+const ExpiringVipNotificationCard = ({ notif, onIgnore, onPay }: { notif: any, onIgnore: (id: number) => void, onPay: (groupId: string) => void }) => {
+    return (
+      <div className="notification-item-vip">
+        <div>
+          <p>Sua assinatura VIP para {notif.groupName} está expirando.</p>
+        </div>
+        <div>
+          <button onClick={() => onPay(notif.groupId)}>Renovar</button>
+          <button onClick={() => onIgnore(notif.id)}>Ignorar</button>
+        </div>
+      </div>
+    );
+  };
 
 export const CardDesignSessaoNotificacao: React.FC<CardDesignSessaoProps> = ({
   title,
