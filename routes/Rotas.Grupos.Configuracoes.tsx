@@ -2,7 +2,7 @@
 import React, { lazy } from 'react';
 import { ProtectedRoute } from '../Componentes/ComponentesDeAuth/ProtectedRoute';
 
-const GroupSettings = lazy(() => import('../pages/GroupSettings').then(m => ({ default: m.GroupSettings })));
+const PG_Configuracoes_Grupo = lazy(() => import('../pages/PG.Configuracoes.Grupo').then(m => ({ default: m.PG_Configuracoes_Grupo })));
 const PGGrupoConfiguracoesInformacoes = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Informacoes').then(m => ({ default: m.PGGrupoConfiguracoesInformacoes })));
 const PGGrupoConfiguracoesAcessoEConvites = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.AcessoEConvites').then(m => ({ default: m.PGGrupoConfiguracoesAcessoEConvites })));
 const PGGrupoConfiguracoesModeracao = lazy(() => import('../pages/groups/settings/PG.Grupo.Configuracoes.Moderacao').then(m => ({ default: m.PGGrupoConfiguracoesModeracao })));
@@ -23,7 +23,7 @@ const PGEditarPaginasVendas = lazy(() => import('../pages/groups/settings/PG.Edi
 
 
 export const groupSettingsRoutes = [
-    { path: '/group-settings/:id', element: <ProtectedRoute><GroupSettings /></ProtectedRoute> },
+    { path: '/group-settings/:id', element: <ProtectedRoute><PG_Configuracoes_Grupo /></ProtectedRoute> },
     { path: '/group-settings/:id/info', element: <ProtectedRoute><PGGrupoConfiguracoesInformacoes /></ProtectedRoute> },
     { path: '/group-settings/:id/access', element: <ProtectedRoute><PGGrupoConfiguracoesAcessoEConvites /></ProtectedRoute> },
     { path: '/group-settings/:id/moderation', element: <ProtectedRoute><PGGrupoConfiguracoesModeracao /></ProtectedRoute> },

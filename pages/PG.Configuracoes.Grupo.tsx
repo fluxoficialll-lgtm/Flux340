@@ -2,18 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SessaoConfiguracoesDeInformacoesDoGrupo } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeInformacoesDoGrupo';
-import { SessaoConfiguracoesDeCargos } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeCargos';
 import { SessaoConfiguracoesDeModeracao } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeModeracao';
 import { SessaoZonaCritica } from '../Componentes/ComponentesDeGroups/SessaoZonaCritica';
-import { SessaoConfiguracoesFinanceiras } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesFinanceiras';
-import { SessaoConfiguracoesDeNotificacaoDoGrupo } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeNotificacaoDoGrupo';
 import { SessaoConfiguracoesDeMarketing } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeMarketing';
 import { SessaoConfiguracoesDeAuditoria } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeAuditoria';
-import { SessaoConfiguracoesDoModoHub } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDoModoHub';
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
 import { mockGroupDetails } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Grupo.Detalhes.ts';
 
-export const GroupSettings: React.FC = () => {
+export const PG_Configuracoes_Grupo: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
@@ -70,7 +66,7 @@ export const GroupSettings: React.FC = () => {
                 .settings-group{margin-bottom:20px;}
                 .settings-group h2{font-size:13px;color:#00c2ff;padding:10px 0;margin-bottom:8px;text-transform:uppercase;font-weight:800;letter-spacing:1px;}
                 .setting-item{display:flex;align-items:center;justify-content:space-between;padding:16px;background-color:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);transition:0.2s;color:#fff;cursor:pointer;border-radius:14px;margin-bottom:8px;}
-                .setting-item:hover{background-color:rgba(255,255,255,0.06);border-color:rgba(0,194,255,0.2);transform:scale(1.02);box-shadow:0 0 15px rgba(0,194,255,0.1);}
+                .setting-item:hover{background-color:rgba(255,255,255,0.06);border-color:rgba(0,194,255,0.2);box-shadow:0 0 15px rgba(0,194,255,0.1);}
                 .setting-info{display:flex;align-items:center;}
                 .setting-info i{font-size:18px;width:30px;text-align:center;margin-right:12px;color:#00c2ff;}
                 .setting-item p{font-size:15px;font-weight:500;}
@@ -87,18 +83,15 @@ export const GroupSettings: React.FC = () => {
             </header>
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">
-                <SessaoConfiguracoesDeInformacoesDoGrupo navigate={navigate} id={id} />
-                <SessaoConfiguracoesDeCargos navigate={navigate} id={id} />
-                <SessaoConfiguracoesDeModeracao navigate={navigate} id={id} group={group} isOwner={isOwner} />
-                <SessaoConfiguracoesFinanceiras navigate={navigate} id={id} />
-                <SessaoConfiguracoesDeNotificacaoDoGrupo navigate={navigate} id={id} />
-                <SessaoConfiguracoesDeMarketing navigate={navigate} id={id} />
-                <SessaoConfiguracoesDeAuditoria navigate={navigate} id={id} />
-                <SessaoConfiguracoesDoModoHub 
+                <SessaoConfiguracoesDeInformacoesDoGrupo 
+                    navigate={navigate} 
                     id={id} 
                     isSalesPlatformEnabled={isSalesPlatformEnabled} 
                     onToggleSalesPlatform={handleToggleSalesPlatform} 
                 />
+                <SessaoConfiguracoesDeModeracao navigate={navigate} id={id} group={group} isOwner={isOwner} />
+                <SessaoConfiguracoesDeMarketing navigate={navigate} id={id} />
+                <SessaoConfiguracoesDeAuditoria navigate={navigate} id={id} />
                 <SessaoZonaCritica handleLeaveDelete={() => {}} isOwner={isOwner} />
 
                 <div className="text-center mt-8 opacity-20 text-[9px] uppercase font-black tracking-[3px]">

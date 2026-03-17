@@ -29,6 +29,11 @@ export const SessaoConfiguracoesDeMarketing: React.FC<SessaoConfiguracoesDeMarke
                 onClick={() => navigate(`/group-settings/${id}/ads-platforms`)} // Updated path
                 rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
             />
+            <ItemConfiguracao
+                icon="fa-chart-pie"
+                label="Faturamento Detalhado"
+                onClick={() => navigate(`/group/${id}/revenue`)}
+            />
         </div>
     );
 };

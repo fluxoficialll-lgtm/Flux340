@@ -21,6 +21,17 @@ export const SessaoConfiguracoesDeModeracao: React.FC<SessaoConfiguracoesDeModer
         <div className="settings-group">
             <h2>Moderação</h2>
             <ItemConfiguracao
+                icon="fa-id-card-clip"
+                label="Criação de Cargos"
+                onClick={() => navigate(`/group-settings/${id}/roles`)}
+                rightElement={<div className="flex items-center"><NewBadge /><i className="fas fa-chevron-right text-gray-600 text-xs ml-3"></i></div>}
+            />
+            <ItemConfiguracao
+                icon="fa-users"
+                label="Distribuição de Cargos"
+                onClick={() => navigate(`/group-settings/${id}/role-distribution`)} // Updated path
+            />
+            <ItemConfiguracao
                 icon="fa-key"
                 label="Acesso e Convites"
                 onClick={() => navigate(`/group-settings/${id}/access`)}

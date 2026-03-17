@@ -13,9 +13,10 @@ interface SessaoConfiguracoesDeInformacoesDoGrupoProps {
     navigate: (path: string) => void;
     id: string;
     isSalesPlatformEnabled: boolean;
+    onToggleSalesPlatform: () => void;
 }
 
-export const SessaoConfiguracoesDeInformacoesDoGrupo: React.FC<SessaoConfiguracoesDeInformacoesDoGrupoProps> = ({ navigate, id, isSalesPlatformEnabled }) => {
+export const SessaoConfiguracoesDeInformacoesDoGrupo: React.FC<SessaoConfiguracoesDeInformacoesDoGrupoProps> = ({ navigate, id, isSalesPlatformEnabled, onToggleSalesPlatform }) => {
     return (
         <div className="settings-group">
             <h2>Configurações de informações do grupo.</h2>
@@ -28,6 +29,22 @@ export const SessaoConfiguracoesDeInformacoesDoGrupo: React.FC<SessaoConfiguraco
                 icon="fa-chart-simple"
                 label="Estatísticas de Capacidade"
                 onClick={() => navigate(`/group-settings/${id}/stats`)}
+            />
+            <ItemConfiguracao
+                icon="fa-bell"
+                label="Notificações do Grupo"
+                onClick={() => navigate(`/group-settings/${id}/general-notifications`)}
+            />
+            <ItemConfiguracao
+                icon="fa-cubes-stacked"
+                label="Modo Hub (Conteúdo e Chat)"
+                onClick={onToggleSalesPlatform}
+                rightElement={
+                    <label className="switch">
+                        <input type="checkbox" checked={isSalesPlatformEnabled} onChange={() => {}} />
+                        <span className="slider-switch"></span>
+                    </label>
+                }
             />
         </div>
     );
