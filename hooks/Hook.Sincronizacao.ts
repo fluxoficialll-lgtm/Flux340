@@ -1,51 +1,40 @@
 
 import { useEffect } from 'react';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { ServicoDeSincronizacaoDeSessao } from '../ServiçosFrontend/ServiçoDeSincronização/ServicoDeSincronizacaoDeSessao.js';
+import { servicoDeSincronizacaoDeSessao } from '../ServiçosFrontend/ServiçoDeSincronização/ServicoDeSincronizacaoDeSessao.js';
 import { SyncState } from '../ServiçosFrontend/ServiçoDeSincronização/EstadoDeSincronizacao.js';
-import { socketService } from '../ServiçosFrontend/ServiçoDeSoquete/ServiçoDeSoquete.js';
-import { RealtimePaymentHandler } from '../ServiçosFrontend/ServiçoDeTempoReal/Notificações/ManipuladorDePagamentoEmTempoReal.js';
+import { socketService } from '../ServiçosFrontend/ServiçoDeSincronização/Servico.Sincronizacao.Tempo.Real.js';
 
 export const useSincronizacao = () => {
   useEffect(() => {
     const user = authService.getCurrentUser();
-    const email = user?.email; // Acesso seguro ao email
+    const email = user?.email;
     
-    // 1. Serviços de tempo real apenas se logado
+    // 1. Conecta o serviço de soquete se o usuário estiver logado
     if (email) {
         socketService.connect();
-        RealtimePaymentHandler.init();
     }
 
-    // 2. Sempre tenta a inicialização para liberar a hidratação (mesmo para guests)
+    // 2. Orquestra a sincronização inicial (completa ou em background)
     const initializeSync = async () => {
         if (email && SyncState.shouldDoFullSync()) {
-            await ServicoDeSincronizacaoDeSessao.performFullSync();
-            SyncState.recordFullSync(); // Marca que a sincronização foi feita
+            await servicoDeSincronizacaoDeSessao.performFullSync();
         } else {
-            // performBackgroundSync disparará os workers que marcam como ready
-            await ServicoDeSincronizacaoDeSessao.performBackgroundSync();
+            await servicoDeSincronizacaoDeSessao.performBackgroundSync();
         }
     };
 
     initializeSync();
 
-    // 3. Batimento cardíaco e Sync Periódico
-    const heartbeatInterval = setInterval(() => {
-      if (authService.getCurrentUser()) { // Verifica o utilizador em vez do email
-        // A lógica de heartbeat pode precisar ser revista se não estiver no authService
-        // Por agora, garantimos que não quebra.
-      }
-    }, 60000);
-
+    // 3. Mantém a sincronização em background periodicamente
     const backgroundSyncInterval = setInterval(() => {
-      if (authService.getCurrentUser()) { // Verifica o utilizador
-        ServicoDeSincronizacaoDeSessao.performBackgroundSync();
+      if (authService.getCurrentUser()) {
+        servicoDeSincronizacaoDeSessao.performBackgroundSync();
       }
-    }, 300000);
+    }, 300000); // A cada 5 minutos
 
+    // 4. Limpeza ao desmontar o hook
     return () => {
-      clearInterval(heartbeatInterval);
       clearInterval(backgroundSyncInterval);
       socketService.disconnect();
     };

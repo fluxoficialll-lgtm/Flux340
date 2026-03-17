@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ServicoDeSincronizacaoDeSessao } from '../ServiçosFrontend/ServiçoDeSincronização/ServicoDeSincronizacaoDeSessao.js';
-// import { PurchaseIntention } from '../ServiçosFrontend/ServiçoDeSincronização/PurchaseIntention';
+import { servicoDeSincronizacaoDeSessao } from '../ServiçosFrontend/ServiçoDeSincronização/ServicoDeSincronizacaoDeSessao.js';
 
 export const HookPonteSucesso = () => {
     const navigate = useNavigate();
@@ -13,28 +12,26 @@ export const HookPonteSucesso = () => {
             const sessionId = query.get('session_id');
 
             if (sessionId) {
-                const পরিপ্রেক্ষিতে = await new ServicoDeSincronizacaoDeSessao().resolverRedirecionamento(sessionId);
-                if (perceive.type === 'group') {
-                    navigate(`/g/${perceive.groupId}`);
-                } else if (perceive.type === 'marketplace') {
+                // A lógica de redirecionamento precisa ser movida para um serviço apropriado.
+                // Por enquanto, vamos apenas sincronizar a sessão para garantir que os dados estejam atualizados.
+                await servicoDeSincronizacaoDeSessao.performFullSync();
+
+                // Lógica de redirecionamento temporariamente comentada até movermos para o lugar certo.
+                /*
+                const percebe = await servicoDeRedirecionamento.resolver(sessionId);
+                if (percebe.type === 'group') {
+                    navigate(`/g/${percebe.groupId}`);
+                } else if (percebe.type === 'marketplace') {
                     navigate(`/market/`);
-                } else if (perceive.type === 'onboarding') {
-                    // const pi = new PurchaseIntention().recover();
-                    // if (pi && pi.groupId) {
-                    //     navigate(`/g/${pi.groupId}?p=1`);
-                    // } else {
-                        navigate(`/`);
-                    // }
                 } else {
-                    navigate(perceive.fallbackUrl || '/');
+                    navigate(percebe.fallbackUrl || '/');
                 }
+                */
+               // Navegação temporária para a home para evitar que o usuário fique preso.
+               navigate('/');
+
             } else {
-                // const pi = new PurchaseIntention().recover();
-                // if (pi && pi.groupId) {
-                //     navigate(`/g/${pi.groupId}?p=1`);
-                // } else {
-                    navigate(`/`);
-                // }
+                navigate(`/`);
             }
         };
 

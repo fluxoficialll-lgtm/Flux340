@@ -1,47 +1,54 @@
-// Arquivo: ServiçosFrontend/ServiçoDeSincronização/Servico.Sincronizacao.Conta.Flux.js
+// Arquivo: ServiçosFrontend/ServiçoDeSincronização/Servico.Sincronizacao.Conta.js
 
 import ClienteBackend from '../Cliente.Backend.js';
 
 /**
- * Serviço para sincronização de dados da conta do usuário "Flux".
- *
- * Este serviço é responsável por buscar os dados mais recentes da conta do usuário
- * do backend e disponibilizá-los para a aplicação.
+ * Serviço para sincronização de dados da conta do usuário (configurações, perfil, etc.).
+ * Adaptado para a nova arquitetura de sincronização modular.
  */
-class ServicoSincronizacaoContaFlux {
+class ServicoSincronizacaoConta {
     constructor() {
         this.dadosDaConta = null;
         this.estado = 'ocioso'; // ocioso, sincronizando, sucesso, erro
-        this.ultimoErro = null;
     }
 
     /**
-     * Inicia o processo de sincronização dos dados da conta.
-     *
-     * @param {boolean} forcar - Se verdadeiro, força a sincronização mesmo que já tenha sido feita.
-     * @returns {Promise<object>} Os dados da conta sincronizados.
-     * @throws {Error} Se a sincronização falhar.
+     * Executa uma sincronização completa, buscando todos os dados da conta no backend.
+     * Corresponde a uma atualização forçada.
      */
-    async sincronizar(forcar = false) {
+    async sync() {
+        console.log('[Sincronização Conta] Executando sincronização completa...');
+        await this._performSync(true); 
+    }
+
+    /**
+     * Executa uma sincronização incremental (delta).
+     * Se os dados já estiverem em cache, não faz nada. Caso contrário, busca no backend.
+     */
+    async syncDelta() {
+        console.log('[Sincronização Conta] Executando sincronização delta...');
+        await this._performSync(false);
+    }
+
+    /**
+     * Lógica principal de sincronização, compartilhada entre sync e syncDelta.
+     * @param {boolean} forcar - Se verdadeiro, ignora o cache e força a busca no backend.
+     * @private
+     */
+    async _performSync(forcar = false) {
         if (this.estado === 'sincronizando') {
-            console.log('Sincronização da conta já em andamento.');
-            // Poderíamos retornar uma promessa que resolve quando a sincronização atual terminar
+            console.log('[Sincronização Conta] Sincronização já em andamento.');
             return;
         }
 
         if (this.estado === 'sucesso' && !forcar) {
-            console.log('Dados da conta já estão sincronizados. Usando cache.');
+            console.log('[Sincronização Conta] Dados já sincronizados. Usando cache.');
             return this.dadosDaConta;
         }
 
         this.estado = 'sincronizando';
-        this.ultimoErro = null;
 
         try {
-            console.log('Iniciando sincronização dos dados da conta Flux...');
-
-            // Usamos o ClienteBackend para buscar os dados do perfil do usuário logado.
-            // O endpoint '/api/v1/perfil/meu' é uma suposição e deve ser ajustado para o seu backend.
             const responseData = await ClienteBackend.get('/api/v1/perfil/meu');
 
             if (!responseData || !responseData.perfil) {
@@ -51,50 +58,22 @@ class ServicoSincronizacaoContaFlux {
             this.dadosDaConta = responseData.perfil;
             this.estado = 'sucesso';
 
-            console.log('Sincronização da conta Flux concluída com sucesso.');
-
-            // Dispara um evento customizado para notificar outras partes da aplicação (ex: hooks do React)
+            console.log('✅ [Sincronização Conta] Sincronização concluída com sucesso.');
             window.dispatchEvent(new CustomEvent('flux-conta-sincronizada', { detail: this.dadosDaConta }));
 
-            return this.dadosDaConta;
         } catch (error) {
-            console.error('Falha ao sincronizar dados da conta Flux:', error);
+            console.error('❌ [Sincronização Conta] Falha ao sincronizar dados da conta:', error);
             this.estado = 'erro';
-            this.ultimoErro = error;
-            
-            // Propaga o erro para que a interface do usuário possa reagir
-            throw error;
+            // Não lançamos o erro para não parar outras sincronizações no `Promise.all`
         }
     }
 
     /**
      * Retorna os últimos dados da conta que foram sincronizados.
-     *
-     * @returns {object | null} Os dados da conta ou null se nunca sincronizado.
      */
     getDadosDaConta() {
         return this.dadosDaConta;
     }
-
-    /**
-     * Retorna o estado atual da sincronização.
-     *
-     * @returns {'ocioso' | 'sincronizando' | 'sucesso' | 'erro'}
-     */
-    getEstado() {
-        return this.estado;
-    }
-
-    /**
-     * Limpa os dados da conta e redefine o estado. Útil ao fazer logout.
-     */
-    reset() {
-        this.dadosDaConta = null;
-        this.estado = 'ocioso';
-        this.ultimoErro = null;
-        console.log('Serviço de sincronização da conta resetado.');
-    }
 }
 
-// Exporta uma instância única do serviço (padrão Singleton) para ser usada em toda a aplicação.
-export const servicoSincronizacaoContaFlux = new ServicoSincronizacaoContaFlux();
+export const servicoSincronizacaoConta = new ServicoSincronizacaoConta();
