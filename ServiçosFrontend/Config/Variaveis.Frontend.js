@@ -1,45 +1,44 @@
 // Arquivo: ServiçosFrontend/Config/Variaveis.Frontend.js
 
 /**
- * Centraliza a definição, validação e acesso às variáveis de ambiente do Frontend.
- * Garante que a aplicação falhe rapidamente (fail-fast) se a configuração estiver incompleta.
- * As variáveis de ambiente do frontend DEVEM começar com o prefixo VITE_.
+ * Centraliza a definição e o acesso às variáveis de ambiente do Frontend.
+ * Este arquivo determina a URL base da API e outras configurações cruciais
+ * com base no ambiente de execução (Produção vs. Desenvolvimento).
  */
 
-// --- Definição das Variáveis Esperadas ---
+// --- Processamento do Ambiente ---
 
-const VARIAVEIS_OBRIGATORIAS = [
-    'VITE_API_BASE_URL',
-    'VITE_GOOGLE_CLIENT_ID',
-    'VITE_STRIPE_PUBLIC_KEY'
-];
-
-// --- Processamento e Validação ---
-
-const VariaveisFrontend = {};
 const env = import.meta.env;
 const isProduction = env.MODE === 'production';
 
-VARIAVEIS_OBRIGATORIAS.forEach(nome => {
-    const valor = env[nome];
-    const chaveCamelCase = nome.replace('VITE_', '').toLowerCase().replace(/_([a-z])/g, g => g[1].toUpperCase());
+// --- Definição das Configurações ---
 
-    if (!valor) {
-        if (isProduction) {
-            throw new Error(`[Configuração do Frontend] A variável de ambiente obrigatória "${nome}" não foi definida.`);
-        } else {
-            // CORREÇÃO: Define um valor padrão funcional para o modo de simulação/desenvolvimento.
-            if (nome === 'VITE_API_BASE_URL') {
-                console.warn(`[Configuração do Frontend] A variável "${nome}" não foi definida. Usando o valor padrão "/api" para o modo de desenvolvimento.`);
-                VariaveisFrontend[chaveCamelCase] = '/api';
-            } else {
-                console.warn(`[Configuração do Frontend] A variável de ambiente "${nome}" não foi definida.`);
-                VariaveisFrontend[chaveCamelCase] = 'NAO_DEFINIDO_EM_DEV';
-            }
-        }
-    } else {
-        VariaveisFrontend[chaveCamelCase] = valor;
+const VariaveisFrontend = {
+    // Define a URL da API com base no ambiente
+    apiBaseUrl: isProduction 
+        ? 'https://api.flux.black' // URL da API de Produção
+        : '/api',                 // Proxy para a API em Desenvolvimento
+
+    // Chave pública do Stripe
+    stripePublicKey: env.VITE_STRIPE_PUBLIC_KEY || 'CHAVE_NAO_DEFINIDA',
+
+    // Client ID do Google
+    googleClientId: env.VITE_GOOGLE_CLIENT_ID || 'CHAVE_NAO_DEFINIDA',
+
+    // Adiciona o modo atual para referência, se necessário
+    mode: env.MODE
+};
+
+// --- Validação (Opcional, mas recomendado) ---
+
+if (isProduction) {
+    if (VariaveisFrontend.stripePublicKey === 'CHAVE_NAO_DEFINIDA') {
+        console.error("[Configuração do Frontend] A variável de ambiente obrigatória 'VITE_STRIPE_PUBLIC_KEY' não foi definida para produção.");
     }
-});
+    if (VariaveisFrontend.googleClientId === 'CHAVE_NAO_DEFINIDA') {
+        console.error("[Configuração do Frontend] A variável de ambiente obrigatória 'VITE_GOOGLE_CLIENT_ID' não foi definida para produção.");
+    }
+}
 
+// Congela o objeto para evitar mutações acidentais em outras partes do código.
 export default Object.freeze(VariaveisFrontend);
