@@ -9,7 +9,7 @@ import { backendConfig } from '../backend/config/ambiente.js';
 const { ambiente: ambienteAtual } = backendConfig;
 
 const MIGRATIONS_DIR = path.join(process.cwd(), 'backend', 'database', 'migrations');
-const MIGRATIONS_TABLE = 'migrations';
+const MIGRATIONS_TABLE = 'schema_migrations'; // Nome da tabela alterado para evitar conflitos
 
 const ensureMigrationsTable = async (client) => {
     await client.query(`
@@ -41,14 +41,15 @@ const applyMigration = async (client, fileName) => {
 };
 
 export const run = async () => {
-    console.log(`
-🚀 Iniciando a verificação e migração do banco de dados no ambiente: ${ambienteAtual.toUpperCase()}...
-`);
+    console.log(`\n🚀 Iniciando a verificação e migração do banco de dados no ambiente: ${ambienteAtual.toUpperCase()}...\n`);
     
-    const client = await pool.connect();
-
+    let client;
     try {
+        client = await pool.connect();
+        console.log('🔌 Conexão com o banco de dados estabelecida com sucesso.');
+
         await client.query('BEGIN');
+        
         await ensureMigrationsTable(client);
 
         const allFiles = await fs.readdir(MIGRATIONS_DIR);
@@ -74,12 +75,20 @@ export const run = async () => {
 
     } catch (error) {
         console.error('🔥 ERRO CRÍTICO! Falha ao aplicar as migrações.');
-        await client.query('ROLLBACK');
-        console.error('⏪ Todas as alterações foram revertidas para garantir a segurança do banco.');
+        if (client) {
+            try {
+                await client.query('ROLLBACK');
+                console.error('⏪ Todas as alterações foram revertidas para garantir a segurança do banco.');
+            } catch (rollbackError) {
+                console.error('!! FALHA NO ROLLBACK. O banco de dados pode estar em estado inconsistente.', rollbackError);
+            }
+        }
         throw error;
     } finally {
-        client.release();
-        console.log('🔌 Conexão com o banco de dados liberada.');
+        if (client) {
+            client.release();
+            console.log('🔌 Conexão com o banco de dados liberada.');
+        }
     }
 };
 
