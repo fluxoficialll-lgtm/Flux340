@@ -1,20 +1,19 @@
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao';
-import { useLoginEmailSenha } from '../hooks/Hook.Login.Email.Senha'; // Hook para email/senha
-import { useGoogleLogin } from '../hooks/Hook.Login.Google'; // Hook para Google Login
+import { useLoginEmailSenha } from '../hooks/Hook.Login.Email.Senha'; 
+import { useGoogleLogin } from '../hooks/Hook.Login.Google'; 
 import { LoginInitialCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginInitialCard';
 import { LoginEmailCard } from '../Componentes/ComponentesDeAuth/Componentes/LoginEmailCard';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export const Login: React.FC = () => {
-    // Hook de autenticação geral (verifica se o usuário já está logado)
+    const navigate = useNavigate();
     const { user, loading: authLoading } = useUsuarioSessao();
 
-    // Hook específico para o fluxo de login com email e senha
     const {
         processando: processandoEmail,
         erro: erroEmail,
@@ -27,17 +26,22 @@ export const Login: React.FC = () => {
         submeterLoginEmail,
     } = useLoginEmailSenha();
 
-    // Hook específico para o fluxo de login com Google
     const {
         processando: processandoGoogle,
         erro: erroGoogle,
         submeterLoginGoogle,
     } = useGoogleLogin();
 
-    // Estado de carregamento geral para a UI
-    const isLoading = processandoEmail || processandoGoogle || authLoading;
+    // Efeito para redirecionar após a autenticação bem-sucedida
+    useEffect(() => {
+        if (!authLoading && user) {
+            const targetUrl = user.profile_completed ? '/feed' : '/complete-profile';
+            navigate(targetUrl, { replace: true });
+        }
+    }, [user, authLoading, navigate]);
 
-    // Se o hook de autenticação ainda está verificando, mostramos um loader global
+    const isLoading = processandoEmail || processandoGoogle;
+
     if (authLoading) {
         return (
             <div className="h-screen w-full bg-[#0c0f14] flex flex-col items-center justify-center gap-4">
@@ -49,19 +53,12 @@ export const Login: React.FC = () => {
         );
     }
 
-    // Se o usuário já está logado, redireciona
-    if (user) {
-        return <Navigate to={user.profile_completed ? '/feed' : '/complete-profile'} replace />;
-    }
-
-    // Componente para a camada de sobreposição durante o processamento
     const CamadaDeProcessamento = () => (
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-[32px] flex items-center justify-center z-50">
             <i className="fa-solid fa-circle-notch fa-spin text-[#00c2ff] text-2xl"></i>
         </div>
     );
 
-    // Componente que renderiza o botão de login do Google
     const BotaoGoogle = () => {
         if (!GOOGLE_CLIENT_ID) {
             return (
@@ -86,7 +83,6 @@ export const Login: React.FC = () => {
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-white font-['Inter'] relative overflow-hidden">
-            {/* Efeitos de fundo */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px]"></div>
                 <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[100px]"></div>
@@ -111,7 +107,6 @@ export const Login: React.FC = () => {
                     />
                 )}
                 
-                {/* Exibe a camada de processamento se qualquer um dos logins estiver ativo */}
                 {isLoading && <CamadaDeProcessamento />}
             </div>
         </div>
