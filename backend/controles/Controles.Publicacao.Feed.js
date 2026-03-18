@@ -2,50 +2,51 @@
 // backend/controles/Controles.Publicacao.Feed.js
 
 import servicoPublicacaoFeed from '../ServicosBackend/Servicos.Publicacao.Feed.js';
+import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
 const criarPost = async (req, res) => {
     try {
         const postData = { ...req.body };
         const post = await servicoPublicacaoFeed.criarPost(postData, req.user);
-        res.status(201).json(post);
+        ServicoHTTPResposta.criado(res, post);
     } catch (error) {
-        res.status(error.statusCode || 400).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 400, error);
     }
 };
 
 const obterTodosOsPosts = async (req, res) => {
     try {
         const posts = await servicoPublicacaoFeed.obterTodosOsPosts(req.query);
-        res.status(200).json(posts);
+        ServicoHTTPResposta.sucesso(res, posts);
     } catch (error) {
-        res.status(error.statusCode || 500).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error);
     }
 };
 
 const obterPostPorId = async (req, res) => {
     try {
         const post = await servicoPublicacaoFeed.obterPostPorId(req.params.postId);
-        res.status(200).json(post);
+        ServicoHTTPResposta.sucesso(res, post);
     } catch (error) {
-        res.status(error.statusCode || 404).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 404, error);
     }
 };
 
 const atualizarPost = async (req, res) => {
     try {
         const updatedPost = await servicoPublicacaoFeed.atualizarPost(req.params.postId, req.body, req.user);
-        res.status(200).json(updatedPost);
+        ServicoHTTPResposta.sucesso(res, updatedPost);
     } catch (error) {
-        res.status(error.statusCode || 400).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 400, error);
     }
 };
 
 const deletarPost = async (req, res) => {
     try {
         await servicoPublicacaoFeed.deletarPost(req.params.postId, req.user);
-        res.status(200).json({ message: "Post deletado com sucesso." });
+        ServicoHTTPResposta.sucesso(res, null, "Post deletado com sucesso.");
     } catch (error) {
-        res.status(error.statusCode || 403).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 403, error);
     }
 };
 

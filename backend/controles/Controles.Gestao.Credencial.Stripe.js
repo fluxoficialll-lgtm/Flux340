@@ -1,4 +1,5 @@
 
+import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 import Stripe from 'stripe';
 import config from '../config/Variaveis.Backend.js';
 
@@ -9,7 +10,7 @@ if (config.stripeSecretKey) {
 
 const createAccountLink = async (req, res) => {
     if (!stripe) {
-        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+        return ServicoHTTPResposta.erro(res, "O sistema de pagamentos não está configurado. Contate o suporte.", 503);
     }
 
     const { accountId, refresh_url, return_url } = req.body;
@@ -22,33 +23,33 @@ const createAccountLink = async (req, res) => {
             type: 'account_onboarding',
         });
 
-        res.status(200).json({ url: accountLink.url });
+        return ServicoHTTPResposta.sucesso(res, { url: accountLink.url });
     } catch (error) {
-        res.status(400).json({ error: { message: error.message } });
+        return ServicoHTTPResposta.erro(res, error.message, 400);
     }
 };
 
 const getAccountDetails = async (req, res) => {
     if (!stripe) {
-        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+        return ServicoHTTPResposta.erro(res, "O sistema de pagamentos não está configurado. Contate o suporte.", 503);
     }
 
     const { accountId } = req.params;
 
     try {
         const account = await stripe.accounts.retrieve(accountId);
-        res.status(200).json(account);
+        return ServicoHTTPResposta.sucesso(res, account);
     } catch (error) {
-        res.status(400).json({ error: { message: error.message } });
+        return ServicoHTTPResposta.erro(res, error.message, 400);
     }
 };
 
 const disconnectAccount = (req, res) => {
     if (!stripe) {
-        return res.status(503).json({ error: { message: "O sistema de pagamentos não está configurado. Contate o suporte." } });
+        return ServicoHTTPResposta.erro(res, "O sistema de pagamentos não está configurado. Contate o suporte.", 503);
     }
     
-    res.status(200).json({ message: "Funcionalidade de desconexão a ser implementada no lado do seu aplicativo." });
+    return ServicoHTTPResposta.sucesso(res, { message: "Funcionalidade de desconexão a ser implementada no lado do seu aplicativo." });
 };
 
 export default {

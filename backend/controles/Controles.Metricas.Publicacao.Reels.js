@@ -1,3 +1,5 @@
+
+import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 import ServicoMetricasPublicacaoReels from '../ServicosBackend/Servicos.Metricas.Publicacao.Reels.js';
 
 class ControlesMetricasPublicacaoReels {
@@ -5,9 +7,10 @@ class ControlesMetricasPublicacaoReels {
         try {
             const { reelId } = req.params;
             const metrics = await ServicoMetricasPublicacaoReels.getReelMetrics(reelId);
-            res.status(200).json(metrics);
+            return ServicoHTTPResposta.sucesso(res, metrics);
         } catch (error) {
-            next(error);
+            console.error(`Error fetching reel metrics for reelId ${req.params.reelId}:`, error);
+            return ServicoHTTPResposta.erro(res, 'Failed to fetch reel metrics', 500, error);
         }
     }
 }

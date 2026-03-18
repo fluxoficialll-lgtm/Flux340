@@ -17,12 +17,12 @@ const registerUser = async (req, res) => {
 
         if (!name || !email) {
             ServicoLog.warn(contexto, "Tentativa de registro sem nome ou email.");
-            return res.status(400).json({ message: 'Nome e email são obrigatórios.' });
+            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'Nome e email são obrigatórios.');
         }
 
         if (!password && !google_id) {
             ServicoLog.warn(contexto, "Tentativa de registro sem senha ou ID do Google.");
-            return res.status(400).json({ message: 'É necessário fornecer uma senha ou um ID do Google.' });
+            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'É necessário fornecer uma senha ou um ID do Google.');
         }
 
         const result = await servicoCriacaoConta.registerUser({ name, email, password, google_id });
@@ -31,7 +31,7 @@ const registerUser = async (req, res) => {
         ServicoRespostaHTTP.criado(res, result, 'Usuário criado com sucesso.');
     } catch (error) {
         ServicoLog.erro(contexto, 'Erro ao registrar usuário', error);
-        res.status(400).json({ message: error.message || 'Ocorreu um erro no servidor.' });
+        ServicoRespostaHTTP.erro(res, error.message || 'Ocorreu um erro no servidor.', 400, error);
     }
 };
 
@@ -42,7 +42,7 @@ const loginUser = async (req, res) => {
         const { email, password } = req.body;
         if (!email || !password) {
             ServicoLog.warn(contexto, "Tentativa de login sem email ou senha.");
-            return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
+            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'Email e senha são obrigatórios.');
         }
 
         const result = await servicoCriacaoConta.loginUser({ email, password });
@@ -64,7 +64,7 @@ const googleAuth = async (req, res) => {
         const { token } = req.body;
         if (!token) {
             ServicoLog.warn(contexto, "Token do Google não fornecido.");
-            return res.status(400).json({ message: 'Token do Google não fornecido.' });
+            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'Token do Google não fornecido.');
         }
 
         const ticket = await client.verifyIdToken({

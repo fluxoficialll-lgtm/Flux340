@@ -1,4 +1,5 @@
 
+import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 import ServicoCriacaoGrupoPago from '../ServicosBackend/Servicos.Criacao.Grupo.Pago.js';
 
 class ControleCriacaoGrupoPago {
@@ -9,15 +10,15 @@ class ControleCriacaoGrupoPago {
 
             // Validações básicas
             if (!dadosGrupo.groupName || !dadosGrupo.numericPrice) {
-                return res.status(400).json({ message: 'Nome do grupo e preço são obrigatórios.' });
+                return ServicoHTTPResposta.erro(res, 'Nome do grupo e preço são obrigatórios.', 400);
             }
 
             const grupoCriado = await ServicoCriacaoGrupoPago.criar(dadosGrupo, creatorId);
-            return res.status(201).json(grupoCriado);
+            return ServicoHTTPResposta.sucesso(res, grupoCriado, 201);
 
         } catch (error) {
             console.error("Erro no controlador ao criar grupo pago:", error);
-            return res.status(500).json({ message: error.message || 'Erro interno do servidor' });
+            return ServicoHTTPResposta.erro(res, 'Erro interno do servidor', 500);
         }
     }
 }

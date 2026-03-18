@@ -1,22 +1,23 @@
 
 // backend/controles/Controles.Publicacao.Reels.js
 import ServicoReels from '../ServicosBackend/Servicos.Publicacao.Reels.js';
+import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
 const createReel = async (req, res) => {
     try {
         const reel = await ServicoReels.createReel(req.body, req.user.id);
-        res.status(201).json(reel);
+        ServicoHTTPResposta.criado(res, reel);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, 400, error);
     }
 };
 
 const getAllReels = async (req, res) => {
     try {
         const reels = await ServicoReels.getAllReels(req.query);
-        res.status(200).json(reels);
+        ServicoHTTPResposta.sucesso(res, reels);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, 500, error);
     }
 };
 
@@ -24,29 +25,29 @@ const getReelById = async (req, res) => {
     try {
         const reel = await ServicoReels.getReelById(req.params.reelId);
         if (!reel) {
-            return res.status(404).json({ message: 'Reel não encontrado.' });
+            return ServicoHTTPResposta.naoEncontrado(res, 'Reel não encontrado.');
         }
-        res.status(200).json(reel);
+        ServicoHTTPResposta.sucesso(res, reel);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, 500, error);
     }
 };
 
 const updateReel = async (req, res) => {
     try {
         const updatedReel = await ServicoReels.updateReel(req.params.reelId, req.body, req.user.id);
-        res.status(200).json(updatedReel);
+        ServicoHTTPResposta.sucesso(res, updatedReel);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, 400, error);
     }
 };
 
 const deleteReel = async (req, res) => {
     try {
         await ServicoReels.deleteReel(req.params.reelId, req.user.id);
-        res.status(204).send();
+        ServicoHTTPResposta.semConteudo(res);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        ServicoHTTPResposta.erro(res, error.message, 400, error);
     }
 };
 
