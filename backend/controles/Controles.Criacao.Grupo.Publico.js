@@ -1,24 +1,29 @@
-
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 import ServicoCriacaoGrupoPublico from '../ServicosBackend/Servicos.Criacao.Grupo.Publico.js';
 
 class ControleCriacaoGrupoPublico {
     async handle(req, res) {
         try {
-            // O ID do usuário virá do middleware de autenticação
-            const creatorId = req.user.id;
-            const dadosGrupo = req.body;
+            // 1. Extrair dados brutos do request
+            const donoId = req.user.id;
+            const dadosDoRequest = req.body; // { nome, descricao, limiteMembros }
 
-            if (!dadosGrupo.name) {
-                return ServicoHTTPResposta.erro(res, 'O nome do grupo é obrigatório.', 400);
-            }
+            // 2. Montar um objeto de dados para o serviço
+            const dadosParaServico = {
+                ...dadosDoRequest,
+                donoId: donoId,
+            };
 
-            const grupoCriado = await ServicoCriacaoGrupoPublico.criar(dadosGrupo, creatorId);
-            return ServicoHTTPResposta.sucesso(res, grupoCriado, 201);
+            // 3. Chamar o serviço com os dados brutos
+            const grupoSalvo = await ServicoCriacaoGrupoPublico.criar(dadosParaServico);
+
+            // 4. Retornar a resposta (o serviço retornará o objeto formatado)
+            return ServicoHTTPResposta.sucesso(res, grupoSalvo, 201);
 
         } catch (error) {
-            console.error("Erro no controlador ao criar grupo público:", error);
-            return ServicoHTTPResposta.erro(res, 'Erro interno do servidor', 500);
+            // Erros de validação (do serviço/modelo) ou outros erros
+            console.error("Erro no controlador ao criar grupo público:", error.message);
+            return ServicoHTTPResposta.erro(res, error.message, 400); // Repassa o erro
         }
     }
 }

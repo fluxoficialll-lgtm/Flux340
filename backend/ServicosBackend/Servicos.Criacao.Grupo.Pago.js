@@ -1,46 +1,57 @@
 import { v4 as uuidv4 } from 'uuid';
-import RepositorioGruposPagos from '../Repositorios/Repositorio.Criacao.Grupo.Pago.js';
+// Importa o repositório unificado
+import RepositorioGrupo from '../Repositorios/Repositorio.Estrutura.Grupos.js';
+import Grupo from '../models/Models.Estrutura.Grupos.js';
 
 class ServicoCriacaoGrupoPago {
-    async criar(dadosGrupo, creatorId) {
-        // Lógica para determinar o valor de expiration_date
-        let expirationValue = undefined;
-        if (dadosGrupo.accessType === 'temporary') {
-            expirationValue = dadosGrupo.accessConfig?.interval;
-        } else if (dadosGrupo.accessType === 'one_time') {
-            expirationValue = `${dadosGrupo.accessConfig?.days}d${dadosGrupo.accessConfig?.hours}h`;
-        }
-
-        const novoGrupo = {
-            id: uuidv4(),
-            creator_id: creatorId,
-            name: dadosGrupo.groupName,
-            description: dadosGrupo.description,
-            group_type: 'paid',
-            cover_image: dadosGrupo.finalCoverUrl || null,
-            is_vip: true,
-            price: dadosGrupo.numericPrice.toString(),
-            currency: dadosGrupo.currency,
-            access_type: dadosGrupo.accessType,
-            selected_provider_id: dadosGrupo.selectedProviderId,
-            expiration_date: expirationValue,
-            vip_door: {
-                mediaItems: dadosGrupo.finalMediaGallery,
-                text: dadosGrupo.vipDoorText || "Bem-vindo ao VIP!",
-                buttonText: dadosGrupo.vipButtonText
-            },
-            pixel_id: dadosGrupo.pixelId || null,
-            pixel_token: dadosGrupo.pixelToken || null,
-            status: 'active'
-        };
-
+    async criar(dadosDoRequest) {
         try {
-            const grupoCriado = await RepositorioGruposPagos.criar(novoGrupo);
-            return grupoCriado;
+            const novoGrupo = new Grupo({
+                id: uuidv4(),
+                nome: dadosDoRequest.groupName,
+                descricao: dadosDoRequest.description,
+                tipo: 'pago',
+                preco: dadosDoRequest.numericPrice,
+                moeda: dadosDoRequest.currency,
+                donoId: dadosDoRequest.donoId,
+                imagemCapa: dadosDoRequest.finalCoverUrl || null,
+                tipoAcesso: dadosDoRequest.accessType,
+                provedorPagamentoId: dadosDoRequest.selectedProviderId,
+                dataExpiracao: this.calcularDataExpiracao(dadosDoRequest),
+                vipDoor: {
+                    mediaItems: dadosDoRequest.finalMediaGallery,
+                    text: dadosDoRequest.vipDoorText || "Bem-vindo ao VIP!",
+                    buttonText: dadosDoRequest.vipButtonText
+                },
+                pixel: {
+                    id: dadosDoRequest.pixelId || null,
+                    token: dadosDoRequest.pixelToken || null,
+                }
+            });
+
+            const dadosParaBanco = novoGrupo.paraBancoDeDados();
+
+            // Usa o repositório unificado
+            const grupoSalvoNoBanco = await RepositorioGrupo.criar(dadosParaBanco);
+
+            const instanciaGrupoSalvo = Grupo.deBancoDeDados(grupoSalvoNoBanco);
+
+            return instanciaGrupoSalvo.paraRespostaHttp();
+
         } catch (error) {
-            console.error("Erro ao criar grupo pago no serviço:", error);
-            throw new Error("Falha ao criar o grupo pago.");
+            console.error("Erro no serviço ao criar grupo pago:", error.message);
+            throw error;
         }
+    }
+
+    calcularDataExpiracao(dados) {
+        if (dados.accessType === 'temporary') {
+            return dados.accessConfig?.interval;
+        }
+        if (dados.accessType === 'one_time') {
+            return `${dados.accessConfig?.days}d${dados.accessConfig?.hours}h`;
+        }
+        return null;
     }
 }
 

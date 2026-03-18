@@ -1,23 +1,29 @@
-
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 import ServicoCriacaoGrupoPrivado from '../ServicosBackend/Servicos.Criacao.Grupo.Privado.js';
 
 class ControleCriacaoGrupoPrivado {
     async handle(req, res) {
         try {
-            const creatorId = req.user.id;
-            const dadosGrupo = req.body;
+            // 1. Extrair dados do request
+            const donoId = req.user.id;
+            const dadosDoRequest = req.body; // { nome, descricao, limiteMembros }
 
-            if (!dadosGrupo.name) {
-                return ServicoHTTPResposta.erro(res, 'O nome do grupo é obrigatório.', 400);
-            }
+            // 2. Montar objeto de dados para o serviço
+            const dadosParaServico = {
+                ...dadosDoRequest,
+                donoId: donoId,
+            };
 
-            const grupoCriado = await ServicoCriacaoGrupoPrivado.criar(dadosGrupo, creatorId);
-            return ServicoHTTPResposta.sucesso(res, grupoCriado, 201);
+            // 3. Chamar o serviço com os dados
+            const grupoSalvo = await ServicoCriacaoGrupoPrivado.criar(dadosParaServico);
+
+            // 4. Retornar a resposta formatada pelo serviço
+            return ServicoHTTPResposta.sucesso(res, grupoSalvo, 201);
 
         } catch (error) {
-            console.error("Erro no controlador ao criar grupo privado:", error);
-            return ServicoHTTPResposta.erro(res, 'Erro interno do servidor', 500);
+            // Captura erros (incluindo validação do modelo via serviço)
+            console.error("Erro no controlador ao criar grupo privado:", error.message);
+            return ServicoHTTPResposta.erro(res, error.message, 400);
         }
     }
 }
