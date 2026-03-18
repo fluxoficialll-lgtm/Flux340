@@ -1,7 +1,9 @@
 
 import { config } from '../ValidaçãoDeAmbiente/config';
-import authApi from '../APIs/authApi.js';
 import { ServicoAutenticacaoMock } from '../ServiçoDeSimulação/simulacoes/SimulacaoDeAuth.ts';
+import { metodoGoogle } from './Servico.Metodo.Google.js';
+import { metodoEmailSenha } from './Servico.Metodo.Email.Senha.js';
+import authApi from '../APIs/authApi.js'; // Mantido para register e updateProfile por enquanto
 
 // --- Helper Function ---
 const salvarSessao = (dados) => {
@@ -16,22 +18,23 @@ const salvarSessao = (dados) => {
 const realAuthService = {
     login: async (email, password) => {
         try {
-            const response = await authApi.login(email, password);
-            salvarSessao(response.data);
-            return response.data;
+            // Alterado para usar o serviço dedicado
+            const data = await metodoEmailSenha.login(email, password);
+            salvarSessao(data);
+            return data;
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Falha no login';
+            const errorMessage = error.message || 'Falha no login';
             throw new Error(errorMessage);
         }
     },
 
     loginWithGoogle: async (credential, referredBy) => {
         try {
-            const response = await authApi.google({ token: credential, referredBy });
-            salvarSessao(response.data);
-            return response.data;
+            const data = await metodoGoogle.login(credential, referredBy);
+            salvarSessao(data);
+            return data;
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Falha na autenticação com o Google.';
+            const errorMessage = error.message || 'Falha na autenticação com o Google.';
             throw new Error(errorMessage);
         }
     },
@@ -44,7 +47,7 @@ const realAuthService = {
 
     register: async (email, password, username, referredBy) => {
         try {
-            const payload = { email, password, username, referredBy };
+            // TODO: Refatorar register para seguir o mesmo padrão de serviço
             const response = await authApi.register(email, password, username, referredBy);
             salvarSessao(response.data);
             return response.data;
@@ -56,8 +59,8 @@ const realAuthService = {
 
     updateProfile: async (profileData) => {
         try {
+            // TODO: Refatorar updateProfile para seguir o mesmo padrão de serviço
             const response = await authApi.updateProfile(profileData);
-            // Atualiza o usuário no localStorage se a API retornar os dados atualizados
             if (response.data.user) {
                  localStorage.setItem('user', JSON.stringify(response.data.user));
             }
@@ -85,7 +88,7 @@ const realAuthService = {
 
 // --- Simulation Service Wrapper ---
 const simulationServiceWrapper = {
-    ...realAuthService, // Keep non-API dependent functions (getToken, getCurrentUser)
+    ...realAuthService,
 
     login: async (email, password) => {
         console.log('[SIMULAÇÃO] ✅ Login solicitado.');
@@ -100,8 +103,7 @@ const simulationServiceWrapper = {
     },
 
     logout: () => {
-        ServicoAutenticacaoMock.logout(); // Manages internal simulation state
-        // Perform real logout actions
+        ServicoAutenticacaoMock.logout();
         localStorage.removeItem('userToken');
         localStorage.removeItem('user');
         window.dispatchEvent(new Event('authChange'));
@@ -109,7 +111,6 @@ const simulationServiceWrapper = {
     },
 
     isAuthenticated: () => {
-        // The source of truth is the mock service's state, but we can also check the token
         const isAuth = ServicoAutenticacaoMock.isAuthenticated();
         console.log(`[SIMULAÇÃO] ✅ Verificando autenticação: ${isAuth}`);
         return isAuth;
@@ -144,7 +145,6 @@ const simulationServiceWrapper = {
         const currentUser = realAuthService.getCurrentUser();
         const updatedUser = { ...currentUser, ...profileData, profile_completed: true };
         
-        // Use the mock function to simulate backend update logic if needed
         ServicoAutenticacaoMock.completeProfile(profileData);
 
         localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -154,7 +154,7 @@ const simulationServiceWrapper = {
 
     loginWithGoogle: async () => {
         console.log('[SIMULAÇÃO] ✅ Login com Google solicitado.');
-        return simulationServiceWrapper.login(); // Re-use the standard login simulation
+        return simulationServiceWrapper.login();
     },
 };
 
