@@ -1,76 +1,99 @@
 
 // backend/ServicosBackend/Servicos.Publicacao.Reels.js
 import RepositorioReels from '../Repositorios/Repositorio.Publicacao.Reels.js';
+import PublicacaoReels from '../models/Models.Estrutura.Publicacao.Reels.js';
 
-const checkPermissions = (userId, reel) => {
-    // Simula a verificação de permissão.
-    // Em um cenário real, essa lógica seria mais robusta.
-    if (!reel || !reel.user_id) {
-        throw new Error('Não é possível verificar as permissões: dados do reel incompletos.');
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
     }
-    return reel.user_id === userId;
-};
+}
 
 const createReel = async (reelData, userId) => {
-    // Lógica de negócio: Adiciona o ID do usuário aos dados do reel.
-    const fullReelData = { ...reelData, user_id: userId };
-    
-    if (!fullReelData.video_url) {
-        throw new Error('A URL do vídeo é obrigatória para criar um reel.');
+    if (!userId) {
+        throw new AppError('Autenticação necessária para criar um reel.', 401);
     }
 
-    // Chama o repositório para criar o reel.
-    return RepositorioReels.createReel(fullReelData);
+    const novoReel = new PublicacaoReels({
+        usuarioId: userId,
+        urlVideo: reelData.video_url,
+        descricao: reelData.description,
+        idMusica: reelData.music_id,
+        hashtags: reelData.hashtags,
+        localizacao: reelData.location
+    });
+
+    if (!novoReel.urlVideo) {
+        throw new AppError('A URL do vídeo é obrigatória para criar um reel.', 400);
+    }
+
+    const dadosParaBanco = novoReel.paraBancoDeDados();
+    const reelCriadoDb = await RepositorioReels.createReel(dadosParaBanco);
+    const reel = PublicacaoReels.deBancoDeDados(reelCriadoDb);
+
+    return reel.paraRespostaHttp();
 };
 
 const getAllReels = async (options) => {
-    // Lógica de negócio para definir padrões de paginação ou filtros.
-    const processedOptions = { limit: 20, offset: 0, ...options };
-    return RepositorioReels.findAllReels(processedOptions);
+    const reelsDb = await RepositorioReels.findAllReels(options);
+    const reels = reelsDb.map(PublicacaoReels.deBancoDeDados);
+    return reels.map(r => r.paraRespostaHttp());
 };
 
 const getReelById = async (reelId) => {
     if (!reelId || isNaN(parseInt(reelId))) {
-        throw new Error('ID de reel inválido fornecido.');
+        throw new AppError('ID de reel inválido fornecido.', 400);
     }
-    return RepositorioReels.findReelById(reelId);
+    const reelDb = await RepositorioReels.findReelById(reelId);
+    if (!reelDb) {
+        throw new AppError('Reel não encontrado.', 404);
+    }
+    const reel = PublicacaoReels.deBancoDeDados(reelDb);
+    return reel.paraRespostaHttp();
 };
 
 const updateReel = async (reelId, updates, userId) => {
     if (!reelId || isNaN(parseInt(reelId))) {
-        throw new Error('ID de reel inválido para atualização.');
+        throw new AppError('ID de reel inválido para atualização.', 400);
     }
 
-    const reel = await RepositorioReels.findReelById(reelId);
-    if (!reel) {
-        throw new Error('Reel não encontrado para atualização.');
-    }
-    
-    // Lógica de negócio: Verificar permissões antes de atualizar.
-    if (!checkPermissions(userId, reel)) {
-        throw new Error('Usuário não autorizado a editar este reel.');
+    const reelDb = await RepositorioReels.findReelById(reelId);
+    if (!reelDb) {
+        throw new AppError('Reel não encontrado para atualização.', 404);
     }
 
-    return RepositorioReels.updateReel(reelId, updates);
+    if (reelDb.user_id !== userId) {
+        throw new AppError('Usuário não autorizado a editar este reel.', 403);
+    }
+
+    // O repositório já lida com campos parciais, então passamos `updates` diretamente
+    const reelAtualizadoDb = await RepositorioReels.updateReel(reelId, updates);
+    const reelAtualizado = PublicacaoReels.deBancoDeDados(reelAtualizadoDb);
+
+    return reelAtualizado.paraRespostaHttp();
 };
 
 const deleteReel = async (reelId, userId) => {
     if (!reelId || isNaN(parseInt(reelId))) {
-        throw new Error('ID de reel inválido para exclusão.');
+        throw new AppError('ID de reel inválido para exclusão.', 400);
     }
 
-    const reel = await RepositorioReels.findReelById(reelId);
-    if (!reel) {
-        throw new Error('Reel não encontrado para exclusão.');
-    }
-    
-    // Lógica de negócio: Verificar permissões antes de deletar.
-    if (!checkPermissions(userId, reel)) {
-        throw new Error('Usuário não autorizado a deletar este reel.');
+    const reelDb = await RepositorioReels.findReelById(reelId);
+    if (!reelDb) {
+        throw new AppError('Reel não encontrado para exclusão.', 404);
     }
 
-    await RepositorioReels.deleteReel(reelId);
-    // O serviço não precisa retornar nada em uma exclusão bem-sucedida.
+    if (reelDb.user_id !== userId) {
+        throw new AppError('Usuário não autorizado a deletar este reel.', 403);
+    }
+
+    const sucesso = await RepositorioReels.deleteReel(reelId);
+    if (!sucesso) {
+        throw new AppError('Falha ao deletar o reel.', 500);
+    }
+
+    return { message: 'Reel deletado com sucesso.' };
 };
 
 export default {

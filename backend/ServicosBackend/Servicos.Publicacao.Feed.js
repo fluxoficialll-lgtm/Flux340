@@ -2,6 +2,7 @@
 // backend/ServicosBackend/Servicos.Publicacao.Feed.js
 
 import repositorioPublicacaoFeed from '../Repositorios/Repositorio.Publicacao.Feed.js';
+import PublicacaoFeed from '../models/Models.Estrutura.Publicacao.Feed.js';
 
 class AppError extends Error {
     constructor(message, statusCode) {
@@ -15,25 +16,43 @@ const criarPost = async (postData, user) => {
         throw new AppError('Autenticação necessária para criar um post.', 401);
     }
 
-    // Validação de dados de entrada pode ser feita aqui ou delegada
-    if (!postData.content || typeof postData.content !== 'string' || postData.content.trim().length === 0) {
+    const novaPublicacao = new PublicacaoFeed({
+        autorId: user.id,
+        conteudo: postData.content,
+        urlMidia: postData.mediaUrl,
+        idPostPai: postData.parentPostId,
+        tipo: postData.type,
+        opcoesEnquete: postData.pollOptions,
+        linkCta: postData.ctaLink,
+        textoCta: postData.ctaText
+    });
+
+    if (!novaPublicacao.conteudo || novaPublicacao.conteudo.trim().length === 0) {
         throw new AppError('O conteúdo do post é obrigatório.', 400);
     }
 
-    return await repositorioPublicacaoFeed.criar({ ...postData, author_id: user.id });
+    const dadosParaBanco = novaPublicacao.paraBancoDeDados();
+    const postCriadoDb = await repositorioPublicacaoFeed.criar(dadosParaBanco);
+    const post = PublicacaoFeed.deBancoDeDados(postCriadoDb);
+
+    return post.paraRespostaHttp();
 };
 
 const obterTodosOsPosts = async (options) => {
-    // A validação do cursor foi movida para a camada de repositório.
-    return await repositorioPublicacaoFeed.obterTodos(options);
+    const { data: postsDb, nextCursor } = await repositorioPublicacaoFeed.obterTodos(options);
+    const posts = postsDb.map(PublicacaoFeed.deBancoDeDados);
+    const postsHttp = posts.map(p => p.paraRespostaHttp());
+
+    return { data: postsHttp, nextCursor };
 };
 
 const obterPostPorId = async (postId) => {
-    const post = await repositorioPublicacaoFeed.obterPorId(postId);
-    if (!post) {
+    const postDb = await repositorioPublicacaoFeed.obterPorId(postId);
+    if (!postDb) {
         throw new AppError('Post não encontrado.', 404);
     }
-    return post;
+    const post = PublicacaoFeed.deBancoDeDados(postDb);
+    return post.paraRespostaHttp();
 };
 
 const atualizarPost = async (postId, postData, user) => {
@@ -41,16 +60,22 @@ const atualizarPost = async (postId, postData, user) => {
         throw new AppError('Autenticação necessária.', 401);
     }
 
-    const post = await repositorioPublicacaoFeed.obterPorId(postId);
-    if (!post) {
-        throw new AppError('Post não encontrado para atualização.', 404);
-    }
+    const postExistente = await obterPostPorId(postId); // Já retorna no formato Http
 
-    if (post.author_id !== user.id) {
+    if (postExistente.autorId !== user.id) {
         throw new AppError('Usuário não autorizado a editar este post.', 403);
     }
 
-    return await repositorioPublicacaoFeed.atualizar(postId, postData);
+    // A lógica de quais campos podem ser atualizados fica aqui
+    const dadosParaAtualizar = {
+        content: postData.content || postExistente.conteudo
+        // Outros campos poderiam ser adicionados aqui
+    };
+
+    const postAtualizadoDb = await repositorioPublicacaoFeed.atualizar(postId, dadosParaAtualizar);
+    const postAtualizado = PublicacaoFeed.deBancoDeDados(postAtualizadoDb);
+    
+    return postAtualizado.paraRespostaHttp();
 };
 
 const deletarPost = async (postId, user) => {
@@ -58,16 +83,18 @@ const deletarPost = async (postId, user) => {
         throw new AppError('Autenticação necessária.', 401);
     }
 
-    const post = await repositorioPublicacaoFeed.obterPorId(postId);
-    if (!post) {
-        throw new AppError('Post não encontrado para deleção.', 404);
-    }
+    const postExistente = await obterPostPorId(postId);
 
-    if (post.author_id !== user.id) {
+    if (postExistente.autorId !== user.id) {
         throw new AppError('Usuário não autorizado a deletar este post.', 403);
     }
 
-    return await repositorioPublicacaoFeed.remover(postId);
+    const sucesso = await repositorioPublicacaoFeed.remover(postId);
+    if (!sucesso) {
+        throw new AppError('Falha ao deletar o post.', 500);
+    }
+
+    return { message: 'Post deletado com sucesso.' };
 };
 
 export default {

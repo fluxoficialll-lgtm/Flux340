@@ -1,74 +1,99 @@
 
 // backend/ServicosBackend/Servicos.Publicacao.Marketplace.js
 import RepositorioMarketplace from '../Repositorios/Repositorio.Publicacao.Marketplace.js';
+import PublicacaoMarketplace from '../models/Models.Estrutura.Publicacao.Marketplace.js';
 
-// Função auxiliar para verificar permissões do usuário
-const verificarPermissoes = (userId, item) => {
-    if (!item || !item.user_id) {
-        throw new Error('Dados do item incompletos para verificação de permissão.');
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
     }
-    return item.user_id === userId;
-};
+}
 
 const criarItem = async (itemData, userId) => {
-    // Lógica de negócio: validar dados essenciais antes de criar
-    if (!itemData.title || !itemData.price || !itemData.category) {
-        throw new Error('Título, preço e categoria são obrigatórios.');
+    if (!userId) {
+        throw new AppError('Autenticação necessária para criar um item.', 401);
     }
-    
-    const fullItemData = { ...itemData, user_id: userId };
-    
-    // Chama o repositório para criar o item
-    return RepositorioMarketplace.criarItem(fullItemData);
+
+    const novoItem = new PublicacaoMarketplace({
+        usuarioId: userId,
+        titulo: itemData.title,
+        descricao: itemData.description,
+        preco: itemData.price,
+        categoria: itemData.category,
+        localizacao: itemData.location,
+        urlsImagens: itemData.image_urls
+    });
+
+    if (!novoItem.titulo || !novoItem.preco || !novoItem.categoria) {
+        throw new AppError('Título, preço e categoria são obrigatórios.', 400);
+    }
+
+    const dadosParaBanco = novoItem.paraBancoDeDados();
+    const itemCriadoDb = await RepositorioMarketplace.criarItem(dadosParaBanco);
+    const item = PublicacaoMarketplace.deBancoDeDados(itemCriadoDb);
+
+    return item.paraRespostaHttp();
 };
 
 const obterTodosItens = async (options) => {
-    // Lógica de negócio: definir filtros/padrões para a busca
-    const searchOptions = { limit: 20, offset: 0, ...options };
-    return RepositorioMarketplace.encontrarTodosItens(searchOptions);
+    const itensDb = await RepositorioMarketplace.encontrarTodosItens(options);
+    const itens = itensDb.map(PublicacaoMarketplace.deBancoDeDados);
+    return itens.map(item => item.paraRespostaHttp());
 };
 
 const obterItemPorId = async (itemId) => {
     if (!itemId || isNaN(parseInt(itemId))) {
-        throw new Error('ID do item inválido.');
+        throw new AppError('ID do item inválido.', 400);
     }
-    return RepositorioMarketplace.encontrarItemPorId(itemId);
+    const itemDb = await RepositorioMarketplace.encontrarItemPorId(itemId);
+    if (!itemDb) {
+        throw new AppError('Item não encontrado.', 404);
+    }
+    const item = PublicacaoMarketplace.deBancoDeDados(itemDb);
+    return item.paraRespostaHttp();
 };
 
 const atualizarItem = async (itemId, updates, userId) => {
     if (!itemId || isNaN(parseInt(itemId))) {
-        throw new Error('ID do item inválido para atualização.');
-    }
-    
-    const item = await RepositorioMarketplace.encontrarItemPorId(itemId);
-    if (!item) {
-        throw new Error('Item não encontrado.');
+        throw new AppError('ID do item inválido para atualização.', 400);
     }
 
-    // Lógica de negócio: verificar permissão antes de atualizar
-    if (!verificarPermissoes(userId, item)) {
-        throw new Error('Você não tem permissão para editar este item.');
+    const itemDb = await RepositorioMarketplace.encontrarItemPorId(itemId);
+    if (!itemDb) {
+        throw new AppError('Item não encontrado para atualização.', 404);
     }
 
-    return RepositorioMarketplace.atualizarItem(itemId, updates);
+    if (itemDb.user_id !== userId) {
+        throw new AppError('Você não tem permissão para editar este item.', 403);
+    }
+
+    const itemAtualizadoDb = await RepositorioMarketplace.atualizarItem(itemId, updates);
+    const itemAtualizado = PublicacaoMarketplace.deBancoDeDados(itemAtualizadoDb);
+
+    return itemAtualizado.paraRespostaHttp();
 };
 
 const deletarItem = async (itemId, userId) => {
     if (!itemId || isNaN(parseInt(itemId))) {
-        throw new Error('ID do item inválido para exclusão.');
+        throw new AppError('ID do item inválido para exclusão.', 400);
     }
 
-    const item = await RepositorioMarketplace.encontrarItemPorId(itemId);
-    if (!item) {
-        throw new Error('Item não encontrado.');
+    const itemDb = await RepositorioMarketplace.encontrarItemPorId(itemId);
+    if (!itemDb) {
+        throw new AppError('Item não encontrado para exclusão.', 404);
     }
 
-    // Lógica de negócio: verificar permissão antes de deletar
-    if (!verificarPermissoes(userId, item)) {
-        throw new Error('Você não tem permissão para deletar este item.');
+    if (itemDb.user_id !== userId) {
+        throw new AppError('Você não tem permissão para deletar este item.', 403);
     }
 
-    await RepositorioMarketplace.deletarItem(itemId);
+    const sucesso = await RepositorioMarketplace.deletarItem(itemId);
+    if (!sucesso) {
+        throw new AppError('Falha ao deletar o item.', 500);
+    }
+
+    return { message: 'Item deletado com sucesso.' };
 };
 
 export default {

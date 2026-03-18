@@ -3,6 +3,7 @@
 
 import repositorio from '../Repositorios/Repositorio.Criacao.Perfil.Flux.js';
 import servicoAuditoria from './Servico.Auditoria.Criar.Perfil.js';
+import Perfil from '../models/Models.Estrutura.Perfil.Flux.js';
 
 class AppError extends Error {
     constructor(message, statusCode) {
@@ -15,11 +16,12 @@ const PossibilidadeBuscarPerfil = async (userId) => {
     if (!userId) {
         throw new AppError('ID do usuário não fornecido.', 400);
     }
-    const perfil = await repositorio.PossibilidadeBuscarUsuarioPorId(userId);
-    if (!perfil) {
+    const perfilDb = await repositorio.PossibilidadeBuscarUsuarioPorId(userId);
+    if (!perfilDb) {
         throw new AppError('Perfil não encontrado.', 404);
     }
-    return perfil;
+    const perfil = Perfil.deBancoDeDados(perfilDb);
+    return perfil.paraRespostaHttp();
 };
 
 const PossibilidadeAtualizarPerfil = async (userId, profileData, user) => {
@@ -27,18 +29,28 @@ const PossibilidadeAtualizarPerfil = async (userId, profileData, user) => {
         throw new AppError('Não autorizado a atualizar este perfil.', 403);
     }
 
-    const perfilAtual = await repositorio.PossibilidadeBuscarUsuarioPorId(userId);
-    if (!perfilAtual) {
-        // Se não houver perfil, cria um novo em vez de lançar um erro.
-        console.log(`[Serviço] Nenhum perfil existente para o usuário ${userId}. Um novo será criado.`);
-    }
+    const perfilAtualDb = await repositorio.PossibilidadeBuscarUsuarioPorId(userId);
 
-    const perfilAtualizado = await repositorio.PossibilidadeAtualizarPerfil(userId, profileData);
+    const perfilParaAtualizar = new Perfil({
+        usuarioId: userId,
+        nome: profileData.name,
+        apelido: profileData.nickname,
+        bio: profileData.bio,
+        urlFoto: profileData.photoUrl,
+        site: profileData.website,
+        privado: profileData.isPrivate,
+        perfilCompleto: profileData.profile_completed
+    });
+
+    const dadosParaBanco = perfilParaAtualizar.paraBancoDeDados();
+    const perfilAtualizadoDb = await repositorio.PossibilidadeAtualizarPerfil(userId, dadosParaBanco);
+    const perfilAtualizado = Perfil.deBancoDeDados(perfilAtualizadoDb);
 
     // Auditoria da atualização do perfil
-    servicoAuditoria.registrar('UPDATE', user.id, 'user_profiles', perfilAtualizado.id, perfilAtual, perfilAtualizado);
+    const perfilAntigoHttp = perfilAtualDb ? Perfil.deBancoDeDados(perfilAtualDb).paraRespostaHttp() : null;
+    servicoAuditoria.registrar('UPDATE', user.id, 'user_profiles', perfilAtualizado.id, perfilAntigoHttp, perfilAtualizado.paraRespostaHttp());
 
-    return perfilAtualizado;
+    return perfilAtualizado.paraRespostaHttp();
 };
 
 const PossibilidadeDeletarPerfil = async (userId, user) => {
@@ -46,15 +58,17 @@ const PossibilidadeDeletarPerfil = async (userId, user) => {
         throw new AppError('Não autorizado a deletar este perfil.', 403);
     }
 
-    const perfilDeletado = await repositorio.PossibilidadeDeletarPerfil(userId);
-    if (!perfilDeletado) {
+    const perfilDeletadoDb = await repositorio.PossibilidadeDeletarPerfil(userId);
+    if (!perfilDeletadoDb) {
         throw new AppError('Perfil a ser deletado não encontrado.', 404);
     }
 
-    // Auditoria da deleção do perfil
-    servicoAuditoria.registrar('DELETE', user.id, 'user_profiles', perfilDeletado.id, perfilDeletado, null);
+    const perfilDeletado = Perfil.deBancoDeDados(perfilDeletadoDb);
 
-    return perfilDeletado;
+    // Auditoria da deleção do perfil
+    servicoAuditoria.registrar('DELETE', user.id, 'user_profiles', perfilDeletado.id, perfilDeletado.paraRespostaHttp(), null);
+
+    return perfilDeletado.paraRespostaHttp();
 };
 
 export default {
