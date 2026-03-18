@@ -1,7 +1,7 @@
 
 // Arquivo: ServiçosFrontend/APIs/API.Sistema.Modo.Hub.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import ClienteBackend from '../../Cliente.Backend.js';
 
 const API_Sistema_Modo_Hub = {
     /**

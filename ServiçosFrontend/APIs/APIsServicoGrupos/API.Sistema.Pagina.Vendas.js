@@ -1,7 +1,7 @@
 
 // Arquivo: ServiçosFrontend/APIs/API.Sistema.Pagina.Vendas.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import ClienteBackend from '../../Cliente.Backend.js';
 
 const API_Sistema_Pagina_Vendas = {
     /**

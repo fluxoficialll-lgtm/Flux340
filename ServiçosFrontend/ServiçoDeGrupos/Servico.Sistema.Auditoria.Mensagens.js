@@ -1,8 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Auditoria.Mensagens.js
 
-import API_Sistema_Auditoria_Mensagens from '../APIs/API.Sistema.Auditoria.Mensagens.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Auditoria_Mensagens from '../APIs/APIsServicoGrupos/API.Sistema.Auditoria.Mensagens.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
 const contextoBase = "Servico.Sistema.Auditoria.Mensagens";
 
@@ -15,7 +15,7 @@ const contextoBase = "Servico.Sistema.Auditoria.Mensagens";
 export const getMessageAuditLogs = async (groupId, filter) => {
     const contexto = `${contextoBase}.getMessageAuditLogs`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -35,7 +35,7 @@ export const getMessageAuditLogs = async (groupId, filter) => {
 export const deleteGroupMessage = async (groupId, messageId) => {
     const contexto = `${contextoBase}.deleteGroupMessage`;
     if (!groupId || !messageId) {
-        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
+        // ServicoLog.aviso(contexto, 'IDs não fornecidos.');
         return Promise.reject('IDs não fornecidos.');
     }
     try {

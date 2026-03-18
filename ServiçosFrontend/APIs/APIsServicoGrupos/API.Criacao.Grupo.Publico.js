@@ -1,5 +1,5 @@
 
-import ClienteBackend from '../Cliente.Backend.js';
+import ClienteBackend from '../../Cliente.Backend.js';
 
 const API_Criacao_Grupo_Publico = {
     /**

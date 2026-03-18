@@ -1,8 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Geral.js
 
-import API_Sistema_Geral from '../APIs/API.Sistema.Geral.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Geral from '../APIs/APIsServicoGrupos/API.Sistema.Geral.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
 const contextoBase = "Servico.Sistema.Geral";
 
@@ -11,7 +11,7 @@ const contextoBase = "Servico.Sistema.Geral";
 export const getGroupDetails = async (groupId) => {
     const contexto = `${contextoBase}.getGroupDetails`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -25,7 +25,7 @@ export const getGroupDetails = async (groupId) => {
 export const updateGroupSettings = async (groupId, settings) => {
     const contexto = `${contextoBase}.updateGroupSettings`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -39,7 +39,7 @@ export const updateGroupSettings = async (groupId, settings) => {
 export const getGroupStats = async (groupId) => {
     const contexto = `${contextoBase}.getGroupStats`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -55,7 +55,7 @@ export const getGroupStats = async (groupId) => {
 export const getGuidelines = async (groupId) => {
     const contexto = `${contextoBase}.getGuidelines`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -69,7 +69,7 @@ export const getGuidelines = async (groupId) => {
 export const updateGuidelines = async (groupId, guidelines) => {
     const contexto = `${contextoBase}.updateGuidelines`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -85,7 +85,7 @@ export const updateGuidelines = async (groupId, guidelines) => {
 export const getNotificationSettings = async (groupId) => {
     const contexto = `${contextoBase}.getNotificationSettings`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -99,7 +99,7 @@ export const getNotificationSettings = async (groupId) => {
 export const updateNotificationSettings = async (groupId, settings) => {
     const contexto = `${contextoBase}.updateNotificationSettings`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {

@@ -1,7 +1,7 @@
 
 // Arquivo: ServiçosFrontend/APIs/API.Sistema.Receita.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import ClienteBackend from '../../Cliente.Backend.js';
 
 const API_Sistema_Receita = {
     /**

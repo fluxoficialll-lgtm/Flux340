@@ -1,8 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Grupo.Diretrizes.js
 
-import API_Sistema_Grupo_Diretrizes from '../APIs/API.Sistema.Grupo.Diretrizes.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Grupo_Diretrizes from '../APIs/APIsServicoGrupos/API.Sistema.Grupo.Diretrizes.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
 const contextoBase = "Servico.Sistema.Grupo.Diretrizes";
 
@@ -29,7 +29,7 @@ export const updateGroupGuidelines = async (groupId, data) => {
     const contexto = `${contextoBase}.updateGroupGuidelines`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
+        // ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
 
@@ -59,11 +59,11 @@ export const updateGroupGuidelines = async (groupId, data) => {
         // Executa todas as atualizações em paralelo
         await Promise.all(promises);
 
-        ServicoLog.info(contexto, `Diretrizes e configurações atualizadas para o grupo ${groupId}.`);
+        // ServicoLog.info(contexto, `Diretrizes e configurações atualizadas para o grupo ${groupId}.`);
         return data; // Retorna os dados como confirmação
 
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao atualizar diretrizes para o grupo ${groupId}:`, { error, data });
+        // ServicoLog.erro(contexto, `Erro ao atualizar diretrizes para o grupo ${groupId}:`, { error, data });
         throw error; // Propaga o erro
     }
 };
@@ -77,14 +77,14 @@ export const getGroupGuidelines = async (groupId) => {
     const contexto = `${contextoBase}.getGroupGuidelines`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
+        // ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
     try {
         const { data } = await API_Sistema_Grupo_Diretrizes.obterDiretrizes(groupId);
         return data;
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao obter diretrizes do grupo ${groupId}:`, { error });
+        // ServicoLog.erro(contexto, `Erro ao obter diretrizes do grupo ${groupId}:`, { error });
         throw error;
     }
 };

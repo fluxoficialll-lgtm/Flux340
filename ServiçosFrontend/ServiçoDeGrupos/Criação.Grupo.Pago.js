@@ -1,12 +1,9 @@
 
-import API_Criacao_Grupo_Pago from '../APIs/API.Criacao.Grupo.Pago.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Criacao_Grupo_Pago from '../APIs/APIsServicoGrupos/API.Criacao.Grupo.Pago.js';
 import { fileService } from '../ServiçoDeArquivos/fileService.js';
 
 class ServiçoCriaçãoGrupoPago {
     async criar(payload, onProgress) {
-        const contexto = "ServiçoCriaçãoGrupoPago.criar";
-
         const {
             groupName, description, selectedCoverFile, vipMediaItems, 
             vipDoorText, vipButtonText, numericPrice, currency, accessType, 
@@ -22,7 +19,6 @@ class ServiçoCriaçãoGrupoPago {
             if (selectedCoverFile) {
                 filesToUpload.unshift(selectedCoverFile);
             }
-            ServicoLog.info(contexto, `Iniciando upload de ${filesToUpload.length} arquivos.`);
             onProgress(0, 0, filesToUpload.length);
 
             let filesUploadedCount = 0;
@@ -48,7 +44,6 @@ class ServiçoCriaçãoGrupoPago {
                     finalMediaGallery.push({ url: item.url, type: item.type });
                 }
             });
-            ServicoLog.info(contexto, "Upload de todos os arquivos concluído.");
 
             // --- Montagem e Envio do Payload para a API ---
             const apiPayload = {
@@ -57,19 +52,13 @@ class ServiçoCriaçãoGrupoPago {
                 pixelId, pixelToken, finalMediaGallery,
             };
 
-            ServicoLog.jsonEnviado(contexto, apiPayload);
-
             // Refatorado: Delegação da chamada de rede para a camada de API
             const { data } = await API_Criacao_Grupo_Pago.criar(apiPayload);
 
-            ServicoLog.jsonRecebido(contexto, data);
             return data;
 
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Falha ao criar o grupo VIP.';
-            // O erro já é logado pelo interceptor, mas podemos adicionar um log específico do serviço se quisermos.
-            // A linha abaixo se torna opcional se o log do ClienteBackend for suficiente.
-            ServicoLog.erro(contexto, errorMessage, { errorData: error.response?.data });
             // Garante que o progresso indique um erro
             onProgress(100, filesToUpload.length, filesToUpload.length, true); 
             throw new Error(errorMessage);

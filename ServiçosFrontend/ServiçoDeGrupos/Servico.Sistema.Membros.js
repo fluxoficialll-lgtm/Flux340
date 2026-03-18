@@ -1,8 +1,7 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Membros.js
 
-import API_Sistema_Membros from '../APIs/API.Sistema.Membros.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Membros from '../APIs/APIsServicoGrupos/API.Sistema.Membros.js';
 
 const contextoBase = "Servico.Sistema.Membros";
 
@@ -14,7 +13,6 @@ const contextoBase = "Servico.Sistema.Membros";
 export const getGroupMembers = async (groupId) => {
     const contexto = `${contextoBase}.getGroupMembers`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -35,7 +33,6 @@ export const getGroupMembers = async (groupId) => {
 export const warnUser = async (groupId, userId, payload) => {
     const contexto = `${contextoBase}.warnUser`;
     if (!groupId || !userId) {
-        ServicoLog.aviso(contexto, 'IDs de grupo e/ou usuário não fornecidos.');
         return Promise.reject('IDs de grupo e/ou usuário não fornecidos.');
     }
     try {
@@ -56,7 +53,6 @@ export const warnUser = async (groupId, userId, payload) => {
 export const banUser = async (groupId, userId, payload) => {
     const contexto = `${contextoBase}.banUser`;
     if (!groupId || !userId) {
-        ServicoLog.aviso(contexto, 'IDs de grupo e/ou usuário não fornecidos.');
         return Promise.reject('IDs de grupo e/ou usuário não fornecidos.');
     }
     try {
@@ -76,7 +72,6 @@ export const banUser = async (groupId, userId, payload) => {
 export const kickMember = async (groupId, memberId) => {
     const contexto = `${contextoBase}.kickMember`;
     if (!groupId || !memberId) {
-        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
         return Promise.reject('IDs não fornecidos.');
     }
     try {

@@ -1,8 +1,7 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Notificacoes.js
 
-import API_Sistema_Notificacoes from '../APIs/API.Sistema.Notificacoes.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Notificacoes from '../APIs/APIsServicoGrupos/API.Sistema.Notificacoes.js';
 
 const contextoBase = "Servico.Sistema.Notificacoes";
 
@@ -27,7 +26,6 @@ export const getNotificationSettings = async (groupId) => {
     const contexto = `${contextoBase}.getNotificationSettings`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
 
@@ -35,7 +33,6 @@ export const getNotificationSettings = async (groupId) => {
         const { data } = await API_Sistema_Notificacoes.obterConfiguracoes(groupId);
         return data;
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao buscar configurações de notificação para o grupo ${groupId}:`, { error });
         throw error;
     }
 };
@@ -50,16 +47,13 @@ export const updateNotificationSettings = async (groupId, settings) => {
     const contexto = `${contextoBase}.updateNotificationSettings`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
 
     try {
         const { data } = await API_Sistema_Notificacoes.atualizarConfiguracoes(groupId, settings);
-        ServicoLog.info(contexto, `Configurações de notificação atualizadas para o grupo ${groupId}.`);
         return data;
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao atualizar configurações de notificação para o grupo ${groupId}:`, { error, settings });
         throw error;
     }
 };

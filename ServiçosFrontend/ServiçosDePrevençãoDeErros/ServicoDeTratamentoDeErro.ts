@@ -1,4 +1,4 @@
-import { rastreadorDeEventos } from '../ServiçoDeTelemetria/RastreadorDeEventos';
+import { rastreadorDeEventos } from '../SistemaObservabilidade/Rastreador.Eventos.js';
 import { ERROR_LEVEL } from './TiposDeErro.ts';
 
 // Adicionamos um parâmetro opcional de navegação

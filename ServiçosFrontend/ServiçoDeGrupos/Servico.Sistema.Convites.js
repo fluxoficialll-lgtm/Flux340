@@ -1,8 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Convites.js
 
-import API_Sistema_Convites from '../APIs/API.Sistema.Convites.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Convites from '../APIs/APIsServicoGrupos/API.Sistema.Convites.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
 const contextoBase = "Servico.Sistema.Convites";
 
@@ -14,7 +14,7 @@ const contextoBase = "Servico.Sistema.Convites";
 export const getInviteLinks = async (groupId) => {
     const contexto = `${contextoBase}.getInviteLinks`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -35,7 +35,7 @@ export const getInviteLinks = async (groupId) => {
 export const createInviteLink = async (groupId, linkData) => {
     const contexto = `${contextoBase}.createInviteLink`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -55,7 +55,7 @@ export const createInviteLink = async (groupId, linkData) => {
 export const revokeInviteLink = async (groupId, linkId) => {
     const contexto = `${contextoBase}.revokeInviteLink`;
     if (!groupId || !linkId) {
-        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
+        // ServicoLog.aviso(contexto, 'IDs não fornecidos.');
         return Promise.reject('IDs não fornecidos.');
     }
     try {

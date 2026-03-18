@@ -1,8 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Auditoria.Ajuste.js
 
-import API_Sistema_Auditoria_Ajuste from '../APIs/API.Sistema.Auditoria.Ajuste.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Auditoria_Ajuste from '../APIs/APIsServicoGrupos/API.Sistema.Auditoria.Ajuste.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
 const contextoBase = "Servico.Sistema.Auditoria.Ajuste";
 
@@ -14,7 +14,7 @@ const contextoBase = "Servico.Sistema.Auditoria.Ajuste";
 export const getSettingsAuditLogs = async (groupId) => {
     const contexto = `${contextoBase}.getSettingsAuditLogs`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {

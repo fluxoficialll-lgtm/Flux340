@@ -1,8 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Grupo.Moderacao.js
 
-import API_Sistema_Grupo_Moderacao from '../APIs/API.Sistema.Grupo.Moderacao.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Grupo_Moderacao from '../APIs/APIsServicoGrupos/API.Sistema.Grupo.Moderacao.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
 const contextoBase = "Servico.Sistema.Grupo.Moderacao";
 
@@ -48,7 +48,7 @@ export const getModerationSettings = async (groupId) => {
     const contexto = `${contextoBase}.getModerationSettings`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
+        // ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
 
@@ -56,7 +56,7 @@ export const getModerationSettings = async (groupId) => {
         const { data } = await API_Sistema_Grupo_Moderacao.obterConfiguracoes(groupId);
         return data;
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao buscar configurações de moderação para o grupo ${groupId}:`, { error });
+        // ServicoLog.erro(contexto, `Erro ao buscar configurações de moderação para o grupo ${groupId}:`, { error });
         throw error;
     }
 };
@@ -71,16 +71,16 @@ export const updateModerationSettings = async (groupId, settings) => {
     const contexto = `${contextoBase}.updateModerationSettings`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
+        // ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
 
     try {
         const { data } = await API_Sistema_Grupo_Moderacao.atualizarConfiguracoes(groupId, settings);
-        ServicoLog.info(contexto, `Configurações de moderação atualizadas para o grupo ${groupId}.`);
+        // ServicoLog.info(contexto, `Configurações de moderação atualizadas para o grupo ${groupId}.`);
         return data;
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao atualizar configurações de moderação para o grupo ${groupId}:`, { error, settings });
+        // ServicoLog.erro(contexto, `Erro ao atualizar configurações de moderação para o grupo ${groupId}:`, { error, settings });
         throw error;
     }
 };

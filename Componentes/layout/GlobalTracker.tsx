@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { rastreadorDeEventos } from '../../ServiçosFrontend/ServiçoDeTelemetria/RastreadorDeEventos';
+import { rastreadorDeEventos } from '../../ServiçosFrontend/SistemaObservabilidade/Rastreador.Eventos.js';
 
 /**
  * Componente de Ordem Superior para Rastreamento Global de Visualizações de Página.

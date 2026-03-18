@@ -1,18 +1,17 @@
+
 type EnvConfig = {
   VITE_API_URL: string;
+  VITE_APP_ENV: 'production' | 'simulation';
 };
 
 const DEFAULT_CONFIG: EnvConfig = {
-  VITE_API_URL: 'http://localhost:3000', // Fallback for local development
+  VITE_API_URL: 'http://localhost:3000',
+  VITE_APP_ENV: 'simulation',
 };
 
-const getRuntimeConfig = (): Partial<EnvConfig> => {
-  // 1. Vite env (for development, from .env files)
+const getRuntimeConfig = (): Partial<Pick<EnvConfig, 'VITE_API_URL'>> => {
   const viteEnv = (import.meta as any)?.env || {};
-
-  // 2. window.__ENV__ (for production, injected via index.html)
   const windowEnv = (window as any).__ENV__ || {};
-
   return {
     VITE_API_URL: viteEnv.VITE_API_URL || windowEnv.VITE_API_URL,
   };
@@ -31,11 +30,15 @@ const isValidUrl = (url: string | undefined): boolean => {
 export const loadEnvironment = (): EnvConfig => {
   const runtime = getRuntimeConfig();
 
+  // Detect environment using Vite's built-in `import.meta.env.DEV` flag
+  const isDevelopment = (import.meta as any).env?.DEV;
+  const appEnv = isDevelopment ? 'simulation' : 'production';
+
   const finalConfig: EnvConfig = {
     VITE_API_URL: runtime.VITE_API_URL || DEFAULT_CONFIG.VITE_API_URL,
+    VITE_APP_ENV: appEnv,
   };
 
-  // Non-destructive validation
   const warnings: string[] = [];
 
   if (!runtime.VITE_API_URL) {
@@ -43,7 +46,7 @@ export const loadEnvironment = (): EnvConfig => {
   }
 
   if (!isValidUrl(finalConfig.VITE_API_URL)) {
-    warnings.push(`VITE_API_URL inválida: "${finalConfig.VITE_API_URL}". O app pode não conseguir se conectar ao backend.`);
+    warnings.push(`VITE_API_URL inválida: \"${finalConfig.VITE_API_URL}\". O app pode não conseguir se conectar ao backend.`);
   }
 
   if (warnings.length > 0) {
@@ -51,6 +54,8 @@ export const loadEnvironment = (): EnvConfig => {
   } else {
     console.log('[CONFIG] Environment configurado com sucesso.');
   }
+  
+  console.log(`[CONFIG] Ambiente detectado: ${finalConfig.VITE_APP_ENV} (isDevelopment: ${isDevelopment})`);
 
   return finalConfig;
 };

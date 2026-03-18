@@ -1,18 +1,18 @@
 
-import API_Criacao_Grupo_Publico from '../APIs/API.Criacao.Grupo.Publico.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Criacao_Grupo_Publico from '../APIs/APIsServicoGrupos/API.Criacao.Grupo.Publico.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 import { fileService } from '../ServiçoDeArquivos/fileService.js';
 
 class ServiçoCriaçãoGrupoPublico {
     async criar(groupData) {
-        const contexto = "ServiçoCriaçãoGrupoPublico.criar";
+        // const contexto = "ServiçoCriaçãoGrupoPublico.criar";
 
         try {
             let coverImageUrl = '';
             if (groupData.coverImageBlob) {
-                ServicoLog.info(contexto, "Iniciando upload da imagem de capa.");
+                // ServicoLog.info(contexto, "Iniciando upload da imagem de capa.");
                 coverImageUrl = await fileService.upload(groupData.coverImageBlob, `group-covers/${Date.now()}.png`);
-                ServicoLog.info(contexto, "Upload da imagem de capa concluído.", { coverImageUrl });
+                // ServicoLog.info(contexto, "Upload da imagem de capa concluído.", { coverImageUrl });
             }
 
             const payload = {
@@ -21,12 +21,12 @@ class ServiçoCriaçãoGrupoPublico {
                 coverImage: coverImageUrl,
             };
 
-            ServicoLog.jsonEnviado(contexto, payload);
+            // ServicoLog.jsonEnviado(contexto, payload);
 
             // Refatorado: Delegação da chamada de rede para a camada de API
             const { data } = await API_Criacao_Grupo_Publico.criar(payload);
 
-            ServicoLog.jsonRecebido(contexto, data);
+            // ServicoLog.jsonRecebido(contexto, data);
             return data;
 
         } catch (error) {

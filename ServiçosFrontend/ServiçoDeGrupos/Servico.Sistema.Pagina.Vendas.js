@@ -1,8 +1,7 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Pagina.Vendas.js
 
-import API_Sistema_Pagina_Vendas from '../APIs/API.Sistema.Pagina.Vendas.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Pagina_Vendas from '../APIs/APIsServicoGrupos/API.Sistema.Pagina.Vendas.js';
 
 const contextoBase = "Servico.Sistema.Pagina.Vendas";
 
@@ -15,7 +14,6 @@ export const getSalesPage = async (groupId) => {
     const contexto = `${contextoBase}.getSalesPage`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
 
@@ -23,7 +21,6 @@ export const getSalesPage = async (groupId) => {
         const { data } = await API_Sistema_Pagina_Vendas.obterPaginaVendas(groupId);
         return data;
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao buscar o conteúdo da página de vendas para o grupo ${groupId}:`, { error });
         throw error;
     }
 };
@@ -38,16 +35,13 @@ export const updateSalesPage = async (groupId, pageData) => {
     const contexto = `${contextoBase}.updateSalesPage`;
     if (!groupId) {
         const erro = "O ID do grupo é obrigatório.";
-        ServicoLog.aviso(contexto, erro);
         return Promise.reject(erro);
     }
 
     try {
         const { data } = await API_Sistema_Pagina_Vendas.atualizarPaginaVendas(groupId, pageData);
-        ServicoLog.info(contexto, `Página de vendas do grupo ${groupId} atualizada com sucesso.`);
         return data;
     } catch (error) {
-        ServicoLog.erro(contexto, `Erro ao atualizar o conteúdo da página de vendas para o grupo ${groupId}:`, { error, pageData });
         throw error;
     }
 };

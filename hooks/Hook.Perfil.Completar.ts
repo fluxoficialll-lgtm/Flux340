@@ -4,12 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { UserProfile } from '../types';
-import ServicoAuditoriaCriarPerfil from '../ServiçosFrontend/ServicoLogs/Servico.Auditoria.Criar.Perfil.js';
 import type { DadosFormularioPerfil, ErrosCompletarPerfil } from '@/tipos/types.Criacao.Perfil.Flux';
 
 export const useCompleteProfile = () => {
     const navigate = useNavigate();
-    const auditoria = ServicoAuditoriaCriarPerfil;
 
     const [dadosPerfil, setDadosPerfil] = useState<DadosFormularioPerfil>({
         name: '',
@@ -26,10 +24,8 @@ export const useCompleteProfile = () => {
     const [imagemOriginal, setImagemOriginal] = useState<string>('');
 
     useEffect(() => {
-        auditoria.iniciarProcesso();
         const user = authService.getCurrentUser();
         
-        auditoria.decisaoRedirecionamento(user);
         if (!user) {
             navigate('/');
         } else if (user.profile_completed) {
@@ -46,13 +42,11 @@ export const useCompleteProfile = () => {
         }
         
         setDadosPerfil(prev => ({ ...prev, [key]: valorFinal }));
-        auditoria.alteracaoFormulario(key, valorFinal);
-    }, [auditoria]);
+    }, []);
 
     const aoMudarImagem = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            auditoria.selecaoDeImagem(file.name);
             const reader = new FileReader();
             reader.onload = (ev) => {
                 setImagemOriginal(ev.target?.result as string);
@@ -63,7 +57,6 @@ export const useCompleteProfile = () => {
     };
 
     const aoSalvarImagemCortada = (base64Cortada: string) => {
-        auditoria.imagemCortada();
         setPreviaImagem(base64Cortada);
         fetch(base64Cortada)
           .then(res => res.blob())
@@ -93,24 +86,17 @@ export const useCompleteProfile = () => {
             isPrivate: dadosPerfil.perfilPrivado,
         };
 
-        auditoria.tentativaDeSubmissao(dadosParaApi);
-
         try {
             if (arquivoSelecionado) {
                 dadosParaApi.photoUrl = await fileService.uploadFile(arquivoSelecionado);
             }
 
-            const usuarioAtualizado = await authService.completeProfile(dadosParaApi);
+            await authService.completeProfile(dadosParaApi);
             
-            auditoria.sucessoNaConclusao({ success: true });
-            auditoria.estadoAposSalvar(usuarioAtualizado);
-            auditoria.decisaoRedirecionamento(usuarioAtualizado);
-
             // Redireciona para o feed após o sucesso
             navigate('/feed');
 
         } catch (err: any) {
-            auditoria.falhaNaConclusao(err, dadosParaApi);
             console.error("Falha ao completar o perfil no hook 'useCompleteProfile':", err);
             
             if (err.message && err.message.includes('NAME_TAKEN')) {
@@ -124,7 +110,6 @@ export const useCompleteProfile = () => {
     };
     
     const aoSair = () => {
-        auditoria.logout();
         authService.logout();
         navigate('/');
     };

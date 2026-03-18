@@ -1,8 +1,8 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Auditoria.Entrada.Saida.js
 
-import API_Sistema_Auditoria_Entrada_Saida from '../APIs/API.Sistema.Auditoria.Entrada.Saida.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+import API_Sistema_Auditoria_Entrada_Saida from '../APIs/APIsServicoGrupos/API.Sistema.Auditoria.Entrada.Saida.js';
+// import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
 const contextoBase = "Servico.Sistema.Auditoria.Entrada.Saida";
 
@@ -14,7 +14,7 @@ const contextoBase = "Servico.Sistema.Auditoria.Entrada.Saida";
 export const getEntryExitLogs = async (groupId) => {
     const contexto = `${contextoBase}.getEntryExitLogs`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        // ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {

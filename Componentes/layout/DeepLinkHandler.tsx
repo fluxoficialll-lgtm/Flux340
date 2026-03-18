@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
-import { rastreadorDeEventos } from '../../ServiçosFrontend/ServiçoDeTelemetria/RastreadorDeEventos.js';
+import { rastreadorDeEventos } from '../../ServiçosFrontend/SistemaObservabilidade/Rastreador.Eventos.js';
 
 export const DeepLinkHandler = () => {
   const navigate = useNavigate();

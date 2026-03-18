@@ -1,7 +1,7 @@
 
 // Arquivo: ServiçosFrontend/APIs/API.Sistema.Mensagens.Agendadas.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import ClienteBackend from '../../Cliente.Backend.js';
 
 const API_Sistema_Mensagens_Agendadas = {
     /**

@@ -1,10 +1,7 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Cargos.js
 
-import API_Sistema_Cargos from '../APIs/API.Sistema.Cargos.js';
-import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
-
-const contextoBase = "Servico.Sistema.Cargos";
+import API_Sistema_Cargos from '../APIs/APIsServicoGrupos/API.Sistema.Cargos.js';
 
 /**
  * Busca todos os cargos de um grupo específico.
@@ -12,9 +9,7 @@ const contextoBase = "Servico.Sistema.Cargos";
  * @returns {Promise<Array>} Uma promessa que resolve para a lista de cargos.
  */
 export const getRoles = async (groupId) => {
-    const contexto = `${contextoBase}.getRoles`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -33,9 +28,7 @@ export const getRoles = async (groupId) => {
  * @returns {Promise<object>} Uma promessa que resolve para o cargo recém-criado.
  */
 export const createRole = async (groupId, roleData) => {
-    const contexto = `${contextoBase}.createRole`;
     if (!groupId) {
-        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
         return Promise.reject('ID do grupo não fornecido.');
     }
     try {
@@ -54,9 +47,7 @@ export const createRole = async (groupId, roleData) => {
  * @returns {Promise<object>} Uma promessa que resolve para o cargo atualizado.
  */
 export const updateRole = async (groupId, roleId, updates) => {
-    const contexto = `${contextoBase}.updateRole`;
     if (!groupId || !roleId) {
-        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
         return Promise.reject('IDs não fornecidos.');
     }
     try {
@@ -74,9 +65,7 @@ export const updateRole = async (groupId, roleId, updates) => {
  * @returns {Promise<void>} Uma promessa que é resolvida quando o cargo é deletado.
  */
 export const deleteRole = async (groupId, roleId) => {
-    const contexto = `${contextoBase}.deleteRole`;
     if (!groupId || !roleId) {
-        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
         return Promise.reject('IDs não fornecidos.');
     }
     try {
@@ -95,9 +84,7 @@ export const deleteRole = async (groupId, roleId) => {
  * @returns {Promise<object>} Uma promessa com a confirmação.
  */
 export const assignRole = async (groupId, memberId, roleId) => {
-    const contexto = `${contextoBase}.assignRole`;
     if (!groupId || !memberId) {
-        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
         return Promise.reject('IDs não fornecidos.');
     }
     try {
