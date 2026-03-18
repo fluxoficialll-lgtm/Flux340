@@ -1,11 +1,10 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Auditoria.Mensagens.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import API_Sistema_Auditoria_Mensagens from '../APIs/API.Sistema.Auditoria.Mensagens.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
-/**
- * Serviço para gerenciar e auditar mensagens de um grupo.
- */
+const contextoBase = "Servico.Sistema.Auditoria.Mensagens";
 
 /**
  * Busca os logs de auditoria de mensagens, com um filtro opcional por usuário.
@@ -13,15 +12,18 @@ import ClienteBackend from '../Cliente.Backend.js';
  * @param {object} [filter] - Filtros para a busca. Ex: { userId: '...' }
  * @returns {Promise<Array>} Uma promessa que resolve para a lista de logs de mensagens.
  */
-export const getMessageAuditLogs = (groupId, filter) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    
-    let url = `/api/groups/${groupId}/audit/messages`;
-    if (filter && filter.userId) {
-        url += `?userId=${filter.userId}`;
+export const getMessageAuditLogs = async (groupId, filter) => {
+    const contexto = `${contextoBase}.getMessageAuditLogs`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
     }
-    
-    return ClienteBackend.get(url);
+    try {
+        const { data } = await API_Sistema_Auditoria_Mensagens.obterLogs(groupId, filter);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 /**
@@ -30,7 +32,16 @@ export const getMessageAuditLogs = (groupId, filter) => {
  * @param {string} messageId - O ID da mensagem a ser apagada.
  * @returns {Promise<object>} Uma promessa com a confirmação da exclusão.
  */
-export const deleteGroupMessage = (groupId, messageId) => {
-    if (!groupId || !messageId) return Promise.reject('IDs não fornecidos.');
-    return ClienteBackend.delete(`/api/groups/${groupId}/messages/${messageId}`);
+export const deleteGroupMessage = async (groupId, messageId) => {
+    const contexto = `${contextoBase}.deleteGroupMessage`;
+    if (!groupId || !messageId) {
+        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
+        return Promise.reject('IDs não fornecidos.');
+    }
+    try {
+        const { data } = await API_Sistema_Auditoria_Mensagens.apagarMensagem(groupId, messageId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };

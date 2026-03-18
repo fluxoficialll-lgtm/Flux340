@@ -1,20 +1,28 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Membros.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import API_Sistema_Membros from '../APIs/API.Sistema.Membros.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
-/**
- * Serviço para gerenciar os membros de um grupo.
- */
+const contextoBase = "Servico.Sistema.Membros";
 
 /**
  * Busca a lista de membros de um grupo específico.
  * @param {string} groupId - O ID do grupo.
  * @returns {Promise<Array>} Uma promessa que resolve para a lista de membros.
  */
-export const getGroupMembers = (groupId) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.get(`/api/groups/${groupId}/members`);
+export const getGroupMembers = async (groupId) => {
+    const contexto = `${contextoBase}.getGroupMembers`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Membros.obter(groupId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 /**
@@ -24,10 +32,18 @@ export const getGroupMembers = (groupId) => {
  * @param {object} payload - O corpo da requisição, contendo o motivo da advertência. Ex: { reason: '...' }
  * @returns {Promise<object>} Confirmação da ação.
  */
-export const warnUser = (groupId, userId, payload) => {
-    if (!groupId || !userId) return Promise.reject('IDs de grupo e/ou usuário não fornecidos.');
-    // O hook `useGroupMessageAuditLog` depende desta função.
-    return ClienteBackend.post(`/api/groups/${groupId}/members/${userId}/warn`, payload);
+export const warnUser = async (groupId, userId, payload) => {
+    const contexto = `${contextoBase}.warnUser`;
+    if (!groupId || !userId) {
+        ServicoLog.aviso(contexto, 'IDs de grupo e/ou usuário não fornecidos.');
+        return Promise.reject('IDs de grupo e/ou usuário não fornecidos.');
+    }
+    try {
+        const { data } = await API_Sistema_Membros.advertir(groupId, userId, payload);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 /**
@@ -37,10 +53,18 @@ export const warnUser = (groupId, userId, payload) => {
  * @param {object} payload - O corpo da requisição, contendo o motivo do banimento. Ex: { reason: '...' }
  * @returns {Promise<object>} Confirmação da ação.
  */
-export const banUser = (groupId, userId, payload) => {
-    if (!groupId || !userId) return Promise.reject('IDs de grupo e/ou usuário não fornecidos.');
-    // O hook `useGroupReportLog` depende desta função.
-    return ClienteBackend.post(`/api/groups/${groupId}/members/${userId}/ban`, payload);
+export const banUser = async (groupId, userId, payload) => {
+    const contexto = `${contextoBase}.banUser`;
+    if (!groupId || !userId) {
+        ServicoLog.aviso(contexto, 'IDs de grupo e/ou usuário não fornecidos.');
+        return Promise.reject('IDs de grupo e/ou usuário não fornecidos.');
+    }
+    try {
+        const { data } = await API_Sistema_Membros.banir(groupId, userId, payload);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 /**
@@ -49,9 +73,17 @@ export const banUser = (groupId, userId, payload) => {
  * @param {string} memberId - O ID do membro a ser expulso.
  * @returns {Promise<object>} Confirmação da ação.
  */
-export const kickMember = (groupId, memberId) => {
-    if (!groupId || !memberId) return Promise.reject('IDs não fornecidos.');
-    // A implementação e simulação para esta função ainda precisa ser criada.
-    console.warn(`[Refatoração] A implementação para 'kickMember' (DELETE /api/groups/${groupId}/members/${memberId}) ainda precisa ser criada.`);
-    return ClienteBackend.delete(`/api/groups/${groupId}/members/${memberId}`);
+export const kickMember = async (groupId, memberId) => {
+    const contexto = `${contextoBase}.kickMember`;
+    if (!groupId || !memberId) {
+        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
+        return Promise.reject('IDs não fornecidos.');
+    }
+    try {
+        console.warn(`[Refatoração] A implementação para 'kickMember' ainda precisa ser criada no backend.`);
+        const { data } = await API_Sistema_Membros.expulsar(groupId, memberId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };

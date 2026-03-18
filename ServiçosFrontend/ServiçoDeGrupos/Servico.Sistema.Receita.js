@@ -1,12 +1,10 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Receita.js
 
-import { api } from '../../api';
-import { checkService } from '../../utils';
+import API_Sistema_Receita from '../APIs/API.Sistema.Receita.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
-/**
- * @file Serviço para o gerenciamento da receita de grupos.
- */
+const contextoBase = "Servico.Sistema.Receita";
 
 /**
  * Busca os dados de faturamento detalhado de um grupo.
@@ -14,7 +12,18 @@ import { checkService } from '../../utils';
  * @returns {Promise<Object>} Uma promessa que resolve com os dados de faturamento.
  */
 export const getGroupRevenue = async (groupId) => {
-    const endpoint = `/groups/${groupId}/revenue`;
-    const response = await api.get(endpoint);
-    return checkService(response);
+    const contexto = `${contextoBase}.getGroupRevenue`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
+
+    try {
+        const { data } = await API_Sistema_Receita.obterReceita(groupId);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao buscar a receita do grupo ${groupId}:`, { error });
+        throw error;
+    }
 };

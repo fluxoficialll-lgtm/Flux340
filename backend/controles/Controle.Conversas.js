@@ -1,14 +1,15 @@
 
 import servicoConversas from '../ServicosBackend/Servico.Conversas.js';
+import ServicoRespostaHTTP from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
-const obterConversas = async (req, res, next) => {
+const obterConversas = async (req, res) => {
     try {
         // O ID do usuário é obtido do token de autenticação, que já foi verificado
         const conversas = await servicoConversas.obterConversas(req.user.id);
-        res.json(conversas);
+        ServicoRespostaHTTP.sucesso(res, conversas, "Conversas obtidas com sucesso");
     } catch (error) {
         // Se houver algum erro, ele é passado para o próximo middleware de erro
-        next(error);
+        ServicoRespostaHTTP.erro(res, error.message);
     }
 };
 

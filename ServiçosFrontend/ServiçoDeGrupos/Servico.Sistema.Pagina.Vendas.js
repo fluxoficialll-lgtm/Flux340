@@ -1,12 +1,10 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Pagina.Vendas.js
 
-import { api } from '../../api';
-import { checkService } from '../../utils';
+import API_Sistema_Pagina_Vendas from '../APIs/API.Sistema.Pagina.Vendas.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
-/**
- * @file Serviço para o gerenciamento da página de vendas de grupos.
- */
+const contextoBase = "Servico.Sistema.Pagina.Vendas";
 
 /**
  * Busca o conteúdo da página de vendas de um grupo.
@@ -14,9 +12,20 @@ import { checkService } from '../../utils';
  * @returns {Promise<Object>} Uma promessa que resolve com o conteúdo da página de vendas.
  */
 export const getSalesPage = async (groupId) => {
-    const endpoint = `/groups/${groupId}/sales-page`;
-    const response = await api.get(endpoint);
-    return checkService(response);
+    const contexto = `${contextoBase}.getSalesPage`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
+
+    try {
+        const { data } = await API_Sistema_Pagina_Vendas.obterPaginaVendas(groupId);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao buscar o conteúdo da página de vendas para o grupo ${groupId}:`, { error });
+        throw error;
+    }
 };
 
 /**
@@ -26,7 +35,19 @@ export const getSalesPage = async (groupId) => {
  * @returns {Promise<Object>} Uma promessa que resolve com o conteúdo da página de vendas atualizado.
  */
 export const updateSalesPage = async (groupId, pageData) => {
-    const endpoint = `/groups/${groupId}/sales-page`;
-    const response = await api.put(endpoint, pageData);
-    return checkService(response);
+    const contexto = `${contextoBase}.updateSalesPage`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
+
+    try {
+        const { data } = await API_Sistema_Pagina_Vendas.atualizarPaginaVendas(groupId, pageData);
+        ServicoLog.info(contexto, `Página de vendas do grupo ${groupId} atualizada com sucesso.`);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao atualizar o conteúdo da página de vendas para o grupo ${groupId}:`, { error, pageData });
+        throw error;
+    }
 };

@@ -1,50 +1,48 @@
 
-// backend/controles/Controles.Criação.Perfil.Flux.js
-
 import servicoCriacaoPerfil from '../ServicosBackend/Servicos.Criacao.Perfil.Flux.js';
+import ServicoRespostaHTTP from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
-const buscarPerfil = async (req, res, next) => {
+const buscarPerfil = async (req, res) => {
     try {
         const perfil = await servicoCriacaoPerfil.PossibilidadeBuscarPerfil(req.user.id);
         if (!perfil) {
-            return res.status(404).json({ message: 'Perfil não encontrado.' });
+            return ServicoRespostaHTTP.naoEncontrado(res, 'Perfil não encontrado.');
         }
-        res.json(perfil);
+        ServicoRespostaHTTP.sucesso(res, perfil);
     } catch (error) {
-        next(error);
+        ServicoRespostaHTTP.erro(res, error.message);
     }
 };
 
-const buscarPerfilPublico = async (req, res, next) => {
+const buscarPerfilPublico = async (req, res) => {
     try {
         const perfil = await servicoCriacaoPerfil.PossibilidadeBuscarPerfil(req.params.userId);
         if (!perfil) {
-            return res.status(404).json({ message: 'Perfil público não encontrado.' });
+            return ServicoRespostaHTTP.naoEncontrado(res, 'Perfil público não encontrado.');
         }
-        res.json(perfil);
+        ServicoRespostaHTTP.sucesso(res, perfil);
     } catch (error) {
-        next(error);
+        ServicoRespostaHTTP.erro(res, error.message);
     }
 };
 
-const atualizarPerfil = async (req, res, next) => {
+const atualizarPerfil = async (req, res) => {
     try {
         const perfilAtualizado = await servicoCriacaoPerfil.PossibilidadeAtualizarPerfil(req.user.id, req.body, req.user);
-        res.json(perfilAtualizado);
+        ServicoRespostaHTTP.sucesso(res, perfilAtualizado, "Perfil atualizado com sucesso");
     } catch (error) {
-        if (error.message.includes('nickname')) {
-            return res.status(409).json({ message: error.message });
-        }
-        next(error);
+        // Nota: O erro de conflito (409) será tratado como um erro genérico (500) pelo serviço de resposta.
+        ServicoRespostaHTTP.erro(res, error.message);
     }
 };
 
-const deletarPerfil = async (req, res, next) => {
+const deletarPerfil = async (req, res) => {
     try {
         await servicoCriacaoPerfil.PossibilidadeDeletarPerfil(req.user.id, req.user);
-        res.status(204).send();
+        // Nota: A resposta 204 (No Content) foi substituída por uma resposta de sucesso (200) com dados nulos.
+        ServicoRespostaHTTP.sucesso(res, null, "Perfil deletado com sucesso");
     } catch (error) {
-        next(error);
+        ServicoRespostaHTTP.erro(res, error.message);
     }
 };
 

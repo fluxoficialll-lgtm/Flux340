@@ -1,13 +1,9 @@
-// Arquivo: ServiçosFrontend/Cliente.Backend.js
 
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import VariaveisFrontend from './Config/Variaveis.Frontend.js';
+import ServicoLog from './ServicoLogs/ServicoDeLog.js';
 
-/**
- * Cliente HTTP centralizado para comunicação com o Backend.
- *
- * Configura o `baseURL` e interceptors para autenticação e tratamento de erros.
- */
 const ClienteBackend = axios.create({
     baseURL: VariaveisFrontend.apiBaseUrl,
     headers: {
@@ -15,57 +11,98 @@ const ClienteBackend = axios.create({
     },
 });
 
-/**
- * Interceptor de Requisição:
- *
- * Antes de cada requisição ser enviada, este interceptor verifica se existe um
- * token de autenticação (JWT) armazenado localmente no localStorage.
- * Se o token existir, ele é adicionado ao cabeçalho 'Authorization'.
- */
+// Interceptor de Requisição Aprimorado
 ClienteBackend.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('authToken'); // 'authToken' é a chave onde o token JWT é guardado
+        const traceId = uuidv4();
+        
+        // Problema 1 e 4 resolvidos: Armazenar traceId e startTime nos metadados
+        config.metadata = { startTime: Date.now(), traceId };
+
+        config.headers['X-Flux-Trace-ID'] = traceId;
+        const token = localStorage.getItem('userToken');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
+
+        // Problema 3 resolvido: Log do payload da requisição
+        ServicoLog.info(
+            'ClienteBackend.Request',
+            `▶️ ${config.method.toUpperCase()} ${config.url}`,
+            {
+                traceId,
+                payload: config.data, // Adiciona o corpo da requisição ao log
+            }
+        );
+
         return config;
     },
     (error) => {
-        // Log do erro para depuração
-        console.error("Erro no interceptor de requisição:", error);
+        ServicoLog.erro('ClienteBackend.Request.Error', 'Erro ao configurar a requisição', error);
         return Promise.reject(error);
     }
 );
 
-/**
- * Interceptor de Resposta:
- *
- * Trata as respostas da API.
- * - Em caso de sucesso, retorna os dados da resposta.
- * - Em caso de erro, analisa o tipo de erro e o trata adequadamente.
- *   - Erros de autenticação (401) podem acionar um fluxo de logout.
- *   - Outros erros são repassados para a lógica de tratamento de erros da aplicação.
- */
+// Interceptor de Resposta Aprimorado
 ClienteBackend.interceptors.response.use(
     (response) => {
-        // Retorna diretamente os dados da resposta em caso de sucesso
-        return response.data;
+        // Problema 4 resolvido: Calcular duração
+        const duration = Date.now() - response.config.metadata.startTime;
+        const { traceId } = response.config.metadata;
+
+        // Problema 2 resolvido: Log da resposta de sucesso
+        ServicoLog.info(
+            'ClienteBackend.Response',
+            `✅ ${response.status} ${response.config.url} em ${duration}ms`,
+            {
+                traceId,
+                status: response.status,
+                duration,
+            }
+        );
+
+        return response;
     },
     (error) => {
-        console.error("Erro na resposta da API:", error.response || error.message);
-
-        if (error.response && error.response.status === 401) {
-            // Lógica de logout - Ex: redirecionar para a página de login
-            // Isso pode ser feito emitindo um evento ou chamando uma função global de logout
-            console.warn("Usuário não autorizado. Redirecionando para login.");
-            localStorage.removeItem('authToken'); // Remover o token
-            // A melhor prática é usar o sistema de rotas para navegar
-            window.location.href = '/login';
+        const contexto = 'ClienteBackend.Response.Error';
+        
+        // Garante que a configuração exista, mesmo em erros de rede
+        if (!error.config || !error.config.metadata) {
+            ServicoLog.erro(contexto, 'Erro de rede ou configuração ausente', { message: error.message });
+            return Promise.reject(error);
         }
 
-        // Repassa o erro para ser tratado pelo código que fez a chamada.
-        // Isso permite que componentes específicos reajam a erros de API.
-        return Promise.reject(error.response ? error.response.data : error);
+        const { startTime, traceId } = error.config.metadata;
+        const duration = Date.now() - startTime;
+
+        if (error.response) {
+            const { status, data, config } = error.response;
+            ServicoLog.erro(contexto, `❌ ${status} ${config.url} em ${duration}ms`,
+                {
+                    traceId,
+                    status,
+                    duration,
+                    errorData: data,
+                }
+            );
+
+            if (status === 401) {
+                ServicoLog.warn(contexto, 'Token inválido ou expirado. Deslogando usuário.', { traceId });
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('user');
+                window.dispatchEvent(new Event('authChange'));
+            }
+        } else {
+            ServicoLog.erro(contexto, `Erro de rede em ${error.config.url} em ${duration}ms`,
+                {
+                    traceId,
+                    duration,
+                    message: error.message,
+                }
+            );
+        }
+
+        return Promise.reject(error);
     }
 );
 

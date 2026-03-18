@@ -1,42 +1,51 @@
 
-// backend/ServicosBackend/Servico.Logs.Backend.js
+class ServicoLog {
 
-/**
- * @file Serviço de Log genérico para o Backend.
- * Centraliza a forma como os logs são registrados no lado do servidor.
- */
+  static log(level, contexto, mensagem, dados = null) {
+    const tempo = new Date().toISOString();
+    const levelUpper = level.toUpperCase();
+    const logString = `[${tempo}] [${levelUpper}] [${contexto}] ${mensagem}`;
 
-const ServicoDeLog = {
-
-    /**
-     * Registra uma mensagem de informação.
-     * @param {string} message - A mensagem a ser registrada.
-     * @param {object} data - Dados adicionais para incluir no log.
-     * @param {string} context - O contexto (módulo/serviço) de onde o log se origina.
-     */
-    info(message, data = {}, context = 'Geral') {
-        console.log(`[INFO][${context}] ${message}`, data);
-    },
-
-    /**
-     * Registra uma mensagem de aviso.
-     * @param {string} message - A mensagem a ser registrada.
-     * @param {object} data - Dados adicionais para incluir no log.
-     * @param {string} context - O contexto de onde o log se origina.
-     */
-    warn(message, data = {}, context = 'Geral') {
-        console.warn(`[WARN][${context}] ${message}`, data);
-    },
-
-    /**
-     * Registra uma mensagem de erro.
-     * @param {string} message - A mensagem a ser registrada.
-     * @param {object} errorData - Dados do erro, como stack trace e informações adicionais.
-     * @param {string} context - O contexto de onde o log se origina.
-     */
-    error(message, errorData = {}, context = 'Geral') {
-        console.error(`[ERROR][${context}] ${message}`, errorData);
+    if (dados) {
+      console.log(logString, dados);
+    } else {
+      console.log(logString);
     }
-};
+  }
 
-export default ServicoDeLog;
+  static info(contexto, mensagem, dados = null) {
+    this.log('info', contexto, mensagem, dados);
+  }
+
+  static erro(contexto, mensagem, erro = null) {
+    const tempo = new Date().toISOString();
+    const logString = `[${tempo}] [ERRO] [${contexto}] ${mensagem}`;
+    
+    if (erro) {
+        console.error(logString, erro);
+    } else {
+        console.error(logString);
+    }
+  }
+
+  static warn(contexto, mensagem, dados = null) {
+    this.log('warn', contexto, mensagem, dados);
+  }
+
+  static debug(contexto, mensagem, dados = null) {
+    // Opcional: Logar debug apenas em ambiente de desenvolvimento
+    if (process.env.NODE_ENV !== 'production') {
+      this.log('debug', contexto, mensagem, dados);
+    }
+  }
+
+  static jsonEnviado(contexto, dados) {
+    this.log('json_sent', contexto, 'JSON Enviado', dados);
+  }
+
+  static jsonRecebido(contexto, dados) {
+    this.log('json_received', contexto, 'JSON Recebido', dados);
+  }
+}
+
+export default ServicoLog;

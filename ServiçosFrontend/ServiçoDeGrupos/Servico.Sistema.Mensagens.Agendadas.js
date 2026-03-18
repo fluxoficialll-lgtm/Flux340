@@ -1,12 +1,10 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Mensagens.Agendadas.js
 
-import { api } from '../../api';
-import { checkService } from '../../utils';
+import API_Sistema_Mensagens_Agendadas from '../APIs/API.Sistema.Mensagens.Agendadas.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
-/**
- * @file Serviço para o gerenciamento de mensagens agendadas em grupos.
- */
+const contextoBase = "Servico.Sistema.Mensagens.Agendadas";
 
 /**
  * Busca as mensagens agendadas de um grupo.
@@ -14,9 +12,20 @@ import { checkService } from '../../utils';
  * @returns {Promise<Array<Object>>} Uma promessa que resolve com a lista de mensagens agendadas.
  */
 export const getScheduledMessages = async (groupId) => {
-    const endpoint = `/groups/${groupId}/scheduled-messages`;
-    const response = await api.get(endpoint);
-    return checkService(response);
+    const contexto = `${contextoBase}.getScheduledMessages`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
+
+    try {
+        const { data } = await API_Sistema_Mensagens_Agendadas.obterMensagensAgendadas(groupId);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao buscar mensagens agendadas para o grupo ${groupId}:`, { error });
+        throw error;
+    }
 };
 
 /**
@@ -26,9 +35,21 @@ export const getScheduledMessages = async (groupId) => {
  * @returns {Promise<Object>} Uma promessa que resolve com a mensagem agendada criada.
  */
 export const createScheduledMessage = async (groupId, messageData) => {
-    const endpoint = `/groups/${groupId}/scheduled-messages`;
-    const response = await api.post(endpoint, messageData);
-    return checkService(response);
+    const contexto = `${contextoBase}.createScheduledMessage`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
+
+    try {
+        const { data } = await API_Sistema_Mensagens_Agendadas.criarMensagemAgendada(groupId, messageData);
+        ServicoLog.info(contexto, `Mensagem agendada criada para o grupo ${groupId}.`);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao criar mensagem agendada para o grupo ${groupId}:`, { error, messageData });
+        throw error;
+    }
 };
 
 /**
@@ -39,9 +60,21 @@ export const createScheduledMessage = async (groupId, messageData) => {
  * @returns {Promise<Object>} Uma promessa que resolve com a mensagem agendada atualizada.
  */
 export const updateScheduledMessage = async (groupId, messageId, messageData) => {
-    const endpoint = `/groups/${groupId}/scheduled-messages/${messageId}`;
-    const response = await api.put(endpoint, messageData);
-    return checkService(response);
+    const contexto = `${contextoBase}.updateScheduledMessage`;
+    if (!groupId || !messageId) {
+        const erro = "Os IDs do grupo e da mensagem são obrigatórios.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
+
+    try {
+        const { data } = await API_Sistema_Mensagens_Agendadas.atualizarMensagemAgendada(groupId, messageId, messageData);
+        ServicoLog.info(contexto, `Mensagem agendada ${messageId} do grupo ${groupId} atualizada.`);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao atualizar mensagem agendada ${messageId} para o grupo ${groupId}:`, { error, messageData });
+        throw error;
+    }
 };
 
 /**
@@ -51,7 +84,19 @@ export const updateScheduledMessage = async (groupId, messageId, messageData) =>
  * @returns {Promise<Object>} Uma promessa que resolve com o resultado da operação.
  */
 export const deleteScheduledMessage = async (groupId, messageId) => {
-    const endpoint = `/groups/${groupId}/scheduled-messages/${messageId}`;
-    const response = await api.delete(endpoint);
-    return checkService(response);
+    const contexto = `${contextoBase}.deleteScheduledMessage`;
+    if (!groupId || !messageId) {
+        const erro = "Os IDs do grupo e da mensagem são obrigatórios.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
+
+    try {
+        const { data } = await API_Sistema_Mensagens_Agendadas.deletarMensagemAgendada(groupId, messageId);
+        ServicoLog.info(contexto, `Mensagem agendada ${messageId} do grupo ${groupId} deletada.`);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao deletar mensagem agendada ${messageId} para o grupo ${groupId}:`, { error });
+        throw error;
+    }
 };

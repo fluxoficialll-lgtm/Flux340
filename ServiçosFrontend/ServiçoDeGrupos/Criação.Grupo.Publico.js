@@ -1,30 +1,39 @@
+
+import API_Criacao_Grupo_Publico from '../APIs/API.Criacao.Grupo.Publico.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 import { fileService } from '../ServiçoDeArquivos/fileService.js';
 
 class ServiçoCriaçãoGrupoPublico {
     async criar(groupData) {
-        let coverImageUrl = '';
-        if (groupData.coverImageBlob) {
-            coverImageUrl = await fileService.upload(groupData.coverImageBlob, `group-covers/${Date.now()}.png`);
-        }
+        const contexto = "ServiçoCriaçãoGrupoPublico.criar";
 
-        const response = await fetch('/api/groups/public', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        try {
+            let coverImageUrl = '';
+            if (groupData.coverImageBlob) {
+                ServicoLog.info(contexto, "Iniciando upload da imagem de capa.");
+                coverImageUrl = await fileService.upload(groupData.coverImageBlob, `group-covers/${Date.now()}.png`);
+                ServicoLog.info(contexto, "Upload da imagem de capa concluído.", { coverImageUrl });
+            }
+
+            const payload = {
                 name: groupData.name,
                 description: groupData.description,
                 coverImage: coverImageUrl,
-            }),
-        });
+            };
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Falha ao criar o grupo público.');
+            ServicoLog.jsonEnviado(contexto, payload);
+
+            // Refatorado: Delegação da chamada de rede para a camada de API
+            const { data } = await API_Criacao_Grupo_Publico.criar(payload);
+
+            ServicoLog.jsonRecebido(contexto, data);
+            return data;
+
+        } catch (error) {
+            // O erro já foi logado pelo interceptor do ClienteBackend
+            const errorMessage = error.response?.data?.message || 'Falha ao criar o grupo público.';
+            throw new Error(errorMessage);
         }
-
-        return await response.json();
     }
 }
 

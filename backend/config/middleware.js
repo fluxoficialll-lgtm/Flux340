@@ -4,7 +4,7 @@ import cors from 'cors';
 import compression from 'compression';
 import helmet from 'helmet';
 import crypto from 'crypto';
-// import { LogDeOperacoes } from '../ServicosBackEnd/ServicosDeLogsSofisticados/LogDeOperacoes.js';
+import ServicoLog from '../ServicosBackend/Servico.Logs.Backend.js';
 
 /**
  * Cria um "child logger" para uma requisição específica, com o traceId já embutido.
@@ -13,23 +13,15 @@ import crypto from 'crypto';
  * @returns {object} - Um objeto logger com os métodos (log, error, etc.) pré-configurados.
  */
 const createRequestLogger = (traceId) => {
-    const requestLogger = {};
-    // for (const level in LogDeOperacoes) {
-    //     if (typeof LogDeOperacoes[level] === 'function') {
-    //         requestLogger[level] = (contexto, data = {}) => {
-    //             LogDeOperacoes[level](contexto, data, traceId);
-    //         };
-    //     }
-    // }
-    // return requestLogger;
-    // Mock logger since the original is missing
-    const levels = ['log', 'error', 'warn', 'debug'];
-    levels.forEach(level => {
-        requestLogger[level] = (contexto, data) => {
-            console.log(`[${level.toUpperCase()}] (${traceId}) ${contexto}`, data);
-        };
-    });
-    return requestLogger;
+    // Mapeia os níveis de log do middleware para os métodos do nosso ServicoLog
+    // e injeta o traceId em cada chamada.
+    return {
+        log: (contexto, data = {}) => ServicoLog.info('Middleware', contexto, { ...data, traceId }),
+        info: (contexto, data = {}) => ServicoLog.info('Middleware', contexto, { ...data, traceId }),
+        error: (contexto, data = {}) => ServicoLog.erro('Middleware', contexto, { ...data, traceId }),
+        warn: (contexto, data = {}) => ServicoLog.warn('Middleware', contexto, { ...data, traceId }),
+        debug: (contexto, data = {}) => ServicoLog.debug('Middleware', contexto, { ...data, traceId }),
+    };
 };
 
 export const setupMiddlewares = (app, io) => {
@@ -55,7 +47,6 @@ export const setupMiddlewares = (app, io) => {
     // Middleware Central de Logging e Contexto
     app.use((req, res, next) => {
         const start = Date.now();
-        // Correção: Captura o caminho original da requisição no início.
         const originalPath = req.originalUrl || req.path;
 
         // 1. Geração e atribuição do Trace ID
@@ -75,7 +66,6 @@ export const setupMiddlewares = (app, io) => {
         } else {
             req.logger.log('INBOUND_REQUEST', { 
                 method: req.method, 
-                // Correção: Usa o caminho original no log de entrada.
                 path: originalPath, 
                 ip: req.ip, 
                 clientId: req.headers['x-flux-client-id'] 
@@ -89,21 +79,17 @@ export const setupMiddlewares = (app, io) => {
 
             const logData = {
                 method: req.method,
-                // Correção: Usa o caminho original no log de saída para evitar confusão.
                 path: originalPath,
                 statusCode,
                 duration_ms: duration,
             };
 
             if (statusCode >= 500) {
-                // Erros de servidor são sempre 'error' ou 'fatal'
                 req.logger.error('OUTBOUND_RESPONSE', logData);
             } else if (statusCode >= 400) {
-                // Erros do cliente (4xx) são 'warn'
                 req.logger.warn('OUTBOUND_RESPONSE', logData);
             } else {
-                // Sucessos (2xx, 3xx) são 'info'
-                req.logger.log('OUTBOUND_RESPONSE', logData);
+                req.logger.info('OUTBOUND_RESPONSE', logData);
             }
         });
 

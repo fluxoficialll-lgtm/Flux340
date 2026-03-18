@@ -1,5 +1,10 @@
 
-import { apiClient } from '../Cliente.Backend.js';
+// Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Grupo.Moderacao.js
+
+import API_Sistema_Grupo_Moderacao from '../APIs/API.Sistema.Grupo.Moderacao.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+
+const contextoBase = "Servico.Sistema.Grupo.Moderacao";
 
 /**
  * @typedef {object} KeywordFilter
@@ -40,29 +45,20 @@ import { apiClient } from '../Cliente.Backend.js';
  * @returns {Promise<GroupModerationSettings>}
  */
 export const getModerationSettings = async (groupId) => {
-  if (!groupId) throw new Error("O ID do grupo é obrigatório.");
+    const contexto = `${contextoBase}.getModerationSettings`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
 
-  try {
-    // Simulação de chamada de API
-    // Em um cenário real: const response = await apiClient.get(`/groups/${groupId}/moderation`);
-    // return response.data;
-
-    console.log(`[MOCK API] Buscando configurações de moderação para o grupo ${groupId}`);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const mockSettings = {
-      keywordFilter: { enabled: true, keywords: ['spam', 'promoção'] },
-      mediaControl: { allowImages: true, allowVideos: false },
-      antiFlood: { enabled: true, messageLimit: 5, timeFrame: 10 },
-      postApproval: { enabled: false, scope: 'new_members' },
-    };
-    
-    return mockSettings;
-
-  } catch (error) {
-    console.error("Erro ao buscar configurações de moderação:", error);
-    throw error;
-  }
+    try {
+        const { data } = await API_Sistema_Grupo_Moderacao.obterConfiguracoes(groupId);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao buscar configurações de moderação para o grupo ${groupId}:`, { error });
+        throw error;
+    }
 };
 
 /**
@@ -72,20 +68,19 @@ export const getModerationSettings = async (groupId) => {
  * @returns {Promise<GroupModerationSettings>}
  */
 export const updateModerationSettings = async (groupId, settings) => {
-  if (!groupId) throw new Error("O ID do grupo é obrigatório.");
+    const contexto = `${contextoBase}.updateModerationSettings`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
 
-  try {
-    // Simulação de chamada de API
-    // Em um cenário real: const response = await apiClient.put(`/groups/${groupId}/moderation`, settings);
-    // return response.data;
-
-    console.log(`[MOCK API] Atualizando configurações de moderação para o grupo ${groupId}:`, settings);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return { ...settings }; // Retorna as configurações atualizadas
-
-  } catch (error) {
-    console.error("Erro ao atualizar configurações de moderação:", error);
-    throw error;
-  }
+    try {
+        const { data } = await API_Sistema_Grupo_Moderacao.atualizarConfiguracoes(groupId, settings);
+        ServicoLog.info(contexto, `Configurações de moderação atualizadas para o grupo ${groupId}.`);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao atualizar configurações de moderação para o grupo ${groupId}:`, { error, settings });
+        throw error;
+    }
 };

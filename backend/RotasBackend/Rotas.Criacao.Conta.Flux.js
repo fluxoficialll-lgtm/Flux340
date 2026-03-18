@@ -1,20 +1,23 @@
 
 import express from 'express';
 import controleCriacaoConta from '../controles/Controles.Criacao.Conta.Flux.js';
-import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
+import ServicoLog from '../ServicosBackend/Servico.Logs.Backend.js';
 
 const router = express.Router();
 
-// Rota para registrar um novo usuário
-// O frontend vai chamar: POST /api/auth/register
-router.post('/register', controleCriacaoConta.registerUser);
+router.post('/register', (req, res, next) => {
+  ServicoLog.jsonRecebido('Rota /register', req.body);
+  controleCriacaoConta.registerUser(req, res, next);
+});
 
-// Rota para login de usuário
-// O frontend vai chamar: POST /api/auth/login
-router.post('/login', controleCriacaoConta.loginUser);
+router.post('/login', (req, res, next) => {
+  ServicoLog.jsonRecebido('Rota /login', req.body);
+  controleCriacaoConta.loginUser(req, res, next);
+});
 
-// Rota para autenticação com Google
-// O frontend vai chamar: POST /api/auth/google
-router.post('/google', controleCriacaoConta.googleAuth);
+router.post('/google', (req, res, next) => {
+  ServicoLog.jsonRecebido('Rota /google', req.body);
+  controleCriacaoConta.googleAuth(req, res, next);
+});
 
 export default router;

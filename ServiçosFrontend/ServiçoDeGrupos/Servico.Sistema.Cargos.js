@@ -1,20 +1,29 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Cargos.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import API_Sistema_Cargos from '../APIs/API.Sistema.Cargos.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
-/**
- * Serviço para gerenciar os cargos (roles) de um grupo.
- */
+const contextoBase = "Servico.Sistema.Cargos";
 
 /**
  * Busca todos os cargos de um grupo específico.
  * @param {string} groupId - O ID do grupo.
  * @returns {Promise<Array>} Uma promessa que resolve para a lista de cargos.
  */
-export const getRoles = (groupId) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.get(`/api/groups/${groupId}/roles`);
+export const getRoles = async (groupId) => {
+    const contexto = `${contextoBase}.getRoles`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Cargos.obter(groupId);
+        return data;
+    } catch (error) {
+        // O erro já é logado pelo interceptor do ClienteBackend
+        throw error;
+    }
 };
 
 /**
@@ -23,9 +32,18 @@ export const getRoles = (groupId) => {
  * @param {object} roleData - Os dados do novo cargo (nome, cor, etc.).
  * @returns {Promise<object>} Uma promessa que resolve para o cargo recém-criado.
  */
-export const createRole = (groupId, roleData) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.post(`/api/groups/${groupId}/roles`, roleData);
+export const createRole = async (groupId, roleData) => {
+    const contexto = `${contextoBase}.createRole`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Cargos.adicionar(groupId, roleData);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 /**
@@ -35,9 +53,18 @@ export const createRole = (groupId, roleData) => {
  * @param {object} updates - Os campos a serem atualizados.
  * @returns {Promise<object>} Uma promessa que resolve para o cargo atualizado.
  */
-export const updateRole = (groupId, roleId, updates) => {
-    if (!groupId || !roleId) return Promise.reject('IDs não fornecidos.');
-    return ClienteBackend.put(`/api/groups/${groupId}/roles/${roleId}`, updates);
+export const updateRole = async (groupId, roleId, updates) => {
+    const contexto = `${contextoBase}.updateRole`;
+    if (!groupId || !roleId) {
+        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
+        return Promise.reject('IDs não fornecidos.');
+    }
+    try {
+        const { data } = await API_Sistema_Cargos.atualizar(groupId, roleId, updates);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 /**
@@ -46,9 +73,18 @@ export const updateRole = (groupId, roleId, updates) => {
  * @param {string} roleId - O ID do cargo a ser deletado.
  * @returns {Promise<void>} Uma promessa que é resolvida quando o cargo é deletado.
  */
-export const deleteRole = (groupId, roleId) => {
-    if (!groupId || !roleId) return Promise.reject('IDs não fornecidos.');
-    return ClienteBackend.delete(`/api/groups/${groupId}/roles/${roleId}`);
+export const deleteRole = async (groupId, roleId) => {
+    const contexto = `${contextoBase}.deleteRole`;
+    if (!groupId || !roleId) {
+        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
+        return Promise.reject('IDs não fornecidos.');
+    }
+    try {
+        const { data } = await API_Sistema_Cargos.remover(groupId, roleId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 /**
@@ -58,7 +94,16 @@ export const deleteRole = (groupId, roleId) => {
  * @param {string | null} roleId - O ID do cargo a ser atribuído (ou null para remover).
  * @returns {Promise<object>} Uma promessa com a confirmação.
  */
-export const assignRole = (groupId, memberId, roleId) => {
-    if (!groupId || !memberId) return Promise.reject('IDs não fornecidos.');
-    return ClienteBackend.post(`/api/groups/${groupId}/members/${memberId}/assign-role`, { roleId });
+export const assignRole = async (groupId, memberId, roleId) => {
+    const contexto = `${contextoBase}.assignRole`;
+    if (!groupId || !memberId) {
+        ServicoLog.aviso(contexto, 'IDs não fornecidos.');
+        return Promise.reject('IDs não fornecidos.');
+    }
+    try {
+        const { data } = await API_Sistema_Cargos.atribuir(groupId, memberId, roleId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };

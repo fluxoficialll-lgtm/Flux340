@@ -1,96 +1,114 @@
 
-// backend/ServicosBackend/Servicos.Criação.Conta.Flux.js
-
 import repositorioCriacaoConta from '../Repositorios/Repositorio.Criacao.Conta.Flux.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import ServicoLog from './Servico.Logs.Backend.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
 
 const registerUser = async (userData) => {
+    const contexto = "Servico.CriacaoConta.registerUser";
     const { name, email, password, google_id } = userData;
-    console.log(`Serviço: Iniciando registro para o email: ${email}`);
+    ServicoLog.info(contexto, `Iniciando registro para o email: ${email}`);
 
-    const id = uuidv4();
-    const userForDb = { id, name, email };
+    try {
+        const id = uuidv4();
+        const userForDb = { id, name, email };
 
-    if (password) {
-        const salt = await bcrypt.genSalt(10);
-        userForDb.password_hash = await bcrypt.hash(password, salt);
-        console.log('Serviço: Senha criptografada com sucesso.');
-    } else if (google_id) {
-        userForDb.google_id = google_id;
-        console.log(`Serviço: Preparando registro com Google ID: ${google_id}`);
-    } else {
-        throw new Error('Método de registro inválido. É necessário fornecer senha ou ID do Google.');
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            userForDb.password_hash = await bcrypt.hash(password, salt);
+            ServicoLog.debug(contexto, 'Senha criptografada com sucesso.');
+        } else if (google_id) {
+            userForDb.google_id = google_id;
+            ServicoLog.debug(contexto, `Preparando registro com Google ID: ${google_id}`);
+        } else {
+            ServicoLog.warn(contexto, 'Método de registro inválido. Faltando senha ou ID do Google.');
+            throw new Error('Método de registro inválido. É necessário fornecer senha ou ID do Google.');
+        }
+
+        const newUser = await repositorioCriacaoConta.registerUser(userForDb);
+        ServicoLog.info(contexto, "Usuário registrado com sucesso no repositório", { userId: newUser.id });
+        return { message: 'Usuário registrado com sucesso!', user: newUser };
+    } catch (error) {
+        ServicoLog.erro(contexto, 'Erro ao registrar usuário', error);
+        throw error;
     }
-
-    const newUser = await repositorioCriacaoConta.registerUser(userForDb);
-    return { message: 'Usuário registrado com sucesso!', user: newUser };
 };
 
 const loginUser = async (loginData) => {
+    const contexto = "Servico.CriacaoConta.loginUser";
     const { email, password } = loginData;
-    console.log(`Serviço: Tentativa de login com o email: ${email}`);
+    ServicoLog.info(contexto, `Tentativa de login com o email: ${email}`);
 
-    const user = await repositorioCriacaoConta.findUserByEmail(email);
-    if (!user) {
-        console.warn(`Serviço: Tentativa de login falhou. Email não encontrado: ${email}`);
-        throw new Error('Credenciais inválidas.');
+    try {
+        const user = await repositorioCriacaoConta.findUserByEmail(email);
+        if (!user) {
+            ServicoLog.warn(contexto, `Tentativa de login falhou. Email não encontrado: ${email}`);
+            throw new Error('Credenciais inválidas.');
+        }
+
+        if (!user.password_hash) {
+            ServicoLog.warn(contexto, `Tentativa de login com senha em uma conta Google (email: ${email})`);
+            throw new Error('Esta conta foi criada usando um provedor social. Tente logar com o Google.');
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+        if (!isMatch) {
+            ServicoLog.warn(contexto, `Tentativa de login falhou. Senha incorreta para o email: ${email}`);
+            throw new Error('Credenciais inválidas.');
+        }
+
+        const payload = { user: { id: user.id, name: user.name, email: user.email } };
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+        ServicoLog.info(contexto, `Login bem-sucedido e token gerado para ${email}`);
+
+        return {
+            message: 'Login bem-sucedido!',
+            token,
+            user: { id: user.id, name: user.name, email: user.email },
+        };
+    } catch (error) {
+        ServicoLog.erro(contexto, 'Erro durante o processo de login', { email, message: error.message });
+        // Re-lança o erro para ser tratado pelo controller
+        throw error;
     }
-
-    if (!user.password_hash) {
-        console.warn(`Serviço: Tentativa de login com senha em uma conta sem senha definida (email: ${email})`);
-        throw new Error('Esta conta foi criada usando um provedor social. Tente logar com o Google.');
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password_hash);
-    if (!isMatch) {
-        console.warn(`Serviço: Tentativa de login falhou. Senha incorreta para o email: ${email}`);
-        throw new Error('Credenciais inválidas.');
-    }
-
-    const payload = { user: { id: user.id, name: user.name, email: user.email } };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-    console.log(`Serviço: Login bem-sucedido e token gerado para ${email}`);
-
-    return {
-        message: 'Login bem-sucedido!',
-        token,
-        user: { id: user.id, name: user.name, email: user.email },
-    };
 };
 
 const findOrCreateUser = async ({ name, email, google_id }) => {
-    console.log(`Serviço: Procurando ou criando usuário com Google ID: ${google_id}`);
+    const contexto = "Servico.CriacaoConta.findOrCreateUser";
+    ServicoLog.info(contexto, `Procurando ou criando usuário com Google ID: ${google_id}`);
 
-    // 1. Tenta encontrar um usuário existente pelo google_id
-    let user = await repositorioCriacaoConta.findUserByGoogleId(google_id);
-    if (user) {
-        console.log('Serviço: Usuário encontrado com Google ID.');
-        return { user, isNewUser: false };
+    try {
+        let user = await repositorioCriacaoConta.findUserByGoogleId(google_id);
+        if (user) {
+            ServicoLog.info(contexto, 'Usuário encontrado com Google ID.', { userId: user.id });
+            return { user, isNewUser: false };
+        }
+
+        ServicoLog.info(contexto, 'Usuário com Google ID não encontrado. Criando um novo.');
+        const newUser = {
+            id: uuidv4(),
+            name,
+            email,
+            google_id,
+        };
+
+        user = await repositorioCriacaoConta.registerUser(newUser);
+        ServicoLog.info(contexto, 'Novo usuário criado com sucesso através do Google Auth.', { userId: user.id });
+
+        return { user, isNewUser: true };
+    } catch (error) {
+        ServicoLog.erro(contexto, 'Erro ao procurar ou criar usuário com Google ID', error);
+        throw error;
     }
-
-    // 2. Se o usuário não existir, cria um novo
-    console.log('Serviço: Usuário com Google ID não encontrado. Criando um novo.');
-    const newUser = {
-        id: uuidv4(),
-        name,
-        email,
-        google_id,
-    };
-
-    user = await repositorioCriacaoConta.registerUser(newUser);
-    console.log('Serviço: Novo usuário criado com sucesso através do Google Auth.');
-
-    return { user, isNewUser: true };
 };
 
 const servicoCriacaoConta = {
     registerUser,
     loginUser,
-    findOrCreateUser, // Adiciona a nova função ao serviço
+    findOrCreateUser,
 };
 
 export default servicoCriacaoConta;

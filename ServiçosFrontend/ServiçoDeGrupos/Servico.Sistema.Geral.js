@@ -1,55 +1,111 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Geral.js
 
-import ClienteBackend from '../Cliente.Backend.js';
+import API_Sistema_Geral from '../APIs/API.Sistema.Geral.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
 
-/**
- * Serviço para gerenciar as configurações gerais, estatísticas, diretrizes e
- * notificações de um grupo.
- */
+const contextoBase = "Servico.Sistema.Geral";
 
 // --- Configurações Gerais e Estatísticas ---
 
-/**
- * Busca os detalhes de um grupo.
- * @param {string} groupId - O ID do grupo.
- * @returns {Promise<object>} Os detalhes do grupo.
- */
-export const getGroupDetails = (groupId) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.get(`/api/groups/${groupId}`);
+export const getGroupDetails = async (groupId) => {
+    const contexto = `${contextoBase}.getGroupDetails`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Geral.obterDetalhes(groupId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
-export const updateGroupSettings = (groupId, settings) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.put(`/api/groups/${groupId}/settings`, settings);
+export const updateGroupSettings = async (groupId, settings) => {
+    const contexto = `${contextoBase}.updateGroupSettings`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Geral.atualizarConfiguracoes(groupId, settings);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
-export const getGroupStats = (groupId) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.get(`/api/groups/${groupId}/stats`);
+export const getGroupStats = async (groupId) => {
+    const contexto = `${contextoBase}.getGroupStats`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Geral.obterEstatisticas(groupId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 // --- Diretrizes do Grupo ---
 
-export const getGuidelines = (groupId) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.get(`/api/groups/${groupId}/guidelines`);
+export const getGuidelines = async (groupId) => {
+    const contexto = `${contextoBase}.getGuidelines`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Geral.obterDiretrizes(groupId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
-export const updateGuidelines = (groupId, guidelines) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.put(`/api/groups/${groupId}/guidelines`, guidelines);
+export const updateGuidelines = async (groupId, guidelines) => {
+    const contexto = `${contextoBase}.updateGuidelines`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Geral.atualizarDiretrizes(groupId, guidelines);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
 // --- Configurações de Notificação ---
 
-export const getNotificationSettings = (groupId) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.get(`/api/groups/${groupId}/notification-settings`);
+export const getNotificationSettings = async (groupId) => {
+    const contexto = `${contextoBase}.getNotificationSettings`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Geral.obterConfiguracoesNotificacao(groupId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };
 
-export const updateNotificationSettings = (groupId, settings) => {
-    if (!groupId) return Promise.reject('ID do grupo não fornecido.');
-    return ClienteBackend.put(`/api/groups/${groupId}/notification-settings`, settings);
+export const updateNotificationSettings = async (groupId, settings) => {
+    const contexto = `${contextoBase}.updateNotificationSettings`;
+    if (!groupId) {
+        ServicoLog.aviso(contexto, 'ID do grupo não fornecido.');
+        return Promise.reject('ID do grupo não fornecido.');
+    }
+    try {
+        const { data } = await API_Sistema_Geral.atualizarConfiguracoesNotificacao(groupId, settings);
+        return data;
+    } catch (error) {
+        throw error;
+    }
 };

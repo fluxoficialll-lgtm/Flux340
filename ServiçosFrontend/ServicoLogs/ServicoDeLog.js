@@ -1,51 +1,48 @@
-// ServiçosFrontend/ServicoLogs/ServicoDeLog.js
 
-class ServicoDeLog {
-    constructor() {
-        if (!ServicoDeLog.instance) {
-            ServicoDeLog.instance = this;
-        }
-        return ServicoDeLog.instance;
+class ServicoLog {
+
+  static log(level, contexto, mensagem, dados = null) {
+    const tempo = new Date().toISOString();
+    const levelUpper = level.toUpperCase();
+    const logString = `[${tempo}] [${levelUpper}] [${contexto}] ${mensagem}`;
+
+    if (dados) {
+      console.log(logString, dados);
+    } else {
+      console.log(logString);
     }
+  }
 
-    log(level, message, data = {}, context = "App") {
-        const timestamp = new Date().toISOString();
+  static info(contexto, mensagem, dados = null) {
+    this.log('info', contexto, mensagem, dados);
+  }
 
-        // Estrutura de log forte
-        const logEntry = {
-            timestamp,
-            level,
-            context,
-            message,
-            data
-        };
-
-        // Output para o console
-        // Em um app real, isso iria para um serviço de log (Datadog, Sentry, etc.)
-        console[level](JSON.stringify(logEntry, null, 2));
+  static erro(contexto, mensagem, erro = null) {
+    const tempo = new Date().toISOString();
+    const logString = `[${tempo}] [ERRO] [${contexto}] ${mensagem}`;
+    
+    if (erro) {
+        console.error(logString, erro);
+    } else {
+        console.error(logString);
     }
+  }
 
-    info(message, data, context) {
-        this.log('log', message, data, context);
-    }
+  static warn(contexto, mensagem, dados = null) {
+    this.log('warn', contexto, mensagem, dados);
+  }
 
-    warn(message, data, context) {
-        this.log('warn', message, data, context);
-    }
+  static debug(contexto, mensagem, dados = null) {
+    this.log('debug', contexto, mensagem, dados);
+  }
 
-    error(message, data, context) {
-        this.log('error', message, data, context);
-    }
+  static jsonEnviado(contexto, dados) {
+    this.log('json_sent', contexto, 'JSON Enviado', dados);
+  }
 
-    debug(message, data, context) {
-        // Evita logs de debug em produção
-        if (process.env.NODE_ENV !== 'production') {
-            this.log('debug', message, data, context);
-        }
-    }
+  static jsonRecebido(contexto, dados) {
+    this.log('json_received', contexto, 'JSON Recebido', dados);
+  }
 }
 
-const instance = new ServicoDeLog();
-Object.freeze(instance);
-
-export default instance;
+export default ServicoLog;

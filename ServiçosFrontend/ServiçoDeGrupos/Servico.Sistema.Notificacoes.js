@@ -1,5 +1,10 @@
 
-import ClienteBackend from '../Cliente.Backend.js';
+// Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Notificacoes.js
+
+import API_Sistema_Notificacoes from '../APIs/API.Sistema.Notificacoes.js';
+import ServicoLog from '../ServicoLogs/ServicoDeLog.js';
+
+const contextoBase = "Servico.Sistema.Notificacoes";
 
 /**
  * @typedef {'all' | 'admins_only' | 'off'} MentionNotificationSetting
@@ -19,29 +24,20 @@ import ClienteBackend from '../Cliente.Backend.js';
  * @returns {Promise<GroupNotificationSettings>}
  */
 export const getNotificationSettings = async (groupId) => {
-  if (!groupId) throw new Error("O ID do grupo é obrigatório.");
+    const contexto = `${contextoBase}.getNotificationSettings`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
 
-  try {
-    // Simulação de chamada de API
-    // Em um cenário real: const response = await ClienteBackend.get(`/groups/${groupId}/notifications`);
-    // return response.data;
-
-    console.log(`[MOCK API] Buscando configurações de notificação para o grupo ${groupId}`);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const mockSettings = {
-      notifyOnNewMember: true,
-      notifyOnMention: 'all',
-      notifyOnNewPost: true,
-      disableAll: false,
-    };
-    
-    return mockSettings;
-
-  } catch (error) {
-    console.error("Erro ao buscar configurações de notificação:", error);
-    throw error;
-  }
+    try {
+        const { data } = await API_Sistema_Notificacoes.obterConfiguracoes(groupId);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao buscar configurações de notificação para o grupo ${groupId}:`, { error });
+        throw error;
+    }
 };
 
 /**
@@ -51,21 +47,19 @@ export const getNotificationSettings = async (groupId) => {
  * @returns {Promise<GroupNotificationSettings>}
  */
 export const updateNotificationSettings = async (groupId, settings) => {
-  if (!groupId) throw new Error("O ID do grupo é obrigatório.");
+    const contexto = `${contextoBase}.updateNotificationSettings`;
+    if (!groupId) {
+        const erro = "O ID do grupo é obrigatório.";
+        ServicoLog.aviso(contexto, erro);
+        return Promise.reject(erro);
+    }
 
-  try {
-    // Simulação de chamada de API
-    // Em um cenário real: const response = await ClienteBackend.put(`/groups/${groupId}/notifications`, settings);
-    // return response.data;
-
-    console.log(`[MOCK API] Atualizando configurações de notificação para o grupo ${groupId}:`, settings);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Retorna as configurações atualizadas para o frontend ter certeza da mudança
-    return { ...settings };
-
-  } catch (error) {
-    console.error("Erro ao atualizar configurações de notificação:", error);
-    throw error;
-  }
+    try {
+        const { data } = await API_Sistema_Notificacoes.atualizarConfiguracoes(groupId, settings);
+        ServicoLog.info(contexto, `Configurações de notificação atualizadas para o grupo ${groupId}.`);
+        return data;
+    } catch (error) {
+        ServicoLog.erro(contexto, `Erro ao atualizar configurações de notificação para o grupo ${groupId}:`, { error, settings });
+        throw error;
+    }
 };
