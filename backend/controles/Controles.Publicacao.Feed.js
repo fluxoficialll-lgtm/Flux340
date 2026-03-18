@@ -1,52 +1,76 @@
 
 // backend/controles/Controles.Publicacao.Feed.js
 
+import { createLogger } from '../ServicosBackend/Logger.js';
 import servicoPublicacaoFeed from '../ServicosBackend/Servicos.Publicacao.Feed.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
+const logger = createLogger('Feed');
+
 const criarPost = async (req, res) => {
+    const userId = req.user.id;
+    logger.info('POST_CREATE_START', { userId });
     try {
         const postData = { ...req.body };
         const post = await servicoPublicacaoFeed.criarPost(postData, req.user);
+        logger.info('POST_CREATE_SUCCESS', { postId: post.id, userId });
         ServicoHTTPResposta.criado(res, post);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 400, error);
+        logger.error('POST_CREATE_ERROR', error, { userId, data: req.body });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 400, error.message);
     }
 };
 
 const obterTodosOsPosts = async (req, res) => {
+    logger.info('POSTS_GET_ALL_START');
     try {
         const posts = await servicoPublicacaoFeed.obterTodosOsPosts(req.query);
+        logger.info('POSTS_GET_ALL_SUCCESS', { count: posts.length });
         ServicoHTTPResposta.sucesso(res, posts);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error);
+        logger.error('POSTS_GET_ALL_ERROR', error, { query: req.query });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error.message);
     }
 };
 
 const obterPostPorId = async (req, res) => {
+    const { postId } = req.params;
+    logger.info('POST_GET_BY_ID_START', { postId });
     try {
-        const post = await servicoPublicacaoFeed.obterPostPorId(req.params.postId);
+        const post = await servicoPublicacaoFeed.obterPostPorId(postId);
+        logger.info('POST_GET_BY_ID_SUCCESS', { postId });
         ServicoHTTPResposta.sucesso(res, post);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 404, error);
+        logger.error('POST_GET_BY_ID_ERROR', error, { postId });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 404, error.message);
     }
 };
 
 const atualizarPost = async (req, res) => {
+    const { postId } = req.params;
+    const userId = req.user.id;
+    logger.info('POST_UPDATE_START', { postId, userId });
     try {
-        const updatedPost = await servicoPublicacaoFeed.atualizarPost(req.params.postId, req.body, req.user);
+        const updatedPost = await servicoPublicacaoFeed.atualizarPost(postId, req.body, req.user);
+        logger.info('POST_UPDATE_SUCCESS', { postId, userId });
         ServicoHTTPResposta.sucesso(res, updatedPost);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 400, error);
+        logger.error('POST_UPDATE_ERROR', error, { postId, userId, data: req.body });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 400, error.message);
     }
 };
 
 const deletarPost = async (req, res) => {
+    const { postId } = req.params;
+    const userId = req.user.id;
+    logger.info('POST_DELETE_START', { postId, userId });
     try {
-        await servicoPublicacaoFeed.deletarPost(req.params.postId, req.user);
+        await servicoPublicacaoFeed.deletarPost(postId, req.user);
+        logger.info('POST_DELETE_SUCCESS', { postId, userId });
         ServicoHTTPResposta.sucesso(res, null, "Post deletado com sucesso.");
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 403, error);
+        logger.error('POST_DELETE_ERROR', error, { postId, userId });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 403, error.message);
     }
 };
 

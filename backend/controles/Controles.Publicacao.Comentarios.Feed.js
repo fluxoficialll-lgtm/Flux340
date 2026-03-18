@@ -1,45 +1,63 @@
 
 // backend/controles/Controles.Publicacao.Comentarios.Feed.js
+import { createLogger } from '../ServicosBackend/Logger.js';
 import ServicoComentariosFeed from '../ServicosBackend/Servicos.Publicacao.Comentarios.Feed.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
+const logger = createLogger('FeedComments');
+
 const criarComentario = async (req, res) => {
+    const { postId } = req.params;
+    const userId = req.user.id;
+    logger.info('COMMENT_CREATE_START', { postId, userId });
     try {
-        const { postId } = req.params;
-        const comentario = await ServicoComentariosFeed.criarComentario(req.body, postId, req.user.id);
+        const comentario = await ServicoComentariosFeed.criarComentario(req.body, postId, userId);
+        logger.info('COMMENT_CREATE_SUCCESS', { commentId: comentario.id, postId, userId });
         ServicoHTTPResposta.criado(res, comentario);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error);
+        logger.error('COMMENT_CREATE_ERROR', error, { postId, userId, data: req.body });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error.message);
     }
 };
 
 const obterComentariosPorPostId = async (req, res) => {
+    const { postId } = req.params;
+    logger.info('COMMENTS_GET_START', { postId });
     try {
-        const { postId } = req.params;
         const comentarios = await ServicoComentariosFeed.obterComentariosPorPostId(postId, req.query);
+        logger.info('COMMENTS_GET_SUCCESS', { postId, count: comentarios.length });
         ServicoHTTPResposta.sucesso(res, comentarios);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error);
+        logger.error('COMMENTS_GET_ERROR', error, { postId });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error.message);
     }
 };
 
 const atualizarComentario = async (req, res) => {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+    logger.info('COMMENT_UPDATE_START', { commentId, userId });
     try {
-        const { commentId } = req.params;
-        const comentarioAtualizado = await ServicoComentariosFeed.atualizarComentario(commentId, req.body, req.user.id);
+        const comentarioAtualizado = await ServicoComentariosFeed.atualizarComentario(commentId, req.body, userId);
+        logger.info('COMMENT_UPDATE_SUCCESS', { commentId, userId });
         ServicoHTTPResposta.sucesso(res, comentarioAtualizado);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error);
+        logger.error('COMMENT_UPDATE_ERROR', error, { commentId, userId, data: req.body });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error.message);
     }
 };
 
 const deletarComentario = async (req, res) => {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+    logger.info('COMMENT_DELETE_START', { commentId, userId });
     try {
-        const { commentId } = req.params;
-        await ServicoComentariosFeed.deletarComentario(commentId, req.user.id);
+        await ServicoComentariosFeed.deletarComentario(commentId, userId);
+        logger.info('COMMENT_DELETE_SUCCESS', { commentId, userId });
         ServicoHTTPResposta.semConteudo(res);
     } catch (error) {
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error);
+        logger.error('COMMENT_DELETE_ERROR', error, { commentId, userId });
+        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error.message);
     }
 };
 

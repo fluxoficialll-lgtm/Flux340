@@ -1,29 +1,33 @@
+
+import { createLogger } from '../ServicosBackend/Logger.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 import ServicoCriacaoGrupoPrivado from '../ServicosBackend/Servicos.Criacao.Grupo.Privado.js';
 
+const logger = createLogger('PrivateGroup');
+
 class ControleCriacaoGrupoPrivado {
     async handle(req, res) {
-        try {
-            // 1. Extrair dados do request
-            const donoId = req.user.id;
-            const dadosDoRequest = req.body; // { nome, descricao, limiteMembros }
+        const donoId = req.user.id;
+        const dadosDoRequest = req.body; // { nome, descricao, limiteMembros }
 
-            // 2. Montar objeto de dados para o serviço
+        logger.info('GROUP_PRIVATE_CREATE_START', { donoId, nome: dadosDoRequest.nome });
+
+        try {
             const dadosParaServico = {
                 ...dadosDoRequest,
                 donoId: donoId,
             };
 
-            // 3. Chamar o serviço com os dados
             const grupoSalvo = await ServicoCriacaoGrupoPrivado.criar(dadosParaServico);
 
-            // 4. Retornar a resposta formatada pelo serviço
+            logger.info('GROUP_PRIVATE_CREATE_SUCCESS', { groupId: grupoSalvo.id, donoId });
+
             return ServicoHTTPResposta.sucesso(res, grupoSalvo, 201);
 
         } catch (error) {
-            // Captura erros (incluindo validação do modelo via serviço)
-            console.error("Erro no controlador ao criar grupo privado:", error.message);
-            return ServicoHTTPResposta.erro(res, error.message, 400);
+            logger.error('GROUP_PRIVATE_CREATE_ERROR', error, { donoId, data: dadosDoRequest });
+
+            return ServicoHTTPResposta.erro(res, 'Falha ao criar grupo privado.', 400, error.message);
         }
     }
 }

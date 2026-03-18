@@ -1,11 +1,11 @@
-
 import dotenv from 'dotenv';
 dotenv.config();
 
 import fs from 'fs/promises';
 import path from 'path';
 import pool from '../backend/database/pool.js';
-import { backendConfig } from '../backend/config/ambiente.js';
+import pkg from '../backend/config/ambiente.js';
+const { backendConfig } = pkg;
 const { ambiente: ambienteAtual } = backendConfig;
 
 const MIGRATIONS_DIR = path.join(process.cwd(), 'backend', 'database', 'migrations');

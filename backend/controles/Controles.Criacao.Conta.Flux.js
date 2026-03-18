@@ -1,109 +1,39 @@
 
-import servicoCriacaoConta from '../ServicosBackend/Servicos.Criacao.Conta.Flux.js';
-import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken';
-import config from '../config/Variaveis.Backend.js';
-import ServicoLog from '../ServicosBackend/Servico.Logs.Backend.js';
-import ServicoRespostaHTTP from '../ServicosBackend/Servico.HTTP.Resposta.js';
+// backend/controles/Controles.Criacao.Conta.Flux.js
 
-const client = new OAuth2Client(config.googleClientId);
+import { createLogger } from '../../ServicosBackend/Logger.js';
+import ServicoCriacaoConta from '../../ServicosBackend/Servicos.Criacao.Conta.Flux.js';
+// Importando o serviço de resposta!
+import ServicoResposta from '../../ServicosBackend/Servico.HTTP.Resposta.js';
 
-const registerUser = async (req, res) => {
-    const contexto = "Controle.CriacaoConta.registerUser";
-    ServicoLog.info(contexto, "Iniciando registro de usuário", req.body);
+// Criando uma instância do logger com o escopo 'Auth'
+const logger = createLogger('Auth');
 
-    try {
-        const { name, email, password, google_id } = req.body;
+class ControlesCriacaoConta {
+  async criarConta(req, res) {
+    const { email, senha, nome, nomeUsuario } = req.body;
 
-        if (!name || !email) {
-            ServicoLog.warn(contexto, "Tentativa de registro sem nome ou email.");
-            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'Nome e email são obrigatórios.');
-        }
-
-        if (!password && !google_id) {
-            ServicoLog.warn(contexto, "Tentativa de registro sem senha ou ID do Google.");
-            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'É necessário fornecer uma senha ou um ID do Google.');
-        }
-
-        const result = await servicoCriacaoConta.registerUser({ name, email, password, google_id });
-        ServicoLog.info(contexto, "Usuário registrado com sucesso", result);
-        
-        ServicoRespostaHTTP.criado(res, result, 'Usuário criado com sucesso.');
-    } catch (error) {
-        ServicoLog.erro(contexto, 'Erro ao registrar usuário', error);
-        ServicoRespostaHTTP.erro(res, error.message || 'Ocorreu um erro no servidor.', 400, error);
-    }
-};
-
-const loginUser = async (req, res) => {
-    const contexto = "Controle.CriacaoConta.loginUser";
-    ServicoLog.info(contexto, "Iniciando login de usuário", req.body);
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            ServicoLog.warn(contexto, "Tentativa de login sem email ou senha.");
-            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'Email e senha são obrigatórios.');
-        }
-
-        const result = await servicoCriacaoConta.loginUser({ email, password });
-        ServicoLog.info(contexto, "Login bem-sucedido", result);
-
-        ServicoRespostaHTTP.sucesso(res, result, 'Login bem-sucedido.');
-
-    } catch (error) {
-        ServicoLog.erro(contexto, 'Erro ao fazer login', error);
-        ServicoRespostaHTTP.naoAutorizado(res, error.message || 'Credenciais inválidas.');
-    }
-};
-
-const googleAuth = async (req, res) => {
-    const contexto = "Controle.CriacaoConta.googleAuth";
-    ServicoLog.info(contexto, "Iniciando autenticação com Google", req.body.token ? { token: "present" } : { token: "absent" });
+    logger.info('AUTH_CREATE_ACCOUNT_START', { email, nomeUsuario });
 
     try {
-        const { token } = req.body;
-        if (!token) {
-            ServicoLog.warn(contexto, "Token do Google não fornecido.");
-            return ServicoRespostaHTTP.requisicaoMalSucedida(res, 'Token do Google não fornecido.');
-        }
-
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: config.googleClientId,
-        });
-
-        const payload = ticket.getPayload();
-        ServicoLog.debug(contexto, "Payload recebido do Google", payload);
-        const { name, email, sub: google_id } = payload;
-
-        const { user, isNewUser } = await servicoCriacaoConta.findOrCreateUser({
-            name,
-            email,
-            google_id,
-        });
-
-        const jwtToken = jwt.sign({ id: user.id, email: user.email }, config.jwtSecret, { expiresIn: '7d' });
-
-        const response = {
-            message: "Autenticação com Google bem-sucedida!",
-            token: jwtToken, 
-            user, 
-            isNewUser 
-        };
-        ServicoLog.info(contexto, "Autenticação com Google bem-sucedida", { userId: user.id, isNewUser });
-
-        ServicoRespostaHTTP.sucesso(res, response, 'Autenticação com Google bem-sucedida!');
+      const novaConta = await ServicoCriacaoConta.criarConta(email, senha, nome, nomeUsuario);
+      
+      logger.info('AUTH_CREATE_ACCOUNT_SUCCESS', { userId: novaConta.id });
+      
+      // Usando o serviço de resposta para padronizar a resposta de sucesso
+      return ServicoResposta.sucesso(res, novaConta, 201); // 201 = Created
 
     } catch (error) {
-        ServicoLog.erro(contexto, 'Erro na autenticação com Google', error);
-        ServicoRespostaHTTP.naoAutorizado(res, 'Falha na autenticação com o Google.');
+      logger.error('AUTH_CREATE_ACCOUNT_ERROR', error, { email });
+
+      // Usando o serviço de resposta para padronizar as respostas de erro
+      if (error.message === 'Email já em uso') {
+        return ServicoResposta.erro(res, error.message, 409); // 409 = Conflict
+      }
+      
+      return ServicoResposta.erro(res, 'Erro interno do servidor', 500);
     }
-};
+  }
+}
 
-const controleCriacaoConta = {
-    registerUser,
-    loginUser,
-    googleAuth,
-};
-
-export default controleCriacaoConta;
+export default new ControlesCriacaoConta();
