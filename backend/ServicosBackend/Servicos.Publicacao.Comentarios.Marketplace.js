@@ -1,16 +1,40 @@
 
 // backend/ServicosBackend/Servicos.Publicacao.Comentarios.Marketplace.js
-import { RepositorioComentariosMarketplace } from '../Repositorios/Repositorio.Publicacao.Comentarios.Marketplace.js';
+import { criarRepositorioDeComentarios } from '../Repositorios/Repositorio.Estrutura.Comentarios.js';
+import Comentario from '../models/Models.Estrutura.Comentarios.js';
+
+const RepositorioComentariosMarketplace = criarRepositorioDeComentarios('marketplace_comments', 'item_id');
+
+const checkPermissions = (userId, comentarioModel) => {
+    if (!comentarioModel || !comentarioModel.autorId) {
+        throw new Error('Dados do comentário incompletos para verificação de permissão.');
+    }
+    return comentarioModel.autorId === userId;
+};
 
 const criarComentario = async (itemId, userId, content) => {
     if (!content) {
         throw new Error('O conteúdo do comentário é obrigatório.');
     }
-    return await RepositorioComentariosMarketplace.criarComentario(itemId, userId, content);
+
+    const novoComentario = new Comentario({
+        postId: itemId,
+        autorId: userId,
+        conteudo: content
+    });
+
+    const comentarioCriado = await RepositorioComentariosMarketplace.criarComentario(novoComentario.paraBancoDeDados());
+    const comentarioModel = Comentario.deBancoDeDados(comentarioCriado);
+    return comentarioModel.paraRespostaHttp();
 };
 
 const obterComentariosPorItemId = async (itemId) => {
-    return await RepositorioComentariosMarketplace.obterComentariosPorItemId(itemId);
+    const comentariosDoBanco = await RepositorioComentariosMarketplace.buscarComentariosPorParentId(itemId, {});
+
+    return comentariosDoBanco.map(dados => {
+        const comentarioModel = Comentario.deBancoDeDados(dados);
+        return comentarioModel.paraRespostaHttp();
+    });
 };
 
 const atualizarComentario = async (commentId, userId, content) => {
@@ -18,29 +42,35 @@ const atualizarComentario = async (commentId, userId, content) => {
         throw new Error('O conteúdo do comentário é obrigatório para atualização.');
     }
 
-    const comentario = await RepositorioComentariosMarketplace.encontrarComentarioPorId(commentId);
-    if (!comentario) {
+    const dadosComentario = await RepositorioComentariosMarketplace.buscarComentarioPorId(commentId);
+    if (!dadosComentario) {
         throw new Error('Comentário não encontrado.');
     }
 
-    if (comentario.user_id !== userId) {
+    const comentarioModel = Comentario.deBancoDeDados(dadosComentario);
+
+    if (!checkPermissions(userId, comentarioModel)) {
         throw new Error('Acesso negado. Você só pode editar seus próprios comentários.');
     }
 
-    return await RepositorioComentariosMarketplace.atualizarComentario(commentId, userId, content);
+    const comentarioAtualizado = await RepositorioComentariosMarketplace.atualizarComentario(commentId, { content });
+    const modeloAtualizado = Comentario.deBancoDeDados(comentarioAtualizado);
+    return modeloAtualizado.paraRespostaHttp();
 };
 
 const deletarComentario = async (commentId, userId) => {
-    const comentario = await RepositorioComentariosMarketplace.encontrarComentarioPorId(commentId);
-    if (!comentario) {
+    const dadosComentario = await RepositorioComentariosMarketplace.buscarComentarioPorId(commentId);
+    if (!dadosComentario) {
         throw new Error('Comentário não encontrado.');
     }
 
-    if (comentario.user_id !== userId) {
+    const comentarioModel = Comentario.deBancoDeDados(dadosComentario);
+
+    if (!checkPermissions(userId, comentarioModel)) {
         throw new Error('Acesso negado. Você só pode deletar seus próprios comentários.');
     }
 
-    return await RepositorioComentariosMarketplace.deletarComentario(commentId, userId);
+    await RepositorioComentariosMarketplace.deletarComentario(commentId);
 };
 
 export default {

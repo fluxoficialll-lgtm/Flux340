@@ -1,12 +1,15 @@
 
 // backend/ServicosBackend/Servicos.Publicacao.Comentarios.Feed.js
-import RepositorioComentariosFeed from '../Repositorios/Repositorio.Publicacao.Comentarios.Feed.js';
+import { criarRepositorioDeComentarios } from '../Repositorios/Repositorio.Estrutura.Comentarios.js';
+import Comentario from '../models/Models.Estrutura.Comentarios.js';
 
-const checkPermissions = (userId, comment) => {
-    if (!comment || !comment.user_id) {
+const RepositorioComentariosFeed = criarRepositorioDeComentarios('feed_comments', 'post_id');
+
+const checkPermissions = (userId, comentarioModel) => {
+    if (!comentarioModel || !comentarioModel.autorId) {
         throw new Error('Dados do comentário incompletos para verificação de permissão.');
     }
-    return comment.user_id === userId;
+    return comentarioModel.autorId === userId;
 };
 
 const criarComentario = async (commentBody, postId, userId) => {
@@ -15,8 +18,15 @@ const criarComentario = async (commentBody, postId, userId) => {
         throw new Error('O conteúdo do comentário não pode estar vazio.');
     }
 
-    const commentData = { post_id: postId, user_id: userId, content };
-    return RepositorioComentariosFeed.criarComentario(commentData);
+    const novoComentario = new Comentario({
+        postId: postId,
+        autorId: userId,
+        conteudo: content
+    });
+
+    const comentarioCriado = await RepositorioComentariosFeed.criarComentario(novoComentario.paraBancoDeDados());
+    const comentarioModel = Comentario.deBancoDeDados(comentarioCriado);
+    return comentarioModel.paraRespostaHttp();
 };
 
 const obterComentariosPorPostId = async (postId, options) => {
@@ -24,7 +34,12 @@ const obterComentariosPorPostId = async (postId, options) => {
         throw new Error('O ID do post é necessário para buscar os comentários.');
     }
     const queryOptions = { limit: 10, offset: 0, ...options };
-    return RepositorioComentariosFeed.buscarComentariosPorPostId(postId, queryOptions);
+    const comentariosDoBanco = await RepositorioComentariosFeed.buscarComentariosPorParentId(postId, queryOptions);
+    
+    return comentariosDoBanco.map(dados => {
+        const comentarioModel = Comentario.deBancoDeDados(dados);
+        return comentarioModel.paraRespostaHttp();
+    });
 };
 
 const atualizarComentario = async (commentId, updates, userId) => {
@@ -33,25 +48,31 @@ const atualizarComentario = async (commentId, updates, userId) => {
         throw new Error('O conteúdo para atualização não pode ser vazio.');
     }
 
-    const comment = await RepositorioComentariosFeed.buscarComentarioPorId(commentId);
-    if (!comment) {
+    const dadosComentario = await RepositorioComentariosFeed.buscarComentarioPorId(commentId);
+    if (!dadosComentario) {
         throw new Error('Comentário não encontrado.');
     }
 
-    if (!checkPermissions(userId, comment)) {
+    const comentarioModel = Comentario.deBancoDeDados(dadosComentario);
+
+    if (!checkPermissions(userId, comentarioModel)) {
         throw new Error('Você não tem permissão para editar este comentário.');
     }
 
-    return RepositorioComentariosFeed.atualizarComentario(commentId, { content });
+    const comentarioAtualizado = await RepositorioComentariosFeed.atualizarComentario(commentId, { content });
+    const modeloAtualizado = Comentario.deBancoDeDados(comentarioAtualizado);
+    return modeloAtualizado.paraRespostaHttp();
 };
 
 const deletarComentario = async (commentId, userId) => {
-    const comment = await RepositorioComentariosFeed.buscarComentarioPorId(commentId);
-    if (!comment) {
+    const dadosComentario = await RepositorioComentariosFeed.buscarComentarioPorId(commentId);
+    if (!dadosComentario) {
         throw new Error('Comentário não encontrado.');
     }
+    
+    const comentarioModel = Comentario.deBancoDeDados(dadosComentario);
 
-    if (!checkPermissions(userId, comment)) {
+    if (!checkPermissions(userId, comentarioModel)) {
         throw new Error('Você não tem permissão para deletar este comentário.');
     }
 
