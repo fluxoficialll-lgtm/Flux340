@@ -28,6 +28,7 @@ import rotasConversas from './Rotas.Conversas.js';
 import rotasCriacaoGrupoPublico from './Rotas.Criacao.Grupo.Publico.js';
 import rotasCriacaoGrupoPrivado from './Rotas.Criacao.Grupo.Privado.js';
 import rotasCriacaoGrupoPago from './Rotas.Criacao.Grupo.Pago.js';
+import rotasGruposConfiguracoes from './Rotas.Grupos.Configuracoes.js';
 
 // --- Rotas de Pagamento (Legado ou Futuro) ---
 import rotasSyncPay from './Rotas.Provedor.SyncPay.js';
@@ -67,6 +68,7 @@ router.use('/conversas', rotasConversas);
 router.use('/groups/public', rotasCriacaoGrupoPublico);
 router.use('/groups/private', rotasCriacaoGrupoPrivado);
 router.use('/groups/paid', rotasCriacaoGrupoPago);
+router.use('/groups', rotasGruposConfiguracoes);
 router.use('/syncpay', rotasSyncPay);
 router.use('/paypal', rotasPayPal);
 router.use('/stripe', rotasStripe);
