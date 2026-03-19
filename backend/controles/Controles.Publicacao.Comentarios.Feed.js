@@ -3,20 +3,43 @@
 import { createLogger } from '../ServicosBackend/Logger.js';
 import ServicoComentariosFeed from '../ServicosBackend/Servicos.Publicacao.Comentarios.Feed.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
+import { validarCriacaoComentario } from '../validators/Validator.Estrutura.Comentario.js';
 
 const logger = createLogger('FeedComments');
 
 const criarComentario = async (req, res) => {
     const { postId } = req.params;
     const userId = req.user.id;
-    logger.info('COMMENT_CREATE_START', { postId, userId });
+    logger.info('COMMENT_CREATE_START', { postId, userId, body: req.body });
     try {
-        const comentario = await ServicoComentariosFeed.criarComentario(req.body, postId, userId);
+        // 1. Validar a entrada
+        const dadosParaValidar = { 
+            ...req.body, 
+            autorId: userId, 
+            parenteId: postId
+        };
+        const dadosValidados = validarCriacaoComentario(dadosParaValidar);
+
+        // 2. Chamar o serviço com os dados validados
+        const comentario = await ServicoComentariosFeed.criarComentario(
+            { texto: dadosValidados.texto },
+            postId,
+            userId
+        );
+
         logger.info('COMMENT_CREATE_SUCCESS', { commentId: comentario.id, postId, userId });
+        
+        // 3. Enviar a resposta
         ServicoHTTPResposta.criado(res, comentario);
+
     } catch (error) {
-        logger.error('COMMENT_CREATE_ERROR', error, { postId, userId, data: req.body });
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error.message);
+        logger.error('COMMENT_CREATE_ERROR', { 
+            errorMessage: error.message,
+            postId, 
+            userId, 
+            data: req.body 
+        });
+        ServicoHTTPResposta.erro(res, error.message, 400);
     }
 };
 

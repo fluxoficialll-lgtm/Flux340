@@ -2,26 +2,47 @@
 import { createLogger } from '../ServicosBackend/Logger.js';
 import ServicoComentariosMarketplace from '../ServicosBackend/Servicos.Publicacao.Comentarios.Marketplace.js';
 import ServicoRespostaHTTP from '../ServicosBackend/Servico.HTTP.Resposta.js';
+import { validarCriacaoComentario } from '../validators/Validator.Estrutura.Comentario.js';
 
 const logger = createLogger('MarketplaceComments');
 
 const criarComentario = async (req, res) => {
     const { itemId } = req.params;
     const userId = req.user.id;
-    const { content } = req.body;
 
-    logger.info('COMMENT_MARKETPLACE_CREATE_START', { itemId, userId });
+    logger.info('COMMENT_MARKETPLACE_CREATE_START', { itemId, userId, body: req.body });
 
     try {
-        const novoComentario = await ServicoComentariosMarketplace.criarComentario(itemId, userId, content);
+        // 1. Validar a entrada
+        const dadosParaValidar = { 
+            texto: req.body.content, // Mapeando 'content' para 'texto'
+            autorId: userId, 
+            parenteId: itemId 
+        };
+        const dadosValidados = validarCriacaoComentario(dadosParaValidar);
+
+        // 2. Chamar o serviço com o texto validado
+        // Assinatura do serviço: (idDoItem, idDoUsuario, textoDoComentario)
+        const novoComentario = await ServicoComentariosMarketplace.criarComentario(
+            itemId, 
+            userId, 
+            dadosValidados.texto
+        );
         
         logger.info('COMMENT_MARKETPLACE_CREATE_SUCCESS', { commentId: novoComentario.id, itemId, userId });
         
+        // 3. Enviar a resposta
         return ServicoRespostaHTTP.criado(res, novoComentario, "Comentário criado com sucesso");
-    } catch (error) {
-        logger.error('COMMENT_MARKETPLACE_CREATE_ERROR', error, { itemId, userId });
 
-        return ServicoRespostaHTTP.erro(res, 'Falha ao criar comentário.', 500, error.message);
+    } catch (error) {
+        logger.error('COMMENT_MARKETPLACE_CREATE_ERROR', { 
+            errorMessage: error.message,
+            itemId, 
+            userId,
+            data: req.body
+        });
+
+        return ServicoRespostaHTTP.erro(res, error.message, 400);
     }
 };
 

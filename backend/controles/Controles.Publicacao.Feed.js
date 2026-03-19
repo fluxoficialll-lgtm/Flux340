@@ -4,20 +4,35 @@
 import { createLogger } from '../ServicosBackend/Logger.js';
 import servicoPublicacaoFeed from '../ServicosBackend/Servicos.Publicacao.Feed.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
+import { validarPublicacaoFeed } from '../validators/Validator.Estrutura.Publicacao.Feed.js';
 
 const logger = createLogger('Feed');
 
 const criarPost = async (req, res) => {
     const userId = req.user.id;
-    logger.info('POST_CREATE_START', { userId });
+    logger.info('POST_CREATE_START', { userId, body: req.body });
     try {
-        const postData = { ...req.body };
-        const post = await servicoPublicacaoFeed.criarPost(postData, req.user);
+        // 1. Validar a entrada
+        const dadosParaValidar = { ...req.body, autorId: userId };
+        const dadosValidados = validarPublicacaoFeed(dadosParaValidar);
+
+        // 2. Chamar o serviço com os dados limpos e validados
+        const post = await servicoPublicacaoFeed.criarPost(dadosValidados, req.user);
+        
         logger.info('POST_CREATE_SUCCESS', { postId: post.id, userId });
+        
+        // 3. Enviar a resposta
         ServicoHTTPResposta.criado(res, post);
+
     } catch (error) {
-        logger.error('POST_CREATE_ERROR', error, { userId, data: req.body });
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 400, error.message);
+        // Captura tanto erros de validação quanto de serviço
+        logger.error('POST_CREATE_ERROR', { 
+            errorMessage: error.message,
+            userId, 
+            data: req.body 
+        });
+        // O erro de validação (com sua mensagem clara) é retornado aqui
+        ServicoHTTPResposta.erro(res, error.message, 400); 
     }
 };
 

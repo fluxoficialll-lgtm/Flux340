@@ -3,19 +3,33 @@
 import { createLogger } from '../ServicosBackend/Logger.js';
 import ServicoReels from '../ServicosBackend/Servicos.Publicacao.Reels.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
+import { validarPublicacaoReels } from '../validators/Validator.Estrutura.Publicacao.Reels.js';
 
 const logger = createLogger('Reels');
 
 const createReel = async (req, res) => {
     const userId = req.user.id;
-    logger.info('REEL_CREATE_START', { userId });
+    logger.info('REEL_CREATE_START', { userId, body: req.body });
     try {
-        const reel = await ServicoReels.createReel(req.body, userId);
+        // 1. Validar a entrada
+        const dadosParaValidar = { ...req.body, autorId: userId };
+        const dadosValidados = validarPublicacaoReels(dadosParaValidar);
+
+        // 2. Chamar o serviço com os dados validados
+        const reel = await ServicoReels.createReel(dadosValidados, req.user);
+        
         logger.info('REEL_CREATE_SUCCESS', { reelId: reel.id, userId });
+        
+        // 3. Enviar a resposta
         ServicoHTTPResposta.criado(res, reel);
+
     } catch (error) {
-        logger.error('REEL_CREATE_ERROR', error, { userId, data: req.body });
-        ServicoHTTPResposta.erro(res, error.message, 400, error.message);
+        logger.error('REEL_CREATE_ERROR', { 
+            errorMessage: error.message, 
+            userId, 
+            data: req.body 
+        });
+        ServicoHTTPResposta.erro(res, error.message, 400);
     }
 };
 

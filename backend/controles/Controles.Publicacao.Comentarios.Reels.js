@@ -2,20 +2,44 @@
 import { createLogger } from '../ServicosBackend/Logger.js';
 import ServicoComentariosReels from '../ServicosBackend/Servicos.Publicacao.Comentarios.Reels.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
+import { validarCriacaoComentario } from '../validators/Validator.Estrutura.Comentario.js';
 
 const logger = createLogger('ReelsComments');
 
 const createComment = async (req, res) => {
     const { reelId } = req.params;
     const userId = req.user.id;
-    logger.info('REEL_COMMENT_CREATE_START', { reelId, userId });
+    logger.info('REEL_COMMENT_CREATE_START', { reelId, userId, body: req.body });
     try {
-        const comment = await ServicoComentariosReels.createComment(req.body, reelId, userId);
+        // 1. Validar a entrada usando o validador genérico
+        const dadosParaValidar = { 
+            ...req.body, 
+            autorId: userId, 
+            parenteId: reelId 
+        };
+        const dadosValidados = validarCriacaoComentario(dadosParaValidar);
+
+        // 2. Chamar o serviço com os dados validados
+        // A assinatura do serviço parece ser: (dadosComentario, idDoReel, idDoUsuario)
+        const comment = await ServicoComentariosReels.createComment(
+            { texto: dadosValidados.texto }, 
+            reelId, 
+            userId
+        );
+        
         logger.info('REEL_COMMENT_CREATE_SUCCESS', { commentId: comment.id, reelId, userId });
+        
+        // 3. Enviar a resposta
         ServicoHTTPResposta.criado(res, comment);
+
     } catch (error) {
-        logger.error('REEL_COMMENT_CREATE_ERROR', error, { reelId, userId, data: req.body });
-        ServicoHTTPResposta.erro(res, error.message, error.statusCode || 500, error.message);
+        logger.error('REEL_COMMENT_CREATE_ERROR', { 
+            errorMessage: error.message,
+            reelId, 
+            userId, 
+            data: req.body 
+        });
+        ServicoHTTPResposta.erro(res, error.message, 400);
     }
 };
 

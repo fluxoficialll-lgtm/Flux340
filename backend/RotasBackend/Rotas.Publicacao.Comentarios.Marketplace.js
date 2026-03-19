@@ -1,6 +1,6 @@
 
 import express from 'express';
-import comentariosMarketplaceControle from '../controles/Controle.Publicacao.Comentarios.Marketplace.js';
+import comentariosMarketplaceControle from '../controles/Controles.Publicacao.Comentarios.Marketplace.js';
 import authMiddleware from '../config/Middleware.Autenticacao.JWT.js'; // Caminho corrigido
 
 const router = express.Router();

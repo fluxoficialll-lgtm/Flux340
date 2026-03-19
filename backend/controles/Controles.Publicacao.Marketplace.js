@@ -3,19 +3,33 @@
 import { createLogger } from '../ServicosBackend/Logger.js';
 import ServicoMarketplace from '../ServicosBackend/Servicos.Publicacao.Marketplace.js';
 import ServicoHTTPResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
+import { validarItemMarketplace } from '../validators/Validator.Estrutura.Publicacao.Marketplace.js';
 
 const logger = createLogger('Marketplace');
 
 const criarItem = async (req, res) => {
     const userId = req.user.id;
-    logger.info('ITEM_CREATE_START', { userId });
+    logger.info('ITEM_CREATE_START', { userId, body: req.body });
     try {
-        const item = await ServicoMarketplace.criarItem(req.body, userId);
+        // 1. Validar a entrada
+        const dadosParaValidar = { ...req.body, autorId: userId };
+        const dadosValidados = validarItemMarketplace(dadosParaValidar);
+
+        // 2. Chamar o serviço com os dados validados
+        const item = await ServicoMarketplace.criarItem(dadosValidados, req.user);
+
         logger.info('ITEM_CREATE_SUCCESS', { itemId: item.id, userId });
+        
+        // 3. Enviar a resposta
         ServicoHTTPResposta.criado(res, item);
+
     } catch (error) {
-        logger.error('ITEM_CREATE_ERROR', error, { userId, data: req.body });
-        ServicoHTTPResposta.erro(res, error.message, 400, error.message);
+        logger.error('ITEM_CREATE_ERROR', { 
+            errorMessage: error.message,
+            userId, 
+            data: req.body 
+        });
+        ServicoHTTPResposta.erro(res, error.message, 400);
     }
 };
 

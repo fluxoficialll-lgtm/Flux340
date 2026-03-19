@@ -1,8 +1,8 @@
 
 import express from 'express';
 import marketplaceControle from '../controles/Controles.Publicacao.Marketplace.js';
-// O caminho da importação foi corrigido para usar o nome do arquivo existente (singular)
-import comentariosMarketplaceControle from '../controles/Controle.Publicacao.Comentarios.Marketplace.js';
+// A importação foi corrigida para usar o nome do arquivo no plural.
+import comentariosMarketplaceControle from '../controles/Controles.Publicacao.Comentarios.Marketplace.js';
 import authMiddleware from '../config/Middleware.Autenticacao.JWT.js';
 
 const router = express.Router();
