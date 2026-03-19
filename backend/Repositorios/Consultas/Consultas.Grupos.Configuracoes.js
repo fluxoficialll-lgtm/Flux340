@@ -21,6 +21,10 @@ export const ConsultasGruposConfiguracoes = {
         SELECT * FROM grupos_configuracoes WHERE id_grupo = ?;
     `,
 
-    // -- Outras queries podem ser adicionadas aqui --
-    // Ex: ATUALIZAR_DIRETRIZES, OBTER_ESTATISTICAS, etc.
+    /**
+     * Query para buscar as diretrizes de um grupo pelo seu ID.
+     */
+    OBTER_DIRETRIZES_POR_ID: `
+        SELECT diretrizes FROM grupos_configuracoes WHERE id_grupo = ?;
+    `,
 };

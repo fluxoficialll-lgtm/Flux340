@@ -37,7 +37,21 @@ class RepositorioGruposConfiguracoes {
         }
     }
     
-    // ...
+    /**
+     * Busca as diretrizes de um grupo no banco de dados.
+     * @param {string} idGrupo - O ID do grupo.
+     */
+    async obterDiretrizes(idGrupo) {
+        const query = ConsultasGruposConfiguracoes.OBTER_DIRETRIZES_POR_ID;
+        
+        try {
+            const [rows] = await pool.query(query, [idGrupo]);
+            return rows[0]; 
+        } catch (error) {
+            console.error('DB_GET_GUIDELINES_ERROR', error);
+            throw error;
+        }
+    }
 }
 
 export default new RepositorioGruposConfiguracoes();

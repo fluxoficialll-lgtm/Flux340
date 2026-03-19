@@ -51,6 +51,21 @@ class GruposConfiguracoesControle {
         }
     }
 
+    async obterDiretrizes(req, res) {
+        const { groupId } = req.params;
+        try {
+            logger.info(`Obtendo diretrizes para o grupo ${groupId}`);
+            const resultado = await ServicoGruposConfig.obterDiretrizes(groupId);
+            if(!resultado) {
+                return ServicoHTTPResposta.naoEncontrado(res, "Diretrizes do grupo não encontradas");
+            }
+            return ServicoHTTPResposta.sucesso(res, resultado);
+        } catch (error) {
+            logger.error('GROUP_GUIDELINES_GET_ERROR', error, { groupId });
+            return ServicoHTTPResposta.erro(res, 'Falha ao obter diretrizes do grupo.', 500, error.message);
+        }
+    }
+
 }
 
 export default new GruposConfiguracoesControle();

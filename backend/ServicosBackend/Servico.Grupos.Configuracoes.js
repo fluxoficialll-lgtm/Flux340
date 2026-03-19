@@ -44,7 +44,20 @@ class ServicoGruposConfiguracoes {
         }
     }
 
-    // ... (outros métodos como obterEstatisticas, atualizarDiretrizes, etc. podem ser atualizados da mesma forma)
+    /**
+     * Obtém as diretrizes de um grupo.
+     */
+    async obterDiretrizes(idGrupo) {
+        try {
+            const dados = await Repositorio.obterDiretrizes(idGrupo);
+            if (!dados) {
+                return null;
+            }
+            return dados;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default new ServicoGruposConfiguracoes();
