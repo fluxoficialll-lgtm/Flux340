@@ -36,7 +36,20 @@ class GruposConfiguracoesControle {
         }
     }
     
-    // ... (outros métodos permanecem, mas precisarão ser implementados no serviço)
+    async obterEstatisticas(req, res) {
+        const { groupId } = req.params;
+        try {
+            logger.info(`Obtendo estatísticas para o grupo ${groupId}`);
+            // No momento, estamos retornando um objeto vazio. A lógica para buscar
+            // as estatísticas reais do grupo será implementada futuramente no
+            // 'ServicoGruposConfig.obterEstatisticas'.
+            const resultado = {}; // Simulação de resultado
+            return ServicoHTTPResposta.sucesso(res, resultado);
+        } catch (error) {
+            logger.error('GROUP_STATS_GET_ERROR', error, { groupId });
+            return ServicoHTTPResposta.erro(res, 'Falha ao obter estatísticas do grupo.', 500, error.message);
+        }
+    }
 
 }
 
