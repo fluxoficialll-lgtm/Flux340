@@ -17,6 +17,10 @@ class Usuario {
         this.privado = data.privado || false;
         this.perfilCompleto = data.perfilCompleto || false;
         
+        // Novas propriedades para seguidores e seguindo
+        this.seguidores = data.seguidores || [];
+        this.seguindo = data.seguindo || [];
+
         this.dataCriacao = data.dataCriacao;
         this.dataAtualizacao = data.dataAtualizacao;
     }
@@ -66,6 +70,9 @@ class Usuario {
             perfilCompleto: dbData.profile_completed,
             dataCriacao: dbData.created_at,
             dataAtualizacao: dbData.updated_at,
+            // Assumindo que a camada de serviço/repositório irá popular isso
+            seguidores: dbData.seguidores || [],
+            seguindo: dbData.seguindo || [],
         });
     }
 
@@ -80,6 +87,11 @@ class Usuario {
             urlFoto: this.urlFoto,
             privado: this.privado,
             perfilCompleto: this.perfilCompleto,
+            // Adicionando contagens e listas à resposta
+            contagemSeguidores: this.seguidores.length,
+            contagemSeguindo: this.seguindo.length,
+            seguidores: this.seguidores,
+            seguindo: this.seguindo,
             dataCriacao: this.dataCriacao,
             dataAtualizacao: this.dataAtualizacao,
         };

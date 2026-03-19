@@ -8,6 +8,8 @@ export interface Usuario {
   urlFoto: string;
   privado: boolean;
   perfilCompleto: boolean;
+  seguidores: string[];
+  seguindo: string[];
   dataCriacao: Date;
   dataAtualizacao: Date;
 }

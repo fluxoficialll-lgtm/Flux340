@@ -1,7 +1,7 @@
 
 import { AxiosResponse } from 'axios';
 import ClienteBackend from '../Cliente.Backend';
-import { LoginDto } from '../../../types/Entrada/Dto.Estrutura.Conta.Flux';
+import { LoginDto } from '../../types/Entrada/Dto.Estrutura.Usuario';
 
 const API_Servico_Metodo_Email_Senha = {
     /**

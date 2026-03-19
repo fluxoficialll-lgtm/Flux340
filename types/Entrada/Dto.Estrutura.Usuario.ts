@@ -9,6 +9,11 @@ export interface LoginUsuarioDTO {
   senha: string;
 }
 
+export interface LoginGoogleDTO {
+  token: string;
+  referredBy?: string;
+}
+
 export interface AuthGoogleUsuarioDTO {
   nome: string;
   email: string;
