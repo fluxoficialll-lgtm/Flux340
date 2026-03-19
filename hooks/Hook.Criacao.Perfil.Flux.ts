@@ -2,25 +2,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { DadosEntradaRegistro, ErrosRegistro } from '../tipos';
+import { CriacaoContaDto } from '../types/Entrada/Dto.Estrutura.Conta.Flux';
 
 export const useHookCriacaoPerfilFlux = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [dados, setDados] = useState<DadosEntradaRegistro>({
+    const [dados, setDados] = useState<CriacaoContaDto>({
+        nome: '',
         email: '',
         senha: '',
-        confirmacaoSenha: '',
-        termosAceitos: false,
-        indicadoPor: undefined,
     });
 
-    const [errors, setErrors] = useState<ErrosRegistro>({});
+    const [errors, setErrors] = useState<Partial<Record<keyof CriacaoContaDto, string>>>({});
     const [loading, setLoading] = useState(false);
     const [isValid, setIsValid] = useState(false);
 
-    const updateField = (key: keyof DadosEntradaRegistro, value: string | boolean) => {
+    const updateField = (key: keyof CriacaoContaDto, value: string) => {
         setDados((prev) => ({ ...prev, [key]: value }));
     };
 
@@ -28,12 +26,12 @@ export const useHookCriacaoPerfilFlux = () => {
         const params = new URLSearchParams(location.search);
         const ref = params.get('ref');
         if (ref) {
-            updateField('indicadoPor', ref);
+            // Você pode querer adicionar um campo para o código de referência no DTO se for necessário
         }
     }, [location]);
 
     useEffect(() => {
-        const newErrors: ErrosRegistro = {};
+        const newErrors: Partial<Record<keyof CriacaoContaDto, string>> = {};
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
         if (dados.email && !emailRegex.test(dados.email)) {
@@ -44,13 +42,13 @@ export const useHookCriacaoPerfilFlux = () => {
             newErrors.senha = "A senha deve ter pelo menos 6 caracteres.";
         }
 
-        if (dados.confirmacaoSenha && dados.senha !== dados.confirmacaoSenha) {
-            newErrors.confirmacao = "As senhas não correspondem.";
+        if (dados.nome && dados.nome.length < 3) {
+            newErrors.nome = "O nome deve ter pelo menos 3 caracteres.";
         }
 
         setErrors(newErrors);
 
-        const allFilled = dados.email && dados.senha && dados.confirmacaoSenha && dados.termosAceitos;
+        const allFilled = dados.email && dados.senha && dados.nome;
         setIsValid(!!allFilled && Object.keys(newErrors).length === 0);
 
     }, [dados]);
@@ -63,12 +61,7 @@ export const useHookCriacaoPerfilFlux = () => {
         setErrors({});
 
         try {
-            await authService.register(
-                dados.email,
-                dados.senha,
-                undefined, // O nome de usuário não é coletado neste formulário
-                dados.indicadoPor
-            );
+            await authService.register(dados);
             
             navigate('/verify-email');
 

@@ -4,6 +4,8 @@ import { ServicoAutenticacaoMock } from '../ServiçoDeSimulação/simulacoes/Sim
 import { metodoGoogle } from './Servico.Metodo.Google';
 import { metodoEmailSenha } from './Servico.Metodo.Email.Senha';
 import authApi from '../APIs/authApi';
+import { CriacaoContaDto, LoginDto } from '../../../types/Entrada/Dto.Estrutura.Conta.Flux';
+import { PerfilDto } from '../../../types/Entrada/Dto.Estrutura.Perfil.Flux';
 
 // --- Interfaces ---
 interface User {
@@ -28,21 +30,12 @@ interface SessionData {
   user: User;
 }
 
-interface ProfileData {
-  name: string;
-  nickname: string;
-  bio: string;
-  website: string;
-  isPrivate: boolean;
-  photoUrl?: string;
-}
-
 interface IAuthService {
-  login(email?: string, password?: string): Promise<SessionData>;
+  login(dadosLogin: LoginDto): Promise<SessionData>;
   loginWithGoogle(credential: string, referredBy?: string): Promise<SessionData>;
   logout(): void;
-  register(email?: string, password?: string, username?: string, referredBy?: string): Promise<SessionData>;
-  updateProfile(profileData: Partial<ProfileData>): Promise<{ user: User }>;
+  register(dadosConta: CriacaoContaDto): Promise<SessionData>;
+  updateProfile(profileData: Partial<PerfilDto>): Promise<{ user: User }>;
   getToken(): string | null;
   isAuthenticated(): boolean;
   getCurrentUser(): User | null;
@@ -62,9 +55,9 @@ const salvarSessao = (dados: SessionData) => {
 
 // --- Real API-based Service ---
 const realAuthService: IAuthService = {
-    async login(email, password) {
+    async login(dadosLogin) {
         try {
-            const data = await metodoEmailSenha.login(email!, password!);
+            const data = await metodoEmailSenha.login(dadosLogin);
             salvarSessao(data);
             return data;
         } catch (error: any) {
@@ -90,9 +83,9 @@ const realAuthService: IAuthService = {
         window.dispatchEvent(new Event('authChange'));
     },
 
-    async register(email, password, username, referredBy) {
+    async register(dadosConta) {
         try {
-            const response = await authApi.register(email!, password!, username!, referredBy);
+            const response = await authApi.register(dadosConta);
             salvarSessao(response.data);
             return response.data;
         } catch (error: any) {
@@ -142,9 +135,9 @@ const realAuthService: IAuthService = {
 const simulationServiceWrapper: IAuthService = {
     ...realAuthService,
 
-    async login(email, password) {
+    async login(dadosLogin) {
         console.log('[SIMULAÇÃO] ✅ Login solicitado.');
-        const user = ServicoAutenticacaoMock.login(email!, password!);
+        const user = ServicoAutenticacaoMock.login(dadosLogin.email, dadosLogin.senha);
         const sessionData: SessionData = {
             token: 'jwt-token-simulado-qualquer-credencial-12345',
             user: user
@@ -168,14 +161,14 @@ const simulationServiceWrapper: IAuthService = {
         return isAuth;
     },
 
-    async register(email, password, username) {
-        console.log('[SIMULAÇÃO] ✅ Registrando novo usuário:', { email, username });
+    async register(dadosConta) {
+        console.log('[SIMULAÇÃO] ✅ Registrando novo usuário:', { email: dadosConta.email, username: dadosConta.nome });
         const user: User = {
             id: `simulated-${Date.now()}`,
-            email: email!,
-            name: username!,
-            username: username!,
-            nickname: username!,
+            email: dadosConta.email,
+            name: dadosConta.nome,
+            username: dadosConta.nome,
+            nickname: dadosConta.nome,
             avatar: 'https://i.pravatar.cc/150?u=simulated-new',
             bio: 'Novo usuário simulado.',
             website: '',
@@ -206,7 +199,7 @@ const simulationServiceWrapper: IAuthService = {
 
     async loginWithGoogle() {
         console.log('[SIMULAÇÃO] ✅ Login com Google solicitado.');
-        return simulationServiceWrapper.login('google.user@example.com', 'simulated_password');
+        return simulationServiceWrapper.login({email: 'google.user@example.com', senha: 'simulated_password'});
     },
 };
 

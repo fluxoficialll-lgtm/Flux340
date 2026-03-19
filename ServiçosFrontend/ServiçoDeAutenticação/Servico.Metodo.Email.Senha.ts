@@ -1,5 +1,6 @@
 
 import API_Servico_Metodo_Email_Senha from '../APIs/API.Servico.Metodo.Email.Senha';
+import { LoginDto } from '../../../types/Entrada/Dto.Estrutura.Conta.Flux';
 
 // Supondo que você tenha interfaces definidas em algum lugar, como em @/types
 interface User {
@@ -15,13 +16,13 @@ interface LoginResponse {
 export const metodoEmailSenha = {
     /**
      * Intermedia a chamada de login com email e senha para a camada de API.
-     * @param email - O email do usuário.
-     * @param password - A senha do usuário.
+     * @param dadosLogin - Objeto contendo o email e a senha do usuário.
      * @returns Retorna os dados da resposta da API.
      */
-    async login(email: string, password: string): Promise<LoginResponse> {
+    async login(dadosLogin: LoginDto): Promise<LoginResponse> {
         try {
-            const { data } = await API_Servico_Metodo_Email_Senha.login(email, password);
+            // A camada de API agora espera o objeto DTO diretamente
+            const { data } = await API_Servico_Metodo_Email_Senha.login(dadosLogin);
             return data;
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || 'Falha no login. Verifique suas credenciais.';

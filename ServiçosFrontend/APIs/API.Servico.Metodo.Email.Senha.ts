@@ -1,16 +1,16 @@
 
 import { AxiosResponse } from 'axios';
-import ClienteBackend from '../Cliente.Backend'; 
+import ClienteBackend from '../Cliente.Backend';
+import { LoginDto } from '../../../types/Entrada/Dto.Estrutura.Conta.Flux';
 
 const API_Servico_Metodo_Email_Senha = {
     /**
      * Envia as credenciais para o backend para autenticação.
-     * @param {string} email - O email do usuário.
-     * @param {string} password - A senha do usuário.
+     * @param {LoginDto} dadosLogin - Objeto contendo o email e a senha do usuário.
      * @returns {Promise<AxiosResponse<any>>} A promessa da resposta do Axios.
      */
-    login(email: string, password: string): Promise<AxiosResponse<any>> {
-        return ClienteBackend.post('/auth/login', { email, password });
+    login(dadosLogin: LoginDto): Promise<AxiosResponse<any>> {
+        return ClienteBackend.post('/auth/login', dadosLogin);
     },
 };
 

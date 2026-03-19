@@ -1,31 +1,24 @@
 
 import { AxiosResponse } from 'axios';
 import ClienteBackend from '../Cliente.Backend';
-
-interface ProfileData {
-    name?: string;
-    nickname?: string;
-    bio?: string;
-    website?: string;
-    isPrivate?: boolean;
-    photoUrl?: string;
-}
+import { CriacaoContaDto } from '../../../types/Entrada/Dto.Estrutura.Conta.Flux';
+import { PerfilDto } from '../../../types/Entrada/Dto.Estrutura.Perfil.Flux';
 
 const authApi = {
     login(email: string, password: string): Promise<AxiosResponse<any>> {
         return ClienteBackend.post('/auth/login', { email, password });
     },
 
-    register(username: string, email: string, password: string): Promise<AxiosResponse<any>> {
-        return ClienteBackend.post('/auth/register', { username, email, password });
+    register(dadosConta: CriacaoContaDto): Promise<AxiosResponse<any>> {
+        return ClienteBackend.post('/auth/register', dadosConta);
     },
 
     validateToken(): Promise<AxiosResponse<any>> {
         return ClienteBackend.post('/auth/validate-token');
     },
 
-    updateProfile(profileData: Partial<ProfileData>): Promise<AxiosResponse<any>> {
-        return ClienteBackend.put('/user/profile', profileData);
+    updateProfile(dadosPerfil: Partial<PerfilDto>): Promise<AxiosResponse<any>> {
+        return ClienteBackend.put('/user/profile', dadosPerfil);
     },
 };
 

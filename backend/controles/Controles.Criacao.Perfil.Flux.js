@@ -2,6 +2,7 @@
 import { createLogger } from '../ServicosBackend/Logger.js';
 import servicoCriacaoPerfil from '../ServicosBackend/Servicos.Criacao.Perfil.Flux.js';
 import ServicoRespostaHTTP from '../ServicosBackend/Servico.HTTP.Resposta.js';
+import { validarPerfil } from '../validators/Validator.Estrutura.Perfil.Flux.js';
 
 const logger = createLogger('Profile');
 
@@ -43,6 +44,11 @@ const buscarPerfilPublico = async (req, res) => {
 
 const atualizarPerfil = async (req, res) => {
     const userId = req.user.id;
+    const { error } = validarPerfil(req.body);
+    if (error) {
+        return ServicoRespostaHTTP.requisiçãoInválida(res, error.details[0].message);
+    }
+
     logger.info('PROFILE_UPDATE_START', { userId });
 
     try {

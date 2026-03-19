@@ -1,0 +1,108 @@
+
+// backend/ServicosBackend/Servico.Usuario.js
+
+import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
+import ServicoLog from './Servico.Logs.Backend.js';
+import Usuario from '../models/Models.Estrutura.Usuario.js';
+import repositorioUsuario from '../Repositorios/Repositorio.Usuario.js';
+import validadorUsuario from '../validators/Validator.Estrutura.Usuario.js';
+
+const contextoBase = "Servico.Usuario";
+
+/**
+ * Registra um novo usuário no sistema.
+ */
+const registrarNovoUsuario = async (dadosUsuario) => {
+    const contexto = `${contextoBase}.registrarNovoUsuario`;
+    
+    const { nome, email, senha } = validadorUsuario.validarRegistro(dadosUsuario);
+    ServicoLog.info(contexto, `Iniciando registro para ${email}`);
+
+    const usuarioExistente = await repositorioUsuario.encontrarPorEmail(email);
+    if (usuarioExistente) {
+        throw new Error('Este e-mail já está em uso.');
+    }
+
+    const novoUsuario = new Usuario({
+        id: uuidv4(),
+        nome,
+        email,
+        senha,
+        apelido: email.split('@')[0],
+    });
+
+    await novoUsuario.criptografarSenha();
+
+    const usuarioDb = await repositorioUsuario.criar(novoUsuario.paraBancoDeDados());
+    ServicoLog.info(contexto, `Usuário ${email} registrado com sucesso.`, { userId: usuarioDb.id });
+
+    return Usuario.deBancoDeDados(usuarioDb);
+};
+
+/**
+ * Autentica um usuário com base em e-mail e senha.
+ */
+const autenticarUsuarioPorCredenciais = async (credenciais) => {
+    const contexto = `${contextoBase}.autenticarUsuarioPorCredenciais`;
+    
+    const { email, senha } = validadorUsuario.validarLogin(credenciais);
+    ServicoLog.info(contexto, `Tentativa de autenticação para ${email}`);
+
+    const usuarioDb = await repositorioUsuario.encontrarPorEmail(email);
+    if (!usuarioDb || !usuarioDb.password_hash) {
+        throw new Error('Credenciais inválidas.');
+    }
+
+    const senhaValida = await bcrypt.compare(senha, usuarioDb.password_hash);
+    if (!senhaValida) {
+        throw new Error('Credenciais inválidas.');
+    }
+
+    ServicoLog.info(contexto, `Autenticação bem-sucedida para ${email}.`);
+    return Usuario.deBancoDeDados(usuarioDb);
+};
+
+/**
+ * Encontra um usuário existente ou cria um novo com base no perfil do Google.
+ */
+const autenticarOuCriarPorGoogle = async (dadosGoogle) => {
+    const contexto = `${contextoBase}.autenticarOuCriarPorGoogle`;
+    
+    const { nome, email, google_id } = validadorUsuario.validarGoogleAuth(dadosGoogle);
+    ServicoLog.info(contexto, `Autenticação Google para ${email}`);
+
+    let usuarioDb = await repositorioUsuario.encontrarPorGoogleId(google_id);
+    let isNewUser = false;
+
+    if (!usuarioDb) {
+        const usuarioExistente = await repositorioUsuario.encontrarPorEmail(email);
+        if (usuarioExistente) {
+            throw new Error("Este e-mail já está cadastrado. Faça login com sua senha.");
+        }
+
+        isNewUser = true;
+        const novoUsuario = new Usuario({
+            id: uuidv4(),
+            nome,
+            email,
+            google_id,
+            apelido: email.split('@')[0],
+            perfilCompleto: false,
+        });
+        
+        usuarioDb = await repositorioUsuario.criar(novoUsuario.paraBancoDeDados());
+        ServicoLog.info(contexto, 'Novo usuário criado via Google Auth.', { userId: usuarioDb.id });
+    }
+
+    return {
+        usuario: Usuario.deBancoDeDados(usuarioDb),
+        isNewUser: isNewUser
+    };
+};
+
+export default {
+    registrarNovoUsuario,
+    autenticarUsuarioPorCredenciais,
+    autenticarOuCriarPorGoogle
+};
