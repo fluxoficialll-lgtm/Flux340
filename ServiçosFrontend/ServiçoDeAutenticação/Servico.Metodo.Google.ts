@@ -1,15 +1,25 @@
 
 import API_Servico_Metodo_Google from '../APIs/API.Servico.Metodo.Google';
+import { Usuario } from '../../../types/Saida/Types.Estrutura.Usuario';
+import { Sessao } from '../../../types/Saida/Types.Estrutura.Sessao';
 
-// Supondo que você tenha interfaces definidas em algum lugar, como em @/types
-interface User {
-    id: string;
-    [key: string]: any;
+// --- Interfaces ---
+interface User extends Usuario {
+  username?: string;
+  nickname?: string;
+  avatar?: string;
+  website?: string;
+  isPrivate?: boolean;
+  profile_completed?: boolean;
+  photoUrl?: string;
+  stats?: { posts: number; followers: number; following: number };
+  products?: any[];
+  profile?: any;
 }
 
-interface LoginResponse {
-    token: string;
-    user: User;
+interface SessionData extends Sessao {
+  token: string;
+  user: User;
 }
 
 export const metodoGoogle = {
@@ -19,7 +29,7 @@ export const metodoGoogle = {
      * @param referredBy - Opcional: ID do usuário que indicou.
      * @returns Retorna os dados da resposta da API.
      */
-    async login(googleCredential: string, referredBy?: string): Promise<LoginResponse> {
+    async login(googleCredential: string, referredBy?: string): Promise<SessionData> {
         try {
             // Corrigido para passar os argumentos diretamente para a função da API
             const { data } = await API_Servico_Metodo_Google.loginComGoogle(googleCredential, referredBy);

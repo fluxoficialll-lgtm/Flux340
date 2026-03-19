@@ -16,10 +16,11 @@ class ServicoCriacaoGrupoPago {
                 donoId: dadosDoRequest.donoId,
                 imagemCapa: dadosDoRequest.finalCoverUrl || null,
                 tipoAcesso: dadosDoRequest.accessType,
+                accessConfig: dadosDoRequest.accessConfig, // Adicionado para salvar a configuração de acesso
                 provedorPagamentoId: dadosDoRequest.selectedProviderId,
                 dataExpiracao: this.calcularDataExpiracao(dadosDoRequest),
                 vipDoor: {
-                    mediaItems: dadosDoRequest.finalMediaGallery,
+                    media: dadosDoRequest.finalMediaGallery, // Corrigido de mediaItems para media
                     text: dadosDoRequest.vipDoorText || "Bem-vindo ao VIP!",
                     buttonText: dadosDoRequest.vipButtonText
                 },

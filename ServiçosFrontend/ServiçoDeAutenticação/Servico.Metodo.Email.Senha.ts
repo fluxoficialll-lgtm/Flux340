@@ -1,16 +1,26 @@
 
 import API_Servico_Metodo_Email_Senha from '../APIs/API.Servico.Metodo.Email.Senha';
-import { LoginDto } from '../../../types/Entrada/Dto.Estrutura.Conta.Flux';
+import { LoginUsuarioDTO as LoginDto } from '../../../types/Entrada/Dto.Estrutura.Usuario';
+import { Usuario } from '../../../types/Saida/Types.Estrutura.Usuario';
+import { Sessao } from '../../../types/Saida/Types.Estrutura.Sessao';
 
-// Supondo que você tenha interfaces definidas em algum lugar, como em @/types
-interface User {
-    id: string;
-    [key: string]: any;
+// --- Interfaces ---
+interface User extends Usuario {
+  username?: string;
+  nickname?: string;
+  avatar?: string;
+  website?: string;
+  isPrivate?: boolean;
+  profile_completed?: boolean;
+  photoUrl?: string;
+  stats?: { posts: number; followers: number; following: number };
+  products?: any[];
+  profile?: any;
 }
 
-interface LoginResponse {
-    token: string;
-    user: User;
+interface SessionData extends Sessao {
+  token: string;
+  user: User;
 }
 
 export const metodoEmailSenha = {
@@ -19,7 +29,7 @@ export const metodoEmailSenha = {
      * @param dadosLogin - Objeto contendo o email e a senha do usuário.
      * @returns Retorna os dados da resposta da API.
      */
-    async login(dadosLogin: LoginDto): Promise<LoginResponse> {
+    async login(dadosLogin: LoginDto): Promise<SessionData> {
         try {
             // A camada de API agora espera o objeto DTO diretamente
             const { data } = await API_Servico_Metodo_Email_Senha.login(dadosLogin);

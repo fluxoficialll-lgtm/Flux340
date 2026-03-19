@@ -4,18 +4,16 @@ import { ServicoAutenticacaoMock } from '../ServiçoDeSimulação/simulacoes/Sim
 import { metodoGoogle } from './Servico.Metodo.Google';
 import { metodoEmailSenha } from './Servico.Metodo.Email.Senha';
 import authApi from '../APIs/authApi';
-import { CriacaoContaDto, LoginDto } from '../../../types/Entrada/Dto.Estrutura.Conta.Flux';
-import { PerfilDto } from '../../../types/Entrada/Dto.Estrutura.Perfil.Flux';
+import { CriarUsuarioDTO, LoginUsuarioDTO as LoginDto } from '../../../types/Entrada/Dto.Estrutura.Usuario';
+import { Usuario } from '../../../types/Saida/Types.Estrutura.Usuario';
+import { Sessao } from '../../../types/Saida/Types.Estrutura.Sessao';
+import { AtualizarPerfilUsuarioDTO } from '../../../types/Entrada/Dto.Estrutura.Usuario';
 
 // --- Interfaces ---
-interface User {
-  id: string;
-  email: string;
-  name?: string;
+interface User extends Usuario {
   username?: string;
   nickname?: string;
   avatar?: string;
-  bio?: string;
   website?: string;
   isPrivate?: boolean;
   profile_completed?: boolean;
@@ -25,7 +23,7 @@ interface User {
   profile?: any;
 }
 
-interface SessionData {
+interface SessionData extends Sessao {
   token: string;
   user: User;
 }
@@ -34,8 +32,8 @@ interface IAuthService {
   login(dadosLogin: LoginDto): Promise<SessionData>;
   loginWithGoogle(credential: string, referredBy?: string): Promise<SessionData>;
   logout(): void;
-  register(dadosConta: CriacaoContaDto): Promise<SessionData>;
-  updateProfile(profileData: Partial<PerfilDto>): Promise<{ user: User }>;
+  register(dadosConta: CriarUsuarioDTO): Promise<SessionData>;
+  updateProfile(profileData: Partial<AtualizarPerfilUsuarioDTO>): Promise<{ user: User }>;
   getToken(): string | null;
   isAuthenticated(): boolean;
   getCurrentUser(): User | null;
@@ -166,17 +164,25 @@ const simulationServiceWrapper: IAuthService = {
         const user: User = {
             id: `simulated-${Date.now()}`,
             email: dadosConta.email,
-            name: dadosConta.nome,
-            username: dadosConta.nome,
-            nickname: dadosConta.nome,
-            avatar: 'https://i.pravatar.cc/150?u=simulated-new',
+            nome: dadosConta.nome,
+            apelido: dadosConta.nome,
             bio: 'Novo usuário simulado.',
-            website: '',
-            profile_completed: false,
+            site: '',
+            urlFoto: 'https://i.pravatar.cc/150?u=simulated-new',
+            privado: false,
+            perfilCompleto: false,
+            seguidores: [],
+            seguindo: [],
+            dataCriacao: new Date(),
+            dataAtualizacao: new Date(),
             stats: { posts: 0, followers: 0, following: 0 },
             products: [],
         };
         const sessionData: SessionData = {
+            id: `simulated-session-${Date.now()}`,
+            idUsuario: user.id,
+            expiraEm: new Date(Date.now() + 3600 * 1000),
+            dataCriacao: new Date(),
             token: 'jwt-token-simulado-registro-12345',
             user: user
         };

@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
-import { ChatData } from '../types';
+import { DadosChat } from '../../types/Saida/Types.Estrutura.Chat';
 
 export const useBlockedUsers = () => {
   const navigate = useNavigate();
-  const [blockedChats, setBlockedChats] = useState<ChatData[]>([]);
+  const [blockedChats, setBlockedChats] = useState<DadosChat[]>([]);
 
   useEffect(() => {
     loadBlockedUsers();
@@ -15,7 +14,7 @@ export const useBlockedUsers = () => {
   const loadBlockedUsers = () => {
     const allChatsMap = chatService.getAllChats();
     const allChats = Object.values(allChatsMap);
-    const blocked = allChats.filter(chat => chat.isBlocked);
+    const blocked = allChats.filter(chat => chat.bloqueado);
     setBlockedChats(blocked);
   };
 

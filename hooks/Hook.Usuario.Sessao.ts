@@ -1,10 +1,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { User } from '../tipos/types.Usuario';
+import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
 export const useUsuarioSessao = () => {
-  const [user, setUser] = useState<User | null>(() => authService.getCurrentUser());
+  const [user, setUser] = useState<Usuario | null>(() => authService.getCurrentUser());
   const [loading, setLoading] = useState(true);
 
   const handleAuthChange = useCallback(() => {
@@ -23,7 +23,7 @@ export const useUsuarioSessao = () => {
     };
   }, [handleAuthChange]);
 
-  const memoizedUser = useMemo(() => user, [user?.id]); // <-- CORRIGIDO
+  const memoizedUser = useMemo(() => user, [user?.id]);
 
   return { user: memoizedUser, loading };
 };

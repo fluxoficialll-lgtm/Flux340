@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
+import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
 export const useEditProfile = () => {
   const navigate = useNavigate();
@@ -10,9 +11,9 @@ export const useEditProfile = () => {
       nome: '',
       apelido: '',
       bio: '',
-      website: '', 
-      isPrivado: false,
-      urlDaFoto: undefined as string | undefined,
+      site: '', 
+      privado: false,
+      urlFoto: undefined as string | undefined,
   });
   
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -27,24 +28,22 @@ export const useEditProfile = () => {
   const [rawImage, setRawImage] = useState<string>('');
 
   useEffect(() => {
-      const user = authService.getCurrentUser();
+      const user: Usuario | null = authService.getCurrentUser();
       if (!user) {
           navigate('/');
           return;
       }
 
-      if (user.profile) {
-          setFormData({
-              nome: user.profile.name || '',
-              apelido: user.profile.nickname || '',
-              bio: user.profile.bio || '',
-              website: user.profile.website || '',
-              isPrivado: user.profile.isPrivate || false,
-              urlDaFoto: user.profile.photoUrl,
-          });
-          if (user.profile.photoUrl) {
-              setImagePreview(user.profile.photoUrl);
-          }
+      setFormData({
+          nome: user.nome || '',
+          apelido: user.apelido || '',
+          bio: user.bio || '',
+          site: user.site || '',
+          privado: user.privado || false,
+          urlFoto: user.urlFoto,
+      });
+      if (user.urlFoto) {
+          setImagePreview(user.urlFoto);
       }
       setFetching(false);
   }, [navigate]);
@@ -62,7 +61,7 @@ export const useEditProfile = () => {
   };
 
   const handleTogglePrivacy = () => {
-      setFormData(prev => ({ ...prev, isPrivado: !prev.isPrivado }));
+      setFormData(prev => ({ ...prev, privado: !prev.privado }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,19 +99,19 @@ export const useEditProfile = () => {
       setLoading(true);
 
       try {
-          let finalPhotoUrl = formData.urlDaFoto;
+          let finalPhotoUrl = formData.urlFoto;
 
           if (selectedFile) {
               finalPhotoUrl = await fileService.uploadFile(selectedFile);
           }
 
           const updatedProfile = { 
-            name: formData.nome,
-            nickname: formData.apelido,
+            nome: formData.nome,
+            apelido: formData.apelido,
             bio: formData.bio,
-            website: formData.website,
-            isPrivate: formData.isPrivado,
-            photoUrl: finalPhotoUrl 
+            site: formData.site,
+            privado: formData.privado,
+            urlFoto: finalPhotoUrl 
           };
 
           await authService.completeProfile(updatedProfile);

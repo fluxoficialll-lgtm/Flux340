@@ -1,11 +1,11 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
-export const HookPerfilTerceiro = (userId) => {
-    const [profile, setProfile] = useState(null);
+export const HookPerfilTerceiro = (userId: string) => {
+    const [profile, setProfile] = useState<Usuario | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchProfile = useCallback(async () => {
         if (!userId) {
@@ -15,11 +15,12 @@ export const HookPerfilTerceiro = (userId) => {
 
         setIsLoading(true);
         try {
-            const data = await authService.getProfile(userId);
-            const { name, nickname, bio, photo_url, website, is_private } = data;
-            setProfile({ name, nickname, bio, photo_url, website, is_private });
+            const data: Usuario = await authService.getProfile(userId);
+            setProfile(data);
         } catch (err) {
-            setError(err.message || 'Erro ao carregar o perfil');
+            if (err instanceof Error) {
+                setError(err.message || 'Erro ao carregar o perfil');
+            }
         } finally {
             setIsLoading(false);
         }

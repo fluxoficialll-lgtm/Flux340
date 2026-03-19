@@ -11,10 +11,11 @@ class Grupo {
     limiteMembros = 0,
     imagemCapa = null,
     tipoAcesso = null,
+    accessConfig = null,
     provedorPagamentoId = null,
     dataExpiracao = null,
-    vipDoor = null,
-    pixel = null,
+    vipDoor = null, // expected: { text: string, buttonText: string, media: {url: string, type: string}[] }
+    pixel = null,   // expected: { id: string, token: string }
   }) {
     this.id = id;
     this.nome = nome;
@@ -27,6 +28,7 @@ class Grupo {
     this.limiteMembros = limiteMembros;
     this.imagemCapa = imagemCapa;
     this.tipoAcesso = tipoAcesso;
+    this.accessConfig = accessConfig;
     this.provedorPagamentoId = provedorPagamentoId;
     this.dataExpiracao = dataExpiracao;
     this.vipDoor = vipDoor;
@@ -72,6 +74,7 @@ class Grupo {
       member_limit: this.limiteMembros,
       cover_image: this.imagemCapa,
       access_type: this.tipoAcesso,
+      access_config: this.accessConfig,
       selected_provider_id: this.provedorPagamentoId,
       expiration_date: this.dataExpiracao,
       vip_door: this.vipDoor,
@@ -96,13 +99,14 @@ class Grupo {
       limiteMembros: dados.member_limit,
       imagemCapa: dados.cover_image,
       tipoAcesso: dados.access_type,
+      accessConfig: dados.access_config,
       provedorPagamentoId: dados.selected_provider_id,
       dataExpiracao: dados.expiration_date,
       vipDoor: dados.vip_door,
-      pixel: {
+      pixel: (dados.pixel_id) ? {
         id: dados.pixel_id,
         token: dados.pixel_token
-      }
+      } : null
     });
   }
 
@@ -119,6 +123,7 @@ class Grupo {
       limiteMembros: this.limiteMembros,
       imagemCapa: this.imagemCapa,
       tipoAcesso: this.tipoAcesso,
+      accessConfig: this.accessConfig,
       provedorPagamentoId: this.provedorPagamentoId,
       dataExpiracao: this.dataExpiracao,
       vipDoor: this.vipDoor,

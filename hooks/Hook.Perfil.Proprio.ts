@@ -1,13 +1,13 @@
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
 export const HookPerfilProprio = () => {
-    const [profile, setProfile] = useState(null);
+    const [profile, setProfile] = useState<Usuario | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const loggedInUser = useMemo(() => authService.getCurrentUser(), []);
+    const loggedInUser: Usuario | null = useMemo(() => authService.getCurrentUser(), []);
     const userId = loggedInUser?.id;
 
     const fetchProfile = useCallback(async () => {
@@ -19,7 +19,7 @@ export const HookPerfilProprio = () => {
 
         setIsLoading(true);
         try {
-            const data = await authService.getProfile(userId);
+            const data: Usuario = await authService.getProfile(userId);
             setProfile(data);
         } catch (err) {
             if (err instanceof Error) {

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js'; 
 import { trackingService } from '../ServiçosFrontend/ServiçoDeRastreamento/ServiçoDeRastreamento.js';
+import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
 // Hook especializado para o login com Email/Senha
 export const useLoginEmailSenha = () => {
@@ -24,9 +25,9 @@ export const useLoginEmailSenha = () => {
         }
     }, [location]);
 
-    const handleRedirect = useCallback((user: any) => {
+    const handleRedirect = useCallback((user: Usuario) => {
         setProcessando(false);
-        const targetPath = user.profile_completed ? '/feed' : '/complete-profile';
+        const targetPath = user.perfilCompleto ? '/feed' : '/complete-profile';
         navigate(targetPath, { replace: true });
     }, [navigate]);
 
