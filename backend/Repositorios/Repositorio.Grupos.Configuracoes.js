@@ -52,6 +52,23 @@ class RepositorioGruposConfiguracoes {
             throw error;
         }
     }
+
+    /**
+     * Atualiza as diretrizes de um grupo no banco de dados.
+     * @param {string} idGrupo - O ID do grupo.
+     * @param {string} diretrizes - As novas diretrizes do grupo.
+     */
+    async atualizarDiretrizes(idGrupo, diretrizes) {
+        const query = ConsultasGruposConfiguracoes.ATUALIZAR_DIRETRIZES;
+        
+        try {
+            const [resultado] = await pool.query(query, [diretrizes, idGrupo]);
+            return resultado;
+        } catch (error) {
+            console.error('DB_UPDATE_GUIDELINES_ERROR', error);
+            throw error;
+        }
+    }
 }
 
 export default new RepositorioGruposConfiguracoes();

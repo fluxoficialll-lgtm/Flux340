@@ -27,4 +27,13 @@ export const ConsultasGruposConfiguracoes = {
     OBTER_DIRETRIZES_POR_ID: `
         SELECT diretrizes FROM grupos_configuracoes WHERE id_grupo = ?;
     `,
+
+    /**
+     * Query para atualizar as diretrizes de um grupo.
+     */
+    ATUALIZAR_DIRETRIZES: `
+        UPDATE grupos_configuracoes 
+        SET diretrizes = ?
+        WHERE id_grupo = ?;
+    `,
 };

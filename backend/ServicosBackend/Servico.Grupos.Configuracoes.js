@@ -58,6 +58,24 @@ class ServicoGruposConfiguracoes {
             throw error;
         }
     }
+
+    /**
+     * Atualiza as diretrizes de um grupo.
+     */
+    async atualizarDiretrizes(idGrupo, diretrizes) {
+        try {
+            const resultado = await Repositorio.atualizarDiretrizes(idGrupo, diretrizes);
+
+            if (resultado.affectedRows === 0) {
+                throw new Error('Nenhum grupo foi atualizado. Verifique o id do grupo.');
+            }
+            
+            return { mensagem: "Diretrizes atualizadas com sucesso!" };
+
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default new ServicoGruposConfiguracoes();

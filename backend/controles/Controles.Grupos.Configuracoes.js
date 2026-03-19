@@ -66,6 +66,20 @@ class GruposConfiguracoesControle {
         }
     }
 
+    async atualizarDiretrizes(req, res) {
+        const { groupId } = req.params;
+        const { diretrizes } = req.body;
+
+        try {
+            logger.info(`Atualizando diretrizes para o grupo ${groupId}`);
+            const resultado = await ServicoGruposConfig.atualizarDiretrizes(groupId, diretrizes);
+            return ServicoHTTPResposta.sucesso(res, resultado);
+        } catch (error) {
+            logger.error('GROUP_GUIDELINES_UPDATE_ERROR', error, { groupId });
+            return ServicoHTTPResposta.erro(res, 'Falha ao atualizar diretrizes do grupo.', 500, error.message);
+        }
+    }
+
 }
 
 export default new GruposConfiguracoesControle();
