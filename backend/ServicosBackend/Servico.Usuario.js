@@ -101,8 +101,52 @@ const autenticarOuCriarPorGoogle = async (dadosGoogle) => {
     };
 };
 
+/**
+ * Atualiza o perfil de um usuário existente.
+ */
+const atualizarPerfilUsuario = async (idUsuario, dadosPerfil) => {
+    const contexto = `${contextoBase}.atualizarPerfilUsuario`;
+    ServicoLog.info(contexto, `Iniciando atualização de perfil para o usuário ${idUsuario}`);
+
+    const usuarioExistente = await repositorioUsuario.encontrarPorId(idUsuario);
+    if (!usuarioExistente) {
+        throw new Error('Usuário não encontrado.');
+    }
+
+    // Filtra dados para evitar a atualização de campos sensíveis/imútaveis
+    const dadosParaAtualizar = Object.keys(dadosPerfil).reduce((acc, key) => {
+        if (dadosPerfil[key] !== undefined) {
+            acc[key] = dadosPerfil[key];
+        }
+        return acc;
+    }, {});
+
+
+    const usuarioAtualizadoDb = await repositorioUsuario.atualizar(idUsuario, dadosParaAtualizar);
+    
+    ServicoLog.info(contexto, `Perfil do usuário ${idUsuario} atualizado com sucesso.`);
+
+    return Usuario.deBancoDeDados(usuarioAtualizadoDb);
+};
+
+
+/**
+ * Encontra um usuário pelo ID.
+ */
+const encontrarUsuarioPorId = async (id) => {
+    const contexto = `${contextoBase}.encontrarUsuarioPorId`;
+    ServicoLog.info(contexto, `Buscando usuário com ID: ${id}`);
+    const usuarioDb = await repositorioUsuario.encontrarPorId(id);
+    if (!usuarioDb) {
+        return null;
+    }
+    return Usuario.deBancoDeDados(usuarioDb);
+};
+
 export default {
     registrarNovoUsuario,
     autenticarUsuarioPorCredenciais,
-    autenticarOuCriarPorGoogle
+    autenticarOuCriarPorGoogle,
+    atualizarPerfilUsuario, // Adicionado
+    encontrarUsuarioPorId   // Adicionado
 };
