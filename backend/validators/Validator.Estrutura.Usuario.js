@@ -93,38 +93,53 @@ const validarGoogleAuth = (data = {}) => {
 
 /**
  * Valida os dados para a atualização de um perfil de usuário.
- * @param {object} data - Contém os campos opcionais { apelido, bio, site, privado }.
- * @returns {object} Objeto com os dados validados e limpos.
+ * @param {object} data - Contém os campos opcionais a serem atualizados.
+ * @returns {object} Objeto limpo contendo apenas os campos validados.
  */
 const validarAtualizacaoPerfil = (data = {}) => {
     const erros = [];
+    const dadosValidados = {};
 
-    if (data.apelido !== undefined && !validator.isLength(data.apelido.trim(), { min: 3 })) {
-        erros.push("Apelido, se fornecido, deve ter no mínimo 3 caracteres.");
+    if (data.apelido !== undefined) {
+        if (!validator.isLength(data.apelido.trim(), { min: 3 })) {
+            erros.push("Apelido, se fornecido, deve ter no mínimo 3 caracteres.");
+        } else {
+            dadosValidados.apelido = data.apelido.trim();
+        }
     }
 
-    if (data.site !== undefined && data.site.trim() !== '' && !validator.isURL(data.site)) {
-        erros.push("O site, se fornecido, deve ser uma URL válida.");
+    if (data.site !== undefined) {
+        const siteTrimmed = data.site.trim();
+        if (siteTrimmed !== '' && !validator.isURL(siteTrimmed)) {
+            erros.push("O site, se fornecido, deve ser uma URL válida.");
+        } else {
+            // Permite que o site seja definido como uma string vazia para removê-lo
+            dadosValidados.site = siteTrimmed;
+        }
     }
     
-    if (data.bio !== undefined && !validator.isLength(data.bio, { max: 150 })) {
-        erros.push("A bio não pode exceder 150 caracteres.");
+    if (data.bio !== undefined) {
+        // A bio pode ser uma string vazia, mas não pode exceder o limite.
+        if (!validator.isLength(data.bio, { max: 150 })) {
+            erros.push("A bio não pode exceder 150 caracteres.");
+        } else {
+            dadosValidados.bio = data.bio.trim();
+        }
     }
 
-    if (data.privado !== undefined && typeof data.privado !== 'boolean') {
-        erros.push("O campo 'privado', se fornecido, deve ser um valor booleano.");
+    if (data.privado !== undefined) {
+        if (typeof data.privado !== 'boolean') {
+            erros.push("O campo 'privado', se fornecido, deve ser um valor booleano.");
+        } else {
+            dadosValidados.privado = data.privado;
+        }
     }
 
     if (erros.length > 0) {
         throw new Error(erros.join(", "));
     }
     
-    return {
-        apelido: data.apelido !== undefined ? data.apelido.trim() : undefined,
-        site: data.site !== undefined ? data.site.trim() : undefined,
-        bio: data.bio !== undefined ? data.bio.trim() : undefined,
-        privado: data.privado !== undefined ? data.privado : undefined
-    };
+    return dadosValidados;
 };
 
 export default {

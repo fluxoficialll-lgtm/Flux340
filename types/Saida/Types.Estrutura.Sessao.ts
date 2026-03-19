@@ -1,7 +1,6 @@
-
-import { Usuario } from './Types.Estrutura.Usuario';
-
 export interface Sessao {
-  token: string;
-  usuario: Usuario;
+  id: string;
+  idUsuario: string;
+  expiraEm: Date;
+  dataCriacao: Date;
 }

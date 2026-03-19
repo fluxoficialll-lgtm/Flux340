@@ -6,19 +6,28 @@ import servicoSessao from '../ServicosBackend/Servico.Sessao.js';
 import ServicoResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 import ServicoLog from '../ServicosBackend/Servico.Logs.Backend.js';
 import validadorUsuario from '../validators/Validator.Estrutura.Usuario.js';
+import validadorSessao from '../validators/Validator.Estrutura.Sessao.js'; // Corrigido: Importando o validador de sessão
 
 const registrar = async (req, res) => {
     const contexto = "Controle.Sessao.registrar";
     const dadosRequisicao = { userAgent: req.headers['user-agent'], ipAddress: req.ip };
 
     try {
-        // 1. Validar a entrada
-        const dadosValidados = validadorUsuario.validarRegistro(req.body);
-        ServicoLog.info(contexto, 'Iniciando registro de usuário', { email: dadosValidados.email });
+        // 1. Validar dados do usuário
+        const dadosUsuarioValidados = validadorUsuario.validarRegistro(req.body);
+        ServicoLog.info(contexto, 'Iniciando registro de usuário', { email: dadosUsuarioValidados.email });
 
-        // 2. Chamar os serviços com os dados validados
-        const usuario = await servicoUsuario.registrarNovoUsuario(dadosValidados);
-        const token = await servicoSessao.criarNovaSessao({ usuario, dadosRequisicao });
+        // 2. Criar o usuário
+        const usuario = await servicoUsuario.registrarNovoUsuario(dadosUsuarioValidados);
+
+        // 3. Preparar a nova sessão
+        const { token, dadosSessao } = await servicoSessao.prepararNovaSessao({ usuario, dadosRequisicao });
+
+        // 4. Validar os dados da sessão
+        const dadosSessaoValidados = validadorSessao.validarNovaSessao(dadosSessao);
+
+        // 5. Salvar a sessão validada
+        await servicoSessao.salvarSessao(dadosSessaoValidados);
 
         ServicoLog.info(contexto, 'Registro e sessão criados com sucesso', { userId: usuario.id });
         return ServicoResposta.sucesso(res, { token, user: usuario.paraRespostaHttp() }, 201);
@@ -28,7 +37,6 @@ const registrar = async (req, res) => {
         if (error.message.includes('está em uso')) {
             return ServicoResposta.conflito(res, error.message);
         }
-        // Captura erros de validação e outros erros de serviço
         return ServicoResposta.requisiçãoInválida(res, error.message);
     }
 };
@@ -38,11 +46,21 @@ const login = async (req, res) => {
     const dadosRequisicao = { userAgent: req.headers['user-agent'], ipAddress: req.ip };
 
     try {
-        const dadosValidados = validadorUsuario.validarLogin(req.body);
-        ServicoLog.info(contexto, 'Iniciando login de usuário', { email: dadosValidados.email });
+        // 1. Validar credenciais de login
+        const dadosLoginValidados = validadorUsuario.validarLogin(req.body);
+        ServicoLog.info(contexto, 'Iniciando login de usuário', { email: dadosLoginValidados.email });
 
-        const usuario = await servicoUsuario.autenticarUsuarioPorCredenciais(dadosValidados);
-        const token = await servicoSessao.criarNovaSessao({ usuario, dadosRequisicao });
+        // 2. Autenticar o usuário
+        const usuario = await servicoUsuario.autenticarUsuarioPorCredenciais(dadosLoginValidados);
+
+        // 3. Preparar a nova sessão
+        const { token, dadosSessao } = await servicoSessao.prepararNovaSessao({ usuario, dadosRequisicao });
+
+        // 4. Validar os dados da sessão
+        const dadosSessaoValidados = validadorSessao.validarNovaSessao(dadosSessao);
+
+        // 5. Salvar a sessão validada
+        await servicoSessao.salvarSessao(dadosSessaoValidados);
 
         ServicoLog.info(contexto, 'Login e sessão criados com sucesso', { userId: usuario.id });
         return ServicoResposta.sucesso(res, { token, user: usuario.paraRespostaHttp() });
@@ -61,11 +79,21 @@ const googleAuth = async (req, res) => {
     const dadosRequisicao = { userAgent: req.headers['user-agent'], ipAddress: req.ip };
 
     try {
-        const dadosValidados = validadorUsuario.validarGoogleAuth(req.body);
-        ServicoLog.info(contexto, 'Iniciando autenticação Google', { email: dadosValidados.email });
+        // 1. Validar dados do Google
+        const dadosGoogleValidados = validadorUsuario.validarGoogleAuth(req.body);
+        ServicoLog.info(contexto, 'Iniciando autenticação Google', { email: dadosGoogleValidados.email });
 
-        const { usuario, isNewUser } = await servicoUsuario.autenticarOuCriarPorGoogle(dadosValidados);
-        const token = await servicoSessao.criarNovaSessao({ usuario, dadosRequisicao });
+        // 2. Autenticar ou criar usuário
+        const { usuario, isNewUser } = await servicoUsuario.autenticarOuCriarPorGoogle(dadosGoogleValidados);
+
+        // 3. Preparar a nova sessão
+        const { token, dadosSessao } = await servicoSessao.prepararNovaSessao({ usuario, dadosRequisicao });
+
+        // 4. Validar os dados da sessão
+        const dadosSessaoValidados = validadorSessao.validarNovaSessao(dadosSessao);
+
+        // 5. Salvar a sessão validada
+        await servicoSessao.salvarSessao(dadosSessaoValidados);
 
         ServicoLog.info(contexto, 'Autenticação Google e sessão processados com sucesso', { userId: usuario.id });
         return ServicoResposta.sucesso(res, { 

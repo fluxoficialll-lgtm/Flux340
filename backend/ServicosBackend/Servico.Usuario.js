@@ -6,17 +6,17 @@ import bcrypt from 'bcryptjs';
 import ServicoLog from './Servico.Logs.Backend.js';
 import Usuario from '../models/Models.Estrutura.Usuario.js';
 import repositorioUsuario from '../Repositorios/Repositorio.Usuario.js';
-import validadorUsuario from '../validators/Validator.Estrutura.Usuario.js';
 
 const contextoBase = "Servico.Usuario";
 
 /**
  * Registra um novo usuário no sistema.
+ * @param {object} dadosUsuario - Dados já validados pelo controlador.
  */
 const registrarNovoUsuario = async (dadosUsuario) => {
     const contexto = `${contextoBase}.registrarNovoUsuario`;
+    const { nome, email, senha } = dadosUsuario; // O serviço espera dados já validados
     
-    const { nome, email, senha } = validadorUsuario.validarRegistro(dadosUsuario);
     ServicoLog.info(contexto, `Iniciando registro para ${email}`);
 
     const usuarioExistente = await repositorioUsuario.encontrarPorEmail(email);
@@ -42,11 +42,12 @@ const registrarNovoUsuario = async (dadosUsuario) => {
 
 /**
  * Autentica um usuário com base em e-mail e senha.
+ * @param {object} credenciais - Credenciais já validadas pelo controlador.
  */
 const autenticarUsuarioPorCredenciais = async (credenciais) => {
     const contexto = `${contextoBase}.autenticarUsuarioPorCredenciais`;
+    const { email, senha } = credenciais; // O serviço espera dados já validados
     
-    const { email, senha } = validadorUsuario.validarLogin(credenciais);
     ServicoLog.info(contexto, `Tentativa de autenticação para ${email}`);
 
     const usuarioDb = await repositorioUsuario.encontrarPorEmail(email);
@@ -65,11 +66,12 @@ const autenticarUsuarioPorCredenciais = async (credenciais) => {
 
 /**
  * Encontra um usuário existente ou cria um novo com base no perfil do Google.
+ * @param {object} dadosGoogle - Dados do Google já validados pelo controlador.
  */
 const autenticarOuCriarPorGoogle = async (dadosGoogle) => {
     const contexto = `${contextoBase}.autenticarOuCriarPorGoogle`;
+    const { nome, email, google_id } = dadosGoogle; // O serviço espera dados já validados
     
-    const { nome, email, google_id } = validadorUsuario.validarGoogleAuth(dadosGoogle);
     ServicoLog.info(contexto, `Autenticação Google para ${email}`);
 
     let usuarioDb = await repositorioUsuario.encontrarPorGoogleId(google_id);
@@ -147,6 +149,6 @@ export default {
     registrarNovoUsuario,
     autenticarUsuarioPorCredenciais,
     autenticarOuCriarPorGoogle,
-    atualizarPerfilUsuario, // Adicionado
-    encontrarUsuarioPorId   // Adicionado
+    atualizarPerfilUsuario,
+    encontrarUsuarioPorId
 };
