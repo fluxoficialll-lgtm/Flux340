@@ -1,8 +1,8 @@
 
 // backend/ServicosBackend/Logger.js
 
-const { createNamespace, getNamespace } = require('cls-hooked');
-const ServicoLog = require('./Servico.Logs.Backend');
+import { createNamespace, getNamespace } from 'cls-hooked';
+import ServicoLog from './Servico.Logs.Backend.js';
 
 // 1. Cria um namespace único para o contexto da requisição.
 const session = createNamespace('request-session');
@@ -49,9 +49,6 @@ class Logger {
   }
 }
 
-const createLogger = (scope) => new Logger(scope);
+export const createLogger = (scope) => new Logger(scope);
 
-module.exports = {
-  createLogger,
-  session // Exportamos a session para ser usada pelo middleware.
-};
+export { session };

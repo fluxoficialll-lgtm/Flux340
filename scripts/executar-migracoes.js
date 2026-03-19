@@ -4,12 +4,12 @@ dotenv.config();
 import fs from 'fs/promises';
 import path from 'path';
 import pool from '../backend/database/pool.js';
-import pkg from '../backend/config/ambiente.js';
-const { backendConfig } = pkg;
+import { backendConfig } from '../backend/config/ambiente.js';
+
 const { ambiente: ambienteAtual } = backendConfig;
 
 const MIGRATIONS_DIR = path.join(process.cwd(), 'backend', 'database', 'migrations');
-const MIGRATIONS_TABLE = 'schema_migrations'; // Nome da tabela alterado para evitar conflitos
+const MIGRATIONS_TABLE = 'schema_migrations';
 
 const ensureMigrationsTable = async (client) => {
     await client.query(`

@@ -35,7 +35,7 @@ const checkOrderStatus = (req, res) => {
 export default {
     createAccountLink,
     getAccountDetails,
--    disconnectAccount,
+    disconnectAccount,
     createOrder,
     checkOrderStatus
 };

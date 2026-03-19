@@ -74,4 +74,4 @@ class ServicoLog {
   }
 }
 
-module.exports = ServicoLog;
+export default ServicoLog;

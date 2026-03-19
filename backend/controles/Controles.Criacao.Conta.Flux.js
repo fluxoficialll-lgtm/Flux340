@@ -1,10 +1,10 @@
 
 // backend/controles/Controles.Criacao.Conta.Flux.js
 
-import { createLogger } from '../../ServicosBackend/Logger.js';
-import ServicoCriacaoConta from '../../ServicosBackend/Servicos.Criacao.Conta.Flux.js';
+import { createLogger } from '../ServicosBackend/Logger.js';
+import ServicoCriacaoConta from '../ServicosBackend/Servicos.Criacao.Conta.Flux.js';
 // Importando o serviço de resposta!
-import ServicoResposta from '../../ServicosBackend/Servico.HTTP.Resposta.js';
+import ServicoResposta from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
 // Criando uma instância do logger com o escopo 'Auth'
 const logger = createLogger('Auth');

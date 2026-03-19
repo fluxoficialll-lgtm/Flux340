@@ -1,8 +1,8 @@
 
 // backend/config/Middleware.Logs.js
 
-const { v4: uuidv4 } = require('uuid');
-const { session } = require('../ServicosBackend/Logger');
+import { v4 as uuidv4 } from 'uuid';
+import { session } from '../ServicosBackend/Logger.js';
 
 /**
  * Middleware para criar um contexto de requisição com um traceId único.
@@ -27,4 +27,4 @@ const requestContextMiddleware = (req, res, next) => {
   });
 };
 
-module.exports = requestContextMiddleware;
+export default requestContextMiddleware;

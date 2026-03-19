@@ -1,7 +1,7 @@
 
-import { createLogger } from '../../ServicosBackend/Logger.js';
-import ServicoComentariosMarketplace from '../../ServicosBackend/Servicos.Publicacao.Comentarios.Marketplace.js';
-import ServicoRespostaHTTP from '../../ServicosBackend/Servico.HTTP.Resposta.js';
+import { createLogger } from '../ServicosBackend/Logger.js';
+import ServicoComentariosMarketplace from '../ServicosBackend/Servicos.Publicacao.Comentarios.Marketplace.js';
+import ServicoRespostaHTTP from '../ServicosBackend/Servico.HTTP.Resposta.js';
 
 const logger = createLogger('MarketplaceComments');
 
