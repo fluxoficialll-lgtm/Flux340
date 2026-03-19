@@ -2,18 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
-import { ErroSenha, PerfilDoUsuario } from '@/tipos';
 
 export const useEditProfile = () => {
   const navigate = useNavigate();
   
-  const [formData, setFormData] = useState<PerfilDoUsuario>({
+  const [formData, setFormData] = useState({
       nome: '',
       apelido: '',
       bio: '',
       website: '', 
       isPrivado: false,
-      urlDaFoto: undefined,
+      urlDaFoto: undefined as string | undefined,
   });
   
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -121,7 +120,8 @@ export const useEditProfile = () => {
           alert('Perfil atualizado com sucesso!');
           navigate('/profile', { replace: true });
       } catch (err: any) {
-          if (err.message === ErroSenha.NOME_DE_USUARIO_JA_EM_USO) {
+          // Substituído o tipo por uma verificação de string
+          if (err.message.includes('nome de usuário')) {
               setUsernameError('Este nome de usuário já está em uso.');
           } else {
               setError(err.message || 'Erro ao atualizar perfil.');

@@ -1,16 +1,15 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { Group, SalesSection } from '../types';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 
 export const useGroupSettings = () => {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
+    const { id } = useParams(); // Removido o tipo genérico
     const { showAlert } = useModal();
     
-    const [group, setGroup] = useState<Group | null>(null);
+    const [group, setGroup] = useState(null); // Estado genérico
     const [loading, setLoading] = useState(true);
     const [isOwner, setIsOwner] = useState(false);
 
@@ -18,7 +17,7 @@ export const useGroupSettings = () => {
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
     const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(false);
-    const [salesPlatformSections, setSalesPlatformSections] = useState<SalesSection[]>([]);
+    const [salesPlatformSections, setSalesPlatformSections] = useState([]); // Estado genérico
 
     useEffect(() => {
         if (!id) {
@@ -31,14 +30,11 @@ export const useGroupSettings = () => {
             try {
                 setLoading(true);
 
-                // A CORREÇÃO REAL E DEFINITIVA:
-                // Substitui a chamada quebrada "servicoDeSimulacao.get" por um "fetch" padrão,
-                // que é interceptado corretamente pelo sistema de simulação.
                 const response = await fetch(`/api/groups/${id}`);
                 if (!response.ok) {
                     throw new Error('A resposta da rede não foi OK');
                 }
-                const groupData: Group = await response.json();
+                const groupData = await response.json(); // Removida a tipagem
 
                 setGroup(groupData);
 

@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { ErroSenha } from '@/tipos';
 
 export const HookRedefinirSenha = () => {
   const navigate = useNavigate();
@@ -19,9 +18,9 @@ export const HookRedefinirSenha = () => {
 
   const validate = () => {
       if (!password) return "Nova senha obrigatória";
-      if (password.length < 6) return ErroSenha.SENHA_MUITO_CURTA;
+      if (password.length < 6) return "A senha deve ter pelo menos 6 caracteres";
       if (!confirm) return "Confirme sua senha";
-      if (password !== confirm) return ErroSenha.SENHAS_NAO_CONFEREM;
+      if (password !== confirm) return "As senhas não conferem";
       return null;
   };
 
