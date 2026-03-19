@@ -1,7 +1,6 @@
 
-// ServiçosFrontend/APIs/API.Servico.Metodo.Google.js
-
-import ClienteBackend from '../Cliente.Backend.js'; // Corrigido o caminho
+import { AxiosResponse } from 'axios';
+import ClienteBackend from '../Cliente.Backend';
 
 const API_Servico_Metodo_Google = {
     /**
@@ -10,8 +9,7 @@ const API_Servico_Metodo_Google = {
      * @param {string} [referredBy] - Opcional. ID do usuário que indicou.
      * @returns {Promise<AxiosResponse<any>>} A promessa da resposta do Axios.
      */
-    loginComGoogle(token, referredBy) {
-        // O ClienteBackend já é uma instância configurada do Axios
+    loginComGoogle(token: string, referredBy?: string): Promise<AxiosResponse<any>> {
         return ClienteBackend.post('/auth/google', { token, referredBy });
     },
 };

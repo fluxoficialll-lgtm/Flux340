@@ -1,7 +1,6 @@
 
-// ServiçosFrontend/APIs/API.Servico.Metodo.Email.Senha.js
-
-import ClienteBackend from '../Cliente.Backend.js'; // Corrigido o caminho
+import { AxiosResponse } from 'axios';
+import ClienteBackend from '../Cliente.Backend'; 
 
 const API_Servico_Metodo_Email_Senha = {
     /**
@@ -10,7 +9,7 @@ const API_Servico_Metodo_Email_Senha = {
      * @param {string} password - A senha do usuário.
      * @returns {Promise<AxiosResponse<any>>} A promessa da resposta do Axios.
      */
-    login(email, password) {
+    login(email: string, password: string): Promise<AxiosResponse<any>> {
         return ClienteBackend.post('/auth/login', { email, password });
     },
 };
