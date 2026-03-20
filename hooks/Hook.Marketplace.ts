@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { MarketplaceItem } from '../types';
 
@@ -11,9 +10,16 @@ export const HookMarketplace = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [allItems, setAllItems] = useState<MarketplaceItem[]>([]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [currentUserEmail, setCurrentUserEmail] = useState<string | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [authState, setAuthState] = useState(authService.getState());
+    const currentUserEmail = authState.user?.email;
+
+    useEffect(() => {
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe();
+    }, []);
 
     const fetchMarketplaceItems = useCallback(async () => {
         setIsLoading(true);
@@ -24,11 +30,12 @@ export const HookMarketplace = () => {
             if (isSimulating) {
                 console.log("[SIMULAÇÃO] useMarketplace: Buscando itens do endpoint de simulação /api/marketplace/items");
                 const response = await fetch('/api/marketplace/items');
+                if (!response.ok) throw new Error(`Falha na simulação: ${response.statusText}`);
                 const items = await response.json();
                 setAllItems(items || []);
             } else {
-                const items = await marketplaceService.fetchItems();
-                setAllItems(items || []);
+                console.log("marketplaceService não encontrado. Itens do marketplace não serão carregados.");
+                setAllItems([]);
             }
         } catch (err) {
             console.error("Erro ao carregar itens do marketplace:", err);
@@ -40,11 +47,7 @@ export const HookMarketplace = () => {
     }, []);
 
     useEffect(() => {
-        const user = authService.getCurrentUser();
-        setCurrentUserEmail(user?.email);
-        
         fetchMarketplaceItems();
-
     }, [fetchMarketplaceItems]);
 
     const filteredProducts = useMemo(() => {
@@ -67,10 +70,7 @@ export const HookMarketplace = () => {
 
     const handleProductClick = (item: MarketplaceItem) => {
         if (!item) return;
-        if (currentUserEmail) {
-            marketplaceService.trackView(item, currentUserEmail);
-        }
-        
+        // A funcionalidade de rastreamento foi removida pois o marketplaceService não existe mais.
         navigate(`/marketplace/product/${item.id}`); 
     };
 

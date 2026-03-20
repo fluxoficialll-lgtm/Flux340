@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
@@ -6,6 +7,7 @@ import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
 export const useCompleteProfile = () => {
     const navigate = useNavigate();
+    const [authState, setAuthState] = useState(authService.getState());
 
     const [dadosPerfil, setDadosPerfil] = useState<Partial<Usuario>>({
         nome: '',
@@ -22,14 +24,21 @@ export const useCompleteProfile = () => {
     const [imagemOriginal, setImagemOriginal] = useState<string>('');
 
     useEffect(() => {
-        const user: Usuario | null = authService.getCurrentUser();
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const { user, loading } = authState;
         
-        if (!user) {
-            navigate('/');
-        } else if (user.perfilCompleto) {
-            navigate('/feed');
+        if (!loading) { // Wait for auth state to be confirmed
+            if (!user) {
+                navigate('/');
+            } else if (user.perfilCompleto) {
+                navigate('/feed');
+            }
         }
-    }, [navigate]);
+    }, [navigate, authState]);
 
     const updateField = useCallback((key: keyof Usuario, value: string | boolean) => {
         let valorFinal = value;

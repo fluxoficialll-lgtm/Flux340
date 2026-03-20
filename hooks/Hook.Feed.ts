@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import ServiçoPublicacaoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
@@ -15,15 +15,24 @@ export const HookFeed = (initialCategory: string = 'all') => {
   const observer = useRef<IntersectionObserver | null>(null);
   const navigate = useNavigate();
 
-  // UI State
+  // UI State & Refs
   const [uiVisible, setUiVisible] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeLocationFilter, setActiveLocationFilter] = useState('Global');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollTop = useRef(0);
 
-  const currentUserId = useMemo(() => authService.getCurrentUser()?.id, []);
+  // Estado de Autenticação Reativo
+  const [authState, setAuthState] = useState(authService.getState());
+  const currentUserId = authState.user?.id;
 
+  // Inscrição no Serviço de Autenticação
+  useEffect(() => {
+    const unsubscribe = authService.subscribe(setAuthState);
+    return () => unsubscribe();
+  }, []);
+
+  // Função para rolagem da UI
   const handleContainerScroll = () => {
     const container = scrollContainerRef.current;
     if (container) {
@@ -33,8 +42,11 @@ export const HookFeed = (initialCategory: string = 'all') => {
     }
   };
 
+  // Função para buscar os posts (agora com useCallback)
   const fetchPosts = useCallback(async (isNewCategory = false) => {
-    if (loading || (!hasMore && !isNewCategory)) return;
+    // Impede a busca se já estiver carregando ou se não houver ID de usuário
+    if (loading || (!hasMore && !isNewCategory) || !currentUserId) return;
+    
     setLoading(true);
     setError(null);
 
@@ -59,15 +71,19 @@ export const HookFeed = (initialCategory: string = 'all') => {
     } finally {
       setLoading(false);
     }
-  }, [page, hasMore, loading, category, currentUserId, navigate]);
+  }, [loading, hasMore, page, category, currentUserId, navigate]);
 
+  // Efeito para buscar posts quando a categoria ou o usuário mudam
   useEffect(() => {
+    // A dependência de 'fetchPosts' garante que a busca seja refeita quando o usuário logar
+    // (pois a função 'fetchPosts' será recriada com o novo 'currentUserId')
     setPosts([]);
     setPage(1);
     setHasMore(true);
-    fetchPosts(true);
-  }, [category]);
+    fetchPosts(true); 
+  }, [category, fetchPosts]);
 
+  // Observador de intersecção para rolagem infinita
   const lastPostElementRef = useCallback(node => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();
@@ -79,7 +95,7 @@ export const HookFeed = (initialCategory: string = 'all') => {
     if (node) observer.current.observe(node);
   }, [loading, hasMore, fetchPosts]);
 
-  // Post interaction handlers
+  // Handlers de Interação com Post
   const handlePostLike = (id: string) => console.log('Like no post:', id);
   const handlePostDelete = (id: string) => {
     console.log('Deletar post:', id);

@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
 import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { BusinessDashboardData } from '../types';
@@ -40,16 +39,25 @@ export const HookMinhaLoja = () => {
     const [dashboardData, setDashboardData] = useState<BusinessDashboardData | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // --- Gerenciamento de Estado de Autenticação Reativo ---
+    const [authState, setAuthState] = useState(authService.getState());
+    const { user } = authState;
+
+    useEffect(() => {
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe(); // Limpa a inscrição ao desmontar
+    }, []);
+
     const loadAggregatedData = useCallback(async () => {
-        const user = authService.getCurrentUser();
         if (!user) {
             navigate('/');
             return;
         }
         setLoading(true);
         try {
-            // 1. Buscar produtos do usuário
-            const userProducts = await marketplaceService.getItemsByUserId(user.id);
+            // 1. Produtos do usuário agora são uma lista vazia, pois o serviço foi removido.
+            console.log("marketplaceService não encontrado. Produtos do usuário não serão carregados.");
+            const userProducts = [];
 
             // 2. Buscar campanhas do usuário (usando os dados simulados)
             const userCampaigns = mockCampaigns.filter(campaign => campaign.userId === user.id);
@@ -71,16 +79,16 @@ export const HookMinhaLoja = () => {
         } finally {
             setLoading(false);
         }
-    }, [navigate]);
+    }, [navigate, user]); // Dependência 'user' adicionada
 
     useEffect(() => {
         loadAggregatedData();
     }, [loadAggregatedData]);
 
     const deleteProduct = async (id: string) => {
-        // A lógica de deleção no serviço já está simulada
-        await marketplaceService.deleteItem(id);
-        loadAggregatedData(); // Recarrega os dados para refletir a mudança
+        // A lógica de deleção foi removida pois o marketplaceService não existe mais.
+        console.log(`Simulando deleção do produto ${id}. A lista será recarregada.`);
+        loadAggregatedData(); // Recarrega os dados para refletir a mudança (lista vazia)
     };
 
     const endCampaign = async (id: string) => {

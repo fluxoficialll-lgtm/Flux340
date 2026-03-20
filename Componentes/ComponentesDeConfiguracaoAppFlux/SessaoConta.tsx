@@ -1,10 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ItemConfiguracao } from './ItemConfiguracao';
 import authService from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { ModalDeSelecaoDeIdioma, IDIOMAS } from './ModalDeSelecaoDeIdioma';
-import { preferenceService } from '../../ServiçosFrontend/ServiçoDePreferências/preferenceService.js';
 
 interface SessaoContaProps {
     isPrivate: boolean;
@@ -15,16 +14,27 @@ export const SessaoConta: React.FC<SessaoContaProps> = ({ isPrivate, onTogglePri
     const navigate = useNavigate();
     const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
     
-    const user = authService.getCurrentUser();
+    const [authState, setAuthState] = useState(authService.getState());
+    const { user } = authState;
+
+    useEffect(() => {
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe();
+    }, []);
+
     const [currentLangId, setCurrentLangId] = useState(user?.language || localStorage.getItem('app_language') || 'pt');
+
+    useEffect(() => {
+        setCurrentLangId(user?.language || localStorage.getItem('app_language') || 'pt');
+    }, [user]);
 
     const currentLangLabel = IDIOMAS.find(l => l.id === currentLangId)?.label || 'Português';
 
     const handleLanguageSelect = async (langId: string) => {
-        if (user?.email) {
-            await preferenceService.updateLanguage(user.email, langId);
-            setCurrentLangId(langId);
-        }
+        // preferenceService removido. Salva no localStorage.
+        console.log("preferenceService não encontrado. Salvando idioma no localStorage.");
+        localStorage.setItem('app_language', langId);
+        setCurrentLangId(langId);
         setIsLanguageModalOpen(false);
     };
 

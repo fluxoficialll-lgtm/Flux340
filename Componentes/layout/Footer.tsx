@@ -2,8 +2,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-// A importação do serviço de simulação foi removida para estabilizar o componente.
-
 interface FooterProps {
     visible?: boolean;
 }
@@ -14,28 +12,22 @@ export const Footer: React.FC<FooterProps> = ({ visible = true }) => {
     const [unreadNotifs, setUnreadNotifs] = useState(0);
     const [unreadMsgs, setUnreadMsgs] = useState(0);
 
-    // A função volta a ter a sua responsabilidade original: buscar dados reais.
     const updateCounts = useCallback(async () => {
-        const { notificationService } = await import('../../ServiçosFrontend/ServiçoDeNotificação/notificationService.js');
-        const { chatService } = await import('../../ServiçosFrontend/ServiçoDeChat/chatService.js');
-
+        // As importações para notificationService e chatService foram removidas
+        // porque os arquivos correspondentes foram deletados, como instruído.
+        // A contagem de notificações e mensagens não lidas será zerada.
         try {
-            const notifCount = await notificationService.getUnreadCount();
-            const msgCount = await chatService.getUnreadCount();
-            setUnreadNotifs(notifCount);
-            setUnreadMsgs(msgCount);
+            setUnreadNotifs(0);
+            setUnreadMsgs(0);
         } catch (error) {
-            console.error("Erro ao atualizar contagens:", error);
+            console.error("Erro ao tentar zerar contagens:", error);
         }
     }, []);
 
     useEffect(() => {
         updateCounts();
         
-        // A lógica de "subscribe" foi removida. Idealmente, a atualização
-        // de contagens seria tratada por um sistema de eventos global ou WebSockets.
-        // Por enquanto, um polling simples pode ser uma alternativa, se necessário.
-        const interval = setInterval(updateCounts, 30000); // Exemplo: atualiza a cada 30 segundos
+        const interval = setInterval(updateCounts, 30000);
 
         return () => {
             clearInterval(interval);

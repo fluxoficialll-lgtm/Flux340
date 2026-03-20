@@ -1,96 +1,91 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { notificationService } from '../ServiçosFrontend/ServiçoDeNotificação/notificationService.js';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { Notification as NotificationItem, Group, PriceInfo } from '../tipos';
 import { MockNotification } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Notificacoes';
 
 export const HookNotificacoes = () => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [pageLoading, setPageLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
     const [displayPriceInfo, setDisplayPriceInfo] = useState<PriceInfo | null>(null);
     const navigate = useNavigate();
 
-    const fetchNotifications = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const isSimulating = localStorage.getItem('isSimulating') === 'true';
+    const [authState, setAuthState] = useState(authService.getState());
+    const { isAuthenticated, isLoading: isAuthLoading } = authState;
 
+    useEffect(() => {
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe();
+    }, []);
+
+    const fetchNotifications = useCallback(async () => {
+        setPageLoading(true);
+        try {
+            // Simulação ou lógica de busca real
+            const isSimulating = localStorage.getItem('isSimulating') === 'true';
             if (isSimulating) {
-                console.log("[SIMULAÇÃO] useNotifications: Buscando notificações do endpoint de simulação /api/notificacoes");
                 const response = await fetch('/api/notificacoes');
                 const mockData: MockNotification[] = await response.json();
-
-                const formattedNotifications = mockData.map((notif): NotificationItem => {
-                    // Mantém a estrutura original de 'actor' e 'entity' que os novos componentes esperam
-                    const baseNotification = {
-                        ...notif,
-                        type: notif.type === 'new_follower' ? 'follow' : notif.type as any,
-                    };
-
-                    // Adiciona/transforma propriedades para compatibilidade com componentes existentes e a UI
-                    const compatibleNotification: NotificationItem = {
-                        ...baseNotification,
-                        username: notif.actor.handle,
-                        displayName: notif.actor.name,
-                        avatarUrl: notif.actor.avatar,
-                        timestamp: notif.createdAt, // Usa 'createdAt' dos dados simulados e atribui a 'timestamp'
-                        relatedContent: notif.entity?.text,
-                        isFollowing: false, // Valor padrão para simulação
-                    };
-
-                    return compatibleNotification;
-                });
-
+                const formattedNotifications = mockData.map((notif): NotificationItem => ({
+                    ...notif,
+                    type: notif.type === 'new_follower' ? 'follow' : notif.type as any,
+                    username: notif.actor.handle,
+                    displayName: notif.actor.name,
+                    avatarUrl: notif.actor.avatar,
+                    timestamp: notif.createdAt,
+                    relatedContent: notif.entity?.text,
+                    isFollowing: false,
+                }));
                 setNotifications(formattedNotifications);
-
             } else {
-                 const fetchedNotifications = await notificationService.getNotifications();
-                 const notificationsWithDisplayNames = await Promise.all(
-                     fetchedNotifications.map(async (notif) => {
-                         const user = await authService.fetchUserByHandle(notif.username);
-                         return { ...notif, displayName: user?.profile?.nickname || user?.profile?.name || notif.username };
-                     })
-                 );
-                 setNotifications(notificationsWithDisplayNames);
+                console.log("Serviço de notificação não encontrado, carregando array vazio.");
+                setNotifications([]);
             }
         } catch (error) {
             console.error("Erro ao buscar notificações:", error);
         } finally {
-            setIsLoading(false);
+            setPageLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        const loadInitialData = async () => {
-            const token = authService.getToken();
-            if (!token) { 
+        // Efeito #1: Lida apenas com o redirecionamento.
+        // Ele espera o fim do carregamento da autenticação.
+        if (!isAuthLoading) {
+            // Se, após o carregamento, o usuário NÃO estiver autenticado, redireciona.
+            if (!isAuthenticated) {
                 navigate('/');
-                return; 
             }
-            await fetchNotifications();
-        };
-        loadInitialData();
-    }, [fetchNotifications, navigate]);
+        }
+    }, [isAuthLoading, isAuthenticated, navigate]);
+
+    useEffect(() => {
+        // Efeito #2: Lida apenas com a busca de dados.
+        // Ele espera o fim do carregamento E a confirmação da autenticação.
+        if (!isAuthLoading && isAuthenticated) {
+            fetchNotifications();
+        }
+    }, [isAuthLoading, isAuthenticated, fetchNotifications]);
+
 
     const handleFollowToggle = useCallback(async (id: number, username: string) => {
-        // ... (resto do código)
+        console.log('Ação de seguir/deixar de seguir não implementada.');
     }, []);
 
     const handlePendingAction = useCallback(async (action: 'accept' | 'reject', notification: any) => {
-        // ... (resto do código)
+        console.log('Ação pendente não implementada.');
     }, []);
 
     const handleIgnoreExpiring = useCallback((groupId: string) => {
-        // ... (resto do código)
+        console.log('Ação de ignorar expiração não implementada.');
     }, []);
 
     const handlePayClick = useCallback(async (group: Group) => {
-        // ... (resto do código)
+        console.log('Ação de pagamento não implementada.');
     }, []);
 
     const filteredNotifications = useMemo(() => {
@@ -105,7 +100,7 @@ export const HookNotificacoes = () => {
 
     return {
         notifications,
-        isLoading,
+        isLoading: pageLoading,
         filter,
         setFilter,
         filteredNotifications,

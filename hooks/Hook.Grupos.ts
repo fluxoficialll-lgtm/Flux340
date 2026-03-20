@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService.js';
 import { Group } from '../tipos/types.Grupo';
 
 export const HookGrupos = () => {
@@ -11,11 +10,19 @@ export const HookGrupos = () => {
   
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const currentUser = authService.getCurrentUser();
-  const currentUserId = currentUser?.id;
-  const currentUserEmail = currentUser?.email;
 
+  // --- Gerenciamento de Estado de Autenticação Reativo ---
+  const [authState, setAuthState] = useState(authService.getState());
+  const { user: currentUser, userId: currentUserId, userEmail: currentUserEmail } = authState;
+
+  // Se inscreve para receber atualizações do estado de autenticação.
+  useEffect(() => {
+    const unsubscribe = authService.subscribe(setAuthState);
+    return () => unsubscribe(); // Limpa a inscrição ao desmontar.
+  }, []);
+
+
+  // --- Carregamento dos Grupos ---
   const loadGroups = useCallback(async () => {
     setLoading(true);
     try {
@@ -41,6 +48,7 @@ export const HookGrupos = () => {
             setGroups(uniqueGroups);
 
         } else {
+            // Lógica para API real iria aqui
             setGroups([]);
         }
     } catch (error) {
@@ -51,9 +59,10 @@ export const HookGrupos = () => {
     }
 }, []);
 
+  // --- Efeitos ---
   useEffect(() => {
     if (!currentUser) {
-      navigate('/');
+      navigate('/'); // Redireciona se não houver usuário logado
       return;
     }
     
@@ -66,36 +75,23 @@ export const HookGrupos = () => {
     }
   }, [navigate, location.search, currentUser, loadGroups]);
 
+
+  // --- Navegação e Ações ---
   const navigateToGroup = (group: Group) => {
     const isCreator = group.creatorId === currentUserId;
     const isMember = (group.memberIds || []).includes(currentUserId || '');
     
-    // 1. PRIORIDADE MÁXIMA: Se for plataforma de vendas, vai direto para o conteúdo da pasta principal.
     if (group.isSalesPlatformEnabled) {
       navigate(`/group-folder/${group.id}/main`);
-      return;
-    }
-
-    // 2. Se for modo Hub, vai para a página de vendas do Hub.
-    if (group.isHubModeEnabled) {
+    } else if (group.isHubModeEnabled) {
       navigate(`/group-sales-content/${group.id}`);
-      return;
-    }
-
-    // 3. Se for membro ou criador, entra no chat do grupo.
-    if (isCreator || isMember) {
+    } else if (isCreator || isMember) {
       navigate(`/group-chat/${group.id}`);
-      return;
-    }
-    
-    // 4. Se não for membro e o grupo for VIP, vai para a página de vendas VIP.
-    if (group.isVip) {
+    } else if (group.isVip) {
       navigate(`/vip-group-sales/${group.id}`);
-      return;
+    } else {
+      navigate(`/group-info-page/${group.id}`);
     }
-
-    // 5. Caso contrário (público e não-membro), vai para a landing page do grupo.
-    navigate(`/group-info-page/${group.id}`);
   };
 
   const joinGroupByCode = async (inputCode: string) => {
@@ -111,7 +107,7 @@ export const HookGrupos = () => {
   };
 
   const getUnreadCount = (groupId: string) => {
-    return 0;
+    return 0; // Placeholder
   }
 
   return {

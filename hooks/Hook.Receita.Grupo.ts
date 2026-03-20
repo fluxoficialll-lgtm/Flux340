@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { ServicoDeTransacoes } from '../ServiçosFrontend/ServiçoDeTransacoes/ServiçoDeTransacoes.js';
-import { currencyService } from '../ServiçosFrontend/ServiçoDeMoeda/currencyService.js';
 import { Group, CurrencyCode } from '../types';
 
 interface UnifiedMetric {
@@ -32,14 +31,20 @@ export const useGroupRevenue = () => {
     const { id } = useParams<{ id: string }>();
     const [group, setGroup] = useState<Group | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isConverting, setIsConverting] = useState(false);
     const [statsBRL, setStatsBRL] = useState<RevenueStats | null>(null);
     const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>('BRL');
     const [conversionRate, setConversionRate] = useState(1);
 
+    const [authState, setAuthState] = useState(authService.getState());
+    const { user } = authState;
+
+    useEffect(() => {
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe();
+    }, []);
+
     const loadData = useCallback(async () => {
         setLoading(true);
-        const user = authService.getCurrentUser();
         if (!user || !id) {
             setLoading(false);
             return;
@@ -115,30 +120,18 @@ export const useGroupRevenue = () => {
         } finally {
             setLoading(false);
         }
-    }, [id]);
+    }, [id, user]);
 
     useEffect(() => { loadData(); }, [loadData]);
 
     useEffect(() => {
-        const updateRate = async () => {
-            if (selectedCurrency === 'BRL') { setConversionRate(1); return; }
-            setIsConverting(true);
-            try {
-                // Esta função pode não existir, dependendo da implementação do currencyService
-                const rate = await currencyService.getRate('BRL', selectedCurrency);
-                setConversionRate(rate);
-            } catch (e) { 
-                console.error("Erro na conversão", e); 
-                setConversionRate(1); // Fallback para taxa 1 em caso de erro
-            }
-            finally { setIsConverting(false); }
-        };
-        updateRate();
+        // currencyService foi removido. A conversão de moeda está desativada, a taxa será sempre 1.
+        setConversionRate(1);
     }, [selectedCurrency]);
 
     const stats = useMemo(() => {
         if (!statsBRL) return null;
-        if (conversionRate === 1) return statsBRL;
+        if (conversionRate === 1) return statsBRL; // Sempre será o caso agora
         const rate = conversionRate;
         return {
             ...statsBRL,
@@ -149,12 +142,20 @@ export const useGroupRevenue = () => {
         };
     }, [statsBRL, conversionRate]);
 
-    const locale = useMemo(() => currencyService.getLocale(selectedCurrency), [selectedCurrency]);
+    const locale = useMemo(() => {
+        // Mapeamento de moedas para locales, já que o currencyService foi removido.
+        const currencyToLocaleMap: { [key: string]: string } = {
+            'BRL': 'pt-BR',
+            'USD': 'en-US',
+            'EUR': 'de-DE', 
+        };
+        return currencyToLocaleMap[selectedCurrency] || 'pt-BR';
+    }, [selectedCurrency]);
 
     return {
         group,
         loading,
-        isConverting,
+        isConverting: false, // O estado de conversão foi removido
         stats,
         selectedCurrency,
         setSelectedCurrency,

@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ServicoGestaoCredencialSyncPay as syncPayService } from '../../ServiçosFrontend/ServiçoDeProvedoresDePagamentos/ServiçoGestãoCredencialSyncPay.js';
 import authService from '../../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { currencyService } from '../../ServiçosFrontend/ServiçoDeMoeda/currencyService.js';
 import { Group, User } from '../../types';
 
 export type SyncPayView = 'selection' | 'pix' | 'boleto';
@@ -21,6 +20,14 @@ export const useFluxoDePagamentoSyncPay = ({ group, onSuccess, onError, onTransa
     const [boletoUrl, setBoletoUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const pollingInterval = useRef<any>(null);
+
+    const [authState, setAuthState] = useState(authService.getState());
+    const { user } = authState;
+
+    useEffect(() => {
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         return () => { if (pollingInterval.current) clearInterval(pollingInterval.current); };
@@ -44,7 +51,6 @@ export const useFluxoDePagamentoSyncPay = ({ group, onSuccess, onError, onTransa
         
         setIsLoading(true);
         
-        const user = authService.getCurrentUser();
         const guestEmail = localStorage.getItem('guest_email_capture');
         if (!user && !guestEmail) { 
             onError("E-mail não identificado. Por favor, recarregue a página."); 
@@ -55,14 +61,10 @@ export const useFluxoDePagamentoSyncPay = ({ group, onSuccess, onError, onTransa
         const email = user?.email || guestEmail!;
 
         try {
-            const baseCurrency = group.currency || 'BRL';
-            const basePrice = parseFloat(group.price || '0');
-            
-            let finalBrlAmount = basePrice;
-            if (baseCurrency !== 'BRL') {
-                const conversionResult = await currencyService.convert(basePrice, baseCurrency, 'BRL');
-                finalBrlAmount = conversionResult.amount;
-            }
+            // Lógica de conversão de moeda removida pois currencyService.js não existe.
+            // O preço do grupo será tratado como se já estivesse em BRL.
+            console.log("currencyService não foi encontrado. O preço será tratado como BRL.");
+            const finalBrlAmount = parseFloat(group.price || '0');
 
             const creatorId = group.creatorEmail || group.creatorId;
             const syncGroup = { ...group, price: finalBrlAmount.toString(), currency: 'BRL' as const, creatorEmail: creatorId };
@@ -87,7 +89,7 @@ export const useFluxoDePagamentoSyncPay = ({ group, onSuccess, onError, onTransa
         currentView,
         setCurrentView,
         isLoading,
-        pixCode,    // Apenas fornece o código
+        pixCode,
         pixImage,
         boletoUrl,
         generatePayment,

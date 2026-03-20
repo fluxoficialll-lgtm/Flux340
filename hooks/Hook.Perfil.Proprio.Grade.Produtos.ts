@@ -1,28 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { marketplaceService } from '../ServiçosFrontend/ServiçoDeMarketplace/marketplaceService.js';
+
+// O marketplaceService foi removido, então este hook não buscará mais produtos.
+// Ele agora retorna uma lista vazia para garantir que a UI não quebre.
 
 export const usePerfilProprioGradeProdutos = (userId: string) => {
   const [produtos, setProdutos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Inicia como false, pois não há carregamento
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchProdutos = () => { // Removido async, pois o serviço é síncrono
-      try {
-        setLoading(true);
-        // O serviço de simulação busca os produtos de forma síncrona
-        const produtosDoServico = marketplaceService.getItemsByUserId(userId);
-        setProdutos(produtosDoServico);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    // A lógica de busca foi removida porque o marketplaceService não existe mais.
+    // O hook agora simplesmente gerencia um estado de produtos vazio.
     if (userId) {
-      fetchProdutos();
+        console.log("marketplaceService não encontrado. Produtos do usuário não serão carregados para o perfil.");
+        setProdutos([]); // Garante que a lista de produtos esteja sempre vazia
     }
   }, [userId]);
 

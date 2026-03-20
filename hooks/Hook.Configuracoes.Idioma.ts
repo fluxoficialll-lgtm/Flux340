@@ -1,8 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { preferenceService } from '../ServiçosFrontend/ServiçoDePreferências/preferenceService.js';
 
 export const LANGUAGES = [
     { id: 'pt', label: 'Português', flag: '🇧🇷', nativeName: 'Brasil' },
@@ -12,26 +11,37 @@ export const LANGUAGES = [
 
 export const HookConfiguracoesIdioma = () => {
     const navigate = useNavigate();
-    const user = authService.getCurrentUser();
+
+    // --- Gerenciamento de Estado de Autenticação Reativo ---
+    const [authState, setAuthState] = useState(authService.getState());
+    const { user } = authState;
+
+    useEffect(() => {
+        const unsubscribe = authService.subscribe(setAuthState);
+        return () => unsubscribe();
+    }, []);
     
     // O estado do idioma atual, inicializado com o valor do usuário ou localStorage
     const [currentLangId, setCurrentLangId] = useState(() => {
         return user?.language || localStorage.getItem('app_language') || 'pt';
     });
+    
+    // Atualiza o idioma se o usuário mudar (ex: login/logout)
+    useEffect(() => {
+        const lang = user?.language || localStorage.getItem('app_language') || 'pt';
+        setCurrentLangId(lang);
+    }, [user]);
 
     const handleLanguageSelect = async (langId: string) => {
-        if (user?.email) {
-            try {
-                await preferenceService.updateLanguage(user.email, langId);
-                // Atualiza o estado local para refletir a mudança imediatamente na UI
-                setCurrentLangId(langId);
-                // Em um app real, aqui você iria recarregar as traduções com i18next
-                // Por enquanto, apenas navegamos de volta
-                navigate(-1);
-            } catch (error) {
-                console.error("Falha ao atualizar o idioma:", error);
-                // Opcional: exibir um alerta de erro para o usuário
-            }
+        // O preferenceService foi removido. A alteração será salva apenas localmente.
+        try {
+            console.log("preferenceService não encontrado. Salvando idioma no localStorage.");
+            localStorage.setItem('app_language', langId);
+            setCurrentLangId(langId);
+            // Em um app real, aqui você iria recarregar as traduções com i18next
+            navigate(-1);
+        } catch (error) {
+            console.error("Falha ao atualizar o idioma localmente:", error);
         }
     };
 
