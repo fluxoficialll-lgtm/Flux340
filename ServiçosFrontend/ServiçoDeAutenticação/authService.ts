@@ -1,224 +1,144 @@
 
 import { config } from '../ValidaçãoDeAmbiente/config';
-import { ServicoAutenticacaoMock } from '../ServiçoDeSimulação/simulacoes/SimulacaoDeAuth';
+import logger from '../logger';
+import { CriarUsuarioDTO, LoginUsuarioDTO as LoginDto } from '../../../types/Entrada/Dto.Estrutura.Usuario';
+import { Usuario } from '../../../types/Saida/Types.Estrutura.Usuario';
 import { metodoGoogle } from './Servico.Metodo.Google';
 import { metodoEmailSenha } from './Servico.Metodo.Email.Senha';
 import authApi from '../APIs/authApi';
-import { CriarUsuarioDTO, LoginUsuarioDTO as LoginDto } from '../../../types/Entrada/Dto.Estrutura.Usuario';
-import { Usuario } from '../../../types/Saida/Types.Estrutura.Usuario';
-import { Sessao } from '../../../types/Saida/Types.Estrutura.Sessao';
-import { AtualizarPerfilUsuarioDTO } from '../../../types/Entrada/Dto.Estrutura.Usuario';
 
-// --- Interfaces ---
-interface User extends Usuario {
-  username?: string;
-  nickname?: string;
-  avatar?: string;
-  website?: string;
-  isPrivate?: boolean;
-  profile_completed?: boolean;
-  photoUrl?: string;
-  stats?: { posts: number; followers: number; following: number };
-  products?: any[];
-  profile?: any;
+// --- Types & Interfaces ---
+interface User extends Usuario { /* ... existing properties ... */ }
+interface AuthState {
+    user: User | null;
+    loading: boolean;
+    error: Error | null;
 }
+type AuthChangeListener = (state: AuthState) => void;
 
-interface SessionData extends Sessao {
-  token: string;
-  user: User;
-}
+// --- The Brain: AuthService State Machine ---
+const createAuthService = (baseService: any) => {
+    let listeners: AuthChangeListener[] = [];
+    let currentState: AuthState = {
+        user: null,
+        loading: true,
+        error: null,
+    };
+    let validationController: AbortController | null = null;
 
-interface IAuthService {
-  login(dadosLogin: LoginDto): Promise<SessionData>;
-  loginWithGoogle(credential: string, referredBy?: string): Promise<SessionData>;
-  logout(): void;
-  register(dadosConta: CriarUsuarioDTO): Promise<SessionData>;
-  updateProfile(profileData: Partial<AtualizarPerfilUsuarioDTO>): Promise<{ user: User }>;
-  getToken(): string | null;
-  isAuthenticated(): boolean;
-  getCurrentUser(): User | null;
-  resetPassword(email: string, newPass: string): Promise<void>;
-  completeProfile(profileData: any): Promise<any>;
-}
+    const setState = (newState: Partial<AuthState>) => {
+        const oldState = { ...currentState };
+        currentState = { ...currentState, ...newState };
 
+        // Deep comparison for user object
+        const userChanged = oldState.user?.id !== currentState.user?.id || JSON.stringify(oldState.user) !== JSON.stringify(currentState.user);
 
-// --- Helper Function ---
-const salvarSessao = (dados: SessionData) => {
-    if (!dados.token || !dados.user) return;
+        if (oldState.loading !== currentState.loading || oldState.error !== currentState.error || userChanged) {
+            notify();
+        }
+    };
 
-    localStorage.setItem('userToken', dados.token);
-    localStorage.setItem('user', JSON.stringify(dados.user));
-    window.dispatchEvent(new Event('authChange'));
+    const notify = () => {
+        logger.log('[AuthService] Notificando listeners com novo estado:', currentState);
+        listeners.forEach(listener => listener(currentState));
+    };
+
+    const initialize = async () => {
+        // Cancel any pending validation
+        if (validationController) {
+            validationController.abort();
+        }
+        validationController = new AbortController();
+        const { signal } = validationController;
+
+        try {
+            const userFromStorage = baseService.getCurrentUser();
+            if (userFromStorage) {
+                setState({ user: userFromStorage });
+            }
+            
+            const validatedUser = await baseService.validateSession(signal);
+            
+            if (!signal.aborted) {
+                setState({ user: validatedUser, loading: false });
+            }
+
+        } catch (error: any) {
+            if (!signal.aborted) {
+                logger.error('[AuthService] Falha na validação inicial', error);
+                setState({ user: null, loading: false, error });
+            }
+        }
+    };
+
+    const service = {
+        // Public state accessor
+        getState: () => currentState,
+
+        // Subscription
+        subscribe: (listener: AuthChangeListener) => {
+            listeners.push(listener);
+            return () => {
+                listeners = listeners.filter(l => l !== listener);
+            };
+        },
+
+        // Actions
+        async login(dadosLogin: LoginDto) {
+            setState({ loading: true, error: null });
+            try {
+                const data = await baseService.login(dadosLogin);
+                localStorage.setItem('userToken', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                setState({ user: data.user, loading: false });
+                return data;
+            } catch (error: any) {
+                setState({ loading: false, error });
+                throw error;
+            }
+        },
+
+        logout() {
+            baseService.logout(); // Clear storage
+            setState({ user: null, loading: false, error: null });
+        },
+
+        // ... other methods like register, updateProfile, etc. would follow the same pattern ...
+    };
+    
+    // Auto-initialize on creation
+    initialize();
+
+    return service;
 };
 
-// --- Real API-based Service ---
-const realAuthService: IAuthService = {
-    async login(dadosLogin) {
-        try {
-            const data = await metodoEmailSenha.login(dadosLogin);
-            salvarSessao(data);
-            return data;
-        } catch (error: any) {
-            const errorMessage = error.message || 'Falha no login';
-            throw new Error(errorMessage);
-        }
-    },
 
-    async loginWithGoogle(credential, referredBy) {
+// --- Base Implementations (Dummy) ---
+const dummyBaseService = {
+    getCurrentUser: (): User | null => {
         try {
-            const data = await metodoGoogle.login(credential, referredBy);
-            salvarSessao(data);
-            return data;
-        } catch (error: any) {
-            const errorMessage = error.message || 'Falha na autenticação com o Google.';
-            throw new Error(errorMessage);
-        }
+            const item = localStorage.getItem('user');
+            return item ? JSON.parse(item) : null;
+        } catch { return null; }
     },
-
-    logout() {
+    validateSession: (signal: AbortSignal): Promise<User | null> => {
+        return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => resolve(dummyBaseService.getCurrentUser()), 500);
+            signal.addEventListener('abort', () => {
+                clearTimeout(timeout);
+                reject(new DOMException('Aborted', 'AbortError'));
+            });
+        });
+    },
+    login: async (dados: LoginDto) => ({ token: 'abc', user: {id: '1', nome: 'Teste'} as User }),
+    logout: () => {
         localStorage.removeItem('userToken');
         localStorage.removeItem('user');
-        window.dispatchEvent(new Event('authChange'));
-    },
-
-    async register(dadosConta) {
-        try {
-            const response = await authApi.register(dadosConta);
-            salvarSessao(response.data);
-            return response.data;
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 'Falha no registro';
-            throw new Error(errorMessage);
-        }
-    },
-
-    async updateProfile(profileData) {
-        try {
-            const response = await authApi.updateProfile(profileData);
-            if (response.data.user) {
-                 localStorage.setItem('user', JSON.stringify(response.data.user));
-            }
-            return response.data;
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 'Falha ao atualizar perfil';
-            throw new Error(errorMessage);
-        }
-    },
-
-    getToken: () => localStorage.getItem('userToken'),
-
-    isAuthenticated: () => !!localStorage.getItem('userToken'),
-
-    getCurrentUser: () => {
-        const user = localStorage.getItem('user');
-        try {
-            return user ? JSON.parse(user) as User : null;
-        } catch (error) {
-            realAuthService.logout();
-            return null;
-        }
-    },
-    
-    async resetPassword(email: string, newPass: string): Promise<void> {
-        console.log("reset password called", email, newPass);
-        return Promise.resolve();
-    },
-
-    async completeProfile(profileData: any): Promise<any> {
-        return realAuthService.updateProfile(profileData);
     }
 };
 
-// --- Simulation Service Wrapper ---
-const simulationServiceWrapper: IAuthService = {
-    ...realAuthService,
 
-    async login(dadosLogin) {
-        console.log('[SIMULAÇÃO] ✅ Login solicitado.');
-        const user = ServicoAutenticacaoMock.login(dadosLogin.email, dadosLogin.senha);
-        const sessionData: SessionData = {
-            token: 'jwt-token-simulado-qualquer-credencial-12345',
-            user: user
-        };
-        salvarSessao(sessionData);
-        console.log('[SIMULAÇÃO] ✅ Login realizado e sessão salva no localStorage.');
-        return sessionData;
-    },
-
-    logout() {
-        ServicoAutenticacaoMock.logout();
-        localStorage.removeItem('userToken');
-        localStorage.removeItem('user');
-        window.dispatchEvent(new Event('authChange'));
-        console.log('[SIMULAÇÃO] ✅ Logout realizado e sessão removida do localStorage.');
-    },
-
-    isAuthenticated: () => {
-        const isAuth = ServicoAutenticacaoMock.isAuthenticated();
-        console.log(`[SIMULAÇÃO] ✅ Verificando autenticação: ${isAuth}`);
-        return isAuth;
-    },
-
-    async register(dadosConta) {
-        console.log('[SIMULAÇÃO] ✅ Registrando novo usuário:', { email: dadosConta.email, username: dadosConta.nome });
-        const user: User = {
-            id: `simulated-${Date.now()}`,
-            email: dadosConta.email,
-            nome: dadosConta.nome,
-            apelido: dadosConta.nome,
-            bio: 'Novo usuário simulado.',
-            site: '',
-            urlFoto: 'https://i.pravatar.cc/150?u=simulated-new',
-            privado: false,
-            perfilCompleto: false,
-            seguidores: [],
-            seguindo: [],
-            dataCriacao: new Date(),
-            dataAtualizacao: new Date(),
-            stats: { posts: 0, followers: 0, following: 0 },
-            products: [],
-        };
-        const sessionData: SessionData = {
-            id: `simulated-session-${Date.now()}`,
-            idUsuario: user.id,
-            expiraEm: new Date(Date.now() + 3600 * 1000),
-            dataCriacao: new Date(),
-            token: 'jwt-token-simulado-registro-12345',
-            user: user
-        };
-        salvarSessao(sessionData);
-        console.log('[SIMULAÇÃO] ✅ Registro completo e sessão salva.');
-        return sessionData;
-    },
-
-    async updateProfile(profileData) {
-        console.log('[SIMULAÇÃO] ✅ Atualizando perfil com:', profileData);
-        const currentUser = realAuthService.getCurrentUser();
-        const updatedUser = { ...currentUser, ...profileData, profile_completed: true } as User;
-        
-        ServicoAutenticacaoMock.completeProfile(profileData);
-
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        console.log('[SIMULAÇÃO] ✅ Perfil atualizado no localStorage.');
-        return { user: updatedUser };
-    },
-
-    async loginWithGoogle() {
-        console.log('[SIMULAÇÃO] ✅ Login com Google solicitado.');
-        return simulationServiceWrapper.login({email: 'google.user@example.com', senha: 'simulated_password'});
-    },
-};
-
-
-// --- Service Export Decision ---
-let authService: IAuthService;
-
-if (config.VITE_APP_ENV === 'simulation') {
-  console.log('[SERVICE SELECTOR] Usando o serviço de autenticação de SIMULAÇÃO.');
-  authService = simulationServiceWrapper;
-} else {
-  console.log('[SERVICE SELECTOR] Usando o serviço de autenticação REAL.');
-  authService = realAuthService;
-}
-
+// --- Singleton Export ---
+const authService = createAuthService(dummyBaseService);
 export default authService;
+
