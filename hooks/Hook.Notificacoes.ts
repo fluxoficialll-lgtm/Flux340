@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+// CORREÇÃO: O caminho para o serviço de notificação foi ajustado.
 import servicoNotificacao from '../ServiçosFrontend/ServicoNotificacao/Servico.Notificacao';
 import { Notificacao, Grupo, InfoPreco } from '../types/Saida/Types.Estrutura.Notificacao';
 
@@ -14,15 +15,14 @@ export const HookNotificacoes = () => {
     const [infoPrecoExibicao, setInfoPrecoExibicao] = useState<InfoPreco | null>(null);
     const navigate = useNavigate();
 
-    // Combina a lógica de autenticação e busca de dados para evitar condições de corrida
     useEffect(() => {
         const verificarAutenticacaoEBuscarDados = async () => {
-            // Espera o serviço de autenticação confirmar o estado do usuário
             const estadoAtual = await authService.confirmarAutenticacao();
 
             if (estadoAtual.isAuthenticated) {
                 setCarregando(true);
                 try {
+                    // A lógica de busca agora é tratada de forma transparente pelo serviço
                     const dados = await servicoNotificacao.buscarNotificacoes();
                     setNotificacoes(dados);
                 } catch (error) {
@@ -32,14 +32,12 @@ export const HookNotificacoes = () => {
                     setCarregando(false);
                 }
             } else {
-                // Se não estiver autenticado após a confirmação, redireciona
                 navigate('/');
             }
         };
 
         verificarAutenticacaoEBuscarDados();
 
-        // Se inscrever para atualizações de estado de autenticação (ex: logout manual)
         const unsubscribe = authService.subscribe((estado) => {
             if (!estado.isAuthenticated) {
                 navigate('/');

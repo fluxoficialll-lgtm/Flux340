@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HookConversaEmGrupo } from '../hooks/Hook.Conversa.Em.Grupo';
+import { useGroupChat } from '../hooks/Hook.Chat.Grupo'; // Caminho e nome do Hook corrigidos
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Virtuoso } from 'react-virtuoso';
 import { ChatHeader } from '../Componentes/ComponentesDeChats/ChatHeader';
@@ -15,7 +15,7 @@ export const GroupChat: React.FC = () => {
     handleSendMessage, handleToggleSelection, handleStartSelection, deleteSelectedMessages, setIsSelectionMode, setSelectedIds, navigate,
     handleEdit, handlePin, handleCopy, handleForward, handleReply,
     isForwardModalOpen, setIsForwardModalOpen, handleConfirmForward
-  } = HookConversaEmGrupo();
+  } = useGroupChat(); // Nome da função corrigido
 
   const { showOptions } = useModal();
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);

@@ -2,12 +2,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { VirtuosoHandle } from 'react-virtuoso';
-import { Group, Message } from '../tipos'; 
+import { Group, Message } from '../tipos';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos';
 import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
 
-export const HookConversaEmGrupo = () => {
+export const useGroupChat = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -23,7 +23,17 @@ export const HookConversaEmGrupo = () => {
     const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
 
     useEffect(() => {
-        setCurrentUserEmail(authService.getCurrentUser()?.email?.toLowerCase() || null);
+        // Pega o estado inicial
+        const currentState = authService.getState();
+        setCurrentUserEmail(currentState.user?.email?.toLowerCase() || null);
+
+        // Se inscreve para futuras atualizações
+        const unsubscribe = authService.subscribe(state => {
+            setCurrentUserEmail(state.user?.email?.toLowerCase() || null);
+        });
+
+        // Limpa a inscrição quando o componente desmonta
+        return () => unsubscribe();
     }, []);
 
     const loadChatData = useCallback(async (groupId: string) => {
@@ -112,7 +122,7 @@ export const HookConversaEmGrupo = () => {
     };
 
     const handleConfirmForward = async (targetChatIds: string[]) => {
-        const token = authService.getToken();
+        const token = authService.getState().token; // Pega o token do estado atual
         if (!token) {
             alert('Autenticação necessária.');
             return;
