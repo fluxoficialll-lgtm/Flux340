@@ -8,6 +8,7 @@ import AppRoutes from './routes/AppRoutes';
 import { inicializarBoot } from './Sistema.Flux.Boot';
 import { configurarAmbiente } from './Sistema.Flux.Ambiente';
 import MonitorDeErrosDeInterface from './Componentes/ComponentesDePrevençãoDeErros/MonitorDeErrosDeInterface.jsx';
+import { AuthProvider } from './ServiçosFrontend/ServiçoDeAutenticação/Provedor.Autenticacao.tsx'; // Corrigido o caminho
 
 // Importações da lógica de sincronização
 import authService from './ServiçosFrontend/ServiçoDeAutenticação/authService.js';
@@ -90,15 +91,17 @@ const SistemaNucleoApp: React.FC = () => {
 
   return (
     <MonitorDeErrosDeInterface>
-      <ModalProvider>
-        <HashRouter>
-          <GlobalTracker />
-          <DeepLinkHandler />
-          <Suspense fallback={<LoadingFallback />}>
-            <AppRoutes />
-          </Suspense>
-        </HashRouter>
-      </ModalProvider>
+      <AuthProvider>
+        <ModalProvider>
+          <HashRouter>
+            <GlobalTracker />
+            <DeepLinkHandler />
+            <Suspense fallback={<LoadingFallback />}>
+              <AppRoutes />
+            </Suspense>
+          </HashRouter>
+        </ModalProvider>
+      </AuthProvider>
     </MonitorDeErrosDeInterface>
   );
 };

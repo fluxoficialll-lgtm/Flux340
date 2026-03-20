@@ -1,29 +1,16 @@
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
+import { useAuth } from '../ServiçosFrontend/ServiçoDeAutenticação/Provedor.Autenticacao.tsx';
 
+/**
+ * Hook customizado para acessar os dados da sessão do usuário.
+ * 
+ * Este hook abstrai o `useAuth` e fornece uma interface mais direta 
+ * para acessar as informações de `user` e `loading`.
+ * 
+ * @returns Um objeto contendo `user` (os dados do usuário autenticado ou `null`) 
+ * e `loading` (um booleano que indica se a sessão ainda está sendo carregada).
+ */
 export const useUsuarioSessao = () => {
-  const [user, setUser] = useState<Usuario | null>(() => authService.getCurrentUser());
-  const [loading, setLoading] = useState(true);
-
-  const handleAuthChange = useCallback(() => {
-    console.log('[useUsuarioSessao] Detectada mudança de autenticação. Atualizando o usuário.');
-    setUser(authService.getCurrentUser());
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('authChange', handleAuthChange);
-    console.log('[useUsuarioSessao] Listener de autenticação adicionado.');
-    setLoading(false);
-
-    return () => {
-      window.removeEventListener('authChange', handleAuthChange);
-      console.log('[useUsuarioSessao] Listener de autenticação removido.');
-    };
-  }, [handleAuthChange]);
-
-  const memoizedUser = useMemo(() => user, [user?.id]);
-
-  return { user: memoizedUser, loading };
+  const { user, loading } = useAuth();
+  return { user, loading };
 };
