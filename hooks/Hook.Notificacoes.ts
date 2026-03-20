@@ -1,117 +1,94 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { Notification as NotificationItem, Group, PriceInfo } from '../tipos';
-import { MockNotification } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Notificacoes';
+import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
+import servicoNotificacao from '../ServiçosFrontend/ServicoNotificacao/Servico.Notificacao';
+import { Notificacao, Grupo, InfoPreco } from '../types/Saida/Types.Estrutura.Notificacao';
 
 export const HookNotificacoes = () => {
-    const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-    const [pageLoading, setPageLoading] = useState(true);
-    const [filter, setFilter] = useState('all');
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-    const [displayPriceInfo, setDisplayPriceInfo] = useState<PriceInfo | null>(null);
+    const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
+    const [carregando, setCarregando] = useState(true);
+    const [filtro, setFiltro] = useState('all');
+    const [modalPagamentoAberto, setModalPagamentoAberto] = useState(false);
+    const [grupoSelecionado, setGrupoSelecionado] = useState<Grupo | null>(null);
+    const [infoPrecoExibicao, setInfoPrecoExibicao] = useState<InfoPreco | null>(null);
     const navigate = useNavigate();
 
-    const [authState, setAuthState] = useState(authService.getState());
-    const { isAuthenticated, isLoading: isAuthLoading } = authState;
-
+    // Combina a lógica de autenticação e busca de dados para evitar condições de corrida
     useEffect(() => {
-        const unsubscribe = authService.subscribe(setAuthState);
-        return () => unsubscribe();
-    }, []);
+        const verificarAutenticacaoEBuscarDados = async () => {
+            // Espera o serviço de autenticação confirmar o estado do usuário
+            const estadoAtual = await authService.confirmarAutenticacao();
 
-    const fetchNotifications = useCallback(async () => {
-        setPageLoading(true);
-        try {
-            // Simulação ou lógica de busca real
-            const isSimulating = localStorage.getItem('isSimulating') === 'true';
-            if (isSimulating) {
-                const response = await fetch('/api/notificacoes');
-                const mockData: MockNotification[] = await response.json();
-                const formattedNotifications = mockData.map((notif): NotificationItem => ({
-                    ...notif,
-                    type: notif.type === 'new_follower' ? 'follow' : notif.type as any,
-                    username: notif.actor.handle,
-                    displayName: notif.actor.name,
-                    avatarUrl: notif.actor.avatar,
-                    timestamp: notif.createdAt,
-                    relatedContent: notif.entity?.text,
-                    isFollowing: false,
-                }));
-                setNotifications(formattedNotifications);
+            if (estadoAtual.isAuthenticated) {
+                setCarregando(true);
+                try {
+                    const dados = await servicoNotificacao.buscarNotificacoes();
+                    setNotificacoes(dados);
+                } catch (error) {
+                    console.error("HookNotificacoes: Erro ao buscar notificações:", error);
+                    setNotificacoes([]);
+                } finally {
+                    setCarregando(false);
+                }
             } else {
-                console.log("Serviço de notificação não encontrado, carregando array vazio.");
-                setNotifications([]);
-            }
-        } catch (error) {
-            console.error("Erro ao buscar notificações:", error);
-        } finally {
-            setPageLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        // Efeito #1: Lida apenas com o redirecionamento.
-        // Ele espera o fim do carregamento da autenticação.
-        if (!isAuthLoading) {
-            // Se, após o carregamento, o usuário NÃO estiver autenticado, redireciona.
-            if (!isAuthenticated) {
+                // Se não estiver autenticado após a confirmação, redireciona
                 navigate('/');
             }
-        }
-    }, [isAuthLoading, isAuthenticated, navigate]);
+        };
 
-    useEffect(() => {
-        // Efeito #2: Lida apenas com a busca de dados.
-        // Ele espera o fim do carregamento E a confirmação da autenticação.
-        if (!isAuthLoading && isAuthenticated) {
-            fetchNotifications();
-        }
-    }, [isAuthLoading, isAuthenticated, fetchNotifications]);
+        verificarAutenticacaoEBuscarDados();
 
+        // Se inscrever para atualizações de estado de autenticação (ex: logout manual)
+        const unsubscribe = authService.subscribe((estado) => {
+            if (!estado.isAuthenticated) {
+                navigate('/');
+            }
+        });
 
-    const handleFollowToggle = useCallback(async (id: number, username: string) => {
+        return () => unsubscribe();
+    }, [navigate]);
+
+    const alternarSeguir = useCallback(async (id: number, username: string) => {
         console.log('Ação de seguir/deixar de seguir não implementada.');
     }, []);
 
-    const handlePendingAction = useCallback(async (action: 'accept' | 'reject', notification: any) => {
+    const acaoPendente = useCallback(async (action: 'accept' | 'reject', notification: any) => {
         console.log('Ação pendente não implementada.');
     }, []);
 
-    const handleIgnoreExpiring = useCallback((groupId: string) => {
+    const ignorarExpiracao = useCallback((groupId: string) => {
         console.log('Ação de ignorar expiração não implementada.');
     }, []);
 
-    const handlePayClick = useCallback(async (group: Group) => {
+    const clicarPagar = useCallback(async (group: Grupo) => {
         console.log('Ação de pagamento não implementada.');
     }, []);
 
-    const filteredNotifications = useMemo(() => {
-        return notifications.filter(notif => {
-            if (filter === 'all') return true;
-            if (filter === 'mentions') return notif.type === 'mention';
-            if (filter === 'follow') return notif.type === 'follow';
-            if (filter === 'likes') return notif.type === 'like';
+    const notificacoesFiltradas = useMemo(() => {
+        return notificacoes.filter(notif => {
+            if (filtro === 'all') return true;
+            if (filtro === 'mentions') return notif.tipo === 'mention';
+            if (filtro === 'follow') return notif.tipo === 'follow';
+            if (filtro === 'likes') return notif.tipo === 'like';
             return false;
         });
-    }, [notifications, filter]);
+    }, [notificacoes, filtro]);
 
     return {
-        notifications,
-        isLoading: pageLoading,
-        filter,
-        setFilter,
-        filteredNotifications,
-        isPaymentModalOpen,
-        setIsPaymentModalOpen,
-        selectedGroup,
-        displayInfo: displayPriceInfo,
-        handleFollowToggle,
-        handlePendingAction,
-        handleIgnoreExpiring,
-        handlePayClick,
+        notificacoes,
+        carregando,
+        filtro,
+        setFiltro,
+        notificacoesFiltradas,
+        modalPagamentoAberto,
+        setModalPagamentoAberto,
+        grupoSelecionado,
+        infoExibicao: infoPrecoExibicao,
+        alternarSeguir,
+        acaoPendente,
+        ignorarExpiracao,
+        clicarPagar,
         navigate,
     };
 };
