@@ -1,18 +1,19 @@
 
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { HookGrupos } from '../hooks/Hook.Grupos';
+import { HookListaGrupos } from '../hooks/Hook.Lista.Grupos'; // ATUALIZADO
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
-import { Group } from '../types';
+import { Group } from '../tipos';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
-import { CardPesquisarGrupo } from '../Componentes/groups/list/Card.Pesquisar.Grupo'; // Importando o novo componente
+import { CardPesquisarGrupo } from '../Componentes/groups/list/Card.Pesquisar.Grupo';
 import { ContêinerListaGrupos } from '../Componentes/groups/list/Contêiner.Lista.Grupos';
 import { CreateGroupFAB } from '../Componentes/groups/list/CreateGroupFAB';
 
 const TrackingModal = lazy(() => import('../Componentes/groups/TrackingModal').then(m => ({ default: m.TrackingModal })));
 
 export const PG_Lista_Grupo: React.FC = () => {
-  const { groups, loading, observerRef, currentUserEmail, navigate, navigateToGroup, joinGroupByCode, deleteGroup, getUnreadCount } = HookGrupos();
+  // A lógica de UI permanece aqui, enquanto a lógica de dados vem do hook específico.
+  const { groups, loading, currentUserEmail, navigate, navigateToGroup, deleteGroup, getUnreadCount } = HookListaGrupos(); // ATUALIZADO
   const { showAlert, showConfirm } = useModal();
 
   const [uiVisible, setUiVisible] = useState(true);
@@ -21,6 +22,7 @@ export const PG_Lista_Grupo: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const lastScrollY = useRef(0);
 
+  // Efeito para controlar a visibilidade da UI no scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScroll = window.scrollY;
@@ -37,10 +39,7 @@ export const PG_Lista_Grupo: React.FC = () => {
     };
   }, []);
 
-  // A função de pesquisa que será passada para o card
   const handleSearch = (query: string) => {
-      // Por enquanto, vamos apenas navegar para uma página de resultados
-      // A lógica real de busca seria implementada aqui ou na página de destino
       if (query.trim()) {
           navigate(`/groups/search?q=${encodeURIComponent(query)}`);
       } else {
@@ -72,7 +71,6 @@ export const PG_Lista_Grupo: React.FC = () => {
       />
 
       <main className="flex-grow pt-[100px] pb-[100px] px-4">
-        {/* Substituindo o botão de link pelo novo card de pesquisa */}
         <CardPesquisarGrupo onSearch={handleSearch} />
 
         <div className="w-full">
@@ -92,7 +90,6 @@ export const PG_Lista_Grupo: React.FC = () => {
           ))}
           {loading && <div className="text-center mt-10"><i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#00c2ff]"></i></div>}
           {!loading && groups.length === 0 && <div className="text-center text-gray-500 mt-10">Você não participa de nenhum grupo.</div>}
-          <div ref={observerRef} className="h-10"></div>
         </div>
       </main>
 

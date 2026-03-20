@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HookMensagens } from '../hooks/Hook.Mensagens';
+import { HookListaConversas } from '../hooks/Hook.Lista.Conversas';
 import { MessagesMenuModal } from '../Componentes/ComponentesDeChats/MessagesMenuModal';
 import { MainHeader } from '../Componentes/layout/MainHeader';
 import { MessageListItem } from '../Componentes/ComponentesDeChats/MessageListItem';
@@ -26,7 +26,7 @@ export const PG_Lista_Conversas: React.FC = () => {
     handleProfileNavigate,
     handleClearSelected,
     closeMenuAndEnterSelection
-  } = HookMensagens();
+  } = HookListaConversas();
 
   const [searchQuery, setSearchQuery] = useState('');
 
