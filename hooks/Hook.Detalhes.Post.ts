@@ -2,17 +2,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { Post, Comment } from '../types';
+import { PublicacaoFeed } from '../types/Saida/Types.Estrutura.Publicacao.Feed';
 import { HookAcoesPost } from './Hook.Acoes.Post';
-// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
-import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { feedPublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 
 export const HookDetalhesPost = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
-  const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [post, setPost] = useState<PublicacaoFeed | null>(null);
+  // Os comentários agora são parte do objeto post, então este estado pode não ser mais necessário
+  // dependendo da implementação.
   const [commentText, setCommentText] = useState('');
   const [replyingTo, setReplyingTo] = useState<{ id: string, username: string } | null>(null);
 
@@ -22,18 +22,15 @@ export const HookDetalhesPost = () => {
   const loadData = useCallback(async () => {
     if (id) {
       try {
-        // CORREÇÃO: A função foi renomeada de 'getPostById' para 'getById' para corresponder ao serviço.
-        const foundPost = await ServiçoPublicaçãoFeed.getById(id);
+        const foundPost = await feedPublicationService.getById(id);
         if (foundPost) {
           setPost(foundPost);
-          // Assumindo que os comentários são parte do objeto do post
-          setComments(foundPost.commentsList || []);
         } else {
           navigate('/feed');
         }
       } catch (error) {
         console.error("Falha ao buscar detalhes do post:", error);
-        navigate('/feed'); // Redireciona em caso de erro
+        navigate('/feed');
       }
     }
   }, [id, navigate]);
@@ -42,8 +39,21 @@ export const HookDetalhesPost = () => {
     loadData();
   }, [id, loadData]);
 
-  // O dummy post permanece útil para evitar erros de renderização antes do post carregar
-  const dummyPost: Post = { id: '', likes: 0, comments: 0, liked: false, username: '', avatar: '', time: '', text: '' };
+  // Criar um objeto dummy que satisfaça a interface PublicacaoFeed para evitar erros de renderização.
+  const dummyPost: PublicacaoFeed = {
+    id: '', 
+    texto: '', 
+    author: { id: '', nome: '', avatar: '' }, 
+    criadoEm: new Date(), 
+    curtidas: [], 
+    comentarios: [],
+    // Adicione outras propriedades obrigatórias com valores padrão
+    imagemUrl: null,
+    videoUrl: null,
+    enquete: null,
+    // etc...
+  };
+
   const { handleCommentSubmit, isCommenting, commentError, handleLike, handleDelete } = HookAcoesPost(post || dummyPost);
 
   const handleSendComment = async () => {
@@ -54,25 +64,24 @@ export const HookDetalhesPost = () => {
     if (success) {
         setCommentText('');
         setReplyingTo(null);
-        loadData(); // Recarrega os dados para mostrar o novo comentário
+        loadData();
     }
   };
   
-  // Estas funções podem ser implementadas no futuro
   const handleDeleteComment = async (commentId: string) => { /* ... */ };
   const handleCommentLike = (commentId: string) => { /* ... */ };
   const handleVote = (optionIndex: number) => { /* ... */ };
 
   return {
     post, 
-    comments, 
+    comments: post?.comentarios || [], // Deriva os comentários do estado do post
     commentText, 
     setCommentText, 
     replyingTo, 
     setReplyingTo, 
     currentUserId, 
-    handleLike, // Vem do usePostActions
-    handleDelete, // Vem do usePostActions
+    handleLike, 
+    handleDelete, 
     handleSendComment, 
     handleDeleteComment, 
     handleCommentLike, 

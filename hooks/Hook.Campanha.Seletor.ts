@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
-import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { feedPublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { Post } from '../types';
+import { PublicacaoFeed } from '../types/Saida/Types.Estrutura.Publicacao.Feed';
 
 export const HookCampanhaSeletor = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'posts' | 'reels'>('posts');
-    const [content, setContent] = useState<Post[]>([]);
+    const [content, setContent] = useState<PublicacaoFeed[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,22 +15,33 @@ export const HookCampanhaSeletor = () => {
             setLoading(true);
             const user = authService.getCurrentUser();
             if (user && user.id) {
-                // Corrigido: Usa o serviço de feed para buscar os posts do perfil do usuário
-                const feedResult = await ServiçoPublicaçãoFeed.getFeed('profile', { userId: user.id });
-                // O resultado pode ter um formato diferente, garantimos que pegamos o array de posts
-                const allPosts = feedResult.data || feedResult;
-                setContent(allPosts as Post[]);
+                try {
+                    const allPosts = await feedPublicationService.getPosts();
+                    // Filtra os posts para pegar apenas os do usuário logado.
+                    const userPosts = allPosts.filter(post => post.autor.id === user.id);
+                    setContent(userPosts);
+                } catch (error) {
+                    console.error("Erro ao buscar conteúdo do usuário:", error);
+                    // Lidar com o erro apropriadamente
+                }
             }
             setLoading(false);
         };
         loadContent();
     }, []);
 
-    const filteredContent = content.filter(p => 
-        activeTab === 'reels' ? p.type === 'video' : (p.type === 'photo' || p.type === 'text')
-    );
+    const filteredContent = content.filter(p => {
+        const hasVideo = p.midia?.some(m => m.tipo.startsWith('video'));
+        const hasImage = p.midia?.some(m => m.tipo.startsWith('image'));
 
-    const handleSelect = (post: Post) => {
+        if (activeTab === 'reels') {
+            return hasVideo;
+        }
+        // Aba 'posts' pode incluir texto, imagens, mas não vídeos (reels)
+        return !hasVideo && (p.conteudo || hasImage);
+    });
+
+    const handleSelect = (post: PublicacaoFeed) => {
         navigate('/ad-placement-selector', { state: { boostedContent: post } });
     };
 

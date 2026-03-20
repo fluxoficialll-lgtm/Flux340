@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-// CORREÇÃO: O caminho para o serviço de notificação foi ajustado.
 import servicoNotificacao from '../ServiçosFrontend/ServicoNotificacao/Servico.Notificacao';
 import { Notificacao, Grupo, InfoPreco } from '../types/Saida/Types.Estrutura.Notificacao';
 
@@ -19,11 +18,11 @@ export const HookNotificacoes = () => {
         const verificarAutenticacaoEBuscarDados = async () => {
             const estadoAtual = await authService.confirmarAutenticacao();
 
-            if (estadoAtual.isAuthenticated) {
+            if (estadoAtual.isAuthenticated && estadoAtual.token) {
                 setCarregando(true);
                 try {
-                    // A lógica de busca agora é tratada de forma transparente pelo serviço
-                    const dados = await servicoNotificacao.buscarNotificacoes();
+                    // CORREÇÃO: Chamar o método correto 'getNotifications' e passar o token.
+                    const dados = await servicoNotificacao.getNotifications(estadoAtual.token);
                     setNotificacoes(dados);
                 } catch (error) {
                     console.error("HookNotificacoes: Erro ao buscar notificações:", error);
@@ -32,7 +31,9 @@ export const HookNotificacoes = () => {
                     setCarregando(false);
                 }
             } else {
-                navigate('/');
+                // Se não estiver autenticado, não há necessidade de navegar aqui, pois o serviço de auth já cuida disso.
+                console.log("HookNotificacoes: Usuário não autenticado.");
+                setCarregando(false);
             }
         };
 
@@ -40,6 +41,8 @@ export const HookNotificacoes = () => {
 
         const unsubscribe = authService.subscribe((estado) => {
             if (!estado.isAuthenticated) {
+                console.log("HookNotificacoes: Usuário deslogado. Limpando notificações.");
+                setNotificacoes([]);
                 navigate('/');
             }
         });
@@ -67,7 +70,8 @@ export const HookNotificacoes = () => {
         return notificacoes.filter(notif => {
             if (filtro === 'all') return true;
             if (filtro === 'mentions') return notif.tipo === 'mention';
-            if (filtro === 'follow') return notif.tipo === 'follow';
+            // CORREÇÃO: Os tipos de notificação são "SEGUIDOR" e "like"
+            if (filtro === 'follow') return notif.tipo === 'SEGUIDOR';
             if (filtro === 'likes') return notif.tipo === 'like';
             return false;
         });

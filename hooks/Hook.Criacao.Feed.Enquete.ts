@@ -1,21 +1,30 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
-import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { feedPublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { Post, PollOption } from '../types';
+import { PublicacaoFeed } from '../types/Saida/Types.Estrutura.Publicacao.Feed';
 
-export const HookCriarEnquete = (editingPost: Post | null) => {
+// Definindo um tipo mais específico para as opções da enquete no hook
+interface PollOption {
+    id: string;
+    text: string;
+    votes?: number;
+}
+
+export const HookCriarEnquete = (editingPost: PublicacaoFeed | null) => {
     const navigate = useNavigate();
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState<PollOption[]>([{ id: '1', text: '' }, { id: '2', text: '' }]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (editingPost && editingPost.poll) {
-            setQuestion(editingPost.poll.question);
-            setOptions(editingPost.poll.options.map((opt, index) => ({ id: `${index + 1}`, text: opt.text, votes: opt.votes })) || []);
+        if (editingPost && editingPost.tipo === 'poll' && editingPost.opcoesEnquete) {
+            setQuestion(editingPost.conteudo);
+            // A estrutura de opcoesEnquete precisa ser conhecida para o mapeamento correto
+            // Assumindo que seja um array de objetos com a propriedade 'text'
+            const pollOptions = editingPost.opcoesEnquete.map((opt: any, index: number) => ({ id: `${index + 1}`, text: opt.text, votes: opt.votes }));
+            setOptions(pollOptions);
         }
     }, [editingPost]);
 
@@ -26,7 +35,7 @@ export const HookCriarEnquete = (editingPost: Post | null) => {
 
     const addOption = () => {
         if (options.length < 5) {
-            setOptions([...options, { id: `${Date.now()}` , text: '' }]);
+            setOptions([...options, { id: `${Date.now()}`, text: '' }]);
         }
     };
 
@@ -44,25 +53,26 @@ export const HookCriarEnquete = (editingPost: Post | null) => {
 
         setIsSubmitting(true);
 
-        const postData = {
-            content: question,
-            type: 'poll',
-            poll: {
-                question,
-                options: options.map(opt => ({ text: opt.text.trim(), votes: opt.votes || 0 }))
-            },
-            // Se for edição, precisamos passar o ID do post
-            ...(editingPost && { postId: editingPost.id })
-        };
+        const formData = new FormData();
+        formData.append('conteudo', question.trim());
+        formData.append('tipo', 'poll');
+        // Serializa as opções da enquete para o formato esperado pelo backend
+        const pollOptionsData = options.map(opt => ({ text: opt.text.trim(), votes: opt.votes || 0 }));
+        formData.append('opcoesEnquete', JSON.stringify(pollOptionsData));
+        // O autorId será adicionado no backend a partir do token de autenticação
 
         try {
             if (editingPost) {
-                // CORREÇÃO: A função foi renomeada de 'updatePost' para 'update' para corresponder ao serviço.
-                await ServiçoPublicaçãoFeed.update(editingPost.id, postData);
+                // Para edição, o serviço precisaria de um método que aceite FormData.
+                // Assumindo que updatePost também pode lidar com FormData.
+                await feedPublicationService.updatePost(editingPost.id, { 
+                    conteudo: question.trim(),
+                    opcoesEnquete: pollOptionsData
+                } as Partial<PublicacaoFeed>);
             } else {
-                await ServiçoPublicaçãoFeed.createPost(postData);
+                await feedPublicationService.createPost(formData);
             }
-            navigate('/'); // Redireciona para a home após sucesso
+            navigate('/feed'); // Redireciona para o feed após sucesso
         } catch (error) {
             console.error("Erro ao criar/atualizar enquete:", error);
             alert('Ocorreu um erro. Tente novamente.');

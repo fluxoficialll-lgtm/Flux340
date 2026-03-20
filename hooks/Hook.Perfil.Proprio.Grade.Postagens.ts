@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
-// CORREÇÃO: Importa o serviço como padrão (sem chaves)
-import ServiçoPublicacaoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { feedPublicationService as ServiçoPublicacaoFeed } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 
 export const usePerfilProprioGradePostagens = (userId: string) => {
   const [postagens, setPostagens] = useState<any[]>([]);
@@ -12,9 +11,7 @@ export const usePerfilProprioGradePostagens = (userId: string) => {
     const fetchPostagens = async () => {
       try {
         setLoading(true);
-        // O serviço de feed não tem um método para buscar por usuário, então buscamos tudo
-        // e filtramos no frontend.
-        const todosOsPosts = await ServiçoPublicacaoFeed.getFeed('posts'); // Assumindo método getFeed
+        const todosOsPosts = await ServiçoPublicacaoFeed.getPosts();
         const postagensDoUsuario = todosOsPosts.filter(post => post.userId === userId);
         setPostagens(postagensDoUsuario);
       } catch (err) {

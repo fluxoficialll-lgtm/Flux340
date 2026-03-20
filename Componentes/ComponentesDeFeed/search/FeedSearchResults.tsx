@@ -6,7 +6,7 @@ import { ContainerFeedPadrao } from '../Container.Feed.Padrao';
 import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { SearchTab } from '../../../pages/FeedSearch';
 import { UserBadge } from '../../ComponenteDeInterfaceDeUsuario/user/UserBadge';
-import ServiçoPublicaçãoFeed from '../../../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { feedPublicationService as ServiçoPublicaçãoFeed } from '../../../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 
 interface FeedSearchResultsProps {
     activeTab: SearchTab;
@@ -39,7 +39,7 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
                 likes: post.likes + (!post.liked ? 1 : -1) 
             };
             
-            await ServiçoPublicaçãoFeed.update(postId, updatedPost);
+            await ServiçoPublicaçãoFeed.updatePost(postId, updatedPost);
         } catch (error) {
             console.error("Falha ao processar o like:", error);
         }
@@ -49,7 +49,7 @@ export const FeedSearchResults: React.FC<FeedSearchResultsProps> = ({
         e.stopPropagation();
         if (await showConfirm("Excluir Post", "Deseja apagar permanentemente?", "Excluir", "Cancelar")) {
             try {
-                await ServiçoPublicaçãoFeed.delete(postId);
+                await ServiçoPublicaçãoFeed.deletePost(postId);
             } catch (error) {
                 console.error("Falha ao deletar o post:", error);
             }

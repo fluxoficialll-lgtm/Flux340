@@ -1,10 +1,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-// CORREÇÃO: A importação agora é default, para corresponder à exportação do serviço.
-import ServiçoPublicaçãoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { feedPublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { Post, User } from '../types';
+import { PublicacaoFeed } from '../types/Saida/Types.Estrutura.Publicacao.Feed';
+import { Autor } from '../types/Saida/Types.Estrutura.Autor';
 
 export type FeedSearchFilter = 'relevant' | 'recent';
 export type SearchTab = 'posts' | 'users';
@@ -15,8 +15,8 @@ export const HookPesquisaFeed = () => {
     const [activeTab, setActiveTab] = useState<SearchTab>('posts');
     const [filter, setFilter] = useState<FeedSearchFilter>('relevant');
     
-    const [postResults, setPostResults] = useState<Post[]>([]);
-    const [userResults, setUserResults] = useState<User[]>([]);
+    const [postResults, setPostResults] = useState<PublicacaoFeed[]>([]);
+    const [userResults, setUserResults] = useState<Autor[]>([]);
     const [loading, setLoading] = useState(false);
     
     const currentUser = authService.getCurrentUser();
@@ -31,10 +31,10 @@ export const HookPesquisaFeed = () => {
         setLoading(true);
         try {
             if (tab === 'posts') {
-                // CORREÇÃO: A função foi renomeada de 'searchPosts' para 'search' para corresponder ao serviço.
-                const data = await ServiçoPublicaçãoFeed.search(query);
+                const data = await feedPublicationService.search(query);
                 setPostResults(data);
             } else {
+                // Assumindo que authService.searchUsers retorna uma lista de Autores
                 const data = await authService.searchUsers(query);
                 setUserResults(data);
             }
@@ -53,13 +53,12 @@ export const HookPesquisaFeed = () => {
     const sortedPosts = useMemo(() => {
         const list = [...postResults];
         if (filter === 'recent') {
-            // Presume que `timestamp` é um número (epoch time) ou uma string ISO 8601
-            return list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+            return list.sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime());
         }
-        // Lógica de relevância
+        // Lógica de relevância adaptada para a nova estrutura PublicacaoFeed
         return list.sort((a, b) => {
-            const scoreA = (a.likes || 0) + (a.comments || 0) * 2 + (a.views || 0) / 10;
-            const scoreB = (b.likes || 0) + (b.comments || 0) * 2 + (b.views || 0) / 10;
+            const scoreA = (a.curtidas?.length || 0) + (a.comentarios?.length || 0) * 2;
+            const scoreB = (b.curtidas?.length || 0) + (b.comentarios?.length || 0) * 2;
             return scoreB - scoreA;
         });
     }, [postResults, filter]);

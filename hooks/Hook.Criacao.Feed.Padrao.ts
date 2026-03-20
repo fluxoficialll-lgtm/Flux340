@@ -1,19 +1,27 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// CORREÇÃO: A importação foi alterada para usar a sintaxe de importação padrão.
-import ServiçoPublicacaoFeed from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoFeed.js';
+import { feedPublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
-import { contentSafetyService } from '../ServiçosFrontend/ServiçoDeSegurançaDeConteúdo/contentSafetyService.js';
-import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
-import { DadosCriacaoPost, ErrosCriacaoPost } from '../tipos/types.Post';
+import { PublicacaoFeed } from '../types/Saida/Types.Estrutura.Publicacao.Feed';
+
+// Interface simplificada para o estado do formulário
+interface PostFormData {
+    texto: string;
+    arquivosMidia: File[];
+    isConteudoAdulto: boolean;
+    localizacao: string;
+    isAnuncio: boolean;
+    orcamentoAnuncio: string;
+    linkAnuncio: string;
+}
 
 export const HookCriarPost = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const locationState = location.state as { isAd?: boolean } | null;
 
-    const [dadosPost, setDadosPost] = useState<Omit<DadosCriacaoPost, 'grupoSelecionado'>>({
+    const [dadosPost, setDadosPost] = useState<PostFormData>({
         texto: '',
         arquivosMidia: [],
         isConteudoAdulto: false,
@@ -25,11 +33,11 @@ export const HookCriarPost = () => {
 
     const [isPublishDisabled, setIsPublishDisabled] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [error, setError] = useState<ErrosCriacaoPost | null>(null);
+    const [error, setError] = useState<{ geral?: string } | null>(null);
     
     const currentUser = useMemo(() => authService.getCurrentUser(), []);
 
-    const updateField = useCallback((key: keyof typeof dadosPost, value: any) => {
+    const updateField = useCallback((key: keyof PostFormData, value: any) => {
         setDadosPost(prev => ({ ...prev, [key]: value }));
     }, []);
 
@@ -49,18 +57,22 @@ export const HookCriarPost = () => {
         setError(null);
 
         try {
-            const uploadedUrls = dadosPost.arquivosMidia.map(m => m.url);
+            const formData = new FormData();
+            formData.append('conteudo', dadosPost.texto);
+            formData.append('tipo', 'post'); // Tipo de publicação padrão
+            formData.append('isConteudoAdulto', String(dadosPost.isConteudoAdulto));
 
-            const postData = {
-                content: dadosPost.texto,
-                authorId: currentUser.id,
-                mediaUrls: uploadedUrls,
-                isPublic: true, 
-                location: dadosPost.localizacao === 'Global' ? undefined : dadosPost.localizacao,
-            };
+            dadosPost.arquivosMidia.forEach(file => {
+                formData.append('midia', file);
+            });
+            
+            // Adicionar lógica para anúncios se necessário
+            if (dadosPost.isAnuncio) {
+                formData.append('linkCta', dadosPost.linkAnuncio);
+                // Outros campos de anúncio
+            }
 
-            // A chamada agora usa a importação padrão e a função com nome correto.
-            await ServiçoPublicacaoFeed.createPost(postData);
+            await feedPublicationService.createPost(formData);
 
             navigate('/feed');
 
@@ -70,13 +82,18 @@ export const HookCriarPost = () => {
         } finally {
             setIsProcessing(false);
         }
-    }; 
+    };
 
-    const handleMediaChange = (event: React.ChangeEvent<HTMLInputElement>) => {};
-    const handleRemoveMedia = (index: number) => {};
-    const saveLocation = () => {};
-    const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {};
-    const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {};
+    const handleMediaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const newFiles = Array.from(event.target.files);
+            updateField('arquivosMidia', [...dadosPost.arquivosMidia, ...newFiles]);
+        }
+    };
+
+    const handleRemoveMedia = (index: number) => {
+        updateField('arquivosMidia', dadosPost.arquivosMidia.filter((_, i) => i !== index));
+    };
 
     return {
         dadosPost,
@@ -88,13 +105,15 @@ export const HookCriarPost = () => {
         handleRemoveMedia,
         handleBack,
         handlePublishClick,
-        saveLocation,
-        handleCountryChange,
-        handleStateChange,
         avatarUrl: currentUser?.avatar_url,
         username: currentUser?.username,
-        isLocationModalOpen: false, 
+        navigate,
+        // Mock de propriedades restantes para manter a compatibilidade da UI
+        isLocationModalOpen: false,
         setIsLocationModalOpen: () => {},
+        saveLocation: () => {},
+        handleCountryChange: () => {},
+        handleStateChange: () => {},
         targetCountry: '', 
         targetState: '',
         targetCity: '',
@@ -102,6 +121,5 @@ export const HookCriarPost = () => {
         countries: [],
         states: [],
         cities: [],
-        navigate,
     };
 };
