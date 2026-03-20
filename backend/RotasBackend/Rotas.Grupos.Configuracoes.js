@@ -17,7 +17,8 @@ router.get('/:groupId/guidelines', gruposConfiguracoesControle.obterDiretrizes);
 router.put('/:groupId/guidelines', gruposConfiguracoesControle.atualizarDiretrizes);
 
 // Rotas de Configurações de Notificação
-router.get('/:groupId/notification-settings', gruposConfiguracoesControle.obterConfiguracoesNotificacao);
-router.put('/:groupId/notification-settings', gruposConfiguracoesControle.atualizarConfiguracoesNotificacao);
+// Corrigido: Usando os métodos genéricos para configurações
+router.get('/:groupId/notification-settings', gruposConfiguracoesControle.obterConfiguracoes);
+router.put('/:groupId/notification-settings', gruposConfiguracoesControle.atualizarConfiguracoes);
 
 export default router;
