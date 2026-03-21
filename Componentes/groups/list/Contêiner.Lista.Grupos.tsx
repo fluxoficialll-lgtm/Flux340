@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Group, ChatMessage } from '../../../types';
-import { GroupMenuDropdown } from './GroupMenuDropdown';
-import { simulationData } from '@/ServiçosFrontend/ServiçoDeSimulação';
+import { Group } from '../../../types';
+import { CardMenuConteinerListaGrupo } from './Card.Menu.Conteiner.Lista.Grupo';
 import { useConfiguracaoGrupo } from '../../../hooks/Hook.Configuracao.Grupo';
 
 interface GroupListItemProps {
@@ -27,47 +26,15 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     onDelete
 }) => {
     const navigate = useNavigate();
-    const { resolverAcaoDoClique } = useConfiguracaoGrupo(); // Usando o nosso novo hook
-    const isCreator = group.donoId === currentUserEmail; // ATUALIZADO: creatorEmail -> donoId
+    const { resolverAcaoDoClique } = useConfiguracaoGrupo();
+    const isCreator = group.donoId === currentUserEmail;
 
-    const allChats = simulationData.chats;
-    const groupChats = Object.values(allChats).filter(chat => {
-        const chatIdStr = chat.id.toString();
-        return chatIdStr === group.id || chatIdStr.startsWith(`${group.id}_`);
-    });
-
-    let lastMsg: ChatMessage | null = null;
-    groupChats.forEach(chat => {
-        if (chat.messages && chat.messages.length > 0) {
-            const latestInChat = chat.messages[chat.messages.length - 1];
-            if (!lastMsg || new Date(latestInChat.timestamp) > new Date(lastMsg.timestamp)) {
-                lastMsg = latestInChat;
-            }
-        }
-    });
-
-    let displayMsg = '';
-    let displayTime = '';
-
-    if (lastMsg) {
-        const sender = (lastMsg.senderEmail || lastMsg.senderId || '').toLowerCase();
-        const isMe = sender === currentUserEmail?.toLowerCase();
-        
-        const prefix = isMe ? 'Você: ' : (lastMsg.senderName ? `${lastMsg.senderName}: ` : '');
-        
-        const content = lastMsg.contentType === 'text' ? lastMsg.text : 
-                       (lastMsg.contentType === 'image' ? '📷 Foto' : 
-                       (lastMsg.contentType === 'video' ? '🎥 Vídeo' : 
-                       (lastMsg.contentType === 'audio' ? '🎤 Áudio' : '📎 Arquivo')));
-        
-        displayMsg = prefix + content;
-        displayTime = new Date(lastMsg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-    } else {
-        // ATUALIZADO: group.description -> group.descricao
-        displayMsg = group.isSalesPlatformEnabled ? 'Acesse o catálogo do grupo' : (group.descricao || 'Toque para abrir a comunidade');
-        displayTime = 'Novo';
-    }
+    // Lógica de simulação de chat removida.
+    // A informação da última mensagem deve vir do backend.
+    const displayMsg = group.isSalesPlatformEnabled 
+        ? 'Acesse o catálogo do grupo' 
+        : (group.descricao || 'Toque para abrir a comunidade');
+    const displayTime = 'Novo';
 
     const handleItemClick = () => {
         if (group.navigateTo) {
@@ -84,7 +51,6 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     return (
         <div className="group-preview flex items-center p-3 border-b border-white/5 cursor-pointer transition-all relative" onClick={handleItemClick}>
             <div className="group-avatar w-[50px] h-[50px] rounded-full mr-4 border-2 border-[#00c2ff] bg-[#00c2ff33] flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
-                {/* ATUALIZADO: coverImage -> imagemCapa, name -> nome, isVip -> tipo === 'pago' */}
                 {group.imagemCapa ? (
                     <img src={group.imagemCapa} alt={group.nome} className="w-full h-full object-cover" />
                 ) : (
@@ -94,7 +60,6 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
             
             <div className="group-info flex flex-col flex-grow min-w-0 mr-2.5">
                 <div className="groupname font-bold text-base mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis text-white">
-                    {/* ATUALIZADO: name -> nome */}
                     {group.nome}
                 </div>
                 <div className={`last-message text-sm whitespace-nowrap overflow-hidden text-ellipsis ${unreadCount > 0 ? 'text-white font-semibold' : 'text-gray-400'}`}>
@@ -118,7 +83,7 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
                     <button className="group-menu-btn absolute right-1 top-1 text-gray-500 p-2 cursor-pointer z-[5]" onClick={onToggleMenu}>
                         <i className="fa-solid fa-ellipsis"></i>
                     </button>
-                    <GroupMenuDropdown 
+                    <CardMenuConteinerListaGrupo 
                         group={group} 
                         isActive={isMenuActive} 
                         onTracking={onTracking}

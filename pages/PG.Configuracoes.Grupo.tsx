@@ -7,55 +7,81 @@ import { SessaoZonaCritica } from '../Componentes/ComponentesDeGroups/SessaoZona
 import { SessaoConfiguracoesDeMarketing } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeMarketing';
 import { SessaoConfiguracoesDeAuditoria } from '../Componentes/ComponentesDeGroups/SessaoConfiguracoesDeAuditoria';
 import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupos.js';
-import { mockGroupDetails } from '../ServiçosFrontend/ServiçoDeSimulação/simulacoes/Simulacao.Grupo.Detalhes.ts';
 
 export const PG_Configuracoes_Grupo: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
-    // Using simulated data from the correct export to prevent infinite loading
-    const group = mockGroupDetails[id] || Object.values(mockGroupDetails)[0];
-    const loading = false; // Forcing loading to be false
-    const isOwner = true; // Assuming owner for full access in dev
-    const refreshGroup = () => console.log("Refresh triggered"); // Mock refresh function
+    // Estados para dados, carregamento, erros e propriedade
+    const [group, setGroup] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [isOwner, setIsOwner] = useState(false); // Assumir falso por padrão
 
+    // Estado para a plataforma de vendas
     const [isSalesPlatformEnabled, setIsSalesPlatformEnabled] = useState(false);
 
-    useEffect(() => {
-        if (group) {
-            setIsSalesPlatformEnabled(group.isSalesPlatformEnabled || false);
+    // Função para buscar dados do grupo
+    const fetchGroupData = async () => {
+        if (!id) {
+            setError("ID do grupo não fornecido.");
+            setLoading(false);
+            return;
         }
-    }, [group]);
+        setLoading(true);
+        try {
+            // Assumindo que o groupSystem tem um método para buscar detalhes do grupo
+            // O ideal é ter um sistema de autenticação para verificar a propriedade real
+            const { data: groupData } = await groupSystem.getGroupDetails(id); 
+            setGroup(groupData);
+            setIsSalesPlatformEnabled(groupData.isSalesPlatformEnabled || false);
+            
+            // Simplesmente assumindo a propriedade para fins de desenvolvimento, como antes
+            // TODO: Substituir pela verificação de propriedade real (ex: `groupData.ownerId === currentUser.id`)
+            setIsOwner(true); 
+
+        } catch (err) {
+            console.error("Falha ao buscar detalhes do grupo:", err);
+            setError("Não foi possível carregar as configurações do grupo.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Efeito para buscar os dados na montagem do componente
+    useEffect(() => {
+        fetchGroupData();
+    }, [id]);
 
     const handleToggleSalesPlatform = async () => {
         if (!id) return;
 
         const originalState = isSalesPlatformEnabled;
         const newState = !isSalesPlatformEnabled;
-
-        // Optimistic UI update
         setIsSalesPlatformEnabled(newState);
 
         try {
-            // Service call to persist the change
             await groupSystem.updateGroupSettings(id, { isSalesPlatformEnabled: newState });
-            // Optional: force group data update for consistency
-            if (refreshGroup) {
-                refreshGroup();
-            }
+            fetchGroupData(); // Re-sincronizar com o backend
         } catch (error) {
-            console.error("Failed to update Hub Mode:", error);
-            // Revert UI state in case of error
+            console.error("Falha ao atualizar o Modo Hub:", error);
             setIsSalesPlatformEnabled(originalState);
-            // Optional: show an error notification to the user
-            alert("Could not save your change. Please try again.");
+            alert("Não foi possível salvar sua alteração. Tente novamente.");
         }
     };
 
-    if (!group) { // Simplified check since loading is always false
+    if (loading) {
         return (
             <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
-                <p>Grupo não encontrado.</p>
+                <p>Carregando...</p>
+            </div>
+        );
+    }
+
+    if (error || !group) {
+        return (
+            <div className="min-h-screen bg-[#0c0f14] flex items-center justify-center text-white">
+                <p>{error || "Grupo não encontrado."}</p>
             </div>
         );
     }
@@ -79,7 +105,7 @@ export const PG_Configuracoes_Grupo: React.FC = () => {
                 <button onClick={() => navigate(-1)} className="bg-none border-none text-white text-2xl cursor-pointer pr-4">
                     <i className="fa-solid fa-arrow-left"></i>
                 </button>
-                <h1 className="font-bold text-lg text-white">Community Management</h1>
+                <h1 className="font-bold text-lg text-white">configurações grupo</h1>
             </header>
 
             <main className="pt-[85px] pb-[100px] w-full max-w-2xl mx-auto px-5 overflow-y-auto flex-grow no-scrollbar">

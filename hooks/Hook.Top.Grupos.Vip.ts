@@ -1,10 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-// CORREÇÃO: A importação do groupService foi removida.
-// import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { servicoDeSimulacao } from '../ServiçosFrontend/ServiçoDeSimulação';
 import { Group } from '../types';
 
 export const HookTopGruposVip = () => {
@@ -12,10 +9,12 @@ export const HookTopGruposVip = () => {
   const [rankedGroups, setRankedGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // A lógica de carregamento de dados foi simplificada, pois a fonte de dados original (simulação) foi removida.
+  // TODO: Implementar a busca de dados de grupos VIP a partir do serviço de backend real.
   const loadData = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-        // CORREÇÃO: Lógica de busca de grupos removida.
+        // Por enquanto, apenas define um array vazio.
         setRankedGroups([]);
     } catch (e) {
         console.error("Erro ao carregar ranking VIP:", e);
@@ -25,15 +24,15 @@ export const HookTopGruposVip = () => {
   }, []);
 
   useEffect(() => {
+    // Carrega os dados na montagem do componente.
+    // A inscrição no serviço de simulação foi removida.
     loadData();
-    const unsubscribe = servicoDeSimulacao.subscribe('groups', () => loadData(true));
-    return () => unsubscribe();
   }, [loadData]);
 
   const handleGroupAction = useCallback((group: Group) => {
       const currentUserId = authService.getCurrentUserId();
       if (!currentUserId) {
-          // Poderia navegar para o login ou mostrar um modal
+          // Ação para usuário não logado, como navegar para a página de login.
           return;
       }
       const isMember = group.memberIds?.includes(currentUserId);

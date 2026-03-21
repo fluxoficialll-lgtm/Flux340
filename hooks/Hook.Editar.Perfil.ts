@@ -28,7 +28,7 @@ export const useEditProfile = () => {
   const [rawImage, setRawImage] = useState<string>('');
 
   useEffect(() => {
-      const user: Usuario | null = authService.getCurrentUser();
+      const user: Usuario | null = authService.getState().user;
       if (!user) {
           navigate('/');
           return;

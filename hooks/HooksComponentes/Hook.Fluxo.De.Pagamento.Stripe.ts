@@ -5,9 +5,6 @@ import { ServicoGestaoCredencialStripe as stripeService } from '../../ServiçosF
 import { Group } from '../../types';
 import { GeoData } from '../../ServiçosFrontend/geoService';
 import { ConversionResult } from '../../ServiçosFrontend/currencyService';
-// CORREÇÃO: Importando o serviço de simulação para evitar chamadas de API desnecessárias.
-import { servicoDeSimulacao } from '../../ServiçosFrontend/ServiçoDeSimulação';
-
 
 // --- TIPOS ---
 export type StripeView = 
@@ -54,13 +51,6 @@ export const useFluxoDePagamentoStripe = (props: UseFluxoDePagamentoStripeProps)
     // Carrega a instância do Stripe
     useEffect(() => {
         const load = async () => {
-            // CORREÇÃO: Se estiver em modo de simulação, não tentamos buscar uma chave real do Stripe.
-            // Isso previne o erro "Internal Server Error" e mantém a UI visível.
-            if (servicoDeSimulacao.estaAtivo()) {
-                console.log("[SIMULAÇÃO] A inicialização do Stripe foi ignorada no modo de simulação.");
-                return;
-            }
-
             try {
                 const response = await stripeService.getPublishableKey(group.creatorEmail);
                 const publicKey = response.publicKey;
@@ -80,11 +70,6 @@ export const useFluxoDePagamentoStripe = (props: UseFluxoDePagamentoStripeProps)
 
     const generatePayment = useCallback(async (method: string) => {
         if (!stripe) {
-            // Em simulação, o Stripe não é inicializado, então este erro pode ser ignorado.
-            if (servicoDeSimulacao.estaAtivo()) {
-                console.log(`[SIMULAÇÃO] A geração de pagamento para o método ${method} foi interceptada.`);
-                return;
-            }
             onError("O Stripe não foi inicializado corretamente.");
             return;
         }

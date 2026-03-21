@@ -2,14 +2,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Group } from '../../../types';
 
-interface GroupMenuDropdownProps {
+interface CardMenuConteinerListaGrupoProps {
     group: Group;
     isActive: boolean;
     onTracking: (e: React.MouseEvent) => void;
     onDelete: (e: React.MouseEvent) => void;
 }
 
-export const GroupMenuDropdown: React.FC<GroupMenuDropdownProps> = ({ 
+export const CardMenuConteinerListaGrupo: React.FC<CardMenuConteinerListaGrupoProps> = ({ 
     group, 
     isActive, 
     onTracking, 
@@ -97,16 +97,16 @@ export const GroupMenuDropdown: React.FC<GroupMenuDropdownProps> = ({
                     <span className="btn-label">Configurações</span>
                 </button>
 
-                {group.isVip && (
+                {group.tipo === 'pago' && (
                     <button className="dropdown-btn" onClick={(e) => { e.stopPropagation(); navigate(`/vip-group-sales/${group.id}`); }}>
                         <i className="fa-solid fa-eye icon-preview"></i>
-                        <span className="btn-label">Preview de Venda</span>
+                        <span className="btn-label">Prévia da porta do grupo pago</span>
                     </button>
                 )}
 
                 <button className="dropdown-btn" onClick={onTracking}>
                     <i className="fa-solid fa-link icon-tracking"></i>
-                    <span className="btn-label">Rastreamento</span>
+                    <span className="btn-label">Criar link</span>
                 </button>
 
                 <div className="h-px bg-white/5 my-1 mx-2"></div>

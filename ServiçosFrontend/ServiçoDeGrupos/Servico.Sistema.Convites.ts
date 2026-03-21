@@ -1,8 +1,13 @@
 
 // Arquivo: ServiçosFrontend/ServiçoDeGrupos/Servico.Sistema.Convites.ts
 
-import API_Sistema_Convites from '../APIs/APIsServicoGrupos/API.Sistema.Convites';
+import { config } from '../ValidaçãoDeAmbiente/config';
+import * as mockApi from '../ServiçoDeSimulação/simulacoes/Simulacao.Grupo.Config.Convites';
+import realApi from '../APIs/APIsServicoGrupos/API.Sistema.Convites';
 // import ServicoLog from '../ServicoLogs/ServicoDeLog';
+
+// Use a simulação se VITE_APP_ENV for 'simulation', caso contrário, use a API real.
+const API_Sistema_Convites = config.VITE_APP_ENV === 'simulation' ? mockApi : realApi;
 
 const contextoBase = "Servico.Sistema.Convites";
 

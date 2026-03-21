@@ -5,7 +5,6 @@ import { Grupo } from '../../../types/Saida/Types.Estrutura.Grupos';
  * @file Dados simulados para os grupos que pertencem ao usuário ou dos quais ele participa.
  */
 
-const ID_USUARIO_SIMULADO = 'user-123-simulado';
 
 export const mockMeusGrupos: Grupo[] = [
   {
@@ -13,7 +12,7 @@ export const mockMeusGrupos: Grupo[] = [
     nome: 'Clube do Livro Secreto',
     descricao: 'Discussões literárias sem spoilers. Apenas para membros convidados.',
     tipo: 'privado',
-    donoId: ID_USUARIO_SIMULADO,
+    donoId: 'qualquer@email.com',
     dataCriacao: '2023-10-26T10:00:00Z',
     imagemCapa: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200',
     tipoAcesso: 'convite',
@@ -25,7 +24,7 @@ export const mockMeusGrupos: Grupo[] = [
     tipo: 'pago',
     preco: 99.90,
     moeda: 'BRL',
-    donoId: ID_USUARIO_SIMULADO,
+    donoId: 'qualquer@email.com',
     dataCriacao: '2024-01-15T14:30:00Z',
     limiteMembros: 100,
     imagemCapa: 'https://images.unsplash.com/photo-1640622300473-977435c38c04?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200',
