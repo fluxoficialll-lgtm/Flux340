@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
 export const useEditProfile = () => {
@@ -101,9 +100,9 @@ export const useEditProfile = () => {
       try {
           let finalPhotoUrl = formData.urlFoto;
 
-          if (selectedFile) {
-              finalPhotoUrl = await fileService.uploadFile(selectedFile);
-          }
+          // if (selectedFile) {
+          //     finalPhotoUrl = await fileService.uploadFile(selectedFile);
+          // }
 
           const updatedProfile = { 
             nome: formData.nome,

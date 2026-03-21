@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import { AdCampaign } from '../types';
 
 export const HookDesempenhoCampanha = () => {
@@ -34,20 +33,20 @@ export const HookDesempenhoCampanha = () => {
         setLoading(true);
         setError(null);
         try {
-            const selectedCamp = adService.getCampaignById(id);
-            if (selectedCamp) {
-                setCampaign(selectedCamp);
-                setEditCopy(selectedCamp.creative?.text || '');
-                setEditCta(selectedCamp.placementCtas?.[previewTab] || selectedCamp.ctaButton || 'saiba mais');
-                setEditMediaUrl(selectedCamp.placementCreatives?.[previewTab]?.mediaUrl || selectedCamp.creative?.mediaUrl);
-                setEditMediaType(selectedCamp.placementCreatives?.[previewTab]?.mediaType || selectedCamp.creative?.mediaType || 'image');
+            // const selectedCamp = adService.getCampaignById(id);
+            // if (selectedCamp) {
+            //     setCampaign(selectedCamp);
+            //     setEditCopy(selectedCamp.creative?.text || '');
+            //     setEditCta(selectedCamp.placementCtas?.[previewTab] || selectedCamp.ctaButton || 'saiba mais');
+            //     setEditMediaUrl(selectedCamp.placementCreatives?.[previewTab]?.mediaUrl || selectedCamp.creative?.mediaUrl);
+            //     setEditMediaType(selectedCamp.placementCreatives?.[previewTab]?.mediaType || selectedCamp.creative?.mediaType || 'image');
 
-                const perfData = await adService.getCampaignPerformance(id);
-                if (perfData) setMetrics(perfData);
-                else setError("Não foi possível processar as métricas desta campanha.");
-            } else {
-                setError("Campanha não encontrada no banco de dados.");
-            }
+            //     const perfData = await adService.getCampaignPerformance(id);
+            //     if (perfData) setMetrics(perfData);
+            //     else setError("Não foi possível processar as métricas desta campanha.");
+            // } else {
+            //     setError("Campanha não encontrada no banco de dados.");
+            // }
         } catch (err) {
             console.error("Dashboard error:", err);
             setError("Ocorreu um erro ao sincronizar os dados.");
@@ -92,7 +91,7 @@ export const HookDesempenhoCampanha = () => {
                     [previewTab]: { mediaUrl: editMediaUrl, mediaType: editMediaType }
                 }
             };
-            await adService.updateCampaign(id, updates);
+            // await adService.updateCampaign(id, updates);
             setCampaign(prev => ({ ...prev, ...updates }));
             return true;
         } catch (e) {

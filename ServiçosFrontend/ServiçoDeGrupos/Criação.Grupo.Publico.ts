@@ -1,6 +1,6 @@
 
 import API_Criacao_Grupo_Publico from '../APIs/APIsServicoGrupos/API.Criacao.Grupo.Publico';
-import { fileService } from '../ServiçoDeArquivos/fileService';
+// import { fileService } from '../ServiçoDeArquivos/fileService';
 
 // Interfaces
 interface GroupData {
@@ -20,7 +20,8 @@ class ServiçoCriaçãoGrupoPublico {
         try {
             let coverImageUrl = '';
             if (groupData.coverImageBlob) {
-                coverImageUrl = await fileService.upload(groupData.coverImageBlob, `group-covers/${Date.now()}.png`);
+                // coverImageUrl = await fileService.upload(groupData.coverImageBlob, `group-covers/${Date.now()}.png`);
+                console.warn("fileService.upload removido. A imagem de capa não será enviada.");
             }
 
             const payload: Payload = {

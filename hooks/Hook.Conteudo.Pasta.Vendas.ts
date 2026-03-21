@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // CORREÇÃO: A importação do groupService foi removida.
 // import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService';
-import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 import { Group, SalesFolder, Infoproduct } from '../types';
 

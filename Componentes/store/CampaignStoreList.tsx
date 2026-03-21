@@ -1,12 +1,9 @@
 import React, { useState, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdCampaign } from '../../types';
-import { adService } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import { useVipPricing } from '../../hooks/Hook.Precos.Vip';
 import { useModal } from '../ComponenteDeInterfaceDeUsuario/ModalSystem';
-// import { budgetManager } from '../../ServiçosFrontend/ServiçoDeAds/engine/BudgetManager';
 
-// Lazy load do modal de pagamento para manter performance
 const PaymentFlowModal = lazy(() => import('../ComponentesDeProvedores/PaymentFlowModal').then(m => ({ default: m.PaymentFlowModal })));
 
 interface CampaignStoreListProps {
@@ -29,7 +26,6 @@ export const CampaignStoreList: React.FC<CampaignStoreListProps> = ({ campaigns,
     const [paymentCampaign, setPaymentCampaign] = useState<AdCampaign | null>(null);
     const [topUpAmount, setTopUpAmount] = useState<number>(0);
 
-    // Utilizamos o hook de precificação inteligente para converter o orçamento para a moeda local do anunciante
     const { geoData, displayPriceInfo } = useVipPricing(
         paymentCampaign ? {
             id: paymentCampaign.id,
@@ -71,11 +67,6 @@ export const CampaignStoreList: React.FC<CampaignStoreListProps> = ({ campaigns,
 
     const handlePaymentSuccess = async () => {
         if (paymentCampaign) {
-            if (topUpAmount > 0) {
-                await adService.addBudget(paymentCampaign.id, topUpAmount);
-            } else {
-                await adService.updateCampaignStatus(paymentCampaign.id, 'active');
-            }
             setPaymentCampaign(null);
             setTopUpAmount(0);
         }
@@ -180,9 +171,7 @@ export const CampaignStoreList: React.FC<CampaignStoreListProps> = ({ campaigns,
             `}</style>
             
             {campaigns.length > 0 ? campaigns.map(camp => {
-                // Nova lógica: Só mostra Adicionar Saldo se a campanha estiver ativa e sem saldo
                 const isActive = camp.status === 'active';
-                // const isDepleted = !budgetManager.hasAvailableBudget(camp);
                 const isDepleted = false;
                 const showTopUp = isActive && camp.pricingModel !== 'commission' && isDepleted;
 
@@ -296,14 +285,14 @@ export const CampaignStoreList: React.FC<CampaignStoreListProps> = ({ campaigns,
                     <PaymentFlowModal 
                         isOpen={!!paymentCampaign}
                         onClose={() => { setPaymentCampaign(null); setTopUpAmount(0); }}
-                        group={{
+                        group={({
                             id: paymentCampaign.id,
                             name: topUpAmount > 0 ? `Recarga: ${paymentCampaign.name}` : `Anúncio: ${paymentCampaign.name}`,
                             price: (topUpAmount || paymentCampaign.budget).toString(),
                             currency: 'BRL',
                             creatorEmail: paymentCampaign.ownerEmail,
                             isVip: false
-                        } as any}
+                        }) as any}
                         provider={geoData?.countryCode === 'BR' ? 'syncpay' : 'stripe'}
                         convertedPriceInfo={displayPriceInfo}
                         geo={geoData}

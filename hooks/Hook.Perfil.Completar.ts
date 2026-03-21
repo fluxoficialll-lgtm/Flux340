@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
-import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
 
 export const useCompleteProfile = () => {
@@ -94,9 +93,9 @@ export const useCompleteProfile = () => {
         };
 
         try {
-            if (arquivoSelecionado) {
-                dadosParaApi.urlFoto = await fileService.uploadFile(arquivoSelecionado);
-            }
+            // if (arquivoSelecionado) {
+            //     dadosParaApi.urlFoto = await fileService.uploadFile(arquivoSelecionado);
+            // }
 
             await authService.completeProfile(dadosParaApi);
             

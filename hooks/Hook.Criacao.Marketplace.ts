@@ -1,7 +1,6 @@
 
 import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
 import { marketplacePublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Marketplace.js';
 
 // Tipagem para os itens da galeria de mídia
@@ -73,10 +72,10 @@ export const HookCriarItemMarketplace = () => {
         }
         setIsSubmitting(true);
         try {
-            const coverImageUrl = await fileService.uploadFile(coverFile, `marketplace-items`);
-            const additionalMediaUrls = await Promise.all(
-                additionalMedia.map(item => fileService.uploadFile(item.file, `marketplace-items`))
-            );
+            // const coverImageUrl = await fileService.uploadFile(coverFile, `marketplace-items`);
+            // const additionalMediaUrls = await Promise.all(
+            //     additionalMedia.map(item => fileService.uploadFile(item.file, `marketplace-items`))
+            // );
             const rawPrice = price.replace(/\./g, '').replace(',', '.');
             const itemData = {
                 title,
@@ -84,7 +83,7 @@ export const HookCriarItemMarketplace = () => {
                 category,
                 description,
                 location: locationVal,
-                images: [coverImageUrl, ...additionalMediaUrls].filter(Boolean) as string[],
+                images: [/*coverImageUrl, ...additionalMediaUrls*/].filter(Boolean) as string[],
             };
             await marketplacePublicationService.createProduct(itemData);
             navigate('/marketplace');

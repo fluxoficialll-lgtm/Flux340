@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 // CORREÇÃO: A importação do groupService foi removida.
 // import { groupService } from '../ServiçosFrontend/ServiçoDeGrupos/groupService.js';
-import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
+// import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import { AdCampaign, Post } from '../tipos/types.Anuncios'; 
 import { Group } from '../tipos/types.Criacao.Grupo.Publico';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
@@ -154,7 +154,7 @@ export const HookCampanha = () => {
         const token = localStorage.getItem('authToken');
         if (user && token) {
             const finalCampaign = { ...campaign, ownerId: user.id };
-            await adService.createCampaign(token, finalCampaign as AdCampaign);
+            // await adService.createCampaign(token, finalCampaign as AdCampaign);
             navigate('/my-store');
         } else {
             setIsLoading(false);

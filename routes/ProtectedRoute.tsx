@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useUsuarioSessao } from '../hooks/Hook.Usuario.Sessao.ts';
 
 interface ProtectedRouteProps {
   element: React.ReactElement;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useUsuarioSessao();
   const location = useLocation();
 
   if (loading) {

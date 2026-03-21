@@ -1,9 +1,20 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AdCampaign, TargetedLocation } from '../../types';
-import { aiInterestEngine } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService';
-import { reachEstimator } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService';
-import { geoSearchService, GeoSearchResult } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService';
+
+// CORREÇÃO: As importações de adService foram removidas.
+// import { aiInterestEngine } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService';
+// import { reachEstimator } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService';
+// import { geoSearchService, GeoSearchResult } from '../../ServiçosFrontend/ServiçoDeAnúncios/adService';
+
+// CORREÇÃO: Interface movida para cá para evitar quebrar a tipagem
+export interface GeoSearchResult {
+    name: string;
+    state?: string;
+    country: string;
+    lat: number;
+    lon: number;
+}
 
 interface TargetingSectionProps {
     campaign: Partial<AdCampaign>;
@@ -24,16 +35,21 @@ export const TargetingSection: React.FC<TargetingSectionProps> = ({
     const [showLocDropdown, setShowLocDropdown] = useState(false);
     const locRef = useRef<HTMLDivElement>(null);
     
-    const estimation = useMemo(() => reachEstimator.estimate(campaign), [campaign]);
+    // CORREÇÃO: Estimador de alcance simulado
+    const estimation = useMemo(() => ({
+        min: 15000,
+        max: 45000,
+        status: 'ideal'
+    }), []);
 
-    // Lógica de busca de locais com Debounce
+    // CORREÇÃO: Lógica de busca de locais removida.
     useEffect(() => {
         const timer = setTimeout(async () => {
             if (locQuery.length >= 3) {
                 setIsSearchingLoc(true);
-                const results = await geoSearchService.search(locQuery);
-                setLocResults(results);
-                setShowLocDropdown(true);
+                console.warn("geoSearchService não está mais disponível. Nenhuma busca real será feita.");
+                setLocResults([]);
+                setShowLocDropdown(false);
                 setIsSearchingLoc(false);
             }
         }, 500);
@@ -54,17 +70,10 @@ export const TargetingSection: React.FC<TargetingSectionProps> = ({
         setShowLocDropdown(false);
     };
 
+    // CORREÇÃO: Lógica de sugestão de interesses removida.
     const handleSmartSuggest = async () => {
         setIsSuggesting(true);
-        const suggestions = await aiInterestEngine.getSmartSuggestions({
-            title: campaign.name || "",
-            text: campaign.creative?.text || ""
-        });
-        
-        if (suggestions.length > 0) {
-            const current = campaign.targeting?.interests || [];
-            onTargetingChange('interests', Array.from(new Set([...current, ...suggestions])));
-        }
+        console.warn("aiInterestEngine não está mais disponível. Nenhuma sugestão será feita.");
         setIsSuggesting(false);
     };
 

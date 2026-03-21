@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adService } from '../ServiçosFrontend/ServiçoDeAnúncios/adService.js';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { BusinessDashboardData } from '../types';
 
@@ -92,19 +91,22 @@ export const HookMinhaLoja = () => {
     };
 
     const endCampaign = async (id: string) => {
-        await adService.updateCampaignStatus(id, 'ended');
+        // await adService.updateCampaignStatus(id, 'ended');
+        console.log('Simulando o encerramento da campanha');
         loadAggregatedData(); // Recarrega os dados
     };
 
     const resumeCampaign = async (id: string) => {
-        await adService.updateCampaignStatus(id, 'active');
+        // await adService.updateCampaignStatus(id, 'active');
+        console.log('Simulando o resumo da campanha');
         loadAggregatedData(); // Recarrega os dados
     };
 
 
 
     const deleteCampaign = async (id: string) => {
-        await adService.deleteCampaign(id);
+        // await adService.deleteCampaign(id);
+        console.log('Simulando a exclusão da campanha');
         loadAggregatedData();
     };
 

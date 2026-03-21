@@ -1,6 +1,6 @@
 
 import API_Criacao_Grupo_Pago from '../APIs/APIsServicoGrupos/API.Criacao.Grupo.Pago';
-import { fileService } from '../ServiçoDeArquivos/fileService';
+// import { fileService } from '../ServiçoDeArquivos/fileService';
 
 // Interfaces
 interface MediaGalleryItem {
@@ -74,7 +74,8 @@ class ServiçoCriaçãoGrupoPago {
             const finalMediaGallery: MediaGalleryItem[] = [];
 
             if (selectedCoverFile) {
-                finalCoverUrl = await fileService.upload(selectedCoverFile, `group-covers/${Date.now()}_${selectedCoverFile.name}`);
+                // finalCoverUrl = await fileService.upload(selectedCoverFile, `group-covers/${Date.now()}_${selectedCoverFile.name}`);
+                console.warn("fileService.upload removido. A imagem de capa não será enviada.");
                 filesUploadedCount++;
                 onProgress((filesUploadedCount / filesToUpload.length) * 100, filesUploadedCount, filesToUpload.length);
             }
@@ -82,8 +83,9 @@ class ServiçoCriaçãoGrupoPago {
             const vipItemsWithFiles = vipMediaItems.filter(item => item.file);
             for (const item of vipItemsWithFiles) {
                 if(item.file) {
-                    const uploadedUrl = await fileService.upload(item.file, `vip-door-media/${Date.now()}_${item.file.name}`);
-                    finalMediaGallery.push({ url: uploadedUrl, type: item.type });
+                    // const uploadedUrl = await fileService.upload(item.file, `vip-door-media/${Date.now()}_${item.file.name}`);
+                    console.warn("fileService.upload removido. O arquivo de mídia VIP não será enviado.");
+                    // finalMediaGallery.push({ url: uploadedUrl, type: item.type });
                     filesUploadedCount++;
                     onProgress((filesUploadedCount / filesToUpload.length) * 100, filesUploadedCount, filesToUpload.length);
                 }
