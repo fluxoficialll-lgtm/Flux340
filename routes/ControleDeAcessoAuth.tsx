@@ -24,12 +24,12 @@ export const ControleDeAcessoAuth: React.FC<ControleDeAcessoAuthProps> = ({ elem
   }
 
   // Se o usuário está logado e o perfil está completo, redireciona para o feed
-  if (user && user.profile_completed) {
+  if (user && user.perfilCompleto) {
     return <Navigate to="/feed" replace />;
   }
 
   // Se o usuário está logado, mas o perfil não está completo, redireciona para a página de completar perfil
-  if (user && !user.profile_completed) {
+  if (user && !user.perfilCompleto) {
     return <Navigate to="/complete-profile" replace />;
   }
 

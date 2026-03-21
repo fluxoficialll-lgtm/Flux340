@@ -6,6 +6,7 @@ import { Usuario } from '../../../types/Saida/Types.Estrutura.Usuario';
 import { metodoGoogle } from './Servico.Metodo.Google';
 import { metodoEmailSenha } from './Servico.Metodo.Email.Senha';
 import authApi from '../APIs/authApi';
+import { mockServicoPerfilUsuario } from '../ServiçoDeSimulação/simulacoes/Simulacao.Perfil.Usuario';
 
 // --- Types & Interfaces ---
 interface User extends Usuario { /* ... existing properties ... */ }
@@ -30,7 +31,6 @@ const createAuthService = (baseService: any) => {
         const oldState = { ...currentState };
         currentState = { ...currentState, ...newState };
 
-        // Deep comparison for user object
         const userChanged = oldState.user?.id !== currentState.user?.id || JSON.stringify(oldState.user) !== JSON.stringify(currentState.user);
 
         if (oldState.loading !== currentState.loading || oldState.error !== currentState.error || userChanged) {
@@ -44,7 +44,6 @@ const createAuthService = (baseService: any) => {
     };
 
     const initialize = async () => {
-        // Cancel any pending validation
         if (validationController) {
             validationController.abort();
         }
@@ -103,7 +102,18 @@ const createAuthService = (baseService: any) => {
             setState({ user: null, loading: false, error: null });
         },
 
-        // ... other methods like register, updateProfile, etc. would follow the same pattern ...
+        async completeProfile(profileData: Partial<Usuario>) {
+            setState({ loading: true, error: null });
+            try {
+                const updatedUser = await baseService.completeProfile(profileData);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setState({ user: updatedUser, loading: false });
+                return updatedUser;
+            } catch (error: any) {
+                setState({ loading: false, error });
+                throw error;
+            }
+        },
     };
     
     // Auto-initialize on creation
@@ -130,10 +140,31 @@ const dummyBaseService = {
             });
         });
     },
-    login: async (dados: LoginDto) => ({ token: 'abc', user: {id: '1', nome: 'Teste'} as User }),
+    login: async (dados: LoginDto) => ({ token: 'abc-simulated', user: await mockServicoPerfilUsuario.getOwnProfile() as User }),
     logout: () => {
         localStorage.removeItem('userToken');
         localStorage.removeItem('user');
+    },
+    completeProfile: async (profileData: Partial<Usuario>): Promise<User> => {
+        console.log("SIMULAÇÃO: Chamando completeProfile com dados:", profileData);
+        const currentUser = dummyBaseService.getCurrentUser();
+        if (!currentUser) {
+            throw new Error("Usuário não encontrado na simulação.");
+        }
+
+        // Simula a atualização do perfil
+        const updatedUser = {
+            ...currentUser,
+            ...profileData,
+            perfilCompleto: true, // A mágica acontece aqui!
+        };
+        
+        console.log("SIMULAÇÃO: Perfil do usuário atualizado:", updatedUser);
+        
+        // Simula uma pequena latência de rede
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        return updatedUser as User;
     }
 };
 
@@ -141,4 +172,3 @@ const dummyBaseService = {
 // --- Singleton Export ---
 const authService = createAuthService(dummyBaseService);
 export default authService;
-
