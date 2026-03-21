@@ -4,12 +4,12 @@ import { HookFeed } from '../hooks/Hook.Feed';
 import { useModal } from '../Componentes/ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { Footer } from '../Componentes/layout/Footer';
 import { MainHeader } from '../Componentes/layout/MainHeader';
-import { Post } from '../tipos';
+import { PublicacaoFeed } from '../types/Saida/Types.Estrutura.Publicacao.Feed';
 
-// Importando os novos containers independentes
-import { ContainerFeedPadrao } from '../Componentes/ComponentesDeFeed/Container.Feed.Padrao';
-import { ContainerFeedEnquete } from '../Componentes/ComponentesDeFeed/Container.Feed.Enquete';
-import { ContainerFeedGrupo } from '../Componentes/ComponentesDeFeed/Container.Feed.Grupo';
+// Importando os componentes de post CORRETAMENTE
+import ContainerFeedPadrao from '../Componentes/ComponentesDeFeed/Container.Feed.Padrao'; // Este tem export default
+import { ContainerFeedEnquete } from '../Componentes/ComponentesDeFeed/Container.Feed.Enquete'; // Este tem export nomeado
+import { ContainerFeedGrupo } from '../Componentes/ComponentesDeFeed/Container.Feed.Grupo';     // Este tem export nomeado
 
 export const Feed: React.FC = () => {
   const {
@@ -27,7 +27,7 @@ export const Feed: React.FC = () => {
   };
 
   // Função que decide qual componente de post renderizar
-  const renderPost = (post: Post) => {
+  const renderPost = (post: PublicacaoFeed & { type?: string }) => { // Adicionado type opcional para compatibilidade
     const commonProps = {
         key: post.id,
         post: post,
@@ -39,10 +39,16 @@ export const Feed: React.FC = () => {
         onShare: () => handlePostShare(post),
     };
 
+    // A propriedade `type` não existe em `PublicacaoFeed`, então o switch não funcionará como antes.
+    // Para corrigir o fluxo de forma completa, seria necessário unificar os tipos de post.
+    // Por enquanto, renderizamos apenas o padrão, que é o foco da nossa depuração.
     switch (post.type) {
         case 'group':
+            // O ContainerFeedGrupo espera props específicas que `PublicacaoFeed` pode não ter.
+            // Precisaríamos de um adaptador aqui ou unificar os tipos.
             return <ContainerFeedGrupo {...commonProps} />;
         case 'poll':
+            // O ContainerFeedEnquete também espera props específicas.
             return <ContainerFeedEnquete {...commonProps} onVote={(postId, index) => handlePostVote(postId, index)} />;
         default:
             return <ContainerFeedPadrao {...commonProps} />;
@@ -77,7 +83,7 @@ export const Feed: React.FC = () => {
       <main ref={scrollContainerRef} onScroll={handleContainerScroll} className="flex-grow w-full overflow-y-auto overflow-x-hidden relative pt-[140px] no-scrollbar">
         <div className="w-full max-w-[500px] mx-auto pb-[100px] px-3">
             {posts.length > 0 ? (
-                posts.filter(Boolean).map(renderPost)
+                posts.filter(p => p && p.autor).map(renderPost)
             ) : !loading && (
                 <div className="text-center text-gray-500 mt-20 animate-fade-in">
                     <i className="fa-solid fa-ghost text-4xl opacity-30 mb-3"></i>
@@ -128,3 +134,6 @@ export const Feed: React.FC = () => {
     </div>
   );
 };
+
+
+

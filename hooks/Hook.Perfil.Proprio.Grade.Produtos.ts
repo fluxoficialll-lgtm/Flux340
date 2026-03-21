@@ -1,20 +1,30 @@
 
 import { useState, useEffect } from 'react';
-
-// O marketplaceService foi removido, então este hook não buscará mais produtos.
-// Ele agora retorna uma lista vazia para garantir que a UI não quebre.
+import { marketplacePublicationService as ServiçoPublicacaoMarketplace } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Marketplace';
+import { PublicacaoMarketplace } from '../types/Saida/Types.Estrutura.Publicacao.Marketplace';
 
 export const usePerfilProprioGradeProdutos = (userId: string) => {
-  const [produtos, setProdutos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false); // Inicia como false, pois não há carregamento
+  const [produtos, setProdutos] = useState<PublicacaoMarketplace[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // A lógica de busca foi removida porque o marketplaceService não existe mais.
-    // O hook agora simplesmente gerencia um estado de produtos vazio.
+    const fetchProdutos = async () => {
+      try {
+        setLoading(true);
+        const todosOsProdutos = await ServiçoPublicacaoMarketplace.getProducts();
+        // Corrigido: Filtrar por usuarioId em vez de userId
+        const produtosDoUsuario = todosOsProdutos.filter(produto => produto.usuarioId === userId);
+        setProdutos(produtosDoUsuario);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (userId) {
-        console.log("marketplaceService não encontrado. Produtos do usuário não serão carregados para o perfil.");
-        setProdutos([]); // Garante que a lista de produtos esteja sempre vazia
+      fetchProdutos();
     }
   }, [userId]);
 

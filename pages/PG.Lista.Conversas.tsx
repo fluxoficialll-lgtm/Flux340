@@ -12,7 +12,7 @@ import { CardPesquisarConversas } from '../Componentes/ComponentesDeChats/Card.P
 export const PG_Lista_Conversas: React.FC = () => {
   const navigate = useNavigate();
   const {
-    contacts,
+    conversas,
     isMenuModalOpen,
     setIsMenuModalOpen,
     isSelectionMode,
@@ -30,9 +30,9 @@ export const PG_Lista_Conversas: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredConversas = conversas ? conversas.filter(conversa => 
+    conversa && conversa.nome && conversa.nome.toLowerCase().includes(searchQuery.toLowerCase())
+  ) : [];
 
   return (
     <div className="h-[100dvh] bg-[radial-gradient(circle_at_top_left,_#0c0f14,_#0a0c10)] text-white font-['Inter'] flex flex-col overflow-hidden">
@@ -70,14 +70,14 @@ export const PG_Lista_Conversas: React.FC = () => {
             )}
             
             <div className="w-full flex-grow">
-                {filteredContacts.length > 0 ? filteredContacts.map(contact => (
+                {filteredConversas.length > 0 ? filteredConversas.map(conversa => (
                     <MessageListItem 
-                      key={contact.id}
-                      contact={contact}
-                      isSelected={selectedIds.includes(contact.id)}
+                      key={conversa.id}
+                      contact={{...conversa, name: conversa.nome, lastMessage: conversa.ultimaMensagem || '', handle: ''}}
+                      isSelected={selectedIds.includes(conversa.id)}
                       isSelectionMode={isSelectionMode}
-                      onClick={() => handleContactClick(contact)}
-                      onAvatarClick={(e) => handleProfileNavigate(e, contact.handle)}
+                      onClick={() => handleContactClick(conversa)}
+                      onAvatarClick={(e) => handleProfileNavigate(e, 'handle')}
                     />
                 )) : (
                     <MessagesEmptyState searchTerm={searchQuery} />

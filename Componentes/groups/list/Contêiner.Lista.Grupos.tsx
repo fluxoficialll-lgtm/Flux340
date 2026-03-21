@@ -28,7 +28,7 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
 }) => {
     const navigate = useNavigate();
     const { resolverAcaoDoClique } = useConfiguracaoGrupo(); // Usando o nosso novo hook
-    const isCreator = group.creatorEmail === currentUserEmail;
+    const isCreator = group.donoId === currentUserEmail; // ATUALIZADO: creatorEmail -> donoId
 
     const allChats = simulationData.chats;
     const groupChats = Object.values(allChats).filter(chat => {
@@ -64,18 +64,17 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
         displayTime = new Date(lastMsg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
     } else {
-        displayMsg = group.isSalesPlatformEnabled ? 'Acesse o catálogo do grupo' : (group.description || 'Toque para abrir a comunidade');
+        // ATUALIZADO: group.description -> group.descricao
+        displayMsg = group.isSalesPlatformEnabled ? 'Acesse o catálogo do grupo' : (group.descricao || 'Toque para abrir a comunidade');
         displayTime = 'Novo';
     }
 
     const handleItemClick = () => {
-        // Primeiro, verificamos se há uma navegação especial pré-definida.
         if (group.navigateTo) {
             navigate(group.navigateTo);
             return;
         }
         
-        // Se não houver, usamos a lógica centralizada do nosso hook.
         resolverAcaoDoClique({
             id: group.id,
             modoHubAtivo: !!group.isSalesPlatformEnabled
@@ -85,16 +84,18 @@ export const ContêinerListaGrupos: React.FC<GroupListItemProps> = ({
     return (
         <div className="group-preview flex items-center p-3 border-b border-white/5 cursor-pointer transition-all relative" onClick={handleItemClick}>
             <div className="group-avatar w-[50px] h-[50px] rounded-full mr-4 border-2 border-[#00c2ff] bg-[#00c2ff33] flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
-                {group.coverImage ? (
-                    <img src={group.coverImage} alt={group.name} className="w-full h-full object-cover" />
+                {/* ATUALIZADO: coverImage -> imagemCapa, name -> nome, isVip -> tipo === 'pago' */}
+                {group.imagemCapa ? (
+                    <img src={group.imagemCapa} alt={group.nome} className="w-full h-full object-cover" />
                 ) : (
-                    <i className={`fa-solid ${group.isVip ? 'fa-crown' : 'fa-users'}`}></i>
+                    <i className={`fa-solid ${group.tipo === 'pago' ? 'fa-crown' : 'fa-users'}`}></i>
                 )}
             </div>
             
             <div className="group-info flex flex-col flex-grow min-w-0 mr-2.5">
                 <div className="groupname font-bold text-base mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis text-white">
-                    {group.name}
+                    {/* ATUALIZADO: name -> nome */}
+                    {group.nome}
                 </div>
                 <div className={`last-message text-sm whitespace-nowrap overflow-hidden text-ellipsis ${unreadCount > 0 ? 'text-white font-semibold' : 'text-gray-400'}`}>
                     {displayMsg}

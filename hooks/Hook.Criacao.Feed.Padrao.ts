@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { feedPublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
@@ -35,7 +35,18 @@ export const HookCriarPost = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<{ geral?: string } | null>(null);
     
-    const currentUser = useMemo(() => authService.getCurrentUser(), []);
+    // CORREÇÃO: Substituindo a chamada inexistente por um estado reativo que ouve o authService.
+    const [currentUser, setCurrentUser] = useState(authService.getState().user);
+
+    useEffect(() => {
+        // Se inscreve para atualizações no estado de autenticação.
+        const unsubscribe = authService.subscribe(state => {
+            setCurrentUser(state.user);
+        });
+        // Limpa a inscrição ao desmontar o componente.
+        return () => unsubscribe();
+    }, []);
+
 
     const updateField = useCallback((key: keyof PostFormData, value: any) => {
         setDadosPost(prev => ({ ...prev, [key]: value }));
@@ -105,8 +116,9 @@ export const HookCriarPost = () => {
         handleRemoveMedia,
         handleBack,
         handlePublishClick,
-        avatarUrl: currentUser?.avatar_url,
-        username: currentUser?.username,
+        // CORREÇÃO: Propriedades de usuário agora vêm do estado reativo e são mais robustas.
+        avatarUrl: currentUser?.photo_url || currentUser?.avatar_url,
+        username: currentUser?.nickname || currentUser?.username || currentUser?.name,
         navigate,
         // Mock de propriedades restantes para manter a compatibilidade da UI
         isLocationModalOpen: false,

@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { usePerfilProprioGradePostagens } from '../../hooks/Hook.Perfil.Proprio.Grade.Postagens';
-import { ContainerFeedPadrao } from '../ComponentesDeFeed/Container.Feed.Padrao';
+// CORREÇÃO: Alterando para importação padrão
+import ContainerFeedPadrao from '../ComponentesDeFeed/Container.Feed.Padrao';
 import { LoadingScreen } from '../ComponenteDeInterfaceDeUsuario/LoadingScreen';
 
 interface PostFeedProps {

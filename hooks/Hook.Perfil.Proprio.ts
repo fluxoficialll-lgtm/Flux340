@@ -1,14 +1,24 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService';
 import { servicoPerfilUsuario } from '../ServiçosFrontend/ServiçosDePerfil/Servico.Perfil.Usuario';
+import { feedPublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Feed';
+import { marketplacePublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Marketplace';
 import { Usuario } from '../../types/Saida/Types.Estrutura.Usuario';
+import { PublicacaoFeed } from '../../types/Saida/Types.Estrutura.Publicacao.Feed';
+import { PublicacaoMarketplace } from '../../types/Saida/Types.Estrutura.Publicacao.Marketplace';
+
+// Estendendo o tipo de Usuário para incluir posts e produtos que podem ser undefined inicialmente.
+type PerfilCompleto = Usuario & {
+    posts?: PublicacaoFeed[];
+    products?: PublicacaoMarketplace[];
+};
 
 export const HookPerfilProprio = () => {
-    const [profile, setProfile] = useState<Usuario | null>(null);
+    const [profile, setProfile] = useState<PerfilCompleto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Observa o estado de autenticação para saber quando o usuário está logado.
     const [authState, setAuthState] = useState(authService.getState());
     const isAuthenticated = !!authState.user;
 
@@ -18,10 +28,9 @@ export const HookPerfilProprio = () => {
     }, []);
 
     const fetchProfile = useCallback(async () => {
-        // A busca só é acionada se o usuário estiver autenticado.
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !authState.user?.id) {
             setIsLoading(false);
-            setError("Usuário não autenticado.");
+            setError("Usuário não autenticado ou ID do usuário não encontrado.");
             setProfile(null);
             return;
         }
@@ -29,10 +38,28 @@ export const HookPerfilProprio = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // O método getOwnProfile não requer mais um ID, pois a API identifica o usuário pelo token.
-            const data = await servicoPerfilUsuario.getOwnProfile();
-            if (data) {
-                setProfile(data);
+            const userId = authState.user.id;
+            
+            // Buscas em paralelo para otimização
+            const [userData, allPosts, allProducts] = await Promise.all([
+                servicoPerfilUsuario.getOwnProfile(),
+                feedPublicationService.getPosts(),
+                marketplacePublicationService.getProducts()
+            ]);
+
+            if (userData) {
+                // Filtrando posts e produtos para o usuário logado
+                const userPosts = allPosts.filter(post => post.autorId === userId);
+                const userProducts = allProducts.filter(product => product.usuarioId === userId);
+
+                // Combinando todos os dados em um único objeto de perfil
+                const perfilCompleto: PerfilCompleto = {
+                    ...userData,
+                    posts: userPosts,
+                    products: userProducts,
+                };
+
+                setProfile(perfilCompleto);
             } else {
                 throw new Error('Não foi possível carregar o perfil a partir do serviço.');
             }
@@ -44,7 +71,7 @@ export const HookPerfilProprio = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [isAuthenticated]); // A dependência agora é o estado de autenticação.
+    }, [isAuthenticated, authState.user?.id]);
 
     useEffect(() => {
         fetchProfile();

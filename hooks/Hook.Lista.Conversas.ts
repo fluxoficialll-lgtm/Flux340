@@ -1,12 +1,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { chatService } from '../ServiçosFrontend/ServiçoDeChat/chatService';
-import { Contact } from '../types';
+import { ServicoGestaoListaConversas } from '../ServiçosFrontend/ServicoConversas/Servico.Gestao.Lista.Conversas';
+import { DadosChat } from '../types/Saida/Types.Estrutura.Chat';
 
 export const HookListaConversas = () => {
     const navigate = useNavigate();
-    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [conversas, setConversas] = useState<DadosChat[]>([]);
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -16,18 +16,8 @@ export const HookListaConversas = () => {
     const loadData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const isSimulating = localStorage.getItem('isSimulating') === 'true';
-
-            if (isSimulating) {
-                console.log("[SIMULAÇÃO] useMessages: Buscando conversas do endpoint de simulação /api/conversas");
-                const response = await fetch('/api/conversas');
-                const conversations = await response.json();
-                setContacts(conversations || []);
-            } else {
-                // Lógica original, se necessário
-                const rawChats = chatService.listConversas(); 
-                // ... (formatação complexa)
-            }
+            const conversations = await ServicoGestaoListaConversas.listarConversas();
+            setConversas(conversations || []);
         } catch (error) {
             console.error("Erro ao carregar dados do chat:", error);
         } finally {
@@ -41,11 +31,11 @@ export const HookListaConversas = () => {
         return () => clearInterval(intervalId);
     }, [loadData]);
 
-    const handleContactClick = (contact: Contact) => {
+    const handleContactClick = (conversa: DadosChat) => {
         if (isSelectionMode) {
-            setSelectedIds(prev => prev.includes(contact.id) ? prev.filter(i => i !== contact.id) : [...prev, contact.id]);
+            setSelectedIds(prev => prev.includes(conversa.id) ? prev.filter(i => i !== conversa.id) : [...prev, conversa.id]);
         } else {
-            navigate(`/chat/${contact.id}`);
+            navigate(`/chat/${conversa.id}`);
         }
     };
     
@@ -65,7 +55,7 @@ export const HookListaConversas = () => {
     };
 
     return {
-        contacts,
+        conversas,
         isLoading,
         isMenuModalOpen,
         setIsMenuModalOpen,

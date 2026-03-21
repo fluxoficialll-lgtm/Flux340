@@ -1,25 +1,27 @@
 
 import { useState, useCallback } from 'react';
-import { Post } from '../types';
-// Importando o serviço correto para comentários do feed
+// CORREÇÃO: Importando o tipo de dados correto que o hook receberá.
+import { PublicacaoFeed } from '../types/Saida/Types.Estrutura.Publicacao.Feed';
 import { ServiçoPublicacaoComentariosFeed } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoComentáriosFeed.js';
 
-export const HookAcoesPost = (post: Post) => {
-    // Estados existentes para Like
-    const [isLiked, setIsLiked] = useState(post.liked);
+// CORREÇÃO: A função agora aceita PublicacaoFeed como argumento.
+export const HookAcoesPost = (post: PublicacaoFeed) => {
+    // CORREÇÃO: PublicacaoFeed não tem a propriedade `liked`. Iniciamos como `false`.
+    // A lógica para determinar se o usuário atual curtiu o post precisará ser gerenciada externamente.
+    const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(post.likes);
 
-    // === NOVOS ESTADOS PARA COMENTÁRIOS ===
     const [isCommenting, setIsCommenting] = useState(false);
     const [commentError, setCommentError] = useState<string | null>(null);
-    const [commentsCount, setCommentsCount] = useState(post.comments);
+    // CORREÇÃO: `post.comments` é um array, então pegamos seu tamanho.
+    const [commentsCount, setCommentsCount] = useState(post.comments.length);
 
     const handleLike = useCallback(async () => {
         const originalIsLiked = isLiked;
         setIsLiked(!originalIsLiked);
         setLikesCount(prev => prev + (!originalIsLiked ? 1 : -1));
         try {
-            // A lógica de API para like será gerenciada em outro lugar ou injetada
+            // A lógica de chamada da API de like deve ser implementada aqui ou no hook pai.
         } catch (error) {
             console.error("Falha ao atualizar o like:", error);
             setIsLiked(originalIsLiked);
@@ -27,9 +29,8 @@ export const HookAcoesPost = (post: Post) => {
         }
     }, [isLiked, post.id]);
 
-    // === NOVA FUNÇÃO PARA PUBLICAR COMENTÁRIOS ===
     const handleCommentSubmit = useCallback(async (commentText: string) => {
-        if (!commentText.trim()) return;
+        if (!commentText.trim()) return false;
 
         setIsCommenting(true);
         setCommentError(null);
@@ -50,8 +51,9 @@ export const HookAcoesPost = (post: Post) => {
         }
     }, [post.id]);
 
-    const handleDelete = useCallback(async (e: React.MouseEvent) => {
-        // A lógica de delete será gerenciada em outro lugar
+    // A função de delete é recebida pelo hook pai, então não há lógica aqui.
+    const handleDelete = useCallback(async () => {
+        // A lógica de confirmação e chamada da API é gerenciada pelo HookDetalhesPost.
     }, [post.id]);
 
     return {

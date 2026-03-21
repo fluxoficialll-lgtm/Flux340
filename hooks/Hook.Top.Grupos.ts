@@ -4,9 +4,8 @@ import { groupSystem } from '../ServiçosFrontend/ServiçoDeGrupos/Sistema.Grupo
 import authService from '../ServiçosFrontend/ServiçoDeAutenticação/authService.js';
 
 export const HookTopGrupos = () => {
-  // CORREÇÃO: O método correto é `getCurrentUser`, que retorna um objeto.
-  // O ID do usuário é então acessado a partir desse objeto.
-  const userId = authService.getCurrentUser()?.id;
+  // CORREÇÃO: O usuário é obtido através do estado do serviço de autenticação.
+  const userId = authService.getState().user?.id;
 
   const fetchTopGroups = async () => {
     if (!userId) {

@@ -11,8 +11,6 @@ export const HookDetalhesPost = () => {
   const { id } = useParams<{ id: string }>();
   
   const [post, setPost] = useState<PublicacaoFeed | null>(null);
-  // Os comentários agora são parte do objeto post, então este estado pode não ser mais necessário
-  // dependendo da implementação.
   const [commentText, setCommentText] = useState('');
   const [replyingTo, setReplyingTo] = useState<{ id: string, username: string } | null>(null);
 
@@ -39,19 +37,16 @@ export const HookDetalhesPost = () => {
     loadData();
   }, [id, loadData]);
 
-  // Criar um objeto dummy que satisfaça a interface PublicacaoFeed para evitar erros de renderização.
+  // Objeto dummyPost CORRIGIDO para alinhar com a interface PublicacaoFeed
   const dummyPost: PublicacaoFeed = {
-    id: '', 
-    texto: '', 
-    author: { id: '', nome: '', avatar: '' }, 
-    criadoEm: new Date(), 
-    curtidas: [], 
-    comentarios: [],
-    // Adicione outras propriedades obrigatórias com valores padrão
-    imagemUrl: null,
-    videoUrl: null,
-    enquete: null,
-    // etc...
+    id: '',
+    content: '',
+    autor: { id: '', nome: '', avatarUrl: '' },
+    createdAt: new Date(),
+    likes: 0,
+    shares: 0,
+    media: [],
+    comments: [],
   };
 
   const { handleCommentSubmit, isCommenting, commentError, handleLike, handleDelete } = HookAcoesPost(post || dummyPost);
@@ -64,17 +59,18 @@ export const HookDetalhesPost = () => {
     if (success) {
         setCommentText('');
         setReplyingTo(null);
-        loadData();
+        loadData(); // Recarrega os dados do post para mostrar o novo comentário
     }
   };
   
-  const handleDeleteComment = async (commentId: string) => { /* ... */ };
-  const handleCommentLike = (commentId: string) => { /* ... */ };
-  const handleVote = (optionIndex: number) => { /* ... */ };
+  // Funções placeholder para ações futuras
+  const handleDeleteComment = async (commentId: string) => { /* Lógica de exclusão de comentário */ };
+  const handleCommentLike = (commentId: string) => { /* Lógica de curtir comentário */ };
+  const handleVote = (optionIndex: number) => { /* Lógica de voto em enquete */ };
 
   return {
     post, 
-    comments: post?.comentarios || [], // Deriva os comentários do estado do post
+    comments: post?.comments || [], // CORRIGIDO: de 'comentarios' para 'comments'
     commentText, 
     setCommentText, 
     replyingTo, 

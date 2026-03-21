@@ -3,35 +3,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ItemConfiguracao } from './ItemConfiguracao';
 
-interface SessaoSegurancaEPrivacidadeProps {
-    isAdultContent: boolean;
-    onToggleAdult: () => void;
-}
+// A interface de props não é mais necessária, pois o componente não recebe mais props.
 
-export const SessaoSegurancaEPrivacidade: React.FC<SessaoSegurancaEPrivacidadeProps> = ({ 
-    isAdultContent, 
-    onToggleAdult 
-}) => {
+export const SessaoSegurancaEPrivacidade: React.FC = () => {
     const navigate = useNavigate();
 
-    const renderSwitch = (checked: boolean, onChange: () => void) => (
-        <label className="switch" onClick={(e) => e.stopPropagation()}>
-            <input type="checkbox" checked={checked} onChange={onChange} />
-            <span className="slider"></span>
-        </label>
-    );
+    // O card de conteúdo +18 foi removido daqui.
 
     return (
         <div className="settings-group">
             <h2>Configurações de segurança e privacidade</h2>
             
-            <ItemConfiguracao 
-                icon="fa-triangle-exclamation" 
-                label="Habilitar Conteúdo +18" 
-                onClick={onToggleAdult}
-                rightElement={renderSwitch(isAdultContent, onToggleAdult)}
-            />
-
             <ItemConfiguracao 
                 icon="fa-shield-alt" 
                 label="Segurança e Login" 

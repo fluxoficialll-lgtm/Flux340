@@ -13,9 +13,7 @@ export const Settings: React.FC = () => {
   const { showConfirm, showAlert } = useModal();
   const { 
     isPrivate, 
-    isAdultContent, 
     togglePrivacy, 
-    toggleAdultContent, 
     logout 
   } = HookConfiguracoes();
 
@@ -67,10 +65,7 @@ export const Settings: React.FC = () => {
             onTogglePrivacy={handleTogglePrivacy}
         />
         <SessaoFinanceiro />
-        <SessaoSegurancaEPrivacidade 
-            isAdultContent={isAdultContent}
-            onToggleAdult={toggleAdultContent}
-        />
+        <SessaoSegurancaEPrivacidade />
         <div className="logout-container">
             <button onClick={handleLogout} className="logout-btn"><i className="fas fa-sign-out-alt"></i> Sair da Conta</button>
             <div className="text-center mt-6 opacity-20 text-[10px] uppercase font-black tracking-widest">

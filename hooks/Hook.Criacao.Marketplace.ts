@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { fileService } from '../ServiçosFrontend/ServiçoDeArquivos/fileService.js';
-import { ServiçoPublicaçãoMarketplace } from '../ServiçosFrontend/ServiçosDePublicações/ServiçoPublicaçãoMarketplace.js';
+import { marketplacePublicationService } from '../ServiçosFrontend/ServiçosDePublicações/Servico.Publicacao.Marketplace.js';
 
 // Tipagem para os itens da galeria de mídia
 interface MediaItem {
@@ -86,7 +86,7 @@ export const HookCriarItemMarketplace = () => {
                 location: locationVal,
                 images: [coverImageUrl, ...additionalMediaUrls].filter(Boolean) as string[],
             };
-            await ServiçoPublicaçãoMarketplace.create(itemData);
+            await marketplacePublicationService.createProduct(itemData);
             navigate('/marketplace');
         } catch (err) {
             console.error("Erro ao publicar item no marketplace:", err);

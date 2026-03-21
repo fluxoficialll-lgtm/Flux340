@@ -2,8 +2,6 @@
 // --- AGREGADOR DE HANDLERS E SERVIÇO DE SIMULAÇÃO ---
 
 import { authHandlers, ServicoAutenticacaoMock } from './simulacoes/SimulacaoDeAuth';
-import { feedHandlers } from './simulacoes/SimulacaoDeFeed';
-import { marketplaceHandlers, mockMarketplaceItems } from './simulacoes/SimulacaoDeMarketplace';
 import { profileHandlers } from './simulacoes/Simulacao.Perfil.Flux';
 import { metricsHandlers } from './simulacoes/SimulacaoDeMetricas';
 import { conversationsHandlers } from './simulacoes/Simulacao.Lista.Conversas';
@@ -48,8 +46,6 @@ const staticProfileHandlers = {
 // --- CONSOLIDAÇÃO DE TODOS OS HANDLERS ---
 const allSimulationHandlers = {
     ...authHandlers,
-    ...feedHandlers,
-    ...marketplaceHandlers,
     ...safeProfileHandlers,      
     ...metricsHandlers,
     ...conversationsHandlers,
@@ -70,6 +66,5 @@ export const getSimulationHandlers = () => {
 };
 
 export const simulationData = {
-    marketplace: mockMarketplaceItems,
     chats: mockChats,
 };

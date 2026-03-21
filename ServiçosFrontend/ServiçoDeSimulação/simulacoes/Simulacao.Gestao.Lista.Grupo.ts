@@ -1,64 +1,32 @@
 
-import { Group } from '../../../tipos/types.Grupo';
+import { Grupo } from '../../../types/Saida/Types.Estrutura.Grupos';
+
+// Importando os dados modulares
+import { mockMeusGrupos } from './dados/Dados.Meus.Grupos';
+import { mockGruposDeTerceirosPagos } from './dados/Dados.Grupo.Terceiros.Pagos';
+import { mockGruposDeTerceirosPublicos } from './dados/Dados.Grupo.Terceiros.Publicos';
+import { mockGruposDeTerceirosPrivados } from './dados/Dados.Grupo.Terceiros.Privados';
 
 /**
- * @file Dados simulados para a lista de grupos.
+ * @file Orquestrador de dados simulados para a lista de grupos.
  *
- * Este arquivo exporta arrays de grupos mocados para serem usados em modo de simulação,
- * permitindo o desenvolvimento e teste da interface do usuário sem a necessidade de um backend funcional.
+ * Este arquivo importa diferentes conjuntos de dados, os combina e os exporta
+ * com os nomes esperados pela camada de serviço (`mockMyGroups` e `mockPublicGroups`),
+ * garantindo que a simulação funcione corretamente.
  */
-
-// Simula um ID de usuário para referência nos dados mocados
-const SIMULATED_USER_ID = 'user-123-simulado';
 
 /**
- * Lista de grupos públicos simulados.
+ * ===================================================================
+ * EXPORTAÇÃO PARA A CAMADA DE SERVIÇO
+ * ===================================================================
  */
-export const mockPublicGroups: Group[] = [
-  {
-    id: 'public-group-1',
-    name: 'Fãs de Tecnologia 🚀',
-    description: 'Um grupo para discutir as últimas notícias de tecnologia, gadgets e inovação.',
-    creatorId: 'user-abc',
-    memberIds: [SIMULATED_USER_ID, 'user-xyz', 'user-def'],
-    isPublic: true,
-    isVip: false,
-    unreadCount: 3,
-  },
-  {
-    id: 'public-group-2',
-    name: 'Culinária para Iniciantes 🍳',
-    description: 'Compartilhe receitas fáceis e dicas de culinária. Todos são bem-vindos!',
-    creatorId: 'user-ghi',
-    memberIds: ['user-jkl'],
-    isPublic: true,
-    isVip: false,
-    unreadCount: 0,
-  },
-];
 
-/**
- * Lista de grupos que pertencem ao usuário simulado (seus grupos).
- */
-export const mockMyGroups: Group[] = [
-    {
-        id: 'my-group-1',
-        name: 'Projeto Secreto do Bairro 🤫',
-        description: 'Grupo para organizar a festa surpresa do Zé.',
-        creatorId: SIMULATED_USER_ID, // O usuário simulado é o criador
-        memberIds: [SIMULATED_USER_ID, 'user-friend-1', 'user-friend-2'],
-        isPublic: false,
-        isVip: false,
-        unreadCount: 5,
-      },
-      {
-        id: 'public-group-1', // Grupo público do qual o usuário também faz parte
-        name: 'Fãs de Tecnologia 🚀',
-        description: 'Um grupo para discutir as últimas notícias de tecnologia, gadgets e inovação.',
-        creatorId: 'user-abc',
-        memberIds: [SIMULATED_USER_ID, 'user-xyz', 'user-def'],
-        isPublic: true,
-        isVip: false,
-        unreadCount: 3,
-      },
+// Exporta diretamente os grupos do usuário com o nome que o serviço espera.
+export const mockMyGroups: Grupo[] = [...mockMeusGrupos];
+
+// Combina todos os grupos de terceiros em uma única lista para a aba "Descobrir".
+export const mockPublicGroups: Grupo[] = [
+  ...mockGruposDeTerceirosPublicos,
+  ...mockGruposDeTerceirosPagos,
+  ...mockGruposDeTerceirosPrivados,
 ];

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Post, User } from '../../../types';
-import { ContainerFeedPadrao } from '../Container.Feed.Padrao';
+import ContainerFeedPadrao from '../Container.Feed.Padrao'; // CORRIGIDO
 import { useModal } from '../../ComponenteDeInterfaceDeUsuario/ModalSystem';
 import { SearchTab } from '../../../pages/FeedSearch';
 import { UserBadge } from '../../ComponenteDeInterfaceDeUsuario/user/UserBadge';

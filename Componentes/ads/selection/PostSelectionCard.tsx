@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Post } from '../../../types';
-import { ContainerFeedPadrao } from '../../ComponentesDeFeed/Container.Feed.Padrao';
+import ContainerFeedPadrao from '../../ComponentesDeFeed/Container.Feed.Padrao'; // CORRIGIDO
 
 interface PostSelectionCardProps {
     post: Post;
