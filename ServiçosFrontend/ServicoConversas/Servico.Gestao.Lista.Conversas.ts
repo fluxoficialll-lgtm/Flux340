@@ -1,15 +1,12 @@
 import { DadosChat } from '../../../types/Saida/Types.Estrutura.Chat';
 import { api } from '../APIs/APIsServicoConversas/API.Servico.Gestao.Lista.Conversas';
+import { simulacao } from '../ServiçoDeSimulação/simulacoes/Simulacao.Gestao.Lista.Conversas';
+import { config } from '../ValidaçãoDeAmbiente/config';
 
 export const ServicoGestaoListaConversas = {
   async listarConversas(): Promise<DadosChat[]> {
-    const isSimulating = localStorage.getItem('isSimulating') === 'true';
-
-    if (isSimulating) {
-      console.log("[SIMULAÇÃO] ServicoGestaoListaConversas: Buscando conversas do endpoint de simulação /api/conversas");
-      const response = await fetch('/api/conversas');
-      const conversations = await response.json();
-      return conversations || [];
+    if (config.VITE_APP_ENV === 'simulation') {
+      return await simulacao.listarConversas();
     } else {
       return await api.listarConversas();
     }
